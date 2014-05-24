@@ -57,7 +57,11 @@ G_DEFINE_TYPE_WITH_CODE (MateMixerPulseDevice, mate_mixer_pulse_device, G_TYPE_O
 static void
 mate_mixer_device_interface_init (MateMixerDeviceInterface *iface)
 {
-
+    iface->list_tracks = mate_mixer_pulse_device_list_tracks;
+    iface->get_ports = mate_mixer_pulse_device_get_ports;
+    iface->get_profiles = mate_mixer_pulse_device_get_profiles;
+    iface->get_active_profile = mate_mixer_pulse_device_get_active_profile;
+    iface->set_active_profile = mate_mixer_pulse_device_set_active_profile;
 }
 
 static void
@@ -119,7 +123,9 @@ mate_mixer_pulse_device_set_property (GObject       *object,
         device->priv->icon = g_strdup (g_value_get_string (value));
         break;
     case PROP_ACTIVE_PROFILE:
-        // TODO
+        mate_mixer_pulse_device_set_active_profile (
+            MATE_MIXER_DEVICE (device),
+            g_value_get_object (value));
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -261,42 +267,6 @@ mate_mixer_pulse_device_new (const pa_card_info *info)
     return device;
 }
 
-const GList *
-mate_mixer_pulse_device_get_ports (MateMixerPulseDevice *device)
-{
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_DEVICE (device), NULL);
-
-    return device->priv->ports;
-}
-
-const GList *
-mate_mixer_pulse_device_get_profiles (MateMixerPulseDevice *device)
-{
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_DEVICE (device), NULL);
-
-    return device->priv->profiles;
-}
-
-MateMixerDeviceProfile *
-mate_mixer_pulse_device_get_active_profile (MateMixerPulseDevice *device)
-{
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_DEVICE (device), NULL);
-
-    return device->priv->active_profile;
-}
-
-gboolean
-mate_mixer_pulse_device_set_active_profile (MateMixerPulseDevice    *device,
-                                            MateMixerDeviceProfile  *profile)
-{
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_DEVICE (device), FALSE);
-    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), FALSE);
-
-    // TODO
-    // pa_context_set_card_profile_by_index ()
-    return TRUE;
-}
-
 gboolean
 mate_mixer_pulse_device_update (MateMixerPulseDevice *device, const pa_card_info *info)
 {
@@ -304,5 +274,48 @@ mate_mixer_pulse_device_update (MateMixerPulseDevice *device, const pa_card_info
     g_return_val_if_fail (info != NULL, FALSE);
 
     // TODO: update status, active_profile, maybe others?
+    return TRUE;
+}
+
+const GList *
+mate_mixer_pulse_device_list_tracks (MateMixerDevice *device)
+{
+    // TODO
+    return NULL;
+}
+
+const GList *
+mate_mixer_pulse_device_get_ports (MateMixerDevice *device)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_PULSE_DEVICE (device), NULL);
+
+    return MATE_MIXER_PULSE_DEVICE (device)->priv->ports;
+}
+
+const GList *
+mate_mixer_pulse_device_get_profiles (MateMixerDevice *device)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_PULSE_DEVICE (device), NULL);
+
+    return MATE_MIXER_PULSE_DEVICE (device)->priv->profiles;
+}
+
+MateMixerDeviceProfile *
+mate_mixer_pulse_device_get_active_profile (MateMixerDevice *device)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_PULSE_DEVICE (device), NULL);
+
+    return MATE_MIXER_PULSE_DEVICE (device)->priv->active_profile;
+}
+
+gboolean
+mate_mixer_pulse_device_set_active_profile (MateMixerDevice *device,
+                                            MateMixerDeviceProfile *profile)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_PULSE_DEVICE (device), FALSE);
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), FALSE);
+
+    // TODO
+    // pa_context_set_card_profile_by_index ()
     return TRUE;
 }

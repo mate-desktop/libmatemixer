@@ -58,6 +58,10 @@ MateMixerDeviceProfile *mate_mixer_device_profile_new (const gchar  *identifier,
                                                        const gchar  *name,
                                                        guint32       priority);
 
+const gchar            *mate_mixer_device_profile_get_identifier (MateMixerDeviceProfile *profile);
+const gchar            *mate_mixer_device_profile_get_name       (MateMixerDeviceProfile *profile);
+guint32                 mate_mixer_device_profile_get_priority   (MateMixerDeviceProfile *profile);
+
 G_END_DECLS
 
 #endif /* MATEMIXER_PROFILE_H */

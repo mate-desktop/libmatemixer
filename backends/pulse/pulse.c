@@ -41,7 +41,6 @@ struct _MateMixerPulsePrivate
 
 /* Support function for dynamic loading of the backend module */
 void  backend_module_init (GTypeModule *module);
-void  backend_module_free (void);
 
 const MateMixerBackendModuleInfo *backend_module_get_info (void);
 
@@ -81,11 +80,6 @@ backend_module_init (GTypeModule *module)
     info.backend_type = MATE_MIXER_BACKEND_TYPE_PULSE;
 }
 
-void
-backend_module_free (void)
-{
-}
-
 const MateMixerBackendModuleInfo *
 backend_module_get_info (void)
 {
@@ -95,9 +89,9 @@ backend_module_get_info (void)
 static void
 mate_mixer_backend_interface_init (MateMixerBackendInterface *iface)
 {
-    iface->open          = mate_mixer_pulse_open;
-    iface->close         = mate_mixer_pulse_close;
-    iface->list_devices  = mate_mixer_pulse_list_devices;
+    iface->open = mate_mixer_pulse_open;
+    iface->close = mate_mixer_pulse_close;
+    iface->list_devices = mate_mixer_pulse_list_devices;
 }
 
 static void

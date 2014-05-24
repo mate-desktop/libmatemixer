@@ -51,4 +51,6 @@ struct _MateMixerNullClass
 
 GType mate_mixer_null_get_type (void) G_GNUC_CONST;
 
+gboolean mate_mixer_null_open (MateMixerBackend *backend);
+
 #endif /* MATEMIXER_NULL_H */

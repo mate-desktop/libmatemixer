@@ -64,6 +64,20 @@ MateMixerDevicePort *mate_mixer_device_port_new (const gchar                  *i
                                                  MateMixerDevicePortStatus     status,
                                                  gint64                        latency_offset);
 
+const gchar *mate_mixer_device_port_get_identifier (MateMixerDevicePort *port);
+
+const gchar *mate_mixer_device_port_get_name (MateMixerDevicePort *port);
+
+const gchar *mate_mixer_device_port_get_icon (MateMixerDevicePort *port);
+
+guint32      mate_mixer_device_port_get_priority (MateMixerDevicePort *port);
+
+MateMixerDevicePortDirection mate_mixer_device_port_get_direction (MateMixerDevicePort *port);
+
+MateMixerDevicePortStatus    mate_mixer_device_port_get_status (MateMixerDevicePort *port);
+
+gint64                       mate_mixer_device_port_get_latency_offset (MateMixerDevicePort *port);
+
 G_END_DECLS
 
 #endif /* MATEMIXER_PORT_H */

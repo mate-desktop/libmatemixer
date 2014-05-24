@@ -41,18 +41,20 @@ struct _MateMixerBackendInterface
 {
     GTypeInterface parent;
 
-    gboolean      (*open)          (MateMixerBackend *backend);
-    void          (*close)         (MateMixerBackend *backend);
-    const GList  *(*list_devices)  (MateMixerBackend *backend);
-    const GList  *(*list_tracks)   (MateMixerBackend *backend);
+    /* Required */
+    gboolean   (*open)          (MateMixerBackend *backend);
+
+    void       (*close)         (MateMixerBackend *backend);
+    GList     *(*list_devices)  (MateMixerBackend *backend);
+    GList     *(*list_tracks)   (MateMixerBackend *backend);
 };
 
 GType mate_mixer_backend_get_type (void) G_GNUC_CONST;
 
-gboolean        mate_mixer_backend_open          (MateMixerBackend *backend);
-void            mate_mixer_backend_close         (MateMixerBackend *backend);
-const GList    *mate_mixer_backend_list_devices  (MateMixerBackend *backend);
-const GList    *mate_mixer_backend_list_tracks   (MateMixerBackend *backend);
+gboolean  mate_mixer_backend_open          (MateMixerBackend *backend);
+void      mate_mixer_backend_close         (MateMixerBackend *backend);
+GList    *mate_mixer_backend_list_devices  (MateMixerBackend *backend);
+GList    *mate_mixer_backend_list_tracks   (MateMixerBackend *backend);
 
 G_END_DECLS
 

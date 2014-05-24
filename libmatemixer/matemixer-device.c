@@ -62,7 +62,71 @@ mate_mixer_device_default_init (MateMixerDeviceInterface *iface)
 const GList *
 mate_mixer_device_list_tracks (MateMixerDevice *device)
 {
+    MateMixerDeviceInterface *iface;
+
     g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), NULL);
 
-    return MATE_MIXER_DEVICE_GET_INTERFACE (device)->list_tracks (device);
+    iface = MATE_MIXER_DEVICE_GET_INTERFACE (device);
+    if (iface->list_tracks)
+        return iface->list_tracks (device);
+
+    return NULL;
+}
+
+const GList *
+mate_mixer_device_get_ports (MateMixerDevice *device)
+{
+    MateMixerDeviceInterface *iface;
+
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), NULL);
+
+    iface = MATE_MIXER_DEVICE_GET_INTERFACE (device);
+    if (iface->get_ports)
+        return iface->get_ports (device);
+
+    return NULL;
+}
+
+const GList *
+mate_mixer_device_get_profiles (MateMixerDevice *device)
+{
+    MateMixerDeviceInterface *iface;
+
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), NULL);
+
+    iface = MATE_MIXER_DEVICE_GET_INTERFACE (device);
+    if (iface->get_profiles)
+        return iface->get_profiles (device);
+
+    return NULL;
+}
+
+MateMixerDeviceProfile *
+mate_mixer_device_get_active_profile (MateMixerDevice *device)
+{
+    MateMixerDeviceInterface *iface;
+
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), NULL);
+
+    iface = MATE_MIXER_DEVICE_GET_INTERFACE (device);
+    if (iface->get_active_profile)
+        return iface->get_active_profile (device);
+
+    return NULL;
+}
+
+gboolean
+mate_mixer_device_set_active_profile (MateMixerDevice *device,
+                                      MateMixerDeviceProfile *profile)
+{
+    MateMixerDeviceInterface *iface;
+
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), NULL);
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), NULL);
+
+    iface = MATE_MIXER_DEVICE_GET_INTERFACE (device);
+    if (iface->set_active_profile)
+        return iface->set_active_profile (device, profile);
+
+    return FALSE;
 }

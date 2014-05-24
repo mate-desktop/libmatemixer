@@ -60,18 +60,20 @@ struct _MateMixerPulseDeviceClass
 GType mate_mixer_pulse_device_get_type (void) G_GNUC_CONST;
 
 MateMixerPulseDevice    *mate_mixer_pulse_device_new (const pa_card_info *info);
-GList                   *mate_mixer_pulse_device_list_tracks (MateMixerPulseDevice *device);
-
-const GList             *mate_mixer_pulse_device_get_ports (MateMixerPulseDevice *device);
-const GList             *mate_mixer_pulse_device_get_profiles (MateMixerPulseDevice *device);
-
-MateMixerDeviceProfile  *mate_mixer_pulse_device_get_active_profile (MateMixerPulseDevice *device);
-
-gboolean                 mate_mixer_pulse_device_set_active_profile (MateMixerPulseDevice *device,
-                                                                     MateMixerDeviceProfile *profile);
 
 gboolean                 mate_mixer_pulse_device_update (MateMixerPulseDevice *device,
                                                          const pa_card_info *info);
+
+/* Interface implementation */
+const GList             *mate_mixer_pulse_device_list_tracks (MateMixerDevice *device);
+
+const GList             *mate_mixer_pulse_device_get_ports (MateMixerDevice *device);
+const GList             *mate_mixer_pulse_device_get_profiles (MateMixerDevice *device);
+
+MateMixerDeviceProfile  *mate_mixer_pulse_device_get_active_profile (MateMixerDevice *device);
+
+gboolean                 mate_mixer_pulse_device_set_active_profile (MateMixerDevice *device,
+                                                                     MateMixerDeviceProfile *profile);
 
 G_END_DECLS
 

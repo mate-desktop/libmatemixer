@@ -25,8 +25,8 @@
 #include "matemixer-private.h"
 #include "matemixer-backend-module.h"
 
-static gboolean  mixer_load_backends    (void);
-static gint      mixer_compare_modules  (gconstpointer a, gconstpointer b);
+static void      mixer_load_modules    (void);
+static gint      mixer_compare_modules (gconstpointer a, gconstpointer b);
 
 static GList    *mixer_modules = NULL;
 static gboolean  mixer_initialized = FALSE;
@@ -34,8 +34,37 @@ static gboolean  mixer_initialized = FALSE;
 gboolean
 mate_mixer_init (void)
 {
-    if (!mixer_initialized)
-        mixer_initialized = mixer_load_backends ();
+    if (!mixer_initialized) {
+        mixer_load_modules ();
+
+        if (mixer_modules) {
+            GList *list;
+
+            list = mixer_modules;
+            while (list) {
+                GTypeModule *module = G_TYPE_MODULE (list->data);
+                GList       *next = list->next;
+
+                /* Attempt to load the module and remove it from the list
+                 * if it isn't usable */
+                if (!g_type_module_use (module)) {
+                    g_object_unref (module);
+                    mixer_modules = g_list_delete_link (mixer_modules, list);
+                }
+                list = next;
+            }
+
+            if (mixer_modules) {
+                /* Sort the usable modules by the priority */
+                mixer_modules = g_list_sort (
+                    mixer_modules,
+                    mixer_compare_modules);
+
+                mixer_initialized = TRUE;
+            } else
+                g_critical ("No usable backend modules have been found");
+        }
+    }
 
     return mixer_initialized;
 }
@@ -50,24 +79,13 @@ mate_mixer_deinit (void)
 
     list = mixer_modules;
     while (list) {
-        MateMixerBackendModule *module;
-
-        module = MATE_MIXER_BACKEND_MODULE (list->data);
-
-        g_type_module_unuse (G_TYPE_MODULE (module));
-
-        // XXX it is not possible to unref the module, figure out how
-        // to handle repeated initialization
-        // g_object_unref (module);
-
+        g_type_module_unuse (G_TYPE_MODULE (list->data));
         list = list->next;
     }
-    g_list_free (mixer_modules);
-
     mixer_initialized = FALSE;
 }
 
-/* Internal function: return a *shared* list of loaded backend modules */
+/* Internal function: return a shared list of loaded backend modules */
 GList *
 mate_mixer_get_modules (void)
 {
@@ -78,70 +96,54 @@ mate_mixer_get_modules (void)
 gboolean
 mate_mixer_is_initialized (void)
 {
-    gboolean initialized;
-
-    G_LOCK_DEFINE_STATIC (mixer_initialized_lock);
-
-    G_LOCK (mixer_initialized_lock);
-    initialized = mixer_initialized;
-    G_UNLOCK (mixer_initialized_lock);
-
-    return initialized;
+    return mixer_initialized;
 }
 
-static gboolean
-mixer_load_backends (void)
+static void
+mixer_load_modules (void)
 {
-    GDir   *dir;
-    GError *error = NULL;
+    static gboolean loaded = FALSE;
 
-    if (!g_module_supported ()) {
-        g_critical ("Unable to load backend modules: GModule not supported");
-        return FALSE;
-    }
+    if (loaded)
+        return;
 
-    /* Read the directory which contains module libraries and load them */
-    dir = g_dir_open (LIBMATEMIXER_BACKEND_DIR, 0, &error);
-    if (dir != NULL) {
-        const gchar *name;
+    if (g_module_supported ()) {
+        GDir   *dir;
+        GError *error = NULL;
 
-        while ((name = g_dir_read_name (dir)) != NULL) {
-            gchar *file;
-            MateMixerBackendModule *module;
+        /* Read the directory which contains module libraries and create a list
+         * of those that are likely to be usable backend modules */
+        dir = g_dir_open (LIBMATEMIXER_BACKEND_DIR, 0, &error);
+        if (dir != NULL) {
+            const gchar *name;
 
-            if (!g_str_has_suffix (name, "." G_MODULE_SUFFIX))
-                continue;
+            while ((name = g_dir_read_name (dir)) != NULL) {
+                gchar *file;
 
-            file = g_build_filename (LIBMATEMIXER_BACKEND_DIR, name, NULL);
-            module = mate_mixer_backend_module_new (file);
+                if (!g_str_has_suffix (name, "." G_MODULE_SUFFIX))
+                    continue;
 
-            /* Load the backend module and make sure it includes all the
-             * required symbols */
-            if (g_type_module_use (G_TYPE_MODULE (module)))
-                mixer_modules = g_list_prepend (mixer_modules, module);
-            else
-                g_object_unref (module);
+                file = g_build_filename (LIBMATEMIXER_BACKEND_DIR, name, NULL);
+                mixer_modules = g_list_prepend (
+                    mixer_modules,
+                    mate_mixer_backend_module_new (file));
 
-            g_free (file);
+                g_free (file);
+            }
+
+            if (mixer_modules == NULL)
+                g_critical ("No backend modules have been found");
+
+            g_dir_close (dir);
+        } else {
+            g_critical ("%s", error->message);
+            g_error_free (error);
         }
-
-        if (mixer_modules == NULL)
-            g_critical ("No usable backend modules have been found");
-
-        g_dir_close (dir);
     } else {
-        g_critical ("%s", error->message);
-        g_error_free (error);
+        g_critical ("Unable to load backend modules: GModule not supported");
     }
 
-    if (mixer_modules) {
-        mixer_modules = g_list_sort (mixer_modules, mixer_compare_modules);
-        return TRUE;
-    }
-
-    /* As we include a "null" backend module to provide no functionality,
-     * we fail the initialization in case no module could be loaded */
-    return FALSE;
+    loaded = TRUE;
 }
 
 /* GCompareFunc function to sort backend modules by the priority, lower

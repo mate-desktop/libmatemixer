@@ -28,7 +28,6 @@
 
 /* Support function for dynamic loading of the backend module */
 void  backend_module_init (GTypeModule *module);
-void  backend_module_free (void);
 
 const MateMixerBackendModuleInfo *backend_module_get_info (void);
 
@@ -52,11 +51,6 @@ backend_module_init (GTypeModule *module)
     info.backend_type = MATE_MIXER_BACKEND_TYPE_NULL;
 }
 
-void
-backend_module_free (void)
-{
-}
-
 const MateMixerBackendModuleInfo *
 backend_module_get_info (void)
 {
@@ -66,6 +60,7 @@ backend_module_get_info (void)
 static void
 mate_mixer_backend_interface_init (MateMixerBackendInterface *iface)
 {
+    iface->open = mate_mixer_null_open;
 }
 
 static void
@@ -92,4 +87,10 @@ mate_mixer_null_class_init (MateMixerNullClass *klass)
 static void
 mate_mixer_null_class_finalize (MateMixerNullClass *klass)
 {
+}
+
+gboolean
+mate_mixer_null_open (MateMixerBackend *backend)
+{
+    return TRUE;
 }

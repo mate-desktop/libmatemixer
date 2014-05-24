@@ -155,28 +155,28 @@ mate_mixer_device_port_class_init (MateMixerDevicePortClass *klass)
     object_class->get_property = mate_mixer_device_port_get_property;
     object_class->set_property = mate_mixer_device_port_set_property;
 
-    properties[PROP_IDENTIFIER] = g_param_spec_string(
+    properties[PROP_IDENTIFIER] = g_param_spec_string (
         "identifier",
         "Identifier",
         "Identifier of the device port",
         NULL,
         G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
-    properties[PROP_NAME] = g_param_spec_string(
+    properties[PROP_NAME] = g_param_spec_string (
         "name",
         "Name",
         "Name of the device port",
         NULL,
         G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
-    properties[PROP_ICON] = g_param_spec_string(
+    properties[PROP_ICON] = g_param_spec_string (
         "icon",
         "Icon",
         "Icon name for the device port",
         NULL,
         G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
-    properties[PROP_PRIORITY] = g_param_spec_uint(
+    properties[PROP_PRIORITY] = g_param_spec_uint (
         "priority",
         "Priority",
         "Priority of the device port",
@@ -185,7 +185,7 @@ mate_mixer_device_port_class_init (MateMixerDevicePortClass *klass)
         0,
         G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
-    properties[PROP_LATENCY_OFFSET] = g_param_spec_int64(
+    properties[PROP_LATENCY_OFFSET] = g_param_spec_int64 (
         "latency-offset",
         "Latency offset",
         "Latency offset of the device port",
@@ -217,4 +217,60 @@ mate_mixer_device_port_new (const gchar                 *identifier,
         //"status",           status,
         "latency-offset",   latency_offset,
         NULL);
+}
+
+const gchar *
+mate_mixer_device_port_get_identifier (MateMixerDevicePort *port)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PORT (port), NULL);
+
+    return port->priv->identifier;
+}
+
+const gchar *
+mate_mixer_device_port_get_name (MateMixerDevicePort *port)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PORT (port), NULL);
+
+    return port->priv->name;
+}
+
+const gchar *
+mate_mixer_device_port_get_icon (MateMixerDevicePort *port)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PORT (port), NULL);
+
+    return port->priv->icon;
+}
+
+guint32
+mate_mixer_device_port_get_priority (MateMixerDevicePort *port)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PORT (port), 0);
+
+    return port->priv->priority;
+}
+
+MateMixerDevicePortDirection
+mate_mixer_device_port_get_direction (MateMixerDevicePort *port)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PORT (port), 0);
+
+    return port->priv->direction;
+}
+
+MateMixerDevicePortStatus
+mate_mixer_device_port_get_status (MateMixerDevicePort *port)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PORT (port), 0);
+
+    return port->priv->status;
+}
+
+gint64
+mate_mixer_device_port_get_latency_offset (MateMixerDevicePort *port)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PORT (port), 0);
+
+    return port->priv->latency_offset;
 }

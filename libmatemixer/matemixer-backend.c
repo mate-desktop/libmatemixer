@@ -30,31 +30,53 @@ mate_mixer_backend_default_init (MateMixerBackendInterface *iface)
 gboolean
 mate_mixer_backend_open (MateMixerBackend *backend)
 {
+    MateMixerBackendInterface *iface;
+
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), NULL);
 
-    return MATE_MIXER_BACKEND_GET_INTERFACE (backend)->open (backend);
+    iface = MATE_MIXER_BACKEND_GET_INTERFACE (backend);
+    if (iface->open)
+        return iface->open (backend);
+
+    return FALSE;
 }
 
 void
 mate_mixer_backend_close (MateMixerBackend *backend)
 {
+    MateMixerBackendInterface *iface;
+
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), NULL);
 
-    MATE_MIXER_BACKEND_GET_INTERFACE (backend)->close (backend);
+    iface = MATE_MIXER_BACKEND_GET_INTERFACE (backend);
+    if (iface->close)
+        iface->close (backend);
 }
 
-const GList *
+GList *
 mate_mixer_backend_list_devices (MateMixerBackend *backend)
 {
+    MateMixerBackendInterface *iface;
+
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), NULL);
 
-    return MATE_MIXER_BACKEND_GET_INTERFACE (backend)->list_devices (backend);
+    iface = MATE_MIXER_BACKEND_GET_INTERFACE (backend);
+    if (iface->list_devices)
+        return iface->list_devices (backend);
+
+    return NULL;
 }
 
-const GList *
+GList *
 mate_mixer_backend_list_tracks (MateMixerBackend *backend)
 {
+    MateMixerBackendInterface *iface;
+
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), NULL);
 
-    return MATE_MIXER_BACKEND_GET_INTERFACE (backend)->list_tracks (backend);
+    iface = MATE_MIXER_BACKEND_GET_INTERFACE (backend);
+    if (iface->list_tracks)
+        return iface->list_tracks (backend);
+
+    return NULL;
 }
