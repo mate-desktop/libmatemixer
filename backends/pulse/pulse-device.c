@@ -243,8 +243,7 @@ mate_mixer_pulse_device_new (const pa_card_info *info)
             pa_proplist_gets (p_info->proplist, "device.icon_name"),
             p_info->priority,
             direction,
-            status,
-            p_info->latency_offset);
+            status);
 
         ports = g_list_prepend (ports, port);
     }
