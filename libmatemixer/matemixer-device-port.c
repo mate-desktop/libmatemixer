@@ -20,6 +20,7 @@
 
 #include "matemixer-device-port.h"
 #include "matemixer-enums.h"
+#include "matemixer-enum-types.h"
 
 struct _MateMixerDevicePortPrivate
 {
@@ -40,8 +41,8 @@ enum
     PROP_NAME,
     PROP_ICON,
     PROP_PRIORITY,
-    // PROP_DIRECTION,
-    // PROP_STATUS,
+    PROP_DIRECTION,
+    PROP_STATUS,
     PROP_LATENCY_OFFSET,
     N_PROPERTIES
 };
@@ -82,10 +83,12 @@ mate_mixer_device_port_get_property (GObject     *object,
     case PROP_PRIORITY:
         g_value_set_uint (value, port->priv->priority);
         break;
-    // case PROP_DIRECTION:
-        // break;
-    // case PROP_STATUS:
-        // break;
+    case PROP_DIRECTION:
+        g_value_set_flags (value, port->priv->direction);
+        break;
+    case PROP_STATUS:
+        g_value_set_flags (value, port->priv->status);
+        break;
     case PROP_LATENCY_OFFSET:
         g_value_set_int64 (value, port->priv->latency_offset);
         break;
@@ -118,10 +121,12 @@ mate_mixer_device_port_set_property (GObject       *object,
     case PROP_PRIORITY:
         port->priv->priority = g_value_get_uint (value);
         break;
-    // case PROP_DIRECTION:
-        // break;
-    // case PROP_STATUS:
-        // break;
+    case PROP_DIRECTION:
+        port->priv->direction = g_value_get_flags (value);
+        break;
+    case PROP_STATUS:
+        port->priv->status = g_value_get_flags (value);
+        break;
     case PROP_LATENCY_OFFSET:
         port->priv->latency_offset = g_value_get_int64 (value);
         break;
@@ -185,6 +190,22 @@ mate_mixer_device_port_class_init (MateMixerDevicePortClass *klass)
         0,
         G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
 
+    properties[PROP_DIRECTION] = g_param_spec_flags (
+        "direction",
+        "Direction",
+        "Direction(s) for the device port",
+        MATE_MIXER_TYPE_DEVICE_PORT_DIRECTION,
+        0,
+        G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+
+    properties[PROP_STATUS] = g_param_spec_flags (
+        "status",
+        "Status",
+        "Status for the device port",
+        MATE_MIXER_TYPE_DEVICE_PORT_STATUS,
+        0,
+        G_PARAM_CONSTRUCT_ONLY | G_PARAM_READWRITE);
+
     properties[PROP_LATENCY_OFFSET] = g_param_spec_int64 (
         "latency-offset",
         "Latency offset",
@@ -200,7 +221,7 @@ mate_mixer_device_port_class_init (MateMixerDevicePortClass *klass)
 }
 
 MateMixerDevicePort *
-mate_mixer_device_port_new (const gchar                 *identifier,
+mate_mixer_device_port_new (const gchar                  *identifier,
                             const gchar                  *name,
                             const gchar                  *icon,
                             guint32                       priority,
@@ -213,8 +234,8 @@ mate_mixer_device_port_new (const gchar                 *identifier,
         "name",             name,
         "icon",             icon,
         "priority",         priority,
-        //"direction",        direction,
-        //"status",           status,
+        "direction",        direction,
+        "status",           status,
         "latency-offset",   latency_offset,
         NULL);
 }
