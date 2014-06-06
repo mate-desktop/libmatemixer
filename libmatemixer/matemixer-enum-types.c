@@ -30,9 +30,9 @@ mate_mixer_backend_type_get_type (void)
 
     if (etype == 0) {
         static const GEnumValue values[] = {
-            { MATE_MIXER_BACKEND_TYPE_UNKNOWN, "MATE_MIXER_BACKEND_TYPE_UNKNOWN", "unknown" },
-            { MATE_MIXER_BACKEND_TYPE_PULSE, "MATE_MIXER_BACKEND_TYPE_PULSE", "pulse" },
-            { MATE_MIXER_BACKEND_TYPE_NULL, "MATE_MIXER_BACKEND_TYPE_NULL", "null" },
+            { MATE_MIXER_BACKEND_UNKNOWN, "MATE_MIXER_BACKEND_UNKNOWN", "unknown" },
+            { MATE_MIXER_BACKEND_PULSE, "MATE_MIXER_BACKEND_PULSE", "pulse" },
+            { MATE_MIXER_BACKEND_NULL, "MATE_MIXER_BACKEND_NULL", "null" },
             { 0, NULL, NULL }
         };
         etype = g_enum_register_static (
@@ -43,35 +43,99 @@ mate_mixer_backend_type_get_type (void)
 }
 
 GType
-mate_mixer_device_port_direction_get_type (void)
+mate_mixer_port_status_get_type (void)
 {
     static GType etype = 0;
 
     if (etype == 0) {
-        static const GFlagsValue values[] = {
-            { MATE_MIXER_DEVICE_PORT_DIRECTION_INPUT, "MATE_MIXER_DEVICE_PORT_DIRECTION_INPUT", "input" },
-            { MATE_MIXER_DEVICE_PORT_DIRECTION_OUTPUT, "MATE_MIXER_DEVICE_PORT_DIRECTION_OUTPUT", "output" },
+        static const GEnumValue values[] = {
+            { MATE_MIXER_PORT_UNKNOWN_STATUS, "MATE_MIXER_PORT_UNKNOWN_STATUS", "unknown-status" },
+            { MATE_MIXER_PORT_AVAILABLE, "MATE_MIXER_PORT_AVAILABLE", "available" },
+            { MATE_MIXER_PORT_UNAVAILABLE, "MATE_MIXER_PORT_UNAVAILABLE", "unavailable" },
             { 0, NULL, NULL }
         };
-        etype = g_flags_register_static (
-            g_intern_static_string ("MateMixerDevicePortDirection"),
+        etype = g_enum_register_static (
+            g_intern_static_string ("MateMixerPortStatus"),
             values);
     }
     return etype;
 }
 
 GType
-mate_mixer_device_port_status_get_type (void)
+mate_mixer_stream_flags_get_type (void)
 {
     static GType etype = 0;
 
     if (etype == 0) {
         static const GFlagsValue values[] = {
-            { MATE_MIXER_DEVICE_PORT_STATUS_AVAILABLE, "MATE_MIXER_DEVICE_PORT_STATUS_AVAILABLE", "available" },
+            { MATE_MIXER_STREAM_INPUT, "MATE_MIXER_STREAM_INPUT", "input" },
+            { MATE_MIXER_STREAM_OUTPUT, "MATE_MIXER_STREAM_OUTPUT", "output" },
+            { MATE_MIXER_STREAM_CLIENT, "MATE_MIXER_STREAM_CLIENT", "client" },
+            { MATE_MIXER_STREAM_VIRTUAL, "MATE_MIXER_STREAM_VIRTUAL", "virtual" },
+            { MATE_MIXER_STREAM_OUTPUT_MONITOR, "MATE_MIXER_STREAM_OUTPUT_MONITOR", "output-monitor" },
+            { MATE_MIXER_STREAM_CAN_BALANCE, "MATE_MIXER_STREAM_CAN_BALANCE", "can-balance" },
+            { MATE_MIXER_STREAM_CAN_FADE, "MATE_MIXER_STREAM_CAN_FADE", "can-fade" },
+            { MATE_MIXER_STREAM_FLAT_VOLUME, "MATE_MIXER_STREAM_FLAT_VOLUME", "flat-volume" },
             { 0, NULL, NULL }
         };
         etype = g_flags_register_static (
-            g_intern_static_string ("MateMixerDevicePortStatus"),
+            g_intern_static_string ("MateMixerStreamFlags"),
+            values);
+    }
+    return etype;
+}
+
+GType
+mate_mixer_stream_status_get_type (void)
+{
+    static GType etype = 0;
+
+    if (etype == 0) {
+        static const GEnumValue values[] = {
+            { MATE_MIXER_STREAM_UNKNOWN_STATUS, "MATE_MIXER_STREAM_UNKNOWN_STATUS", "unknown-status" },
+            { MATE_MIXER_STREAM_RUNNING, "MATE_MIXER_STREAM_RUNNING", "running" },
+            { MATE_MIXER_STREAM_IDLE, "MATE_MIXER_STREAM_IDLE", "idle" },
+            { MATE_MIXER_STREAM_SUSPENDED, "MATE_MIXER_STREAM_SUSPENDED", "suspended" },
+            { 0, NULL, NULL }
+        };
+        etype = g_enum_register_static (
+            g_intern_static_string ("MateMixerStreamStatus"),
+            values);
+    }
+    return etype;
+}
+
+GType
+mate_mixer_channel_position_get_type (void)
+{
+    static GType etype = 0;
+
+    if (etype == 0) {
+        static const GEnumValue values[] = {
+            { MATE_MIXER_CHANNEL_UNKNOWN_POSITION, "MATE_MIXER_CHANNEL_UNKNOWN_POSITION", "unknown-position" },
+            { MATE_MIXER_CHANNEL_MONO, "MATE_MIXER_CHANNEL_MONO", "mono" },
+            { MATE_MIXER_CHANNEL_FRONT_LEFT, "MATE_MIXER_CHANNEL_FRONT_LEFT", "front-left" },
+            { MATE_MIXER_CHANNEL_FRONT_RIGHT, "MATE_MIXER_CHANNEL_FRONT_RIGHT", "front-right" },
+            { MATE_MIXER_CHANNEL_FRONT_CENTER, "MATE_MIXER_CHANNEL_FRONT_CENTER", "front-center" },
+            { MATE_MIXER_CHANNEL_LFE, "MATE_MIXER_CHANNEL_LFE", "lfe" },
+            { MATE_MIXER_CHANNEL_BACK_LEFT, "MATE_MIXER_CHANNEL_BACK_LEFT", "back-left" },
+            { MATE_MIXER_CHANNEL_BACK_RIGHT, "MATE_MIXER_CHANNEL_BACK_RIGHT", "back-right" },
+            { MATE_MIXER_CHANNEL_FRONT_LEFT_CENTER, "MATE_MIXER_CHANNEL_FRONT_LEFT_CENTER", "front-left-center" },
+            { MATE_MIXER_CHANNEL_FRONT_RIGHT_CENTER, "MATE_MIXER_CHANNEL_FRONT_RIGHT_CENTER", "front-right-center" },
+            { MATE_MIXER_CHANNEL_BACK_CENTER, "MATE_MIXER_CHANNEL_BACK_CENTER", "back-center" },
+            { MATE_MIXER_CHANNEL_SIDE_LEFT, "MATE_MIXER_CHANNEL_SIDE_LEFT", "side-left" },
+            { MATE_MIXER_CHANNEL_SIDE_RIGHT, "MATE_MIXER_CHANNEL_SIDE_RIGHT", "side-right" },
+            { MATE_MIXER_CHANNEL_TOP_FRONT_LEFT, "MATE_MIXER_CHANNEL_TOP_FRONT_LEFT", "top-front-left" },
+            { MATE_MIXER_CHANNEL_TOP_FRONT_RIGHT, "MATE_MIXER_CHANNEL_TOP_FRONT_RIGHT", "top-front-right" },
+            { MATE_MIXER_CHANNEL_TOP_FRONT_CENTER, "MATE_MIXER_CHANNEL_TOP_FRONT_CENTER", "top-front-center" },
+            { MATE_MIXER_CHANNEL_TOP_CENTER, "MATE_MIXER_CHANNEL_TOP_CENTER", "top-center" },
+            { MATE_MIXER_CHANNEL_TOP_BACK_LEFT, "MATE_MIXER_CHANNEL_TOP_BACK_LEFT", "top-back-left" },
+            { MATE_MIXER_CHANNEL_TOP_BACK_RIGHT, "MATE_MIXER_CHANNEL_TOP_BACK_RIGHT", "top-back-right" },
+            { MATE_MIXER_CHANNEL_TOP_BACK_CENTER, "MATE_MIXER_CHANNEL_TOP_BACK_CENTER", "top-back-center" },
+            { 0, NULL, NULL }
+        };
+        etype = g_enum_register_static (
+            g_intern_static_string ("MateMixerChannelPosition"),
             values);
     }
     return etype;

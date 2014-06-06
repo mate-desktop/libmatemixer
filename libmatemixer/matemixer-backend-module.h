@@ -25,6 +25,13 @@
 
 G_BEGIN_DECLS
 
+typedef struct {
+    gchar                *name;
+    guint                 priority;
+    GType                 g_type;
+    MateMixerBackendType  backend_type;
+} MateMixerBackendInfo;
+
 #define MATE_MIXER_TYPE_BACKEND_MODULE          \
         (mate_mixer_backend_module_get_type ())
 #define MATE_MIXER_BACKEND_MODULE(o)            \
@@ -40,17 +47,7 @@ G_BEGIN_DECLS
 
 typedef struct _MateMixerBackendModule         MateMixerBackendModule;
 typedef struct _MateMixerBackendModuleClass    MateMixerBackendModuleClass;
-typedef struct _MateMixerBackendModuleInfo     MateMixerBackendModuleInfo;
 typedef struct _MateMixerBackendModulePrivate  MateMixerBackendModulePrivate;
-
-struct _MateMixerBackendModuleInfo
-{
-    gchar *name;
-    guint  priority;
-    GType  g_type;
-
-    MateMixerBackendType backend_type;
-};
 
 struct _MateMixerBackendModule
 {
@@ -66,9 +63,9 @@ struct _MateMixerBackendModuleClass
 
 GType mate_mixer_backend_module_get_type (void) G_GNUC_CONST;
 
-MateMixerBackendModule           *mate_mixer_backend_module_new (const gchar *path);
-const MateMixerBackendModuleInfo *mate_mixer_backend_module_get_info (MateMixerBackendModule *module);
-const gchar                      *mate_mixer_backend_module_get_path (MateMixerBackendModule *module);
+MateMixerBackendModule     *mate_mixer_backend_module_new      (const gchar            *path);
+const MateMixerBackendInfo *mate_mixer_backend_module_get_info (MateMixerBackendModule *module);
+const gchar                *mate_mixer_backend_module_get_path (MateMixerBackendModule *module);
 
 G_END_DECLS
 

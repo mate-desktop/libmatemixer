@@ -55,11 +55,8 @@ mate_mixer_init (void)
             }
 
             if (mixer_modules) {
-                /* Sort the usable modules by the priority */
-                mixer_modules = g_list_sort (
-                    mixer_modules,
-                    mixer_compare_modules);
-
+                /* Sort the usable modules by their priority */
+                mixer_modules = g_list_sort (mixer_modules, mixer_compare_modules);
                 mixer_initialized = TRUE;
             } else
                 g_critical ("No usable backend modules have been found");
@@ -85,11 +82,11 @@ mate_mixer_deinit (void)
     mixer_initialized = FALSE;
 }
 
-/* Internal function: return a shared list of loaded backend modules */
-GList *
+/* Internal function: return a list of loaded backend modules */
+const GList *
 mate_mixer_get_modules (void)
 {
-    return mixer_modules;
+    return (const GList *) mixer_modules;
 }
 
 /* Internal function: return TRUE if the library has been initialized */
@@ -124,10 +121,8 @@ mixer_load_modules (void)
                     continue;
 
                 file = g_build_filename (LIBMATEMIXER_BACKEND_DIR, name, NULL);
-                mixer_modules = g_list_prepend (
-                    mixer_modules,
-                    mate_mixer_backend_module_new (file));
-
+                mixer_modules = g_list_prepend (mixer_modules,
+                                                mate_mixer_backend_module_new (file));
                 g_free (file);
             }
 
@@ -151,7 +146,7 @@ mixer_load_modules (void)
 static gint
 mixer_compare_modules (gconstpointer a, gconstpointer b)
 {
-    const MateMixerBackendModuleInfo *info1, *info2;
+    const MateMixerBackendInfo *info1, *info2;
 
     info1 = mate_mixer_backend_module_get_info (MATE_MIXER_BACKEND_MODULE (a));
     info2 = mate_mixer_backend_module_get_info (MATE_MIXER_BACKEND_MODULE (b));

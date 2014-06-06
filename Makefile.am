@@ -4,9 +4,9 @@ SUBDIRS =                               \
         libmatemixer                    \
         backends                        \
         data                            \
-        doc
+        docs
 
-EXTRA_DIR = autogen.sh
+EXTRA_DIST = autogen.sh
 
 MAINTAINERCLEANFILES =                  \
     $(srcdir)/aclocal.m4                \

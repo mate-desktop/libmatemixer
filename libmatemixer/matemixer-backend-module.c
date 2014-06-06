@@ -33,19 +33,40 @@ struct _MateMixerBackendModulePrivate
     void (*init)   (GTypeModule *type_module);
     void (*deinit) (void);
 
-    const MateMixerBackendModuleInfo *(*get_info) (void);
+    const MateMixerBackendInfo *(*get_info) (void);
 };
 
-static gboolean mate_mixer_backend_module_load   (GTypeModule *gmodule);
-static void     mate_mixer_backend_module_unload (GTypeModule *gmodule);
+static void     mate_mixer_backend_module_class_init (MateMixerBackendModuleClass *klass);
+static void     mate_mixer_backend_module_init       (MateMixerBackendModule      *module);
+static void     mate_mixer_backend_module_dispose    (GObject                     *object);
+static void     mate_mixer_backend_module_finalize   (GObject                     *object);
+
+static gboolean mate_mixer_backend_module_load       (GTypeModule *gmodule);
+static void     mate_mixer_backend_module_unload     (GTypeModule *gmodule);
+
+static void
+mate_mixer_backend_module_class_init (MateMixerBackendModuleClass *klass)
+{
+    GObjectClass     *object_class;
+    GTypeModuleClass *module_class;
+
+    object_class = G_OBJECT_CLASS (klass);
+    object_class->dispose  = mate_mixer_backend_module_dispose;
+    object_class->finalize = mate_mixer_backend_module_finalize;
+
+    module_class = G_TYPE_MODULE_CLASS (klass);
+    module_class->load   = mate_mixer_backend_module_load;
+    module_class->unload = mate_mixer_backend_module_unload;
+
+    g_type_class_add_private (object_class, sizeof (MateMixerBackendModulePrivate));
+}
 
 static void
 mate_mixer_backend_module_init (MateMixerBackendModule *module)
 {
-    module->priv = G_TYPE_INSTANCE_GET_PRIVATE (
-        module,
-        MATE_MIXER_TYPE_BACKEND_MODULE,
-        MateMixerBackendModulePrivate);
+    module->priv = G_TYPE_INSTANCE_GET_PRIVATE (module,
+                                                MATE_MIXER_TYPE_BACKEND_MODULE,
+                                                MateMixerBackendModulePrivate);
 }
 
 static void
@@ -76,23 +97,6 @@ mate_mixer_backend_module_finalize (GObject *object)
     G_OBJECT_CLASS (mate_mixer_backend_module_parent_class)->finalize (object);
 }
 
-static void
-mate_mixer_backend_module_class_init (MateMixerBackendModuleClass *klass)
-{
-    GObjectClass     *object_class;
-    GTypeModuleClass *gtype_class;
-
-    object_class = G_OBJECT_CLASS (klass);
-    object_class->dispose  = mate_mixer_backend_module_dispose;
-    object_class->finalize = mate_mixer_backend_module_finalize;
-
-    gtype_class  = G_TYPE_MODULE_CLASS (klass);
-    gtype_class->load   = mate_mixer_backend_module_load;
-    gtype_class->unload = mate_mixer_backend_module_unload;
-
-    g_type_class_add_private (object_class, sizeof (MateMixerBackendModulePrivate));
-}
-
 static gboolean
 mate_mixer_backend_module_load (GTypeModule *type_module)
 {
@@ -101,28 +105,27 @@ mate_mixer_backend_module_load (GTypeModule *type_module)
     module = MATE_MIXER_BACKEND_MODULE (type_module);
 
     if (!module->priv->loaded) {
-        module->priv->gmodule = g_module_open (
-            module->priv->path,
-            G_MODULE_BIND_LAZY | G_MODULE_BIND_LOCAL);
-
+        module->priv->gmodule = g_module_open (module->priv->path,
+                                               G_MODULE_BIND_LAZY |
+                                               G_MODULE_BIND_LOCAL);
         if (module->priv->gmodule == NULL) {
             g_warning ("Failed to load backend module %s: %s",
-                module->priv->path,
-                g_module_error ());
+                       module->priv->path,
+                       g_module_error ());
 
             return FALSE;
         }
 
         /* Validate library symbols that each backend module must provide */
         if (!g_module_symbol (module->priv->gmodule,
-                "backend_module_init",
-                (gpointer *) &module->priv->init) ||
+                              "backend_module_init",
+                              (gpointer *) &module->priv->init) ||
             !g_module_symbol (module->priv->gmodule,
-                "backend_module_get_info",
-                (gpointer *) &module->priv->get_info)) {
+                              "backend_module_get_info",
+                              (gpointer *) &module->priv->get_info)) {
             g_warning ("Failed to load backend module %s: %s",
-                module->priv->path,
-                g_module_error ());
+                       module->priv->path,
+                       g_module_error ());
 
             g_module_close (module->priv->gmodule);
             return FALSE;
@@ -130,8 +133,8 @@ mate_mixer_backend_module_load (GTypeModule *type_module)
 
         /* Optional backend functions */
         g_module_symbol (module->priv->gmodule,
-            "backend_module_deinit",
-            (gpointer *) &module->priv->deinit);
+                         "backend_module_deinit",
+                         (gpointer *) &module->priv->deinit);
 
         module->priv->init (type_module);
         module->priv->loaded = TRUE;
@@ -140,7 +143,7 @@ mate_mixer_backend_module_load (GTypeModule *type_module)
          * it in other parts of the library */
         if (G_UNLIKELY (module->priv->get_info () == NULL)) {
             g_warning ("Backend module %s does not provide module information",
-                module->priv->path);
+                       module->priv->path);
 
             /* Close the module but keep the loaded flag to avoid unreffing
              * this instance as the GType has most likely been registered */
@@ -150,7 +153,7 @@ mate_mixer_backend_module_load (GTypeModule *type_module)
 
         /* It is not possible to unref this instance, so let's avoid unloading
          * the module and just let the backend module (de)initialize when
-         * (un)load are called repeatedly */
+         * (de)init functions are called repeatedly */
         g_module_make_resident (module->priv->gmodule);
 
         g_debug ("Loaded backend module %s", module->priv->path);
@@ -189,7 +192,7 @@ mate_mixer_backend_module_new (const gchar *path)
     return module;
 }
 
-const MateMixerBackendModuleInfo *
+const MateMixerBackendInfo *
 mate_mixer_backend_module_get_info (MateMixerBackendModule *module)
 {
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND_MODULE (module), NULL);

@@ -6,15 +6,13 @@ AM_CPPFLAGS =                                                   \
         -I$(top_srcdir)                                         \
         -DG_LOG_DOMAIN=\"libmatemixer-null\"
 
-libmatemixer_null_la_CFLAGS =                                   \
-        $(GLIB_CFLAGS)
+libmatemixer_null_la_CFLAGS = $(GLIB_CFLAGS)
 
 libmatemixer_null_la_SOURCES =                                  \
         null.c                                                  \
         null.h
 
-libmatemixer_null_la_LIBADD =                                   \
-        $(GLIB_LIBS)
+libmatemixer_null_la_LIBADD = $(GLIB_LIBS)
 
 libmatemixer_null_la_LDFLAGS =                                  \
         -avoid-version                                          \

@@ -1,7 +1,6 @@
 lib_LTLIBRARIES = libmatemixer.la
 
 AM_CPPFLAGS =                                                   \
-        $(GLIB_CFLAGS)                                          \
         -I$(top_srcdir)                                         \
         -I$(top_srcdir)/libmatemixer                            \
         -DG_LOG_DOMAIN=\"libmatemixer\"                         \
@@ -13,10 +12,12 @@ libmatemixer_include_HEADERS =                                  \
         matemixer.h                                             \
         matemixer-control.h                                     \
         matemixer-device.h                                      \
-        matemixer-device-port.h                                 \
-        matemixer-device-profile.h                              \
         matemixer-enums.h                                       \
-        matemixer-track.h
+        matemixer-port.h                                        \
+        matemixer-profile.h                                     \
+        matemixer-stream.h
+
+libmatemixer_la_CFLAGS = $(GLIB_CFLAGS)
 
 libmatemixer_la_SOURCES =                                       \
         matemixer.c                                             \
@@ -24,13 +25,14 @@ libmatemixer_la_SOURCES =                                       \
         matemixer-backend.c                                     \
         matemixer-backend.h                                     \
         matemixer-backend-module.c                              \
+        matemixer-backend-module.h                              \
         matemixer-control.c                                     \
         matemixer-device.c                                      \
-        matemixer-device-port.c                                 \
-        matemixer-device-profile.c                              \
         matemixer-enum-types.c                                  \
         matemixer-enum-types.h                                  \
-        matemixer-track.c
+        matemixer-port.c                                        \
+        matemixer-profile.c                                     \
+        matemixer-stream.c
 
 libmatemixer_la_LIBADD = $(GLIB_LIBS)
 

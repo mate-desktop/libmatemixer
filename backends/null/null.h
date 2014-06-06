@@ -51,6 +51,10 @@ struct _MateMixerNullClass
 
 GType mate_mixer_null_get_type (void) G_GNUC_CONST;
 
-gboolean mate_mixer_null_open (MateMixerBackend *backend);
+/* Support function for dynamic loading of the backend module */
+void                        backend_module_init     (GTypeModule      *module);
+const MateMixerBackendInfo *backend_module_get_info (void);
+
+gboolean                    mate_mixer_null_open    (MateMixerBackend *backend);
 
 #endif /* MATEMIXER_NULL_H */

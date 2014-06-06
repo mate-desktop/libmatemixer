@@ -23,48 +23,23 @@
 #include "matemixer-control.h"
 #include "matemixer-enums.h"
 #include "matemixer-private.h"
-#include "matemixer-track.h"
+#include "matemixer-stream.h"
 
 struct _MateMixerControlPrivate
 {
     GList                  *devices;
-    GList                  *tracks;
+    GList                  *streams;
     MateMixerBackend       *backend;
     MateMixerBackendModule *module;
 };
 
 G_DEFINE_TYPE (MateMixerControl, mate_mixer_control, G_TYPE_OBJECT);
 
-static MateMixerBackend *mixer_control_init_module (MateMixerBackendModule *module);
+static void              mate_mixer_control_class_init (MateMixerControlClass  *klass);
+static void              mate_mixer_control_init       (MateMixerControl       *control);
+static void              mate_mixer_control_dispose    (GObject                *object);
 
-static void
-mate_mixer_control_init (MateMixerControl *control)
-{
-    control->priv = G_TYPE_INSTANCE_GET_PRIVATE (
-        control,
-        MATE_MIXER_TYPE_CONTROL,
-        MateMixerControlPrivate);
-}
-
-static void
-mate_mixer_control_finalize (GObject *object)
-{
-    MateMixerControl *control;
-
-    control = MATE_MIXER_CONTROL (object);
-
-    mate_mixer_backend_close (control->priv->backend);
-
-    g_object_unref (control->priv->backend);
-    g_object_unref (control->priv->module);
-
-    if (control->priv->devices)
-        g_list_free_full (control->priv->devices, g_object_unref);
-    if (control->priv->tracks)
-        g_list_free_full (control->priv->tracks, g_object_unref);
-
-    G_OBJECT_CLASS (mate_mixer_control_parent_class)->finalize (object);
-}
+static MateMixerBackend *mixer_control_init_module     (MateMixerBackendModule *module);
 
 static void
 mate_mixer_control_class_init (MateMixerControlClass *klass)
@@ -72,15 +47,49 @@ mate_mixer_control_class_init (MateMixerControlClass *klass)
     GObjectClass *object_class;
 
     object_class = G_OBJECT_CLASS (klass);
-    object_class->finalize = mate_mixer_control_finalize;
+    object_class->dispose = mate_mixer_control_dispose;
 
     g_type_class_add_private (object_class, sizeof (MateMixerControlPrivate));
+}
+
+static void
+mate_mixer_control_init (MateMixerControl *control)
+{
+    control->priv = G_TYPE_INSTANCE_GET_PRIVATE (control,
+                                                 MATE_MIXER_TYPE_CONTROL,
+                                                 MateMixerControlPrivate);
+}
+
+static void
+mate_mixer_control_dispose (GObject *object)
+{
+    MateMixerControl *control;
+
+    control = MATE_MIXER_CONTROL (object);
+
+    if (control->priv->backend) {
+        mate_mixer_backend_close (control->priv->backend);
+        g_clear_object (&control->priv->backend);
+    }
+
+    g_clear_object (&control->priv->module);
+
+    if (control->priv->devices) {
+        g_list_free_full (control->priv->devices, g_object_unref);
+        control->priv->devices = NULL;
+    }
+    if (control->priv->streams) {
+        g_list_free_full (control->priv->streams, g_object_unref);
+        control->priv->streams = NULL;
+    }
+
+    G_OBJECT_CLASS (mate_mixer_control_parent_class)->dispose (object);
 }
 
 MateMixerControl *
 mate_mixer_control_new (void)
 {
-    GList                  *modules;
+    const GList            *modules;
     MateMixerControl       *control;
     MateMixerBackend       *backend = NULL;
     MateMixerBackendModule *module = NULL;
@@ -101,7 +110,7 @@ mate_mixer_control_new (void)
     }
 
     /* The last module in the priority list is the "null" module which
-     * should always be initialized correctly, but in case "null" is absent
+     * should always be initialized correctly, but in case "null" is absent,
      * all the other modules might fail their initializations */
     if (backend == NULL)
         return NULL;
@@ -117,7 +126,7 @@ mate_mixer_control_new (void)
 MateMixerControl *
 mate_mixer_control_new_backend (MateMixerBackendType backend_type)
 {
-    GList                  *modules;
+    const GList            *modules;
     MateMixerControl       *control;
     MateMixerBackend       *backend = NULL;
     MateMixerBackendModule *module = NULL;
@@ -129,7 +138,7 @@ mate_mixer_control_new_backend (MateMixerBackendType backend_type)
 
     modules = mate_mixer_get_modules ();
     while (modules) {
-        const MateMixerBackendModuleInfo *info;
+        const MateMixerBackendInfo *info;
 
         module = MATE_MIXER_BACKEND_MODULE (modules->data);
         info   = mate_mixer_backend_module_get_info (module);
@@ -158,35 +167,49 @@ mate_mixer_control_list_devices (MateMixerControl *control)
 {
     g_return_val_if_fail (MATE_MIXER_IS_CONTROL (control), NULL);
 
-    /* This list is cached here and invalidated when the backend
-     * notifies us about a change */
+    /* This list is cached here and invalidated when the backend notifies us
+     * about a change */
     if (control->priv->devices == NULL)
-        control->priv->devices = mate_mixer_backend_list_devices (
-            MATE_MIXER_BACKEND (control->priv->backend));
-
-    // TODO: notification signals from backend
+        control->priv->devices =
+            mate_mixer_backend_list_devices (MATE_MIXER_BACKEND (control->priv->backend));
 
     return (const GList *) control->priv->devices;
 }
 
 const GList *
-mate_mixer_control_list_tracks (MateMixerControl *control)
+mate_mixer_control_list_streams (MateMixerControl *control)
 {
     g_return_val_if_fail (MATE_MIXER_IS_CONTROL (control), NULL);
 
-    /* This list is cached here and invalidated when the backend
-     * notifies us about a change */
-    if (control->priv->tracks == NULL)
-        control->priv->tracks = mate_mixer_backend_list_tracks (
-            MATE_MIXER_BACKEND (control->priv->backend));
+    /* This list is cached here and invalidated when the backend notifies us
+     * about a change */
+    if (control->priv->streams == NULL)
+        control->priv->streams =
+            mate_mixer_backend_list_streams (MATE_MIXER_BACKEND (control->priv->backend));
 
-    return (const GList *) control->priv->tracks;
+    return (const GList *) control->priv->streams;
+}
+
+MateMixerStream *
+mate_mixer_control_get_default_input_stream (MateMixerControl *control)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_CONTROL (control), NULL);
+
+    return mate_mixer_backend_get_default_input_stream (control->priv->backend);
+}
+
+MateMixerStream *
+mate_mixer_control_get_default_output_stream (MateMixerControl *control)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_CONTROL (control), NULL);
+
+    return mate_mixer_backend_get_default_output_stream (control->priv->backend);
 }
 
 const gchar *
 mate_mixer_control_get_backend_name (MateMixerControl *control)
 {
-    const MateMixerBackendModuleInfo *info;
+    const MateMixerBackendInfo *info;
 
     g_return_val_if_fail (MATE_MIXER_IS_CONTROL (control), NULL);
 
@@ -198,7 +221,7 @@ mate_mixer_control_get_backend_name (MateMixerControl *control)
 MateMixerBackendType
 mate_mixer_control_get_backend_type (MateMixerControl *control)
 {
-    const MateMixerBackendModuleInfo *info;
+    const MateMixerBackendInfo *info;
 
     g_return_val_if_fail (MATE_MIXER_IS_CONTROL (control), FALSE);
 
@@ -210,8 +233,8 @@ mate_mixer_control_get_backend_type (MateMixerControl *control)
 static MateMixerBackend *
 mixer_control_init_module (MateMixerBackendModule *module)
 {
-    MateMixerBackend                  *backend;
-    const MateMixerBackendModuleInfo  *info;
+    MateMixerBackend           *backend;
+    const MateMixerBackendInfo *info;
 
     info = mate_mixer_backend_module_get_info (module);
     backend = g_object_newv (info->g_type, 0, NULL);

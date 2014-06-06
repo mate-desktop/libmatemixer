@@ -17,8 +17,6 @@
 
 #include <glib.h>
 #include <glib-object.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 #include <libmatemixer/matemixer-backend.h>
 #include <libmatemixer/matemixer-backend-module.h>
@@ -27,47 +25,59 @@
 #include <pulse/thread-mainloop.h>
 
 #include "pulse.h"
+#include "pulse-connection.h"
 #include "pulse-device.h"
+#include "pulse-stream.h"
+#include "pulse-sink.h"
 
 #define BACKEND_NAME      "PulseAudio"
 #define BACKEND_PRIORITY   0
 
 struct _MateMixerPulsePrivate
 {
-    pa_threaded_mainloop  *mainloop;
-    pa_context            *context;
-    GHashTable            *devices;
+    GHashTable               *devices;
+    gboolean                  lists_loaded;
+    GHashTable               *cards;
+    GHashTable               *sinks;
+    GHashTable               *sink_inputs;
+    GHashTable               *sources;
+    GHashTable               *source_outputs;
+    MateMixerPulseConnection *connection;
 };
 
 /* Support function for dynamic loading of the backend module */
 void  backend_module_init (GTypeModule *module);
 
-const MateMixerBackendModuleInfo *backend_module_get_info (void);
+const MateMixerBackendInfo *backend_module_get_info (void);
 
-static void    mate_mixer_backend_interface_init (MateMixerBackendInterface *iface);
+static void mate_mixer_backend_interface_init (MateMixerBackendInterface *iface);
 
-static void    pulse_card_info_cb (pa_context *c,
-                                   const pa_card_info *info,
-                                   int eol,
-                                   void *userdata);
+static void pulse_card_cb (MateMixerPulseConnection *connection,
+                            const pa_card_info *info,
+                            MateMixerPulse *pulse);
 
-static void    pulse_card_update  (MateMixerPulse *pulse, const pa_card_info *i);
+static void pulse_sink_cb (MateMixerPulseConnection *connection,
+                            const pa_sink_info *info,
+                            MateMixerPulse *pulse);
 
-static void    pulse_state_cb     (pa_context *c, void *userdata);
+static void pulse_sink_input_cb (MateMixerPulseConnection *connection,
+                            const pa_sink_input_info *info,
+                            MateMixerPulse *pulse);
 
-static void    pulse_subscribe_cb (pa_context *c,
-                                   pa_subscription_event_type_t t,
-                                   uint32_t idx,
-                                   void *userdata);
+static void pulse_source_cb (MateMixerPulseConnection *connection,
+                            const pa_source_info *info,
+                            MateMixerPulse *pulse);
 
-static gchar  *pulse_get_app_name (void);
+static void pulse_source_output_cb (MateMixerPulseConnection *connection,
+                            const pa_source_output_info *info,
+                            MateMixerPulse *pulse);
 
 G_DEFINE_DYNAMIC_TYPE_EXTENDED (MateMixerPulse, mate_mixer_pulse,
                                 G_TYPE_OBJECT, 0,
                                 G_IMPLEMENT_INTERFACE_DYNAMIC (MATE_MIXER_TYPE_BACKEND,
                                                                mate_mixer_backend_interface_init))
 
-static MateMixerBackendModuleInfo info;
+static MateMixerBackendInfo info;
 
 void
 backend_module_init (GTypeModule *module)
@@ -77,10 +87,10 @@ backend_module_init (GTypeModule *module)
     info.name         = BACKEND_NAME;
     info.priority     = BACKEND_PRIORITY;
     info.g_type       = MATE_MIXER_TYPE_PULSE;
-    info.backend_type = MATE_MIXER_BACKEND_TYPE_PULSE;
+    info.backend_type = MATE_MIXER_BACKEND_PULSE;
 }
 
-const MateMixerBackendModuleInfo *
+const MateMixerBackendInfo *
 backend_module_get_info (void)
 {
     return &info;
@@ -107,18 +117,70 @@ mate_mixer_pulse_init (MateMixerPulse *pulse)
         g_direct_equal,
         NULL,
         g_object_unref);
+
+    pulse->priv->cards = g_hash_table_new_full (
+        g_direct_hash,
+        g_direct_equal,
+        NULL,
+        g_object_unref);
+    pulse->priv->sinks = g_hash_table_new_full (
+        g_direct_hash,
+        g_direct_equal,
+        NULL,
+        g_object_unref);
+    pulse->priv->sink_inputs = g_hash_table_new_full (
+        g_direct_hash,
+        g_direct_equal,
+        NULL,
+        g_object_unref);
+    pulse->priv->sources = g_hash_table_new_full (
+        g_direct_hash,
+        g_direct_equal,
+        NULL,
+        g_object_unref);
+    pulse->priv->source_outputs = g_hash_table_new_full (
+        g_direct_hash,
+        g_direct_equal,
+        NULL,
+        g_object_unref);
 }
 
 static void
-mate_mixer_pulse_finalize (GObject *object)
+mate_mixer_pulse_dispose (GObject *object)
 {
     MateMixerPulse *pulse;
 
     pulse = MATE_MIXER_PULSE (object);
 
-    g_hash_table_destroy (pulse->priv->devices);
+    if (pulse->priv->devices) {
+        g_hash_table_destroy (pulse->priv->devices);
+        pulse->priv->devices = NULL;
+    }
 
-    G_OBJECT_CLASS (mate_mixer_pulse_parent_class)->finalize (object);
+    if (pulse->priv->cards) {
+        g_hash_table_destroy (pulse->priv->cards);
+        pulse->priv->cards = NULL;
+    }
+    if (pulse->priv->sinks) {
+        g_hash_table_destroy (pulse->priv->sinks);
+        pulse->priv->devices = NULL;
+    }
+    if (pulse->priv->sink_inputs) {
+        g_hash_table_destroy (pulse->priv->sink_inputs);
+        pulse->priv->devices = NULL;
+    }
+    if (pulse->priv->sources) {
+        g_hash_table_destroy (pulse->priv->sources);
+        pulse->priv->devices = NULL;
+    }
+    if (pulse->priv->source_outputs) {
+        g_hash_table_destroy (pulse->priv->source_outputs);
+        pulse->priv->source_outputs = NULL;
+    }
+
+    g_clear_object (&pulse->priv->connection);
+
+    G_OBJECT_CLASS (mate_mixer_pulse_parent_class)->dispose (object);
 }
 
 static void
@@ -127,7 +189,7 @@ mate_mixer_pulse_class_init (MateMixerPulseClass *klass)
     GObjectClass *object_class;
 
     object_class = G_OBJECT_CLASS (klass);
-    object_class->finalize = mate_mixer_pulse_finalize;
+    object_class->dispose = mate_mixer_pulse_dispose;
 
     g_type_class_add_private (object_class, sizeof (MateMixerPulsePrivate));
 }
@@ -141,83 +203,48 @@ mate_mixer_pulse_class_finalize (MateMixerPulseClass *klass)
 gboolean
 mate_mixer_pulse_open (MateMixerBackend *backend)
 {
-    int              ret;
-    gchar           *app_name;
-    MateMixerPulse  *pulse;
+    MateMixerPulse            *pulse;
+    MateMixerPulseConnection  *connection;
 
-    g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), FALSE);
+    g_return_val_if_fail (MATE_MIXER_IS_PULSE (backend), FALSE);
 
     pulse = MATE_MIXER_PULSE (backend);
 
-    g_return_val_if_fail (pulse->priv->mainloop == NULL, FALSE);
+    g_return_val_if_fail (pulse->priv->connection == NULL, FALSE);
 
-    pulse->priv->mainloop = pa_threaded_mainloop_new ();
-    if (G_UNLIKELY (pulse->priv->mainloop == NULL)) {
-        g_warning ("Failed to created PulseAudio main loop");
+    connection = mate_mixer_pulse_connection_new (NULL, NULL);
+    if (G_UNLIKELY (connection == NULL)) {
+        g_object_unref (connection);
         return FALSE;
     }
 
-    app_name = pulse_get_app_name ();
-
-    pulse->priv->context = pa_context_new (
-        pa_threaded_mainloop_get_api (pulse->priv->mainloop),
-        app_name);
-
-    g_free (app_name);
-
-    if (G_UNLIKELY (pulse->priv->context == NULL)) {
-        g_warning ("Failed to created PulseAudio context");
-
-        pa_threaded_mainloop_free (pulse->priv->mainloop);
-        pulse->priv->mainloop = NULL;
+    if (!mate_mixer_pulse_connection_connect (connection)) {
+        g_object_unref (connection);
         return FALSE;
     }
 
-    // XXX: investigate PA_CONTEXT_NOFAIL
-    ret = pa_context_connect (pulse->priv->context, NULL, PA_CONTEXT_NOFLAGS, NULL);
-    if (ret < 0) {
-        g_warning ("Failed to connect to PulseAudio server: %s", pa_strerror (ret));
+    g_signal_connect (connection,
+        "list-item-card",
+        G_CALLBACK (pulse_card_cb),
+        pulse);
+    g_signal_connect (connection,
+        "list-item-sink",
+        G_CALLBACK (pulse_sink_cb),
+        pulse);
+    g_signal_connect (connection,
+        "list-item-sink-input",
+        G_CALLBACK (pulse_sink_input_cb),
+        pulse);
+    g_signal_connect (connection,
+        "list-item-source",
+        G_CALLBACK (pulse_source_cb),
+        pulse);
+    g_signal_connect (connection,
+        "list-item-source-output",
+        G_CALLBACK (pulse_source_output_cb),
+        pulse);
 
-        pa_context_unref (pulse->priv->context);
-        pa_threaded_mainloop_free (pulse->priv->mainloop);
-
-        pulse->priv->context = NULL;
-        pulse->priv->mainloop = NULL;
-        return FALSE;
-    }
-
-    g_debug ("Connected to PulseAudio server");
-
-    pa_threaded_mainloop_lock (pulse->priv->mainloop);
-
-    pa_context_set_state_callback (pulse->priv->context,
-        pulse_state_cb,
-        backend);
-    pa_context_set_subscribe_callback (pulse->priv->context,
-        pulse_subscribe_cb,
-        backend);
-
-    ret = pa_threaded_mainloop_start (pulse->priv->mainloop);
-    if (ret < 0) {
-        g_warning ("Failed to start PulseAudio main loop: %s", pa_strerror (ret));
-
-        pa_threaded_mainloop_unlock (pulse->priv->mainloop);
-
-        pa_context_unref (pulse->priv->context);
-        pa_threaded_mainloop_free (pulse->priv->mainloop);
-
-        pulse->priv->context = NULL;
-        pulse->priv->mainloop = NULL;
-        return FALSE;
-    }
-
-    while (pa_context_get_state (pulse->priv->context) != PA_CONTEXT_READY) {
-        // XXX this will get stuck if connection fails
-        pa_threaded_mainloop_wait (pulse->priv->mainloop);
-    }
-
-    pa_threaded_mainloop_unlock (pulse->priv->mainloop);
-
+    pulse->priv->connection = connection;
     return TRUE;
 }
 
@@ -226,140 +253,118 @@ mate_mixer_pulse_close (MateMixerBackend *backend)
 {
     MateMixerPulse *pulse;
 
-    g_return_if_fail (MATE_MIXER_IS_BACKEND (backend));
+    g_return_if_fail (MATE_MIXER_IS_PULSE (backend));
 
     pulse = MATE_MIXER_PULSE (backend);
 
-    g_return_if_fail (pulse->priv->mainloop != NULL);
+    g_clear_object (&pulse->priv->connection);
+}
 
-    pa_threaded_mainloop_stop (pulse->priv->mainloop);
+static gboolean
+pulse_load_lists (MateMixerPulse *pulse)
+{
+    /* The Pulse server is queried for initial lists, each of the functions
+     * waits until the list is available and then continues with the next.
+     *
+     * One possible improvement would be to load the lists asynchronously right
+     * after we connect to Pulse and when the application calls one of the
+     * list_* () functions, check if the initial list is already available and
+     * eventually wait until it's available. However, this would be
+     * tricky with the way the Pulse API is currently used and might not
+     * be beneficial at all.
+     */
 
-    pa_context_unref (pulse->priv->context);
-    pa_threaded_mainloop_free (pulse->priv->mainloop);
+    // XXX figure out how to handle server reconnects, ideally everything
+    // we know should be ditched and read again asynchronously and
+    // the user should only be notified about actual differences
+    // from the state before we were disconnected
 
-    pulse->priv->context = NULL;
-    pulse->priv->mainloop = NULL;
+    // mate_mixer_pulse_connection_get_server_info (pulse->priv->connection);
+    mate_mixer_pulse_connection_get_card_list (pulse->priv->connection);
+    mate_mixer_pulse_connection_get_sink_list (pulse->priv->connection);
+    mate_mixer_pulse_connection_get_sink_input_list (pulse->priv->connection);
+    mate_mixer_pulse_connection_get_source_list (pulse->priv->connection);
+    mate_mixer_pulse_connection_get_source_output_list (pulse->priv->connection);
+
+    return TRUE;
 }
 
 GList *
 mate_mixer_pulse_list_devices (MateMixerBackend *backend)
 {
-    MateMixerPulse  *pulse;
-    pa_operation    *o;
+    MateMixerPulse *pulse;
+    GList          *list;
 
-    g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), NULL);
+    g_return_val_if_fail (MATE_MIXER_IS_PULSE (backend), NULL);
 
     pulse = MATE_MIXER_PULSE (backend);
 
-    pa_threaded_mainloop_lock (pulse->priv->mainloop);
+    if (!pulse->priv->lists_loaded)
+        pulse_load_lists (pulse);
 
-    o = pa_context_get_card_info_list (pulse->priv->context, pulse_card_info_cb, pulse);
-    if (o == NULL) {
-        g_warning ("Failed to read card list: %s",
-            pa_strerror (pa_context_errno (pulse->priv->context)));
+    list = g_hash_table_get_values (pulse->priv->devices);
 
-        pa_threaded_mainloop_unlock (pulse->priv->mainloop);
-        return NULL;
-    }
-
-    while (pa_operation_get_state (o) == PA_OPERATION_RUNNING)
-        pa_threaded_mainloop_wait (pulse->priv->mainloop);
-
-    pa_operation_unref (o);
-    pa_threaded_mainloop_unlock (pulse->priv->mainloop);
-
-    return g_hash_table_get_values (pulse->priv->devices);
+    g_list_foreach (list, (GFunc) g_object_ref, NULL);
+    return list;
 }
 
-static void
-pulse_card_info_cb (pa_context *c, const pa_card_info *info, int eol, void *userdata)
-{
-    MateMixerPulse *pulse;
-
-    pulse = MATE_MIXER_PULSE (userdata);
-
-    if (!eol)
-        pulse_card_update (pulse, info);
-
-    pa_threaded_mainloop_signal (pulse->priv->mainloop, 0);
-}
-
-static void
-pulse_card_update (MateMixerPulse *pulse, const pa_card_info *info)
-{
-    gpointer item;
-
-    item = g_hash_table_lookup (pulse->priv->devices, GINT_TO_POINTER (info->index));
-    if (item) {
-        /* The card is already known, just update the fields that may
-         * have changed */
-        mate_mixer_pulse_device_update (MATE_MIXER_PULSE_DEVICE (item), info);
-    } else {
-        MateMixerPulseDevice *device = mate_mixer_pulse_device_new (info);
-
-        if (G_UNLIKELY (device == NULL))
-            g_warning ("Failed to process PulseAudio sound device");
-        else
-            g_hash_table_insert (
-                pulse->priv->devices,
-                GINT_TO_POINTER (info->index),
-                device);
-    }
-}
-
-static void
-pulse_state_cb (pa_context *c, void *userdata)
-{
-    MateMixerPulse *pulse;
-
-    pulse = MATE_MIXER_PULSE (userdata);
-
-    // TODO: handle errors
-
-    switch (pa_context_get_state (c)) {
-    case PA_CONTEXT_UNCONNECTED:
-        break;
-    case PA_CONTEXT_CONNECTING:
-        break;
-    case PA_CONTEXT_AUTHORIZING:
-        break;
-    case PA_CONTEXT_SETTING_NAME:
-        break;
-    case PA_CONTEXT_READY:
-        break;
-    case PA_CONTEXT_FAILED:
-        break;
-    case PA_CONTEXT_TERMINATED:
-        break;
-    default:
-        break;
-    }
-
-    pa_threaded_mainloop_signal (pulse->priv->mainloop, FALSE);
-}
-
-static void
-pulse_subscribe_cb (pa_context *c,
-                    pa_subscription_event_type_t t,
-                    uint32_t idx,
-                    void *userdata)
+GList *
+mate_mixer_pulse_list_streams (MateMixerBackend *backend)
 {
     // TODO
+    return NULL;
 }
 
-static gchar *
-pulse_get_app_name (void)
+static void
+pulse_card_cb (MateMixerPulseConnection *connection,
+                const pa_card_info *info,
+                MateMixerPulse *pulse)
 {
-    const char *name_app;
-    char        name_buf[256];
+    MateMixerPulseDevice *device;
 
-    /* Inspired by GStreamer's pulse plugin */
-    name_app = g_get_application_name ();
-    if (name_app != NULL)
-        return g_strdup (name_app);
+    device = mate_mixer_pulse_device_new (connection, info);
+    if (G_LIKELY (device))
+        g_hash_table_insert (
+            pulse->priv->devices,
+            GINT_TO_POINTER (mate_mixer_pulse_device_get_index (device)),
+            device);
+}
 
-    if (pa_get_binary_name (name_buf, sizeof (name_buf)) != NULL)
-        return g_strdup (name_buf);
+static void
+pulse_sink_cb (MateMixerPulseConnection *connection,
+                            const pa_sink_info *info,
+                            MateMixerPulse *pulse)
+{
+    MateMixerPulseStream *stream;
 
-    return g_strdup_printf ("libmatemixer-%lu", (gulong) getpid ());
+    stream = mate_mixer_pulse_sink_new (connection, info);
+    if (G_LIKELY (stream))
+        g_hash_table_insert (
+            pulse->priv->sinks,
+            GINT_TO_POINTER (mate_mixer_pulse_stream_get_index (stream)),
+            stream);
+}
+
+static void
+pulse_sink_input_cb (MateMixerPulseConnection *connection,
+                            const pa_sink_input_info *info,
+                            MateMixerPulse *pulse)
+{
+
+}
+
+static void
+pulse_source_cb (MateMixerPulseConnection *connection,
+                            const pa_source_info *info,
+                            MateMixerPulse *pulse)
+{
+
+}
+
+static void
+pulse_source_output_cb (MateMixerPulseConnection *connection,
+                            const pa_source_output_info *info,
+                            MateMixerPulse *pulse)
+{
+
 }

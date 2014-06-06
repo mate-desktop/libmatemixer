@@ -21,7 +21,7 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include <libmatemixer/matemixer-enums.h>
+#include "matemixer-stream.h"
 
 G_BEGIN_DECLS
 
@@ -42,19 +42,23 @@ struct _MateMixerBackendInterface
     GTypeInterface parent;
 
     /* Required */
-    gboolean   (*open)          (MateMixerBackend *backend);
+    gboolean         (*open)                      (MateMixerBackend *backend);
 
-    void       (*close)         (MateMixerBackend *backend);
-    GList     *(*list_devices)  (MateMixerBackend *backend);
-    GList     *(*list_tracks)   (MateMixerBackend *backend);
+    void             (*close)                     (MateMixerBackend *backend);
+    GList           *(*list_devices)              (MateMixerBackend *backend);
+    GList           *(*list_streams)              (MateMixerBackend *backend);
+    MateMixerStream *(*get_default_input_stream)  (MateMixerBackend *backend);
+    MateMixerStream *(*get_default_output_stream) (MateMixerBackend *backend);
 };
 
 GType mate_mixer_backend_get_type (void) G_GNUC_CONST;
 
-gboolean  mate_mixer_backend_open          (MateMixerBackend *backend);
-void      mate_mixer_backend_close         (MateMixerBackend *backend);
-GList    *mate_mixer_backend_list_devices  (MateMixerBackend *backend);
-GList    *mate_mixer_backend_list_tracks   (MateMixerBackend *backend);
+gboolean         mate_mixer_backend_open                      (MateMixerBackend *backend);
+void             mate_mixer_backend_close                     (MateMixerBackend *backend);
+GList           *mate_mixer_backend_list_devices              (MateMixerBackend *backend);
+GList           *mate_mixer_backend_list_streams              (MateMixerBackend *backend);
+MateMixerStream *mate_mixer_backend_get_default_input_stream  (MateMixerBackend *backend);
+MateMixerStream *mate_mixer_backend_get_default_output_stream (MateMixerBackend *backend);
 
 G_END_DECLS
 

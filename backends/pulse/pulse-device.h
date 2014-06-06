@@ -22,9 +22,11 @@
 #include <glib-object.h>
 
 #include <libmatemixer/matemixer-device.h>
-#include <libmatemixer/matemixer-device-profile.h>
+#include <libmatemixer/matemixer-profile.h>
 
 #include <pulse/pulseaudio.h>
+
+#include "pulse-connection.h"
 
 G_BEGIN_DECLS
 
@@ -54,26 +56,35 @@ struct _MateMixerPulseDevice
 
 struct _MateMixerPulseDeviceClass
 {
-    GObjectClass parent;    
+    GObjectClass parent;
 };
 
 GType mate_mixer_pulse_device_get_type (void) G_GNUC_CONST;
 
-MateMixerPulseDevice    *mate_mixer_pulse_device_new (const pa_card_info *info);
+MateMixerPulseDevice    *mate_mixer_pulse_device_new (MateMixerPulseConnection *connection,
+                                                      const pa_card_info *info);
 
 gboolean                 mate_mixer_pulse_device_update (MateMixerPulseDevice *device,
                                                          const pa_card_info *info);
 
+MateMixerPulseConnection *mate_mixer_pulse_device_get_connection (MateMixerPulseDevice *device);
+
+guint32                  mate_mixer_pulse_device_get_index (MateMixerPulseDevice *device);
+
 /* Interface implementation */
-const GList             *mate_mixer_pulse_device_list_tracks (MateMixerDevice *device);
+const gchar *mate_mixer_pulse_device_get_name (MateMixerDevice *device);
+const gchar *mate_mixer_pulse_device_get_description (MateMixerDevice *device);
+const gchar *mate_mixer_pulse_device_get_icon (MateMixerDevice *device);
 
-const GList             *mate_mixer_pulse_device_get_ports (MateMixerDevice *device);
-const GList             *mate_mixer_pulse_device_get_profiles (MateMixerDevice *device);
+const GList             *mate_mixer_pulse_device_list_streams (MateMixerDevice *device);
 
-MateMixerDeviceProfile  *mate_mixer_pulse_device_get_active_profile (MateMixerDevice *device);
+const GList             *mate_mixer_pulse_device_list_ports (MateMixerDevice *device);
+const GList             *mate_mixer_pulse_device_list_profiles (MateMixerDevice *device);
+
+MateMixerProfile  *mate_mixer_pulse_device_get_active_profile (MateMixerDevice *device);
 
 gboolean                 mate_mixer_pulse_device_set_active_profile (MateMixerDevice *device,
-                                                                     MateMixerDeviceProfile *profile);
+                                                                     const gchar *name);
 
 G_END_DECLS
 

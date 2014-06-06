@@ -22,8 +22,8 @@
 
 G_BEGIN_DECLS
 
-GList     *mate_mixer_get_modules     (void);
-gboolean   mate_mixer_is_initialized  (void);
+const GList *mate_mixer_get_modules    (void);
+gboolean     mate_mixer_is_initialized (void);
 
 G_END_DECLS
 

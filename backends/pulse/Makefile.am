@@ -13,10 +13,20 @@ libmatemixer_pulse_la_CFLAGS =                                  \
 libmatemixer_pulse_la_SOURCES =                                 \
         pulse.c                                                 \
         pulse.h                                                 \
+        pulse-connection.c                                      \
+        pulse-connection.h                                      \
         pulse-device.c                                          \
         pulse-device.h                                          \
-        pulse-track.c                                           \
-        pulse-track.h
+        pulse-stream.c                                          \
+        pulse-stream.h                                          \
+        pulse-sink.c                                            \
+        pulse-sink.h                                            \
+        pulse-sink-input.c                                      \
+        pulse-sink-input.h                                      \
+        pulse-source.c                                          \
+        pulse-source.h                                          \
+        pulse-source-output.c                                   \
+        pulse-source-output.h
 
 libmatemixer_pulse_la_LIBADD =                                  \
         $(GLIB_LIBS)                                            \

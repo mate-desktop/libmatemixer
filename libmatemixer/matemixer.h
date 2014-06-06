@@ -22,7 +22,7 @@
 #include <libmatemixer/matemixer-control.h>
 #include <libmatemixer/matemixer-device.h>
 #include <libmatemixer/matemixer-enums.h>
-#include <libmatemixer/matemixer-track.h>
+#include <libmatemixer/matemixer-stream.h>
 
 G_BEGIN_DECLS
 

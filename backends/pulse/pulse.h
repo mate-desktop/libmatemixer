@@ -54,8 +54,10 @@ struct _MateMixerPulseClass
 
 GType mate_mixer_pulse_get_type (void) G_GNUC_CONST;
 
+/* Interface implementation */
 gboolean      mate_mixer_pulse_open          (MateMixerBackend *backend);
 void          mate_mixer_pulse_close         (MateMixerBackend *backend);
 GList        *mate_mixer_pulse_list_devices  (MateMixerBackend *backend);
+GList        *mate_mixer_pulse_list_streams  (MateMixerBackend *backend);
 
 #endif /* MATEMIXER_PULSE_H */

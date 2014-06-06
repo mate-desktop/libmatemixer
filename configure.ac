@@ -138,7 +138,7 @@ backends/null/Makefile
 backends/pulse/Makefile
 data/Makefile
 data/libmatemixer.pc
-doc/Makefile
+docs/Makefile
 ])
 
 AC_OUTPUT
