@@ -49,7 +49,7 @@ struct _MateMixerDeviceInterface
     const GList      *(*list_profiles)      (MateMixerDevice *device);
     MateMixerProfile *(*get_active_profile) (MateMixerDevice *device);
     gboolean          (*set_active_profile) (MateMixerDevice *device,
-                                             const gchar     *name);
+                                             const gchar     *profile_name);
 };
 
 GType mate_mixer_device_get_type (void) G_GNUC_CONST;
@@ -62,7 +62,7 @@ const GList *     mate_mixer_device_list_ports         (MateMixerDevice *device)
 const GList *     mate_mixer_device_list_profiles      (MateMixerDevice *device);
 MateMixerProfile *mate_mixer_device_get_active_profile (MateMixerDevice *device);
 gboolean          mate_mixer_device_set_active_profile (MateMixerDevice *device,
-                                                        const gchar     *name);
+                                                        const gchar     *profile_name);
 
 G_END_DECLS
 

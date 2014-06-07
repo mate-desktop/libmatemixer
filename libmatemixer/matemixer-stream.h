@@ -82,15 +82,15 @@ struct _MateMixerStreamInterface
     gboolean                 (*set_position_volume_db) (MateMixerStream          *stream,
                                                         MateMixerChannelPosition  position,
                                                         gdouble                   volume);
-    gboolean                 (*get_balance)            (MateMixerStream          *stream);
+    gdouble                  (*get_balance)            (MateMixerStream          *stream);
     gboolean                 (*set_balance)            (MateMixerStream          *stream,
                                                         gdouble                   balance);
-    gboolean                 (*get_fade)               (MateMixerStream          *stream);
+    gdouble                  (*get_fade)               (MateMixerStream          *stream);
     gboolean                 (*set_fade)               (MateMixerStream          *stream,
                                                         gdouble                   fade);
     MateMixerPort *          (*get_active_port)        (MateMixerStream          *stream);
     gboolean                 (*set_active_port)        (MateMixerStream          *stream,
-                                                        MateMixerPort            *port);
+                                                        const gchar              *port_name);
     const GList *            (*list_ports)             (MateMixerStream          *stream);
 };
 
@@ -158,7 +158,7 @@ const GList *            mate_mixer_stream_list_ports             (MateMixerStre
 
 MateMixerPort *          mate_mixer_stream_get_active_port        (MateMixerStream          *stream);
 gboolean                 mate_mixer_stream_set_active_port        (MateMixerStream          *stream,
-                                                                   MateMixerPort            *port);
+                                                                   const gchar              *port);
 
 G_END_DECLS
 

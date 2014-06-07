@@ -57,7 +57,7 @@ mate_mixer_device_default_init (MateMixerDeviceInterface *iface)
     g_object_interface_install_property (iface,
                                          g_param_spec_object ("active-profile",
                                                               "Active profile",
-                                                              "Name of the active profile",
+                                                              "The currently active profile of the sound device",
                                                               MATE_MIXER_TYPE_PROFILE,
                                                               G_PARAM_READABLE |
                                                               G_PARAM_STATIC_STRINGS));
@@ -169,17 +169,17 @@ mate_mixer_device_get_active_profile (MateMixerDevice *device)
 }
 
 gboolean
-mate_mixer_device_set_active_profile (MateMixerDevice *device, const gchar *name)
+mate_mixer_device_set_active_profile (MateMixerDevice *device, const gchar *profile_name)
 {
     MateMixerDeviceInterface *iface;
 
     g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), FALSE);
-    g_return_val_if_fail (name != NULL, FALSE);
+    g_return_val_if_fail (profile_name != NULL, FALSE);
 
     iface = MATE_MIXER_DEVICE_GET_INTERFACE (device);
 
     if (iface->set_active_profile)
-        return iface->set_active_profile (device, name);
+        return iface->set_active_profile (device, profile_name);
 
     return FALSE;
 }
