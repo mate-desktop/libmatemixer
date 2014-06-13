@@ -11,12 +11,19 @@ libmatemixer_pulse_la_CFLAGS =                                  \
         $(PULSEAUDIO_CFLAGS)
 
 libmatemixer_pulse_la_SOURCES =                                 \
-        pulse.c                                                 \
-        pulse.h                                                 \
+        pulse-backend.c                                         \
+        pulse-backend.h                                         \
+        pulse-client-stream.c                                   \
+        pulse-client-stream.h                                   \
         pulse-connection.c                                      \
         pulse-connection.h                                      \
         pulse-device.c                                          \
         pulse-device.h                                          \
+        pulse-enums.h                                           \
+        pulse-enum-types.c                                      \
+        pulse-enum-types.h                                      \
+        pulse-helpers.c                                         \
+        pulse-helpers.h                                         \
         pulse-stream.c                                          \
         pulse-stream.h                                          \
         pulse-sink.c                                            \
@@ -34,6 +41,7 @@ libmatemixer_pulse_la_LIBADD =                                  \
 
 libmatemixer_pulse_la_LDFLAGS =                                 \
         -avoid-version                                          \
+        -no-undefined                                           \
         -export-dynamic                                         \
         -module
 

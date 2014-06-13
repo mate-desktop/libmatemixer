@@ -27,41 +27,55 @@
 #include "pulse-stream.h"
 #include "pulse-sink.h"
 
-struct _MateMixerPulseSinkPrivate
+struct _PulseSinkPrivate
 {
     guint32 index_monitor;
 };
 
-G_DEFINE_TYPE (MateMixerPulseSink, mate_mixer_pulse_sink, MATE_MIXER_TYPE_PULSE_STREAM);
+enum {
+    PROP_0,
+    N_PROPERTIES
+};
+
+static gboolean sink_set_mute        (MateMixerStream *stream,
+                                      gboolean         mute);
+static gboolean sink_set_volume      (MateMixerStream *stream,
+                                      pa_cvolume      *volume);
+static gboolean sink_set_active_port (MateMixerStream *stream,
+                                      const gchar     *port_name);
+
+G_DEFINE_TYPE (PulseSink, pulse_sink, PULSE_TYPE_STREAM);
 
 static void
-mate_mixer_pulse_sink_init (MateMixerPulseSink *sink)
+pulse_sink_init (PulseSink *sink)
 {
     sink->priv = G_TYPE_INSTANCE_GET_PRIVATE (sink,
-                                              MATE_MIXER_TYPE_PULSE_SINK,
-                                              MateMixerPulseSinkPrivate);
+                                              PULSE_TYPE_SINK,
+                                              PulseSinkPrivate);
 }
 
 static void
-mate_mixer_pulse_sink_class_init (MateMixerPulseSinkClass *klass)
+pulse_sink_class_init (PulseSinkClass *klass)
 {
-    MateMixerPulseStreamClass *stream_class;
+    PulseStreamClass *stream_class;
 
-    stream_class = MATE_MIXER_PULSE_STREAM_CLASS (klass);
+    stream_class = PULSE_STREAM_CLASS (klass);
 
-    stream_class->set_volume = mate_mixer_pulse_sink_set_volume;
-    stream_class->set_mute = mate_mixer_pulse_sink_set_mute;
+    stream_class->set_mute        = sink_set_mute;
+    stream_class->set_volume      = sink_set_volume;
+    stream_class->set_active_port = sink_set_active_port;
 
-    g_type_class_add_private (G_OBJECT (klass), sizeof (MateMixerPulseSinkPrivate));
+    g_type_class_add_private (klass, sizeof (PulseSinkPrivate));
 }
 
-MateMixerPulseStream *
-mate_mixer_pulse_sink_new (MateMixerPulseConnection *connection, const pa_sink_info *info)
+PulseStream *
+pulse_sink_new (PulseConnection *connection, const pa_sink_info *info)
 {
-    MateMixerPulseStream *stream;
-    GList *ports = NULL;
-    int i;
+    PulseSink *sink;
+    GList     *ports = NULL;
+    int        i;
 
+    /* Convert the list of sink ports to a GList of MateMixerPorts */
     for (i = 0; i < info->n_ports; i++) {
         MateMixerPort       *port;
         MateMixerPortStatus  status = MATE_MIXER_PORT_UNKNOWN_STATUS;
@@ -88,43 +102,122 @@ mate_mixer_pulse_sink_new (MateMixerPulseConnection *connection, const pa_sink_i
         ports = g_list_prepend (ports, port);
     }
 
-    if (ports)
-        ports = g_list_reverse (ports);
+    /* Consider the sink index as unchanging parameter */
+    sink = g_object_new (PULSE_TYPE_SINK,
+                         "connection", connection,
+                         "index", info->index,
+                         NULL);
 
-    stream = g_object_new (MATE_MIXER_TYPE_PULSE_STREAM,
-                           "connection", connection,
-                           "index", info->index,
-                           "name", info->name,
-                           "description", info->description,
-                           "channels", info->channel_map.channels,
-                           "mute", info->mute ? TRUE : FALSE,
-                           NULL);
+    /* According to the PulseAudio code, the list of sink port never changes with
+     * updates.
+     * This may be not future-proof, but checking and validating the list of ports on
+     * each update would be an expensive operation, so let's set the list only during
+     * the construction */
+    pulse_stream_update_ports (PULSE_STREAM (sink), g_list_reverse (ports));
 
-    return stream;
+    /* Other data may change at any time, so let's make a use of our update function */
+    pulse_sink_update (PULSE_STREAM (sink), info);
+
+    return PULSE_STREAM (sink);
 }
 
 gboolean
-mate_mixer_pulse_sink_set_volume (MateMixerStream *stream, guint32 volume)
+pulse_sink_update (PulseStream *stream, const pa_sink_info *info)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_STREAM (stream), FALSE);
+    PulseSink            *sink;
+    MateMixerStreamFlags  flags =   MATE_MIXER_STREAM_OUTPUT |
+                                    MATE_MIXER_STREAM_HAS_MUTE |
+                                    MATE_MIXER_STREAM_HAS_VOLUME |
+                                    MATE_MIXER_STREAM_CAN_SET_VOLUME;
 
-/*
-    return mate_mixer_pulse_connection_set_sink_volume (mate_mixer_pulse_stream_get_connection (MATE_MIXER_PULSE_STREAM (stream)),
-                                                        volume);
-*/
+    g_return_val_if_fail (PULSE_IS_SINK (stream), FALSE);
+
+    sink = PULSE_SINK (stream);
+
+    /* Let all the information update before emitting notify signals */
+    g_object_freeze_notify (G_OBJECT (stream));
+
+    pulse_stream_update_name (stream, info->name);
+    pulse_stream_update_description (stream, info->description);
+    pulse_stream_update_mute (stream, info->mute ? TRUE : FALSE);
+    pulse_stream_update_channel_map (stream, &info->channel_map);
+    pulse_stream_update_volume_extended (stream,
+                                         &info->volume,
+                                         info->base_volume,
+                                         info->n_volume_steps);
+    if (info->active_port)
+        pulse_stream_update_active_port (stream, info->active_port->name);
+
+    switch (info->state) {
+    case PA_SINK_RUNNING:
+        pulse_stream_update_status (stream, MATE_MIXER_STREAM_RUNNING);
+        break;
+    case PA_SINK_IDLE:
+        pulse_stream_update_status (stream, MATE_MIXER_STREAM_IDLE);
+        break;
+    case PA_SINK_SUSPENDED:
+        pulse_stream_update_status (stream, MATE_MIXER_STREAM_SUSPENDED);
+        break;
+    default:
+        pulse_stream_update_status (stream, MATE_MIXER_STREAM_UNKNOWN_STATUS);
+        break;
+    }
+
+    /* Build the flag list */
+    if (info->flags & PA_SINK_DECIBEL_VOLUME)
+        flags |= MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME;
+    if (info->flags & PA_SINK_FLAT_VOLUME)
+        flags |= MATE_MIXER_STREAM_HAS_FLAT_VOLUME;
+
+    if (info->monitor_source_name)
+        flags |= MATE_MIXER_STREAM_OUTPUT_MONITOR;
+
+    if (pa_channel_map_can_balance (&info->channel_map))
+        flags |= MATE_MIXER_STREAM_CAN_BALANCE;
+    if (pa_channel_map_can_fade (&info->channel_map))
+        flags |= MATE_MIXER_STREAM_CAN_FADE;
+
+    pulse_stream_update_flags (stream, flags);
+
+    if (sink->priv->index_monitor != info->monitor_source) {
+        sink->priv->index_monitor = info->monitor_source;
+
+        // TODO: provide a property
+        // g_object_notify (G_OBJECT (stream), "monitor");
+    }
+
+    g_object_thaw_notify (G_OBJECT (stream));
     return TRUE;
 }
 
-gboolean
-mate_mixer_pulse_sink_set_mute (MateMixerStream *stream, gboolean mute)
+static gboolean
+sink_set_mute (MateMixerStream *stream, gboolean mute)
 {
-    MateMixerPulseStream *pulse_stream;
+    g_return_val_if_fail (PULSE_IS_SINK (stream), FALSE);
 
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_STREAM (stream), FALSE);
+    return pulse_connection_set_sink_mute (pulse_stream_get_connection (PULSE_STREAM (stream)),
+                                           pulse_stream_get_index (PULSE_STREAM (stream)),
+                                           mute);
+}
 
-    pulse_stream = MATE_MIXER_PULSE_STREAM (stream);
+static gboolean
+sink_set_volume (MateMixerStream *stream, pa_cvolume *volume)
+{
+    g_return_val_if_fail (PULSE_IS_SINK (stream), FALSE);
+    g_return_val_if_fail (volume != NULL, FALSE);
 
-    return mate_mixer_pulse_connection_set_sink_mute (mate_mixer_pulse_stream_get_connection (pulse_stream),
-                                                      mate_mixer_pulse_stream_get_index (pulse_stream),
-                                                      mute);
+    return pulse_connection_set_sink_volume (pulse_stream_get_connection (PULSE_STREAM (stream)),
+                                             pulse_stream_get_index (PULSE_STREAM (stream)),
+                                             volume);
+}
+
+static gboolean
+sink_set_active_port (MateMixerStream *stream, const gchar *port_name)
+{
+    g_return_val_if_fail (PULSE_IS_SINK (stream), FALSE);
+    g_return_val_if_fail (port_name != NULL, FALSE);
+
+    return pulse_connection_set_sink_port (pulse_stream_get_connection (PULSE_STREAM (stream)),
+                                           pulse_stream_get_index (PULSE_STREAM (stream)),
+                                           port_name);
 }

@@ -19,7 +19,6 @@
 #include <glib-object.h>
 
 #include "matemixer-device.h"
-#include "matemixer-enum-types.h"
 #include "matemixer-profile.h"
 
 G_DEFINE_INTERFACE (MateMixerDevice, mate_mixer_device, G_TYPE_OBJECT)
@@ -169,17 +168,17 @@ mate_mixer_device_get_active_profile (MateMixerDevice *device)
 }
 
 gboolean
-mate_mixer_device_set_active_profile (MateMixerDevice *device, const gchar *profile_name)
+mate_mixer_device_set_active_profile (MateMixerDevice *device, const gchar *profile)
 {
     MateMixerDeviceInterface *iface;
 
     g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), FALSE);
-    g_return_val_if_fail (profile_name != NULL, FALSE);
+    g_return_val_if_fail (profile != NULL, FALSE);
 
     iface = MATE_MIXER_DEVICE_GET_INTERFACE (device);
 
     if (iface->set_active_profile)
-        return iface->set_active_profile (device, profile_name);
+        return iface->set_active_profile (device, profile);
 
     return FALSE;
 }

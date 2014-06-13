@@ -15,14 +15,11 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MATEMIXER_PULSE_DEVICE_H
-#define MATEMIXER_PULSE_DEVICE_H
+#ifndef PULSE_DEVICE_H
+#define PULSE_DEVICE_H
 
 #include <glib.h>
 #include <glib-object.h>
-
-#include <libmatemixer/matemixer-device.h>
-#include <libmatemixer/matemixer-profile.h>
 
 #include <pulse/pulseaudio.h>
 
@@ -30,62 +27,46 @@
 
 G_BEGIN_DECLS
 
-#define MATE_MIXER_TYPE_PULSE_DEVICE            \
-        (mate_mixer_pulse_device_get_type ())
-#define MATE_MIXER_PULSE_DEVICE(o)              \
-        (G_TYPE_CHECK_INSTANCE_CAST ((o), MATE_MIXER_TYPE_PULSE_DEVICE, MateMixerPulseDevice))
-#define MATE_MIXER_IS_PULSE_DEVICE(o)           \
-        (G_TYPE_CHECK_INSTANCE_TYPE ((o), MATE_MIXER_TYPE_PULSE_DEVICE))
-#define MATE_MIXER_PULSE_DEVICE_CLASS(k)        \
-        (G_TYPE_CHECK_CLASS_CAST ((k), MATE_MIXER_TYPE_PULSE_DEVICE, MateMixerPulseDeviceClass))
-#define MATE_MIXER_IS_PULSE_DEVICE_CLASS(k)     \
-        (G_TYPE_CLASS_CHECK_CLASS_TYPE ((k), MATE_MIXER_TYPE_PULSE_DEVICE))
-#define MATE_MIXER_PULSE_DEVICE_GET_CLASS(o)    \
-        (G_TYPE_INSTANCE_GET_CLASS ((o), MATE_MIXER_TYPE_PULSE_DEVICE, MateMixerPulseDeviceClass))
+#define PULSE_TYPE_DEVICE            \
+        (pulse_device_get_type ())
+#define PULSE_DEVICE(o)              \
+        (G_TYPE_CHECK_INSTANCE_CAST ((o), PULSE_TYPE_DEVICE, PulseDevice))
+#define PULSE_IS_DEVICE(o)           \
+        (G_TYPE_CHECK_INSTANCE_TYPE ((o), PULSE_TYPE_DEVICE))
+#define PULSE_DEVICE_CLASS(k)        \
+        (G_TYPE_CHECK_CLASS_CAST ((k), PULSE_TYPE_DEVICE, PulseDeviceClass))
+#define PULSE_IS_DEVICE_CLASS(k)     \
+        (G_TYPE_CLASS_CHECK_CLASS_TYPE ((k), PULSE_TYPE_DEVICE))
+#define PULSE_DEVICE_GET_CLASS(o)    \
+        (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_IS_DEVICE, PulseDeviceClass))
 
-typedef struct _MateMixerPulseDevice         MateMixerPulseDevice;
-typedef struct _MateMixerPulseDeviceClass    MateMixerPulseDeviceClass;
-typedef struct _MateMixerPulseDevicePrivate  MateMixerPulseDevicePrivate;
+typedef struct _PulseDevice         PulseDevice;
+typedef struct _PulseDeviceClass    PulseDeviceClass;
+typedef struct _PulseDevicePrivate  PulseDevicePrivate;
 
-struct _MateMixerPulseDevice
+struct _PulseDevice
 {
     GObject parent;
 
-    MateMixerPulseDevicePrivate *priv;
+    PulseDevicePrivate *priv;
 };
 
-struct _MateMixerPulseDeviceClass
+struct _PulseDeviceClass
 {
     GObjectClass parent;
 };
 
-GType mate_mixer_pulse_device_get_type (void) G_GNUC_CONST;
+GType            pulse_device_get_type       (void) G_GNUC_CONST;
 
-MateMixerPulseDevice    *mate_mixer_pulse_device_new (MateMixerPulseConnection *connection,
-                                                      const pa_card_info *info);
+PulseDevice     *pulse_device_new            (PulseConnection    *connection,
+                                              const pa_card_info *info);
 
-gboolean                 mate_mixer_pulse_device_update (MateMixerPulseDevice *device,
-                                                         const pa_card_info *info);
+gboolean         pulse_device_update         (PulseDevice        *device,
+                                              const pa_card_info *info);
 
-MateMixerPulseConnection *mate_mixer_pulse_device_get_connection (MateMixerPulseDevice *device);
-
-guint32                  mate_mixer_pulse_device_get_index (MateMixerPulseDevice *device);
-
-/* Interface implementation */
-const gchar *mate_mixer_pulse_device_get_name (MateMixerDevice *device);
-const gchar *mate_mixer_pulse_device_get_description (MateMixerDevice *device);
-const gchar *mate_mixer_pulse_device_get_icon (MateMixerDevice *device);
-
-const GList             *mate_mixer_pulse_device_list_streams (MateMixerDevice *device);
-
-const GList             *mate_mixer_pulse_device_list_ports (MateMixerDevice *device);
-const GList             *mate_mixer_pulse_device_list_profiles (MateMixerDevice *device);
-
-MateMixerProfile  *mate_mixer_pulse_device_get_active_profile (MateMixerDevice *device);
-
-gboolean                 mate_mixer_pulse_device_set_active_profile (MateMixerDevice *device,
-                                                                     const gchar *name);
+guint32          pulse_device_get_index      (PulseDevice        *device);
+PulseConnection *pulse_device_get_connection (PulseDevice        *device);
 
 G_END_DECLS
 
-#endif /* MATEMIXER_PULSE_DEVICE_H */
+#endif /* PULSE_DEVICE_H */

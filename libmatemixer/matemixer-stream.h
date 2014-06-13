@@ -41,42 +41,44 @@ typedef struct _MateMixerStreamInterface  MateMixerStreamInterface;
 
 struct _MateMixerStreamInterface
 {
+    /*< private >*/
     GTypeInterface parent;
 
     const gchar *            (*get_name)               (MateMixerStream          *stream);
     const gchar *            (*get_description)        (MateMixerStream          *stream);
     const gchar *            (*get_icon)               (MateMixerStream          *stream);
     MateMixerDevice *        (*get_device)             (MateMixerStream          *stream);
+    MateMixerStreamFlags     (*get_flags)              (MateMixerStream          *stream);
     MateMixerStreamStatus    (*get_status)             (MateMixerStream          *stream);
     gboolean                 (*get_mute)               (MateMixerStream          *stream);
     gboolean                 (*set_mute)               (MateMixerStream          *stream,
                                                         gboolean                  mute);
-    guint32                  (*get_volume)             (MateMixerStream          *stream);
+    guint                    (*get_num_channels)       (MateMixerStream          *stream);
+    gint64                   (*get_volume)             (MateMixerStream          *stream);
     gboolean                 (*set_volume)             (MateMixerStream          *stream,
-                                                        guint32                   volume);
+                                                        gint64                    volume);
     gdouble                  (*get_volume_db)          (MateMixerStream          *stream);
     gboolean                 (*set_volume_db)          (MateMixerStream          *stream,
                                                         gdouble                   volume_db);
-    guint8                   (*get_num_channels)       (MateMixerStream          *stream);
     MateMixerChannelPosition (*get_channel_position)   (MateMixerStream          *stream,
-                                                        guint8                    channel);
-    guint32                  (*get_channel_volume)     (MateMixerStream          *stream,
-                                                        guint8                    channel);
+                                                        guint                     channel);
+    gint64                   (*get_channel_volume)     (MateMixerStream          *stream,
+                                                        guint                     channel);
     gboolean                 (*set_channel_volume)     (MateMixerStream          *stream,
-                                                        guint8                    channel,
-                                                        guint32                   volume);
+                                                        guint                     channel,
+                                                        gint64                    volume);
     gdouble                  (*get_channel_volume_db)  (MateMixerStream          *stream,
-                                                        guint8                    channel);
+                                                        guint                     channel);
     gboolean                 (*set_channel_volume_db)  (MateMixerStream          *stream,
-                                                        guint8                    channel,
+                                                        guint                     channel,
                                                         gdouble                   volume_db);
     gboolean                 (*has_position)           (MateMixerStream          *stream,
                                                         MateMixerChannelPosition  position);
-    guint32                  (*get_position_volume)    (MateMixerStream          *stream,
+    gint64                   (*get_position_volume)    (MateMixerStream          *stream,
                                                         MateMixerChannelPosition  position);
     gboolean                 (*set_position_volume)    (MateMixerStream          *stream,
                                                         MateMixerChannelPosition  position,
-                                                        guint32                   volume);
+                                                        gint64                    volume);
     gdouble                  (*get_position_volume_db) (MateMixerStream          *stream,
                                                         MateMixerChannelPosition  position);
     gboolean                 (*set_position_volume_db) (MateMixerStream          *stream,
@@ -88,57 +90,63 @@ struct _MateMixerStreamInterface
     gdouble                  (*get_fade)               (MateMixerStream          *stream);
     gboolean                 (*set_fade)               (MateMixerStream          *stream,
                                                         gdouble                   fade);
+    gboolean                 (*suspend)                (MateMixerStream          *stream);
+    gboolean                 (*resume)                 (MateMixerStream          *stream);
+    const GList *            (*list_ports)             (MateMixerStream          *stream);
     MateMixerPort *          (*get_active_port)        (MateMixerStream          *stream);
     gboolean                 (*set_active_port)        (MateMixerStream          *stream,
                                                         const gchar              *port_name);
-    const GList *            (*list_ports)             (MateMixerStream          *stream);
+    gint64                   (*get_min_volume)         (MateMixerStream          *stream);
+    gint64                   (*get_max_volume)         (MateMixerStream          *stream);
+    gint64                   (*get_normal_volume)      (MateMixerStream          *stream);
 };
 
-GType mate_mixer_stream_get_type (void) G_GNUC_CONST;
+GType                    mate_mixer_stream_get_type               (void) G_GNUC_CONST;
 
 const gchar *            mate_mixer_stream_get_name               (MateMixerStream          *stream);
 const gchar *            mate_mixer_stream_get_description        (MateMixerStream          *stream);
 const gchar *            mate_mixer_stream_get_icon               (MateMixerStream          *stream);
 MateMixerDevice *        mate_mixer_stream_get_device             (MateMixerStream          *stream);
+MateMixerStreamFlags     mate_mixer_stream_get_flags              (MateMixerStream          *stream);
 MateMixerStreamStatus    mate_mixer_stream_get_status             (MateMixerStream          *stream);
 
 gboolean                 mate_mixer_stream_get_mute               (MateMixerStream          *stream);
 gboolean                 mate_mixer_stream_set_mute               (MateMixerStream          *stream,
                                                                    gboolean                  mute);
 
-guint32                  mate_mixer_stream_get_volume             (MateMixerStream          *stream);
+guint                    mate_mixer_stream_get_num_channels       (MateMixerStream          *stream);
+
+gint64                   mate_mixer_stream_get_volume             (MateMixerStream          *stream);
 gboolean                 mate_mixer_stream_set_volume             (MateMixerStream          *stream,
-                                                                   guint32                   volume);
+                                                                   gint64                    volume);
 
 gdouble                  mate_mixer_stream_get_volume_db          (MateMixerStream          *stream);
 gboolean                 mate_mixer_stream_set_volume_db          (MateMixerStream          *stream,
                                                                    gdouble                   volume_db);
 
-guint8                   mate_mixer_stream_get_num_channels       (MateMixerStream          *stream);
-
 MateMixerChannelPosition mate_mixer_stream_get_channel_position   (MateMixerStream          *stream,
-                                                                   guint8                    channel);
+                                                                   guint                     channel);
 
-guint32                  mate_mixer_stream_get_channel_volume     (MateMixerStream          *stream,
-                                                                   guint8                    channel);
+gint64                   mate_mixer_stream_get_channel_volume     (MateMixerStream          *stream,
+                                                                   guint                     channel);
 gboolean                 mate_mixer_stream_set_channel_volume     (MateMixerStream          *stream,
-                                                                   guint8                    channel,
-                                                                   guint32                   volume);
+                                                                   guint                     channel,
+                                                                   gint64                    volume);
 
 gdouble                  mate_mixer_stream_get_channel_volume_db  (MateMixerStream          *stream,
-                                                                   guint8                    channel);
+                                                                   guint                     channel);
 gboolean                 mate_mixer_stream_set_channel_volume_db  (MateMixerStream          *stream,
-                                                                   guint8                    channel,
+                                                                   guint                     channel,
                                                                    gdouble                   volume_db);
 
 gboolean                 mate_mixer_stream_has_position           (MateMixerStream          *stream,
                                                                    MateMixerChannelPosition  position);
 
-guint32                  mate_mixer_stream_get_position_volume    (MateMixerStream          *stream,
+gint64                   mate_mixer_stream_get_position_volume    (MateMixerStream          *stream,
                                                                    MateMixerChannelPosition  position);
 gboolean                 mate_mixer_stream_set_position_volume    (MateMixerStream          *stream,
                                                                    MateMixerChannelPosition  position,
-                                                                   guint32                   volume);
+                                                                   gint64                    volume);
 
 gdouble                  mate_mixer_stream_get_position_volume_db (MateMixerStream          *stream,
                                                                    MateMixerChannelPosition  position);
@@ -154,11 +162,18 @@ gdouble                  mate_mixer_stream_get_fade               (MateMixerStre
 gboolean                 mate_mixer_stream_set_fade               (MateMixerStream          *stream,
                                                                    gdouble                   fade);
 
+gboolean                 mate_mixer_stream_suspend                (MateMixerStream          *stream);
+gboolean                 mate_mixer_stream_resume                 (MateMixerStream          *stream);
+
 const GList *            mate_mixer_stream_list_ports             (MateMixerStream          *stream);
 
 MateMixerPort *          mate_mixer_stream_get_active_port        (MateMixerStream          *stream);
 gboolean                 mate_mixer_stream_set_active_port        (MateMixerStream          *stream,
                                                                    const gchar              *port);
+
+gint64                   mate_mixer_stream_get_min_volume         (MateMixerStream          *stream);
+gint64                   mate_mixer_stream_get_max_volume         (MateMixerStream          *stream);
+gint64                   mate_mixer_stream_get_normal_volume      (MateMixerStream          *stream);
 
 G_END_DECLS
 

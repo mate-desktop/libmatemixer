@@ -21,105 +21,106 @@
 #include <unistd.h>
 
 #include <pulse/pulseaudio.h>
+#include <pulse/glib-mainloop.h>
 
 #include "pulse-connection.h"
+#include "pulse-enums.h"
+#include "pulse-enum-types.h"
 
-struct _MateMixerPulseConnectionPrivate
+struct _PulseConnectionPrivate
 {
-    gchar                 *server;
-    gboolean               reconnect;
-    gboolean               connected;
-    pa_context            *context;
-    pa_threaded_mainloop  *mainloop;
+    gchar                *server;
+    guint                 outstanding;
+    gboolean              reconnect;
+    gboolean              connected_once;
+    pa_context           *context;
+    pa_glib_mainloop     *mainloop;
+    PulseConnectionState  state;
 };
 
 enum {
     PROP_0,
     PROP_SERVER,
     PROP_RECONNECT,
-    PROP_CONNECTED,
+    PROP_STATE,
     N_PROPERTIES
 };
 
 enum {
-    LIST_ITEM_CARD,
-    LIST_ITEM_SINK,
-    LIST_ITEM_SOURCE,
-    LIST_ITEM_SINK_INPUT,
-    LIST_ITEM_SOURCE_OUTPUT,
-    CARD_ADDED,
+    SERVER_INFO,
+    CARD_INFO,
     CARD_REMOVED,
-    CARD_CHANGED,
-    SINK_ADDED,
+    SINK_INFO,
     SINK_REMOVED,
-    SINK_CHANGED,
-    SOURCE_ADDED,
+    SOURCE_INFO,
     SOURCE_REMOVED,
-    SOURCE_CHANGED,
+    SINK_INPUT_INFO,
+    SINK_INPUT_REMOVED,
+    SOURCE_OUTPUT_INFO,
+    SOURCE_OUTPUT_REMOVED,
     N_SIGNALS
 };
+
+static gchar        *connection_get_app_name            (void);
+static gboolean      connection_load_lists              (PulseConnection              *connection);
+
+static void          connection_state_cb                (pa_context                   *c,
+                                                         void                         *userdata);
+static void          connection_subscribe_cb            (pa_context                   *c,
+                                                         pa_subscription_event_type_t  t,
+                                                         uint32_t                      idx,
+                                                         void                         *userdata);
+static void          connection_server_info_cb          (pa_context *c,
+                                                         const pa_server_info         *info,
+                                                         void                         *userdata);
+static void          connection_card_info_cb            (pa_context                   *c,
+                                                         const pa_card_info           *info,
+                                                         int                           eol,
+                                                         void                         *userdata);
+static void          connection_sink_info_cb            (pa_context                   *c,
+                                                         const pa_sink_info           *info,
+                                                         int                           eol,
+                                                         void                         *userdata);
+static void          connection_source_info_cb          (pa_context                   *c,
+                                                         const pa_source_info         *info,
+                                                         int                           eol,
+                                                         void                         *userdata);
+static void          connection_sink_input_info_cb      (pa_context                   *c,
+                                                         const pa_sink_input_info     *info,
+                                                         int                           eol,
+                                                         void                         *userdata);
+static void          connection_source_output_info_cb   (pa_context *c,
+                                                         const pa_source_output_info  *info,
+                                                         int                           eol,
+                                                         void                         *userdata);
+
+static void         connection_list_loaded              (PulseConnection              *connection);
+static gboolean     connection_process_operation        (PulseConnection              *connection,
+                                                         pa_operation                 *op);
+
+G_DEFINE_TYPE (PulseConnection, pulse_connection, G_TYPE_OBJECT);
 
 static GParamSpec *properties[N_PROPERTIES] = { NULL, };
 
 static guint signals[N_SIGNALS] = { 0, };
 
-G_DEFINE_TYPE (MateMixerPulseConnection, mate_mixer_pulse_connection, G_TYPE_OBJECT);
-
-static gchar *pulse_connection_get_name (void);
-
-static gboolean pulse_connection_process_operation (MateMixerPulseConnection *connection,
-                                                    pa_operation *o);
-
-static void pulse_connection_state_cb (pa_context *c, void *userdata);
-
-static void pulse_connection_subscribe_cb (pa_context *c,
-                                           pa_subscription_event_type_t t,
-                                            uint32_t idx,
-                                            void *userdata);
-
-static void pulse_connection_card_info_cb (pa_context *c,
-                                           const pa_card_info *info,
-                                           int eol,
-                                           void *userdata);
-
-static void pulse_connection_sink_info_cb (pa_context *c,
-                                            const pa_sink_info *info,
-                                            int eol,
-                                            void *userdata);
-
-static void pulse_connection_source_info_cb (pa_context *c,
-                                             const pa_source_info *info,
-                                             int eol,
-                                             void *userdata);
-
-static void pulse_connection_sink_input_info_cb (pa_context *c,
-                                                const pa_sink_input_info *info,
-                                                int eol,
-                                                void *userdata);
-
-static void pulse_connection_source_output_info_cb (pa_context *c,
-                                                    const pa_source_output_info *info,
-                                                    int eol,
-                                                    void *userdata);
-
 static void
-mate_mixer_pulse_connection_init (MateMixerPulseConnection *connection)
+pulse_connection_init (PulseConnection *connection)
 {
-    connection->priv = G_TYPE_INSTANCE_GET_PRIVATE (
-        connection,
-        MATE_MIXER_TYPE_PULSE_CONNECTION,
-        MateMixerPulseConnectionPrivate);
+    connection->priv = G_TYPE_INSTANCE_GET_PRIVATE (connection,
+                                                    PULSE_TYPE_CONNECTION,
+                                                    PulseConnectionPrivate);
 }
 
 static void
-mate_mixer_pulse_connection_get_property (GObject     *object,
-                                          guint        param_id,
-                                          GValue      *value,
-                                          GParamSpec  *pspec)
+pulse_connection_get_property (GObject    *object,
+                               guint       param_id,
+                               GValue     *value,
+                               GParamSpec *pspec)
 {
-    MateMixerPulseConnection *connection;
+    PulseConnection *connection;
 
-    connection = MATE_MIXER_PULSE_CONNECTION (object);
+    connection = PULSE_CONNECTION (object);
 
     switch (param_id) {
     case PROP_SERVER:
@@ -128,8 +129,8 @@ mate_mixer_pulse_connection_get_property (GObject     *object,
     case PROP_RECONNECT:
         g_value_set_boolean (value, connection->priv->reconnect);
         break;
-    case PROP_CONNECTED:
-        g_value_set_boolean (value, connection->priv->connected);
+    case PROP_STATE:
+        g_value_set_enum (value, connection->priv->state);
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -138,18 +139,20 @@ mate_mixer_pulse_connection_get_property (GObject     *object,
 }
 
 static void
-mate_mixer_pulse_connection_set_property (GObject       *object,
-                                          guint          param_id,
-                                          const GValue  *value,
-                                          GParamSpec    *pspec)
+pulse_connection_set_property (GObject      *object,
+                               guint         param_id,
+                               const GValue *value,
+                               GParamSpec   *pspec)
 {
-    MateMixerPulseConnection *connection;
+    PulseConnection *connection;
 
-    connection = MATE_MIXER_PULSE_CONNECTION (object);
+    connection = PULSE_CONNECTION (object);
 
     switch (param_id) {
     case PROP_SERVER:
-        connection->priv->server = g_strdup (g_value_get_string (value));
+        g_free (connection->priv->server);
+
+        connection->priv->server = g_value_dup_string (value);
         break;
     case PROP_RECONNECT:
         connection->priv->reconnect = g_value_get_boolean (value);
@@ -161,170 +164,248 @@ mate_mixer_pulse_connection_set_property (GObject       *object,
 }
 
 static void
-mate_mixer_pulse_connection_finalize (GObject *object)
+pulse_connection_finalize (GObject *object)
 {
-    MateMixerPulseConnection *connection;
+    PulseConnection *connection;
 
-    connection = MATE_MIXER_PULSE_CONNECTION (object);
+    connection = PULSE_CONNECTION (object);
 
     g_free (connection->priv->server);
 
-    G_OBJECT_CLASS (mate_mixer_pulse_connection_parent_class)->finalize (object);
+    G_OBJECT_CLASS (pulse_connection_parent_class)->finalize (object);
 }
 
 static void
-mate_mixer_pulse_connection_class_init (MateMixerPulseConnectionClass *klass)
+pulse_connection_class_init (PulseConnectionClass *klass)
 {
     GObjectClass *object_class;
 
     object_class = G_OBJECT_CLASS (klass);
-    object_class->finalize     = mate_mixer_pulse_connection_finalize;
-    object_class->get_property = mate_mixer_pulse_connection_get_property;
-    object_class->set_property = mate_mixer_pulse_connection_set_property;
+    object_class->finalize     = pulse_connection_finalize;
+    object_class->get_property = pulse_connection_get_property;
+    object_class->set_property = pulse_connection_set_property;
 
-    properties[PROP_SERVER] = g_param_spec_string (
-        "server",
-        "Server",
-        "PulseAudio server to connect to",
-        NULL,
-        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+    properties[PROP_SERVER] = g_param_spec_string ("server",
+                                                   "Server",
+                                                   "PulseAudio server to connect to",
+                                                   NULL,
+                                                   G_PARAM_READWRITE |
+                                                   G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_RECONNECT] = g_param_spec_boolean (
-        "reconnect",
-        "Reconnect",
-        "Try to reconnect when connection to PulseAudio server is lost",
-        TRUE,
-        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
+    properties[PROP_RECONNECT] = g_param_spec_boolean ("reconnect",
+                                                       "Reconnect",
+                                                       "Try to reconnect when connection is lost",
+                                                       TRUE,
+                                                       G_PARAM_READWRITE |
+                                                       G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_CONNECTED] = g_param_spec_boolean (
-        "connected",
-        "Connected",
-        "Connected to a PulseAudio server or not",
-        FALSE,
-        G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+    properties[PROP_STATE] = g_param_spec_enum ("state",
+                                                "State",
+                                                "Connection state",
+                                                 PULSE_TYPE_CONNECTION_STATE,
+                                                 PULSE_CONNECTION_DISCONNECTED,
+                                                 G_PARAM_READABLE |
+                                                 G_PARAM_STATIC_STRINGS);
 
-    signals[LIST_ITEM_CARD] = g_signal_new (
-        "list-item-card",
-        G_TYPE_FROM_CLASS (object_class),
-        G_SIGNAL_RUN_LAST,
-        G_STRUCT_OFFSET (MateMixerPulseConnectionClass, list_item_card),
-        NULL,
-        NULL,
-        g_cclosure_marshal_VOID__POINTER,
-        G_TYPE_NONE,
-        1,
-        G_TYPE_POINTER);
+    signals[SERVER_INFO] = g_signal_new ("server-info",
+                                         G_TYPE_FROM_CLASS (object_class),
+                                         G_SIGNAL_RUN_LAST,
+                                         G_STRUCT_OFFSET (PulseConnectionClass, server_info),
+                                         NULL,
+                                         NULL,
+                                         g_cclosure_marshal_VOID__POINTER,
+                                         G_TYPE_NONE,
+                                         1,
+                                         G_TYPE_POINTER);
 
-    signals[LIST_ITEM_SINK] = g_signal_new (
-        "list-item-sink",
-        G_TYPE_FROM_CLASS (object_class),
-        G_SIGNAL_RUN_LAST,
-        G_STRUCT_OFFSET (MateMixerPulseConnectionClass, list_item_sink),
-        NULL,
-        NULL,
-        g_cclosure_marshal_VOID__POINTER,
-        G_TYPE_NONE,
-        1,
-        G_TYPE_POINTER);
+    signals[CARD_INFO] = g_signal_new ("card-info",
+                                       G_TYPE_FROM_CLASS (object_class),
+                                       G_SIGNAL_RUN_LAST,
+                                       G_STRUCT_OFFSET (PulseConnectionClass, card_removed),
+                                       NULL,
+                                       NULL,
+                                       g_cclosure_marshal_VOID__POINTER,
+                                       G_TYPE_NONE,
+                                       1,
+                                       G_TYPE_POINTER);
 
-    signals[LIST_ITEM_SINK_INPUT] = g_signal_new (
-        "list-item-sink-input",
-        G_TYPE_FROM_CLASS (object_class),
-        G_SIGNAL_RUN_LAST,
-        G_STRUCT_OFFSET (MateMixerPulseConnectionClass, list_item_sink_input),
-        NULL,
-        NULL,
-        g_cclosure_marshal_VOID__POINTER,
-        G_TYPE_NONE,
-        1,
-        G_TYPE_POINTER);
+    signals[CARD_REMOVED] = g_signal_new ("card-removed",
+                                          G_TYPE_FROM_CLASS (object_class),
+                                          G_SIGNAL_RUN_LAST,
+                                          G_STRUCT_OFFSET (PulseConnectionClass, card_removed),
+                                          NULL,
+                                          NULL,
+                                          g_cclosure_marshal_VOID__UINT,
+                                          G_TYPE_NONE,
+                                          1,
+                                          G_TYPE_UINT);
 
-    signals[LIST_ITEM_SOURCE] = g_signal_new (
-        "list-item-source",
-        G_TYPE_FROM_CLASS (object_class),
-        G_SIGNAL_RUN_LAST,
-        G_STRUCT_OFFSET (MateMixerPulseConnectionClass, list_item_source),
-        NULL,
-        NULL,
-        g_cclosure_marshal_VOID__POINTER,
-        G_TYPE_NONE,
-        1,
-        G_TYPE_POINTER);
+    signals[SINK_INFO] = g_signal_new ("sink-info",
+                                       G_TYPE_FROM_CLASS (object_class),
+                                       G_SIGNAL_RUN_LAST,
+                                       G_STRUCT_OFFSET (PulseConnectionClass, sink_info),
+                                       NULL,
+                                       NULL,
+                                       g_cclosure_marshal_VOID__POINTER,
+                                       G_TYPE_NONE,
+                                       1,
+                                       G_TYPE_POINTER);
 
-    signals[LIST_ITEM_SOURCE_OUTPUT] = g_signal_new (
-        "list-item-source-output",
-        G_TYPE_FROM_CLASS (object_class),
-        G_SIGNAL_RUN_LAST,
-        G_STRUCT_OFFSET (MateMixerPulseConnectionClass, list_item_source_output),
-        NULL,
-        NULL,
-        g_cclosure_marshal_VOID__POINTER,
-        G_TYPE_NONE,
-        1,
-        G_TYPE_POINTER);
+    signals[SINK_REMOVED] = g_signal_new ("sink-removed",
+                                          G_TYPE_FROM_CLASS (object_class),
+                                          G_SIGNAL_RUN_LAST,
+                                          G_STRUCT_OFFSET (PulseConnectionClass, sink_removed),
+                                          NULL,
+                                          NULL,
+                                          g_cclosure_marshal_VOID__UINT,
+                                          G_TYPE_NONE,
+                                          1,
+                                          G_TYPE_UINT);
+
+    signals[SINK_INPUT_INFO] = g_signal_new ("sink-input-info",
+                                             G_TYPE_FROM_CLASS (object_class),
+                                             G_SIGNAL_RUN_LAST,
+                                             G_STRUCT_OFFSET (PulseConnectionClass, sink_input_info),
+                                             NULL,
+                                             NULL,
+                                             g_cclosure_marshal_VOID__POINTER,
+                                             G_TYPE_NONE,
+                                             1,
+                                             G_TYPE_POINTER);
+
+    signals[SINK_INPUT_REMOVED] = g_signal_new ("sink-input-removed",
+                                                G_TYPE_FROM_CLASS (object_class),
+                                                G_SIGNAL_RUN_LAST,
+                                                G_STRUCT_OFFSET (PulseConnectionClass, sink_input_removed),
+                                                NULL,
+                                                NULL,
+                                                g_cclosure_marshal_VOID__UINT,
+                                                G_TYPE_NONE,
+                                                1,
+                                                G_TYPE_UINT);
+
+    signals[SOURCE_INFO] = g_signal_new ("source-info",
+                                         G_TYPE_FROM_CLASS (object_class),
+                                         G_SIGNAL_RUN_LAST,
+                                         G_STRUCT_OFFSET (PulseConnectionClass, source_info),
+                                         NULL,
+                                         NULL,
+                                         g_cclosure_marshal_VOID__POINTER,
+                                         G_TYPE_NONE,
+                                         1,
+                                         G_TYPE_POINTER);
+
+    signals[SOURCE_REMOVED] = g_signal_new ("source-removed",
+                                            G_TYPE_FROM_CLASS (object_class),
+                                            G_SIGNAL_RUN_LAST,
+                                            G_STRUCT_OFFSET (PulseConnectionClass, source_removed),
+                                            NULL,
+                                            NULL,
+                                            g_cclosure_marshal_VOID__UINT,
+                                            G_TYPE_NONE,
+                                            1,
+                                            G_TYPE_UINT);
+
+    signals[SOURCE_OUTPUT_INFO] = g_signal_new ("source-output-info",
+                                                G_TYPE_FROM_CLASS (object_class),
+                                                G_SIGNAL_RUN_LAST,
+                                                G_STRUCT_OFFSET (PulseConnectionClass, source_output_info),
+                                                NULL,
+                                                NULL,
+                                                g_cclosure_marshal_VOID__POINTER,
+                                                G_TYPE_NONE,
+                                                1,
+                                                G_TYPE_POINTER);
+
+    signals[SOURCE_OUTPUT_REMOVED] = g_signal_new ("source-output-removed",
+                                                   G_TYPE_FROM_CLASS (object_class),
+                                                   G_SIGNAL_RUN_LAST,
+                                                   G_STRUCT_OFFSET (PulseConnectionClass, source_output_removed),
+                                                   NULL,
+                                                   NULL,
+                                                   g_cclosure_marshal_VOID__UINT,
+                                                   G_TYPE_NONE,
+                                                   1,
+                                                   G_TYPE_UINT);
 
     g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
-    g_type_class_add_private (object_class, sizeof (MateMixerPulseConnectionPrivate));
+    g_type_class_add_private (object_class, sizeof (PulseConnectionPrivate));
 }
 
-// XXX: pass more info about application, provide API
-
-MateMixerPulseConnection *
-mate_mixer_pulse_connection_new (const gchar *server, const gchar *app_name)
+PulseConnection *
+pulse_connection_new (const gchar *app_name,
+                      const gchar *app_id,
+                      const gchar *app_version,
+                      const gchar *app_icon,
+                      const gchar *server_address)
 {
-    pa_threaded_mainloop      *mainloop;
-    pa_context                *context;
-    MateMixerPulseConnection  *connection;
+    pa_glib_mainloop *mainloop;
+    pa_context       *context;
+    pa_proplist      *proplist;
+    PulseConnection  *connection;
 
-    mainloop = pa_threaded_mainloop_new ();
+    mainloop = pa_glib_mainloop_new (g_main_context_get_thread_default ());
     if (G_UNLIKELY (mainloop == NULL)) {
         g_warning ("Failed to create PulseAudio main loop");
         return NULL;
     }
 
-    if (app_name != NULL) {
-        context = pa_context_new (
-            pa_threaded_mainloop_get_api (mainloop),
-            app_name);
-    } else {
-        gchar *name = pulse_connection_get_name ();
+    proplist = pa_proplist_new ();
+    if (app_name)
+        pa_proplist_sets (proplist, PA_PROP_APPLICATION_NAME, app_name);
+    if (app_id)
+        pa_proplist_sets (proplist, PA_PROP_APPLICATION_ID, app_id);
+    if (app_icon)
+        pa_proplist_sets (proplist, PA_PROP_APPLICATION_ICON_NAME, app_icon);
+    if (app_version)
+        pa_proplist_sets (proplist, PA_PROP_APPLICATION_VERSION, app_version);
 
-        context = pa_context_new (
-            pa_threaded_mainloop_get_api (mainloop),
-            name);
+    if (app_name != NULL) {
+        context = pa_context_new_with_proplist (pa_glib_mainloop_get_api (mainloop),
+                                                app_name,
+                                                proplist);
+    } else {
+        gchar *name = connection_get_app_name ();
+
+        context = pa_context_new_with_proplist (pa_glib_mainloop_get_api (mainloop),
+                                                name,
+                                                proplist);
 
         g_free (name);
     }
+    pa_proplist_free (proplist);
 
     if (G_UNLIKELY (context == NULL)) {
         g_warning ("Failed to create PulseAudio context");
-
-        pa_threaded_mainloop_free (mainloop);
+        pa_glib_mainloop_free (mainloop);
         return NULL;
     }
 
-    connection = g_object_new (MATE_MIXER_TYPE_PULSE_CONNECTION,
-        "server",    server,
-        "reconnect", TRUE,
-        NULL);
+    connection = g_object_new (PULSE_TYPE_CONNECTION,
+                               "server", server_address,
+                               "reconnect", TRUE,
+                               NULL);
 
     connection->priv->mainloop = mainloop;
-    connection->priv->context = context;
-
+    connection->priv->context  = context;
     return connection;
 }
 
 gboolean
-mate_mixer_pulse_connection_connect (MateMixerPulseConnection *connection)
+pulse_connection_connect (PulseConnection *connection)
 {
     int ret;
-    pa_operation *o;
 
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
-    if (connection->priv->connected)
+    if (connection->priv->state != PULSE_CONNECTION_DISCONNECTED)
         return TRUE;
+
+    /* Set function to monitor status changes */
+    pa_context_set_state_callback (connection->priv->context,
+                                   connection_state_cb,
+                                   connection);
 
     /* Initiate a connection, this call does not guarantee the connection
      * to be established and usable */
@@ -333,272 +414,323 @@ mate_mixer_pulse_connection_connect (MateMixerPulseConnection *connection)
         g_warning ("Failed to connect to PulseAudio server: %s", pa_strerror (ret));
         return FALSE;
     }
-
-    pa_threaded_mainloop_lock (connection->priv->mainloop);
-
-    /* Set callback for connection status changes; the callback is not really
-     * used when connecting the first time, it is only needed to signal
-     * a status change */
-    pa_context_set_state_callback (connection->priv->context,
-        pulse_connection_state_cb,
-        connection);
-
-    ret = pa_threaded_mainloop_start (connection->priv->mainloop);
-    if (ret < 0) {
-        g_warning ("Failed to start PulseAudio main loop: %s", pa_strerror (ret));
-
-        pa_context_disconnect (connection->priv->context);
-        pa_threaded_mainloop_unlock (connection->priv->mainloop);
-        return FALSE;
-    }
-
-    while (TRUE) {
-        /* Wait for a connection state which tells us whether the connection
-         * has been established or has failed */
-        pa_context_state_t state =
-            pa_context_get_state (connection->priv->context);
-
-        if (state == PA_CONTEXT_READY)
-            break;
-
-        if (state == PA_CONTEXT_FAILED ||
-            state == PA_CONTEXT_TERMINATED) {
-            g_warning ("Failed to connect to PulseAudio server: %s",
-                pa_strerror (pa_context_errno (connection->priv->context)));
-
-            pa_context_disconnect (connection->priv->context);
-            pa_threaded_mainloop_unlock (connection->priv->mainloop);
-            return FALSE;
-        }
-        pa_threaded_mainloop_wait (connection->priv->mainloop);
-    }
-
-    pa_context_set_subscribe_callback (connection->priv->context,
-        pulse_connection_subscribe_cb,
-        connection);
-
-    // XXX don't want notifications before the initial lists are downloaded
-
-    o = pa_context_subscribe (connection->priv->context,
-        PA_SUBSCRIPTION_MASK_CARD |
-        PA_SUBSCRIPTION_MASK_SINK |
-        PA_SUBSCRIPTION_MASK_SOURCE |
-        PA_SUBSCRIPTION_MASK_SINK_INPUT |
-        PA_SUBSCRIPTION_MASK_SOURCE_OUTPUT,
-        NULL, NULL);
-    if (o == NULL)
-        g_warning ("Failed to subscribe to PulseAudio notifications: %s",
-            pa_strerror (pa_context_errno (connection->priv->context)));
-    else
-        pa_operation_unref (o);
-
-    pa_threaded_mainloop_unlock (connection->priv->mainloop);
-
-    connection->priv->connected = TRUE;
-
-    g_object_notify_by_pspec (G_OBJECT (connection), properties[PROP_CONNECTED]);
     return TRUE;
 }
 
 void
-mate_mixer_pulse_connection_disconnect (MateMixerPulseConnection *connection)
+pulse_connection_disconnect (PulseConnection *connection)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
-    if (!connection->priv->connected)
+    if (connection->priv->state == PULSE_CONNECTION_DISCONNECTED)
         return;
 
     pa_context_disconnect (connection->priv->context);
 
-    connection->priv->connected = FALSE;
+    connection->priv->state = PULSE_CONNECTION_DISCONNECTED;
 
-    g_object_notify_by_pspec (G_OBJECT (connection), properties[PROP_CONNECTED]);
+    g_object_notify_by_pspec (G_OBJECT (connection), properties[PROP_STATE]);
+}
+
+PulseConnectionState
+pulse_connection_get_state (PulseConnection *connection)
+{
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    return connection->priv->state;
 }
 
 gboolean
-mate_mixer_pulse_connection_get_server_info (MateMixerPulseConnection *connection)
+pulse_connection_set_default_sink (PulseConnection *connection,
+                                   const gchar     *name)
 {
-    // TODO
-    return TRUE;
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    op = pa_context_set_default_sink (connection->priv->context,
+                                      name,
+                                      NULL, NULL);
+
+    return connection_process_operation (connection, op);
 }
 
 gboolean
-mate_mixer_pulse_connection_get_card_list (MateMixerPulseConnection *connection)
+pulse_connection_set_default_source (PulseConnection *connection,
+                                     const gchar     *name)
 {
-    pa_operation *o;
-    gboolean ret;
+    pa_operation *op;
 
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
-    pa_threaded_mainloop_lock (connection->priv->mainloop);
+    op = pa_context_set_default_source (connection->priv->context,
+                                        name,
+                                        NULL, NULL);
 
-    o = pa_context_get_card_info_list (
-        connection->priv->context,
-        pulse_connection_card_info_cb,
-        connection);
-
-    ret = pulse_connection_process_operation (connection, o);
-
-    pa_threaded_mainloop_unlock (connection->priv->mainloop);
-    return ret;
+    return connection_process_operation (connection, op);
 }
 
 gboolean
-mate_mixer_pulse_connection_get_sink_list (MateMixerPulseConnection *connection)
+pulse_connection_set_card_profile (PulseConnection *connection,
+                                   const gchar     *card,
+                                   const gchar     *profile)
 {
-    pa_operation *o;
-    gboolean ret;
+    pa_operation *op;
 
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
-    pa_threaded_mainloop_lock (connection->priv->mainloop);
+    op = pa_context_set_card_profile_by_name (connection->priv->context,
+                                              card,
+                                              profile,
+                                              NULL, NULL);
 
-    o = pa_context_get_sink_info_list (
-        connection->priv->context,
-        pulse_connection_sink_info_cb,
-        connection);
-
-    ret = pulse_connection_process_operation (connection, o);
-
-    pa_threaded_mainloop_unlock (connection->priv->mainloop);
-    return ret;
+    return connection_process_operation (connection, op);
 }
 
 gboolean
-mate_mixer_pulse_connection_get_sink_input_list (MateMixerPulseConnection *connection)
+pulse_connection_set_sink_mute (PulseConnection *connection,
+                                guint32          index,
+                                gboolean         mute)
 {
-    pa_operation *o;
-    gboolean ret;
+    pa_operation *op;
 
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
-    pa_threaded_mainloop_lock (connection->priv->mainloop);
+    op = pa_context_set_sink_mute_by_index (connection->priv->context,
+                                            index,
+                                            (int) mute,
+                                            NULL, NULL);
 
-    o = pa_context_get_sink_input_info_list (
-        connection->priv->context,
-        pulse_connection_sink_input_info_cb,
-        connection);
-
-    ret = pulse_connection_process_operation (connection, o);
-
-    pa_threaded_mainloop_unlock (connection->priv->mainloop);
-    return ret;
+    return connection_process_operation (connection, op);
 }
 
 gboolean
-mate_mixer_pulse_connection_get_source_list (MateMixerPulseConnection *connection)
+pulse_connection_set_sink_volume (PulseConnection  *connection,
+                                  guint32           index,
+                                  const pa_cvolume *volume)
 {
-    pa_operation  *o;
-    gboolean       ret;
+    pa_operation *op;
 
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
-    pa_threaded_mainloop_lock (connection->priv->mainloop);
+    op = pa_context_set_sink_volume_by_index (connection->priv->context,
+                                              index,
+                                              volume,
+                                              NULL, NULL);
 
-    o = pa_context_get_source_info_list (
-        connection->priv->context,
-        pulse_connection_source_info_cb,
-        connection);
-
-    ret = pulse_connection_process_operation (connection, o);
-
-    pa_threaded_mainloop_unlock (connection->priv->mainloop);
-    return ret;
+    return connection_process_operation (connection, op);
 }
 
 gboolean
-mate_mixer_pulse_connection_get_source_output_list (MateMixerPulseConnection *connection)
+pulse_connection_set_sink_port (PulseConnection *connection,
+                                guint32          index,
+                                const gchar     *port)
 {
-    pa_operation *o;
-    gboolean ret;
+    pa_operation *op;
 
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
-    pa_threaded_mainloop_lock (connection->priv->mainloop);
+    op = pa_context_set_sink_port_by_index (connection->priv->context,
+                                            index,
+                                            port,
+                                            NULL, NULL);
 
-    o = pa_context_get_source_output_info_list (
-        connection->priv->context,
-        pulse_connection_source_output_info_cb,
-        connection);
-
-    ret = pulse_connection_process_operation (connection, o);
-
-    pa_threaded_mainloop_unlock (connection->priv->mainloop);
-    return ret;
+    return connection_process_operation (connection, op);
 }
 
 gboolean
-mate_mixer_pulse_connection_set_card_profile (MateMixerPulseConnection *connection,
-                                              const gchar              *card,
-                                              const gchar              *profile)
+pulse_connection_set_sink_input_mute (PulseConnection  *connection,
+                                      guint32           index,
+                                      gboolean          mute)
 {
-    pa_operation *o;
-    gboolean ret;
+    pa_operation *op;
 
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
-    pa_threaded_mainloop_lock (connection->priv->mainloop);
+    op = pa_context_set_sink_input_mute (connection->priv->context,
+                                         index,
+                                         (int) mute,
+                                         NULL, NULL);
 
-    o = pa_context_set_card_profile_by_name (
-        connection->priv->context,
-        card,
-        profile,
-        NULL, NULL);
-
-    // XXX maybe shouldn't wait for the completion
-
-    ret = pulse_connection_process_operation (connection, o);
-
-    pa_threaded_mainloop_unlock (connection->priv->mainloop);
-    return ret;
+    return connection_process_operation (connection, op);
 }
 
 gboolean
-mate_mixer_pulse_connection_set_sink_mute (MateMixerPulseConnection *connection,
-                                           guint32 index,
-                                           gboolean mute)
+pulse_connection_set_sink_input_volume (PulseConnection  *connection,
+                                        guint32           index,
+                                        const pa_cvolume *volume)
 {
-    pa_operation *o;
-    gboolean ret;
+    pa_operation *op;
 
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
-    pa_threaded_mainloop_lock (connection->priv->mainloop);
+    op = pa_context_set_sink_input_volume (connection->priv->context,
+                                           index,
+                                           volume,
+                                           NULL, NULL);
 
-    o = pa_context_set_sink_mute_by_index (
-        connection->priv->context,
-        index,
-        (int) mute,
-        NULL, NULL);
-
-    // XXX maybe shouldn't wait for the completion
-
-    ret = pulse_connection_process_operation (connection, o);
-
-    pa_threaded_mainloop_unlock (connection->priv->mainloop);
-    return ret;
+    return connection_process_operation (connection, op);
 }
 
-static gboolean
-pulse_connection_process_operation (MateMixerPulseConnection *connection,
-                                    pa_operation *o)
+gboolean
+pulse_connection_set_source_mute (PulseConnection *connection,
+                                  guint32          index,
+                                  gboolean         mute)
 {
-    if (o == NULL) {
-        g_warning ("Failed to process PulseAudio operation: %s",
-            pa_strerror (pa_context_errno (connection->priv->context)));
+    pa_operation *op;
 
-        return FALSE;
-    }
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
-    while (pa_operation_get_state (o) == PA_OPERATION_RUNNING)
-        pa_threaded_mainloop_wait (connection->priv->mainloop);
+    op = pa_context_set_source_mute_by_index (connection->priv->context,
+                                              index,
+                                              (int) mute,
+                                              NULL, NULL);
 
-    pa_operation_unref (o);
-    return TRUE;
+    return connection_process_operation (connection, op);
+}
+
+gboolean
+pulse_connection_set_source_volume (PulseConnection  *connection,
+                                    guint32           index,
+                                    const pa_cvolume *volume)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    op = pa_context_set_source_volume_by_index (connection->priv->context,
+                                                index,
+                                                volume,
+                                                NULL, NULL);
+
+    return connection_process_operation (connection, op);
+}
+
+gboolean
+pulse_connection_set_source_port (PulseConnection *connection,
+                                  guint32          index,
+                                  const gchar     *port)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    op = pa_context_set_source_port_by_index (connection->priv->context,
+                                              index,
+                                              port,
+                                              NULL, NULL);
+
+    return connection_process_operation (connection, op);
+}
+
+gboolean
+pulse_connection_set_source_output_mute (PulseConnection *connection,
+                                         guint32          index,
+                                         gboolean         mute)
+{
+#if PA_CHECK_VERSION(1, 0, 0)
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    op = pa_context_set_source_output_mute (connection->priv->context,
+                                            index,
+                                            (int) mute,
+                                            NULL, NULL);
+
+    return connection_process_operation (connection, op);
+#else
+    return FALSE;
+#endif
+}
+
+gboolean
+pulse_connection_set_source_output_volume (PulseConnection  *connection,
+                                           guint32           index,
+                                           const pa_cvolume *volume)
+{
+#if PA_CHECK_VERSION(1, 0, 0)
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    op = pa_context_set_source_output_volume (connection->priv->context,
+                                              index,
+                                              volume,
+                                              NULL, NULL);
+
+    return connection_process_operation (connection, op);
+#else
+    return FALSE;
+#endif
+}
+
+gboolean
+pulse_connection_move_sink_input (PulseConnection *connection,
+                                  guint32          index,
+                                  guint32          sink_index)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    op = pa_context_move_sink_input_by_index (connection->priv->context,
+                                              index,
+                                              sink_index,
+                                              NULL, NULL);
+
+    return connection_process_operation (connection, op);
+}
+
+gboolean
+pulse_connection_move_source_output (PulseConnection *connection,
+                                     guint32          index,
+                                     guint32          source_index)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    op = pa_context_move_source_output_by_index (connection->priv->context,
+                                                 index,
+                                                 source_index,
+                                                 NULL, NULL);
+
+    return connection_process_operation (connection, op);
+}
+
+gboolean
+pulse_connection_kill_sink_input (PulseConnection *connection,
+                                  guint32          index)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    op = pa_context_kill_sink_input (connection->priv->context,
+                                     index,
+                                     NULL, NULL);
+
+    return connection_process_operation (connection, op);
+}
+
+gboolean
+pulse_connection_kill_source_output (PulseConnection *connection,
+                                     guint32          index)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    op = pa_context_kill_source_output (connection->priv->context,
+                                        index,
+                                        NULL, NULL);
+
+    return connection_process_operation (connection, op);
 }
 
 static gchar *
-pulse_connection_get_name (void)
+connection_get_app_name (void)
 {
     const char *name_app;
     char        name_buf[256];
@@ -614,151 +746,368 @@ pulse_connection_get_name (void)
     return g_strdup_printf ("libmatemixer-%lu", (gulong) getpid ());
 }
 
-static void
-pulse_connection_state_cb (pa_context *c, void *userdata)
+static gboolean
+connection_load_lists (PulseConnection *connection)
 {
-    MateMixerPulseConnection  *connection;
-    pa_context_state_t         state;
+    GList        *ops = NULL;
+    pa_operation *op;
 
-    connection = MATE_MIXER_PULSE_CONNECTION (userdata);
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
-    state = pa_context_get_state (c);
-    switch (state) {
-    case PA_CONTEXT_READY:
-        /* The connection is established, the context is ready to
-         * execute operations. */
-        if (!connection->priv->connected) {
-            connection->priv->connected = TRUE;
-
-            g_object_notify_by_pspec (
-                G_OBJECT (connection),
-                properties[PROP_CONNECTED]);
-        }
-        break;
-
-    case PA_CONTEXT_TERMINATED:
-        /* The connection was terminated cleanly. */
-        if (connection->priv->connected) {
-            connection->priv->connected = FALSE;
-
-            g_object_notify_by_pspec (
-                G_OBJECT (connection),
-                properties[PROP_CONNECTED]);
-
-            pa_context_disconnect (connection->priv->context);
-        }
-        break;
-
-    case PA_CONTEXT_FAILED:
-        break;
-
-    default:
-        break;
+    if (G_UNLIKELY (connection->priv->outstanding)) {
+        /* This can only mean a bug */
+        g_warn_if_reached ();
+        return FALSE;
     }
 
-    pa_threaded_mainloop_signal (connection->priv->mainloop, 0);
+    op = pa_context_get_server_info (connection->priv->context,
+                                     connection_server_info_cb,
+                                     connection);
+    if (G_UNLIKELY (op == NULL))
+        goto error;
+
+    ops = g_list_prepend (ops, op);
+
+    op = pa_context_get_card_info_list (connection->priv->context,
+                                        connection_card_info_cb,
+                                        connection);
+    if (G_UNLIKELY (op == NULL))
+        goto error;
+
+    ops = g_list_prepend (ops, op);
+
+    op = pa_context_get_sink_info_list (connection->priv->context,
+                                        connection_sink_info_cb,
+                                        connection);
+    if (G_UNLIKELY (op == NULL))
+        goto error;
+
+    ops = g_list_prepend (ops, op);
+
+    op = pa_context_get_sink_input_info_list (connection->priv->context,
+                                              connection_sink_input_info_cb,
+                                              connection);
+    if (G_UNLIKELY (op == NULL))
+        goto error;
+
+    ops = g_list_prepend (ops, op);
+
+    op = pa_context_get_source_info_list (connection->priv->context,
+                                          connection_source_info_cb,
+                                          connection);
+    if (G_UNLIKELY (op == NULL))
+        goto error;
+
+    ops = g_list_prepend (ops, op);
+
+    op = pa_context_get_source_output_info_list (connection->priv->context,
+                                                 connection_source_output_info_cb,
+                                                 connection);
+    if (G_UNLIKELY (op == NULL))
+        goto error;
+
+    ops = g_list_prepend (ops, op);
+
+    g_list_foreach (ops, (GFunc) pa_operation_unref, NULL);
+    g_list_free (ops);
+
+    connection->priv->outstanding = 5;
+    return TRUE;
+
+error:
+    g_list_foreach (ops, (GFunc) pa_operation_cancel, NULL);
+    g_list_foreach (ops, (GFunc) pa_operation_unref, NULL);
+    g_list_free (ops);
+    return FALSE;
 }
 
 static void
-pulse_connection_subscribe_cb (pa_context *c,
-                               pa_subscription_event_type_t t,
-                               uint32_t idx,
-                               void *userdata)
+connection_state_cb (pa_context *c, void *userdata)
 {
-    // TODO
+    PulseConnection    *connection;
+    pa_context_state_t  state;
+
+    connection = PULSE_CONNECTION (userdata);
+
+    state = pa_context_get_state (c);
+
+    if (state == PA_CONTEXT_READY) {
+        pa_operation *op;
+
+        // XXX check state
+
+        op = pa_context_subscribe (connection->priv->context,
+                                   PA_SUBSCRIPTION_MASK_CARD |
+                                   PA_SUBSCRIPTION_MASK_SINK |
+                                   PA_SUBSCRIPTION_MASK_SOURCE |
+                                   PA_SUBSCRIPTION_MASK_SINK_INPUT |
+                                   PA_SUBSCRIPTION_MASK_SOURCE_OUTPUT,
+                                   NULL, NULL);
+        if (op) {
+            connection->priv->state = PULSE_CONNECTION_LOADING;
+            connection->priv->connected_once = TRUE;
+
+            pa_context_set_subscribe_callback (connection->priv->context,
+                                               connection_subscribe_cb,
+                                               connection);
+            pa_operation_unref (op);
+
+            connection_load_lists (connection);
+
+            g_object_notify_by_pspec (G_OBJECT (connection), properties[PROP_STATE]);
+        } else {
+            /* If we could not subscribe to notifications, we consider it the
+             * same as a connection failture */
+            g_warning ("Failed to subscribe to PulseAudio notifications: %s",
+                pa_strerror (pa_context_errno (connection->priv->context)));
+
+            state = PA_CONTEXT_FAILED;
+        }
+    }
+
+    if (state == PA_CONTEXT_TERMINATED || state == PA_CONTEXT_FAILED) {
+        /* We also handle the case of clean connection termination as it is a state
+         * change which should not normally happen, because the signal subscription
+         * is cancelled before disconnecting */
+        pulse_connection_disconnect (connection);
+
+        if (connection->priv->connected_once && connection->priv->reconnect)
+            pulse_connection_connect (connection);
+    }
 }
 
 static void
-pulse_connection_card_info_cb (pa_context *c,
-                               const pa_card_info *info,
-                               int eol,
-                               void *userdata)
+connection_subscribe_cb (pa_context                   *c,
+                         pa_subscription_event_type_t  t,
+                         uint32_t                      idx,
+                         void                         *userdata)
 {
-    MateMixerPulseConnection *connection;
+    PulseConnection *connection;
+    pa_operation    *op;
 
-    connection = MATE_MIXER_PULSE_CONNECTION (userdata);
+    connection = PULSE_CONNECTION (userdata);
 
-    if (!eol)
+    switch (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) {
+    case PA_SUBSCRIPTION_EVENT_CARD:
+        if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
+            g_signal_emit (G_OBJECT (connection),
+                           signals[CARD_REMOVED],
+                           0,
+                           idx);
+        } else {
+            op = pa_context_get_card_info_by_index (connection->priv->context,
+                                                    idx,
+                                                    connection_card_info_cb,
+                                                    connection);
+            connection_process_operation (connection, op);
+        }
+        break;
+
+    case PA_SUBSCRIPTION_EVENT_SINK:
+        if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
+            g_signal_emit (G_OBJECT (connection),
+                           signals[SINK_REMOVED],
+                           0,
+                           idx);
+        } else {
+            op = pa_context_get_sink_info_by_index (connection->priv->context,
+                                                    idx,
+                                                    connection_sink_info_cb,
+                                                    connection);
+            connection_process_operation (connection, op);
+        }
+        break;
+
+    case PA_SUBSCRIPTION_EVENT_SINK_INPUT:
+        if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
+            g_signal_emit (G_OBJECT (connection),
+                           signals[SINK_INPUT_REMOVED],
+                           0,
+                           idx);
+        } else {
+            op = pa_context_get_sink_input_info (connection->priv->context,
+                                                 idx,
+                                                 connection_sink_input_info_cb,
+                                                 connection);
+            connection_process_operation (connection, op);
+        }
+        break;
+
+    case PA_SUBSCRIPTION_EVENT_SOURCE:
+        if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
+            g_signal_emit (G_OBJECT (connection),
+                           signals[SOURCE_REMOVED],
+                           0,
+                           idx);
+        } else {
+            op = pa_context_get_source_info_by_index (connection->priv->context,
+                                                      idx,
+                                                      connection_source_info_cb,
+                                                      connection);
+            connection_process_operation (connection, op);
+        }
+        break;
+
+    case PA_SUBSCRIPTION_EVENT_SOURCE_OUTPUT:
+        if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
+            g_signal_emit (G_OBJECT (connection),
+                           signals[SOURCE_OUTPUT_REMOVED],
+                           0,
+                           idx);
+        } else {
+            op = pa_context_get_source_output_info (connection->priv->context,
+                                                    idx,
+                                                    connection_source_output_info_cb,
+                                                    connection);
+            connection_process_operation (connection, op);
+        }
+        break;
+    }
+}
+
+static void
+connection_server_info_cb (pa_context           *c,
+                           const pa_server_info *info,
+                           void                 *userdata)
+{
+    g_signal_emit (G_OBJECT (userdata),
+                   signals[SERVER_INFO],
+                   0,
+                   info);
+}
+
+static void
+connection_card_info_cb (pa_context         *c,
+                         const pa_card_info *info,
+                         int                 eol,
+                         void               *userdata)
+{
+    PulseConnection *connection;
+
+    connection = PULSE_CONNECTION (userdata);
+
+    if (eol) {
+        if (connection->priv->state == PULSE_CONNECTION_LOADING)
+            connection_list_loaded (connection);
+        return;
+    }
+
+    g_signal_emit (G_OBJECT (connection),
+                   signals[CARD_INFO],
+                   0,
+                   info);
+}
+
+static void
+connection_sink_info_cb (pa_context         *c,
+                         const pa_sink_info *info,
+                         int                 eol,
+                         void               *userdata)
+{
+    PulseConnection *connection;
+
+    connection = PULSE_CONNECTION (userdata);
+
+    if (eol)
+        connection_list_loaded (connection);
+    else
         g_signal_emit (G_OBJECT (connection),
-            signals[LIST_ITEM_CARD],
-            0,
-            info);
-
-    pa_threaded_mainloop_signal (connection->priv->mainloop, 0);
+                       signals[SINK_INFO],
+                       0,
+                       info);
 }
 
 static void
-pulse_connection_sink_info_cb (pa_context *c,
-                               const pa_sink_info *info,
-                               int eol,
-                               void *userdata)
+connection_sink_input_info_cb (pa_context               *c,
+                               const pa_sink_input_info *info,
+                               int                       eol,
+                               void                     *userdata)
 {
-    MateMixerPulseConnection *connection;
+    PulseConnection *connection;
 
-    connection = MATE_MIXER_PULSE_CONNECTION (userdata);
+    connection = PULSE_CONNECTION (userdata);
 
-    if (!eol)
-        g_signal_emit (G_OBJECT (connection),
-            signals[LIST_ITEM_SINK],
-            0,
-            info);
+    if (eol) {
+        if (connection->priv->state == PULSE_CONNECTION_LOADING)
+            connection_list_loaded (connection);
+        return;
+    }
 
-    pa_threaded_mainloop_signal (connection->priv->mainloop, 0);
+    g_signal_emit (G_OBJECT (connection),
+                   signals[SINK_INPUT_INFO],
+                   0,
+                   info);
 }
 
 static void
-pulse_connection_sink_input_info_cb (pa_context *c,
-                                     const pa_sink_input_info *info,
-                                     int eol,
-                                     void *userdata)
+connection_source_info_cb (pa_context           *c,
+                           const pa_source_info *info,
+                           int                   eol,
+                           void                 *userdata)
 {
-    MateMixerPulseConnection *connection;
+    PulseConnection *connection;
 
-    connection = MATE_MIXER_PULSE_CONNECTION (userdata);
+    connection = PULSE_CONNECTION (userdata);
 
-    if (!eol)
-        g_signal_emit (G_OBJECT (connection),
-            signals[LIST_ITEM_SINK_INPUT],
-            0,
-            info);
+    if (eol) {
+        if (connection->priv->state == PULSE_CONNECTION_LOADING)
+            connection_list_loaded (connection);
+        return;
+    }
 
-    pa_threaded_mainloop_signal (connection->priv->mainloop, 0);
+    g_signal_emit (G_OBJECT (connection),
+                   signals[SOURCE_INFO],
+                   0,
+                   info);
 }
 
 static void
-pulse_connection_source_info_cb (pa_context *c,
-                                 const pa_source_info *info,
-                                 int eol,
-                                 void *userdata)
+connection_source_output_info_cb (pa_context                  *c,
+                                  const pa_source_output_info *info,
+                                  int                          eol,
+                                  void                        *userdata)
 {
-    MateMixerPulseConnection *connection;
+    PulseConnection *connection;
 
-    connection = MATE_MIXER_PULSE_CONNECTION (userdata);
+    connection = PULSE_CONNECTION (userdata);
 
-    if (!eol)
-        g_signal_emit (G_OBJECT (connection),
-            signals[LIST_ITEM_SOURCE],
-            0,
-            info);
+    if (eol) {
+        if (connection->priv->state == PULSE_CONNECTION_LOADING)
+            connection_list_loaded (connection);
+        return;
+    }
 
-    pa_threaded_mainloop_signal (connection->priv->mainloop, 0);
+    g_signal_emit (G_OBJECT (connection),
+                   signals[SOURCE_OUTPUT_INFO],
+                   0,
+                   info);
 }
 
 static void
-pulse_connection_source_output_info_cb (pa_context *c,
-                                        const pa_source_output_info *info,
-                                        int eol,
-                                        void *userdata)
+connection_list_loaded (PulseConnection *connection)
 {
-    MateMixerPulseConnection *connection;
+    connection->priv->outstanding--;
 
-    connection = MATE_MIXER_PULSE_CONNECTION (userdata);
+    if (G_UNLIKELY (connection->priv->outstanding < 0)) {
+        g_warn_if_reached ();
+        connection->priv->outstanding = 0;
+    }
+    if (connection->priv->outstanding == 0) {
+        connection->priv->state = PULSE_CONNECTION_CONNECTED;
 
-    if (!eol)
-        g_signal_emit (G_OBJECT (connection),
-            signals[LIST_ITEM_SOURCE_OUTPUT],
-            0,
-            info);
+        g_object_notify_by_pspec (G_OBJECT (connection), properties[PROP_STATE]);
+    }
+}
 
-    pa_threaded_mainloop_signal (connection->priv->mainloop, 0);
+static gboolean
+connection_process_operation (PulseConnection *connection, pa_operation *op)
+{
+    if (G_UNLIKELY (op == NULL)) {
+        g_warning ("PulseAudio operation failed: %s",
+                   pa_strerror (pa_context_errno (connection->priv->context)));
+        return FALSE;
+    }
+
+    pa_operation_unref (op);
+    return TRUE;
 }

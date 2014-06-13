@@ -1,0 +1,6 @@
+mate_mixer_client_stream_get_type
+mate_mixer_control_get_type
+mate_mixer_device_get_type
+mate_mixer_port_get_type
+mate_mixer_profile_get_type
+mate_mixer_stream_get_type

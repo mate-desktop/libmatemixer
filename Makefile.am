@@ -4,7 +4,8 @@ SUBDIRS =                               \
         libmatemixer                    \
         backends                        \
         data                            \
-        docs
+        docs                            \
+        examples
 
 EXTRA_DIST = autogen.sh
 

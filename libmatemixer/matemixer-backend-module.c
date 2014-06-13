@@ -22,8 +22,6 @@
 #include "matemixer-backend.h"
 #include "matemixer-backend-module.h"
 
-G_DEFINE_TYPE (MateMixerBackendModule, mate_mixer_backend_module, G_TYPE_TYPE_MODULE);
-
 struct _MateMixerBackendModulePrivate
 {
     GModule  *gmodule;
@@ -44,6 +42,8 @@ static void     mate_mixer_backend_module_finalize   (GObject                   
 static gboolean mate_mixer_backend_module_load       (GTypeModule *gmodule);
 static void     mate_mixer_backend_module_unload     (GTypeModule *gmodule);
 
+G_DEFINE_TYPE (MateMixerBackendModule, mate_mixer_backend_module, G_TYPE_TYPE_MODULE);
+
 static void
 mate_mixer_backend_module_class_init (MateMixerBackendModuleClass *klass)
 {
@@ -58,7 +58,7 @@ mate_mixer_backend_module_class_init (MateMixerBackendModuleClass *klass)
     module_class->load   = mate_mixer_backend_module_load;
     module_class->unload = mate_mixer_backend_module_unload;
 
-    g_type_class_add_private (object_class, sizeof (MateMixerBackendModulePrivate));
+    g_type_class_add_private (klass, sizeof (MateMixerBackendModulePrivate));
 }
 
 static void
@@ -88,11 +88,7 @@ mate_mixer_backend_module_dispose (GObject *object)
 static void
 mate_mixer_backend_module_finalize (GObject *object)
 {
-    MateMixerBackendModule *module;
-
-    module = MATE_MIXER_BACKEND_MODULE (object);
-
-    g_free (module->priv->path);
+    g_free (MATE_MIXER_BACKEND_MODULE (object)->priv->path);
 
     G_OBJECT_CLASS (mate_mixer_backend_module_parent_class)->finalize (object);
 }
@@ -139,8 +135,8 @@ mate_mixer_backend_module_load (GTypeModule *type_module)
         module->priv->init (type_module);
         module->priv->loaded = TRUE;
 
-        /* Make sure get_info () returns something so we can avoid checking
-         * it in other parts of the library */
+        /* Make sure get_info() returns something so we can avoid checking it
+         * in other parts of the library */
         if (G_UNLIKELY (module->priv->get_info () == NULL)) {
             g_warning ("Backend module %s does not provide module information",
                        module->priv->path);
@@ -158,7 +154,7 @@ mate_mixer_backend_module_load (GTypeModule *type_module)
 
         g_debug ("Loaded backend module %s", module->priv->path);
     } else {
-        /* This function was called before so initialize only */
+        /* This function was called before, so initialize only */
         module->priv->init (type_module);
     }
     return TRUE;
@@ -171,8 +167,8 @@ mate_mixer_backend_module_unload (GTypeModule *type_module)
 
     module = MATE_MIXER_BACKEND_MODULE (type_module);
 
-    /* Only deinitialize the backend module, do not modify the loaded
-     * flag as the module remains loaded */
+    /* Only deinitialize the backend module, do not modify the loaded flag
+     * as the module remains loaded */
     if (module->priv->deinit)
         module->priv->deinit ();
 }

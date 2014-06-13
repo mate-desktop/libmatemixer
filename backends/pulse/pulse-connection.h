@@ -15,88 +15,144 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MATEMIXER_PULSE_CONNECTION_H
-#define MATEMIXER_PULSE_CONNECTION_H
+#ifndef PULSE_CONNECTION_H
+#define PULSE_CONNECTION_H
 
 #include <glib.h>
 #include <glib-object.h>
 
 #include <pulse/pulseaudio.h>
 
+#include "pulse-enums.h"
+
 G_BEGIN_DECLS
 
-#define MATE_MIXER_TYPE_PULSE_CONNECTION            \
-        (mate_mixer_pulse_connection_get_type ())
-#define MATE_MIXER_PULSE_CONNECTION(o)              \
-        (G_TYPE_CHECK_INSTANCE_CAST ((o), MATE_MIXER_TYPE_PULSE_CONNECTION, MateMixerPulseConnection))
-#define MATE_MIXER_IS_PULSE_CONNECTION(o)           \
-        (G_TYPE_CHECK_INSTANCE_TYPE ((o), MATE_MIXER_TYPE_PULSE_CONNECTION))
-#define MATE_MIXER_PULSE_CONNECTION_CLASS(k)        \
-        (G_TYPE_CHECK_CLASS_CAST ((k), MATE_MIXER_TYPE_PULSE_CONNECTION, MateMixerPulseConnectionClass))
-#define MATE_MIXER_IS_PULSE_CONNECTION_CLASS(k)     \
-        (G_TYPE_CLASS_CHECK_CLASS_TYPE ((k), MATE_MIXER_TYPE_PULSE_CONNECTION))
-#define MATE_MIXER_PULSE_CONNECTION_GET_CLASS(o)    \
-        (G_TYPE_INSTANCE_GET_CLASS ((o), MATE_MIXER_TYPE_PULSE_CONNECTION, MateMixerPulseConnectionClass))
+#define PULSE_TYPE_CONNECTION                   \
+        (pulse_connection_get_type ())
+#define PULSE_CONNECTION(o)                     \
+        (G_TYPE_CHECK_INSTANCE_CAST ((o), PULSE_TYPE_CONNECTION, PulseConnection))
+#define PULSE_IS_CONNECTION(o)                  \
+        (G_TYPE_CHECK_INSTANCE_TYPE ((o), PULSE_TYPE_CONNECTION))
+#define PULSE_CONNECTION_CLASS(k)               \
+        (G_TYPE_CHECK_CLASS_CAST ((k), PULSE_TYPE_CONNECTION, PulseConnectionClass))
+#define PULSE_IS_CONNECTION_CLASS(k)            \
+        (G_TYPE_CLASS_CHECK_CLASS_TYPE ((k), PULSE_TYPE_CONNECTION))
+#define PULSE_CONNECTION_GET_CLASS(o)           \
+        (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_TYPE_CONNECTION, PulseConnectionClass))
 
-typedef struct _MateMixerPulseConnection         MateMixerPulseConnection;
-typedef struct _MateMixerPulseConnectionClass    MateMixerPulseConnectionClass;
-typedef struct _MateMixerPulseConnectionPrivate  MateMixerPulseConnectionPrivate;
+typedef struct _PulseConnection         PulseConnection;
+typedef struct _PulseConnectionClass    PulseConnectionClass;
+typedef struct _PulseConnectionPrivate  PulseConnectionPrivate;
 
-struct _MateMixerPulseConnection
+struct _PulseConnection
 {
     GObject parent;
 
-    MateMixerPulseConnectionPrivate *priv;
+    PulseConnectionPrivate *priv;
 };
 
-struct _MateMixerPulseConnectionClass
+struct _PulseConnectionClass
 {
     GObjectClass parent;
 
-    void (*disconnected) (MateMixerPulseConnection *connection);
-    void (*reconnected)  (MateMixerPulseConnection *connection);
-
-    void (*list_item_card) (MateMixerPulseConnection *connection,
-                            const pa_card_info *info);
-    void (*list_item_sink) (MateMixerPulseConnection *connection,
-                            const pa_sink_info *info);
-    void (*list_item_sink_input) (MateMixerPulseConnection *connection,
-                            const pa_sink_input_info *info);
-    void (*list_item_source) (MateMixerPulseConnection *connection,
-                            const pa_source_info *info);
-    void (*list_item_source_output) (MateMixerPulseConnection *connection,
-                            const pa_source_output_info *info);
+    void (*server_info)                 (PulseConnection             *connection,
+                                         const pa_server_info        *info);
+    void (*card_info)                   (PulseConnection             *connection,
+                                         const pa_card_info          *info);
+    void (*card_removed)           (PulseConnection             *connection,
+                                         guint32                      index);
+    void (*sink_info)                   (PulseConnection             *connection,
+                                         const pa_sink_info          *info);
+    void (*sink_removed)           (PulseConnection             *connection,
+                                         guint32                      index);
+    void (*sink_input_info)             (PulseConnection             *connection,
+                                         const pa_sink_input_info    *info);
+    void (*sink_input_removed)     (PulseConnection             *connection,
+                                         guint32                      index);
+    void (*source_info)                 (PulseConnection             *connection,
+                                         const pa_source_info        *info);
+    void (*source_removed)         (PulseConnection             *connection,
+                                         guint32                      index);
+    void (*source_output_info)          (PulseConnection             *connection,
+                                         const pa_source_output_info *info);
+    void (*source_output_removed)  (PulseConnection             *connection,
+                                         guint32                      index);
 };
 
-GType mate_mixer_pulse_connection_get_type (void) G_GNUC_CONST;
+GType            pulse_connection_get_type               (void) G_GNUC_CONST;
 
-MateMixerPulseConnection *mate_mixer_pulse_connection_new (const gchar *server,
-                                                           const gchar *app_name);
+PulseConnection *pulse_connection_new (const gchar *app_name,
+                                        const gchar *app_id,
+                                        const gchar *app_version,
+                                        const gchar *app_icon,
+                                        const gchar *server_address);
 
-gboolean mate_mixer_pulse_connection_connect (MateMixerPulseConnection *connection);
+gboolean         pulse_connection_connect                (PulseConnection  *connection);
+void             pulse_connection_disconnect             (PulseConnection  *connection);
 
-void mate_mixer_pulse_connection_disconnect (MateMixerPulseConnection *connection);
+PulseConnectionState pulse_connection_get_state (PulseConnection *connection);
 
-gboolean mate_mixer_pulse_connection_get_server_info (MateMixerPulseConnection *connection);
+gboolean         pulse_connection_set_default_sink (PulseConnection *connection,
+                                                    const gchar     *name);
 
-gboolean mate_mixer_pulse_connection_get_card_list (MateMixerPulseConnection *connection);
+gboolean         pulse_connection_set_default_source (PulseConnection *connection,
+                                                      const gchar     *name);
 
-gboolean mate_mixer_pulse_connection_get_sink_list (MateMixerPulseConnection *connection);
+gboolean         pulse_connection_set_card_profile       (PulseConnection  *connection,
+                                                          const gchar      *device,
+                                                          const gchar      *profile);
 
-gboolean mate_mixer_pulse_connection_get_sink_input_list (MateMixerPulseConnection *connection);
+gboolean         pulse_connection_set_sink_mute          (PulseConnection  *connection,
+                                                          guint32           index,
+                                                          gboolean          mute);
+gboolean         pulse_connection_set_sink_volume        (PulseConnection  *connection,
+                                                          guint32           index,
+                                                          const pa_cvolume *volume);
+gboolean         pulse_connection_set_sink_port          (PulseConnection  *connection,
+                                                          guint32           index,
+                                                          const gchar      *port);
 
-gboolean mate_mixer_pulse_connection_get_source_list (MateMixerPulseConnection *connection);
+gboolean         pulse_connection_set_sink_input_mute    (PulseConnection  *connection,
+                                                          guint32           index,
+                                                          gboolean          mute);
 
-gboolean mate_mixer_pulse_connection_get_source_output_list (MateMixerPulseConnection *connection);
+gboolean         pulse_connection_set_sink_input_volume (PulseConnection  *connection,
+                                                        guint32           index,
+                                                        const pa_cvolume *volume);
 
-gboolean mate_mixer_pulse_connection_set_card_profile (MateMixerPulseConnection *connection,
-                                                       const gchar              *device,
-                                                       const gchar              *profile);
 
-gboolean mate_mixer_pulse_connection_set_sink_mute (MateMixerPulseConnection *connection,
-                                                    guint32 index,
-                                                    gboolean mute);
+gboolean         pulse_connection_set_source_mute        (PulseConnection  *connection,
+                                                          guint32           index,
+                                                          gboolean          mute);
+gboolean         pulse_connection_set_source_volume      (PulseConnection  *connection,
+                                                          guint32           index,
+                                                          const pa_cvolume *volume);
+gboolean         pulse_connection_set_source_port        (PulseConnection  *connection,
+                                                          guint32           index,
+                                                          const gchar      *port);
+
+gboolean         pulse_connection_set_source_output_mute (PulseConnection *connection,
+                                                        guint32          index,
+                                                        gboolean         mute);
+
+gboolean         pulse_connection_set_source_output_volume (PulseConnection  *connection,
+                                                        guint32           index,
+                                                        const pa_cvolume *volume);
+
+gboolean         pulse_connection_move_sink_input (PulseConnection *connection,
+                                                   guint32          index,
+                                                   guint32          sink_index);
+
+gboolean         pulse_connection_move_source_output (PulseConnection *connection,
+                                                          guint32          index,
+                                                          guint32          source_index);
+
+gboolean        pulse_connection_kill_sink_input (PulseConnection *connection,
+                                                  guint32          index);
+
+gboolean        pulse_connection_kill_source_output (PulseConnection *connection,
+                                                     guint32          index);
 
 G_END_DECLS
 
-#endif /* MATEMIXER_PULSE_CONNECTION_H */
+#endif /* PULSE_CONNECTION_H */

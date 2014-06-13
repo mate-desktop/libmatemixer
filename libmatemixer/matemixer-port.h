@@ -44,29 +44,29 @@ typedef struct _MateMixerPortPrivate  MateMixerPortPrivate;
 
 struct _MateMixerPort
 {
-    GObject parent;
-
-    MateMixerPortPrivate *priv;
+    /*< private >*/
+    GObject                 parent;
+    MateMixerPortPrivate   *priv;
 };
 
 struct _MateMixerPortClass
 {
-    GObjectClass parent;
+    /*< private >*/
+    GObjectClass            parent;
 };
 
-GType mate_mixer_port_get_type (void) G_GNUC_CONST;
+GType               mate_mixer_port_get_type        (void) G_GNUC_CONST;
+MateMixerPort *     mate_mixer_port_new             (const gchar         *name,
+                                                     const gchar         *description,
+                                                     const gchar         *icon,
+                                                     gulong               priority,
+                                                     MateMixerPortStatus  status);
 
-MateMixerPort *      mate_mixer_port_new             (const gchar         *name,
-                                                      const gchar         *description,
-                                                      const gchar         *icon,
-                                                      guint32              priority,
-                                                      MateMixerPortStatus  status);
-
-const gchar *        mate_mixer_port_get_name        (MateMixerPort *port);
-const gchar *        mate_mixer_port_get_description (MateMixerPort *port);
-const gchar *        mate_mixer_port_get_icon        (MateMixerPort *port);
-guint32              mate_mixer_port_get_priority    (MateMixerPort *port);
-MateMixerPortStatus  mate_mixer_port_get_status      (MateMixerPort *port);
+const gchar *       mate_mixer_port_get_name        (MateMixerPort *port);
+const gchar *       mate_mixer_port_get_description (MateMixerPort *port);
+const gchar *       mate_mixer_port_get_icon        (MateMixerPort *port);
+gulong              mate_mixer_port_get_priority    (MateMixerPort *port);
+MateMixerPortStatus mate_mixer_port_get_status      (MateMixerPort *port);
 
 G_END_DECLS
 

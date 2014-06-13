@@ -25,12 +25,21 @@
 #include "matemixer-private.h"
 #include "matemixer-backend-module.h"
 
-static void      mixer_load_modules    (void);
-static gint      mixer_compare_modules (gconstpointer a, gconstpointer b);
+static void mixer_load_modules    (void);
+static gint mixer_compare_modules (gconstpointer a, gconstpointer b);
 
 static GList    *mixer_modules = NULL;
 static gboolean  mixer_initialized = FALSE;
 
+/**
+ * mate_mixer_init:
+ *
+ * Initializes the library. You must call this function before using any other
+ * function from the library.
+ *
+ * Returns: %TRUE on success, or %FALSE if the library installation is broken and
+ * does not provide support for any sound systems.
+ */
 gboolean
 mate_mixer_init (void)
 {
@@ -66,6 +75,12 @@ mate_mixer_init (void)
     return mixer_initialized;
 }
 
+/**
+ * mate_mixer_deinit:
+ *
+ * Deinitializes the library. You should call this function when you do not need
+ * to use the library any longer or before exitting the application.
+ */
 void
 mate_mixer_deinit (void)
 {
@@ -135,14 +150,14 @@ mixer_load_modules (void)
             g_error_free (error);
         }
     } else {
-        g_critical ("Unable to load backend modules: GModule not supported");
+        g_critical ("Unable to load backend modules: GModule is not supported in your system");
     }
 
     loaded = TRUE;
 }
 
-/* GCompareFunc function to sort backend modules by the priority, lower
- * number means higher priority */
+/* GCompareFunc function to sort backend modules by the priority, higher number means
+ * higher priority */
 static gint
 mixer_compare_modules (gconstpointer a, gconstpointer b)
 {
@@ -151,5 +166,5 @@ mixer_compare_modules (gconstpointer a, gconstpointer b)
     info1 = mate_mixer_backend_module_get_info (MATE_MIXER_BACKEND_MODULE (a));
     info2 = mate_mixer_backend_module_get_info (MATE_MIXER_BACKEND_MODULE (b));
 
-    return info1->priority - info2->priority;
+    return info2->priority - info1->priority;
 }

@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.3//EN"
+               "http://www.oasis-open.org/docbook/xml/4.3/docbookx.dtd"
+[
+  <!ENTITY % local.common.attrib "xmlns:xi  CDATA  #FIXED 'http://www.w3.org/2003/XInclude'">
+  <!ENTITY version SYSTEM "version.xml">
+]>
+<book id="index">
+  <bookinfo>
+    <title>libmatemixer Reference Manual</title>
+    <releaseinfo>
+      for libmatemixer &version;.
+    </releaseinfo>
+  </bookinfo>
+
+  <chapter>
+    <title>API Reference</title>
+    <xi:include href="xml/matemixer.xml"/>
+    <xi:include href="xml/matemixer-enums.xml"/>
+    <xi:include href="xml/matemixer-version.xml"/>
+    <xi:include href="xml/matemixer-client-stream.xml"/>
+    <xi:include href="xml/matemixer-control.xml"/>
+    <xi:include href="xml/matemixer-device.xml"/>
+    <xi:include href="xml/matemixer-port.xml"/>
+    <xi:include href="xml/matemixer-profile.xml"/>
+    <xi:include href="xml/matemixer-stream.xml"/>
+  </chapter>
+  <index id="api-index-full">
+    <title>API Index</title>
+    <xi:include href="xml/api-index-full.xml"><xi:fallback /></xi:include>
+  </index>
+</book>

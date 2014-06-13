@@ -27,16 +27,16 @@
 #include "pulse-connection.h"
 #include "pulse-device.h"
 
-struct _MateMixerPulseDevicePrivate
+struct _PulseDevicePrivate
 {
-    guint32                   index;
-    gchar                    *name;
-    gchar                    *description;
-    GList                    *profiles;
-    GList                    *ports;
-    gchar                    *icon;
-    MateMixerProfile         *profile;
-    MateMixerPulseConnection *connection;
+    guint32           index;
+    gchar            *name;
+    gchar            *description;
+    GList            *profiles;
+    GList            *ports;
+    gchar            *icon;
+    PulseConnection  *connection;
+    MateMixerProfile *profile;
 };
 
 enum
@@ -51,40 +51,53 @@ enum
 
 static void mate_mixer_device_interface_init (MateMixerDeviceInterface *iface);
 
-G_DEFINE_TYPE_WITH_CODE (MateMixerPulseDevice, mate_mixer_pulse_device, G_TYPE_OBJECT,
+static const gchar *     device_get_name (MateMixerDevice *device);
+static const gchar *     device_get_description (MateMixerDevice *device);
+static const gchar *     device_get_icon (MateMixerDevice *device);
+
+static const GList *     device_list_streams (MateMixerDevice *device);
+
+static const GList *     device_list_ports (MateMixerDevice *device);
+static const GList *     device_list_profiles (MateMixerDevice *device);
+static MateMixerProfile *device_get_active_profile (MateMixerDevice *device);
+
+static gboolean          device_set_active_profile (MateMixerDevice *device,
+                                                                     const gchar *name);
+
+G_DEFINE_TYPE_WITH_CODE (PulseDevice, pulse_device, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (MATE_MIXER_TYPE_DEVICE,
                                                 mate_mixer_device_interface_init))
 
 static void
 mate_mixer_device_interface_init (MateMixerDeviceInterface *iface)
 {
-    iface->get_name = mate_mixer_pulse_device_get_name;
-    iface->get_description = mate_mixer_pulse_device_get_description;
-    iface->get_icon = mate_mixer_pulse_device_get_icon;
-    iface->list_streams = mate_mixer_pulse_device_list_streams;
-    iface->list_ports = mate_mixer_pulse_device_list_ports;
-    iface->list_profiles = mate_mixer_pulse_device_list_profiles;
-    iface->get_active_profile = mate_mixer_pulse_device_get_active_profile;
-    iface->set_active_profile = mate_mixer_pulse_device_set_active_profile;
+    iface->get_name           = device_get_name;
+    iface->get_description    = device_get_description;
+    iface->get_icon           = device_get_icon;
+    iface->list_streams       = device_list_streams;
+    iface->list_ports         = device_list_ports;
+    iface->list_profiles      = device_list_profiles;
+    iface->get_active_profile = device_get_active_profile;
+    iface->set_active_profile = device_set_active_profile;
 }
 
 static void
-mate_mixer_pulse_device_init (MateMixerPulseDevice *device)
+pulse_device_init (PulseDevice *device)
 {
     device->priv = G_TYPE_INSTANCE_GET_PRIVATE (device,
-                                                MATE_MIXER_TYPE_PULSE_DEVICE,
-                                                MateMixerPulseDevicePrivate);
+                                                PULSE_TYPE_DEVICE,
+                                                PulseDevicePrivate);
 }
 
 static void
-mate_mixer_pulse_device_get_property (GObject     *object,
-                                      guint        param_id,
-                                      GValue      *value,
-                                      GParamSpec  *pspec)
+pulse_device_get_property (GObject    *object,
+                           guint       param_id,
+                           GValue     *value,
+                           GParamSpec *pspec)
 {
-    MateMixerPulseDevice *device;
+    PulseDevice *device;
 
-    device = MATE_MIXER_PULSE_DEVICE (object);
+    device = PULSE_DEVICE (object);
 
     switch (param_id) {
     case PROP_NAME:
@@ -106,14 +119,14 @@ mate_mixer_pulse_device_get_property (GObject     *object,
 }
 
 static void
-mate_mixer_pulse_device_set_property (GObject       *object,
-                                      guint          param_id,
-                                      const GValue  *value,
-                                      GParamSpec    *pspec)
+pulse_device_set_property (GObject      *object,
+                           guint         param_id,
+                           const GValue *value,
+                           GParamSpec   *pspec)
 {
-    MateMixerPulseDevice *device;
+    PulseDevice *device;
 
-    device = MATE_MIXER_PULSE_DEVICE (object);
+    device = PULSE_DEVICE (object);
 
     switch (param_id) {
     case PROP_NAME:
@@ -132,11 +145,11 @@ mate_mixer_pulse_device_set_property (GObject       *object,
 }
 
 static void
-mate_mixer_pulse_device_dispose (GObject *object)
+pulse_device_dispose (GObject *object)
 {
-    MateMixerPulseDevice *device;
+    PulseDevice *device;
 
-    device = MATE_MIXER_PULSE_DEVICE (object);
+    device = PULSE_DEVICE (object);
 
     if (device->priv->profiles != NULL) {
         g_list_free_full (device->priv->profiles, g_object_unref);
@@ -151,50 +164,50 @@ mate_mixer_pulse_device_dispose (GObject *object)
     g_clear_object (&device->priv->profile);
     g_clear_object (&device->priv->connection);
 
-    G_OBJECT_CLASS (mate_mixer_pulse_device_parent_class)->dispose (object);
+    G_OBJECT_CLASS (pulse_device_parent_class)->dispose (object);
 }
 
 static void
-mate_mixer_pulse_device_finalize (GObject *object)
+pulse_device_finalize (GObject *object)
 {
-    MateMixerPulseDevice *device;
+    PulseDevice *device;
 
-    device = MATE_MIXER_PULSE_DEVICE (object);
+    device = PULSE_DEVICE (object);
 
     g_free (device->priv->name);
     g_free (device->priv->description);
     g_free (device->priv->icon);
 
-    G_OBJECT_CLASS (mate_mixer_pulse_device_parent_class)->finalize (object);
+    G_OBJECT_CLASS (pulse_device_parent_class)->finalize (object);
 }
 
 static void
-mate_mixer_pulse_device_class_init (MateMixerPulseDeviceClass *klass)
+pulse_device_class_init (PulseDeviceClass *klass)
 {
     GObjectClass *object_class;
 
     object_class = G_OBJECT_CLASS (klass);
-    object_class->dispose      = mate_mixer_pulse_device_dispose;
-    object_class->finalize     = mate_mixer_pulse_device_finalize;
-    object_class->get_property = mate_mixer_pulse_device_get_property;
-    object_class->set_property = mate_mixer_pulse_device_set_property;
+    object_class->dispose      = pulse_device_dispose;
+    object_class->finalize     = pulse_device_finalize;
+    object_class->get_property = pulse_device_get_property;
+    object_class->set_property = pulse_device_set_property;
 
     g_object_class_override_property (object_class, PROP_NAME, "name");
     g_object_class_override_property (object_class, PROP_DESCRIPTION, "description");
     g_object_class_override_property (object_class, PROP_ICON, "icon");
     g_object_class_override_property (object_class, PROP_ACTIVE_PROFILE, "active-profile");
 
-    g_type_class_add_private (object_class, sizeof (MateMixerPulseDevicePrivate));
+    g_type_class_add_private (object_class, sizeof (PulseDevicePrivate));
 }
 
-MateMixerPulseDevice *
-mate_mixer_pulse_device_new (MateMixerPulseConnection *connection, const pa_card_info *info)
+PulseDevice *
+pulse_device_new (PulseConnection *connection, const pa_card_info *info)
 {
-    MateMixerPulseDevice *device;
-    MateMixerProfile     *active_profile = NULL;
-    GList                *profiles = NULL;
-    GList                *ports = NULL;
-    guint32               i;
+    PulseDevice      *device;
+    MateMixerProfile *active_profile = NULL;
+    GList            *profiles = NULL;
+    GList            *ports = NULL;
+    guint32           i;
 
     g_return_val_if_fail (info != NULL, NULL);
 
@@ -264,7 +277,7 @@ mate_mixer_pulse_device_new (MateMixerPulseConnection *connection, const pa_card
     if (ports)
         ports = g_list_reverse (ports);
 
-    device = g_object_new (MATE_MIXER_TYPE_PULSE_DEVICE,
+    device = g_object_new (PULSE_TYPE_DEVICE,
                            "name", info->name,
                            "description", pa_proplist_gets (info->proplist, "device.description"),
                            "icon", pa_proplist_gets (info->proplist, "device.icon_name"),
@@ -285,113 +298,97 @@ mate_mixer_pulse_device_new (MateMixerPulseConnection *connection, const pa_card
 }
 
 gboolean
-mate_mixer_pulse_device_update (MateMixerPulseDevice *device, const pa_card_info *info)
+pulse_device_update (PulseDevice *device, const pa_card_info *info)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_DEVICE (device), FALSE);
+    g_return_val_if_fail (PULSE_IS_DEVICE (device), FALSE);
     g_return_val_if_fail (info != NULL, FALSE);
 
     // TODO: update status, active_profile, maybe others?
     return TRUE;
 }
 
-MateMixerPulseConnection *
-mate_mixer_pulse_device_get_connection (MateMixerPulseDevice *device)
+PulseConnection *
+pulse_device_get_connection (PulseDevice *device)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_DEVICE (device), NULL);
+    g_return_val_if_fail (PULSE_IS_DEVICE (device), NULL);
 
     return device->priv->connection;
 }
 
 guint32
-mate_mixer_pulse_device_get_index (MateMixerPulseDevice *device)
+pulse_device_get_index (PulseDevice *device)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_DEVICE (device), 0);
+    g_return_val_if_fail (PULSE_IS_DEVICE (device), 0);
 
     return device->priv->index;
 }
 
-const gchar *
-mate_mixer_pulse_device_get_name (MateMixerDevice *device)
+static const gchar *
+device_get_name (MateMixerDevice *device)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_DEVICE (device), NULL);
+    g_return_val_if_fail (PULSE_IS_DEVICE (device), NULL);
 
-    return MATE_MIXER_PULSE_DEVICE (device)->priv->name;
+    return PULSE_DEVICE (device)->priv->name;
 }
 
-const gchar *
-mate_mixer_pulse_device_get_description (MateMixerDevice *device)
+static const gchar *
+device_get_description (MateMixerDevice *device)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_DEVICE (device), NULL);
+    g_return_val_if_fail (PULSE_IS_DEVICE (device), NULL);
 
-    return MATE_MIXER_PULSE_DEVICE (device)->priv->description;
+    return PULSE_DEVICE (device)->priv->description;
 }
 
-const gchar *
-mate_mixer_pulse_device_get_icon (MateMixerDevice *device)
+static const gchar *
+device_get_icon (MateMixerDevice *device)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_DEVICE (device), NULL);
+    g_return_val_if_fail (PULSE_IS_DEVICE (device), NULL);
 
-    return MATE_MIXER_PULSE_DEVICE (device)->priv->icon;
+    return PULSE_DEVICE (device)->priv->icon;
 }
 
-const GList *
-mate_mixer_pulse_device_list_streams (MateMixerDevice *device)
+static const GList *
+device_list_streams (MateMixerDevice *device)
 {
     // TODO
     return NULL;
 }
 
-const GList *
-mate_mixer_pulse_device_list_ports (MateMixerDevice *device)
+static const GList *
+device_list_ports (MateMixerDevice *device)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_DEVICE (device), NULL);
+    g_return_val_if_fail (PULSE_IS_DEVICE (device), NULL);
 
-    return (const GList *) MATE_MIXER_PULSE_DEVICE (device)->priv->ports;
+    return (const GList *) PULSE_DEVICE (device)->priv->ports;
 }
 
-const GList *
-mate_mixer_pulse_device_list_profiles (MateMixerDevice *device)
+static const GList *
+device_list_profiles (MateMixerDevice *device)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_DEVICE (device), NULL);
+    g_return_val_if_fail (PULSE_IS_DEVICE (device), NULL);
 
-    return (const GList *) MATE_MIXER_PULSE_DEVICE (device)->priv->profiles;
+    return (const GList *) PULSE_DEVICE (device)->priv->profiles;
 }
 
-MateMixerProfile *
-mate_mixer_pulse_device_get_active_profile (MateMixerDevice *device)
+static MateMixerProfile *
+device_get_active_profile (MateMixerDevice *device)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_DEVICE (device), NULL);
+    g_return_val_if_fail (PULSE_IS_DEVICE (device), NULL);
 
-    return MATE_MIXER_PULSE_DEVICE (device)->priv->profile;
+    return PULSE_DEVICE (device)->priv->profile;
 }
 
-gboolean
-mate_mixer_pulse_device_set_active_profile (MateMixerDevice *device, const gchar *name)
+static gboolean
+device_set_active_profile (MateMixerDevice *device, const gchar *name)
 {
-    gboolean ret;
-    MateMixerPulseDevicePrivate *priv;
+    PulseDevicePrivate *priv;
 
-    g_return_val_if_fail (MATE_MIXER_IS_PULSE_DEVICE (device), FALSE);
+    g_return_val_if_fail (PULSE_IS_DEVICE (device), FALSE);
     g_return_val_if_fail (name != NULL, FALSE);
 
-    priv = MATE_MIXER_PULSE_DEVICE (device)->priv;
-    ret  = mate_mixer_pulse_connection_set_card_profile (priv->connection,
-                                                         priv->name,
-                                                         name);
+    priv = PULSE_DEVICE (device)->priv;
 
-    // XXX decide to either confirm the change during the connection call or
-    // wait for a notification from Pulse
-/*
-    if (ret) {
-        if (priv->profile)
-            g_object_unref (priv->profile);
-
-        priv->profile = g_object_ref (profile);
-
-        g_object_notify_by_pspec (
-            G_OBJECT (device),
-            properties[PROP_ACTIVE_PROFILE]);
-    }
-*/
-    return ret;
+    return pulse_connection_set_card_profile (priv->connection,
+                                              priv->name,
+                                              name);
 }

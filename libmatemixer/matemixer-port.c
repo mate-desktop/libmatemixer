@@ -27,12 +27,11 @@ struct _MateMixerPortPrivate
     gchar               *name;
     gchar               *description;
     gchar               *icon;
-    guint32              priority;
+    gulong               priority;
     MateMixerPortStatus  status;
 };
 
-enum
-{
+enum {
     PROP_0,
     PROP_NAME,
     PROP_DESCRIPTION,
@@ -71,7 +70,7 @@ mate_mixer_port_get_property (GObject    *object,
         g_value_set_string (value, port->priv->icon);
         break;
     case PROP_PRIORITY:
-        g_value_set_uint (value, port->priv->priority);
+        g_value_set_ulong (value, port->priv->priority);
         break;
     case PROP_STATUS:
         g_value_set_enum (value, port->priv->status);
@@ -103,7 +102,7 @@ mate_mixer_port_set_property (GObject      *object,
         port->priv->icon = g_strdup (g_value_get_string (value));
         break;
     case PROP_PRIORITY:
-        port->priv->priority = g_value_get_uint (value);
+        port->priv->priority = g_value_get_ulong (value);
         break;
     case PROP_STATUS:
         port->priv->status = g_value_get_enum (value);
@@ -124,53 +123,48 @@ mate_mixer_port_class_init (MateMixerPortClass *klass)
     object_class->get_property = mate_mixer_port_get_property;
     object_class->set_property = mate_mixer_port_set_property;
 
-    properties[PROP_NAME] =
-        g_param_spec_string ("name",
-                             "Name",
-                             "Name of the port",
-                             NULL,
-                             G_PARAM_CONSTRUCT_ONLY |
-                             G_PARAM_READWRITE |
-                             G_PARAM_STATIC_STRINGS);
+    properties[PROP_NAME] = g_param_spec_string ("name",
+                                                 "Name",
+                                                 "Name of the port",
+                                                 NULL,
+                                                 G_PARAM_CONSTRUCT_ONLY |
+                                                 G_PARAM_READWRITE |
+                                                 G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_DESCRIPTION] =
-        g_param_spec_string ("description",
-                             "Description",
-                             "Description of the port",
-                             NULL,
-                             G_PARAM_CONSTRUCT_ONLY |
-                             G_PARAM_READWRITE |
-                             G_PARAM_STATIC_STRINGS);
+    properties[PROP_DESCRIPTION] = g_param_spec_string ("description",
+                                                        "Description",
+                                                        "Description of the port",
+                                                        NULL,
+                                                        G_PARAM_CONSTRUCT_ONLY |
+                                                        G_PARAM_READWRITE |
+                                                        G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_ICON] =
-        g_param_spec_string ("icon",
-                             "Icon",
-                             "Name of the port icon",
-                             NULL,
-                             G_PARAM_CONSTRUCT_ONLY |
-                             G_PARAM_READWRITE |
-                             G_PARAM_STATIC_STRINGS);
+    properties[PROP_ICON] = g_param_spec_string ("icon",
+                                                 "Icon",
+                                                 "Name of the port icon",
+                                                 NULL,
+                                                 G_PARAM_CONSTRUCT_ONLY |
+                                                 G_PARAM_READWRITE |
+                                                 G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_PRIORITY] =
-        g_param_spec_uint ("priority",
-                           "Priority",
-                           "Priority of the port",
-                           0,
-                           G_MAXUINT32,
-                           0,
-                           G_PARAM_CONSTRUCT_ONLY |
-                           G_PARAM_READWRITE |
-                           G_PARAM_STATIC_STRINGS);
+    properties[PROP_PRIORITY] = g_param_spec_ulong ("priority",
+                                                    "Priority",
+                                                    "Priority of the port",
+                                                    0,
+                                                    G_MAXULONG,
+                                                    0,
+                                                    G_PARAM_CONSTRUCT_ONLY |
+                                                    G_PARAM_READWRITE |
+                                                    G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_STATUS] =
-        g_param_spec_enum ("status",
-                           "Status",
-                           "Status for the port",
-                           MATE_MIXER_TYPE_PORT_STATUS,
-                           MATE_MIXER_PORT_UNKNOWN_STATUS,
-                           G_PARAM_CONSTRUCT_ONLY |
-                           G_PARAM_READWRITE |
-                           G_PARAM_STATIC_STRINGS);
+    properties[PROP_STATUS] = g_param_spec_enum ("status",
+                                                 "Status",
+                                                 "Status for the port",
+                                                 MATE_MIXER_TYPE_PORT_STATUS,
+                                                 MATE_MIXER_PORT_UNKNOWN_STATUS,
+                                                 G_PARAM_CONSTRUCT_ONLY |
+                                                 G_PARAM_READWRITE |
+                                                 G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
@@ -203,7 +197,7 @@ MateMixerPort *
 mate_mixer_port_new (const gchar         *name,
                      const gchar         *description,
                      const gchar         *icon,
-                     guint32              priority,
+                     gulong               priority,
                      MateMixerPortStatus  status)
 {
     return g_object_new (MATE_MIXER_TYPE_PORT,
@@ -239,7 +233,7 @@ mate_mixer_port_get_icon (MateMixerPort *port)
     return port->priv->icon;
 }
 
-guint32
+gulong
 mate_mixer_port_get_priority (MateMixerPort *port)
 {
     g_return_val_if_fail (MATE_MIXER_IS_PORT (port), 0);

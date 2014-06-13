@@ -15,8 +15,8 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MATEMIXER_PULSE_SINK_H
-#define MATEMIXER_PULSE_SINK_H
+#ifndef PULSE_SINK_H
+#define PULSE_SINK_H
 
 #include <glib.h>
 #include <glib-object.h>
@@ -25,45 +25,47 @@
 
 #include <pulse/pulseaudio.h>
 
+#include "pulse-stream.h"
+
 G_BEGIN_DECLS
 
-#define MATE_MIXER_TYPE_PULSE_SINK            \
-        (mate_mixer_pulse_sink_get_type ())
-#define MATE_MIXER_PULSE_SINK(o)              \
-        (G_TYPE_CHECK_INSTANCE_CAST ((o), MATE_MIXER_TYPE_PULSE_SINK, MateMixerPulseSink))
-#define MATE_MIXER_IS_PULSE_SINK(o)           \
-        (G_TYPE_CHECK_INSTANCE_TYPE ((o), MATE_MIXER_TYPE_PULSE_SINK))
-#define MATE_MIXER_PULSE_SINK_CLASS(k)        \
-        (G_TYPE_CHECK_CLASS_CAST ((k), MATE_MIXER_TYPE_PULSE_SINK, MateMixerPulseSinkClass))
-#define MATE_MIXER_IS_PULSE_SINK_CLASS(k)     \
-        (G_TYPE_CLASS_CHECK_CLASS_TYPE ((k), MATE_MIXER_TYPE_PULSE_SINK))
-#define MATE_MIXER_PULSE_SINK_GET_CLASS(o)    \
-        (G_TYPE_INSTANCE_GET_CLASS ((o), MATE_MIXER_TYPE_PULSE_SINK, MateMixerPulseSinkClass))
+#define PULSE_TYPE_SINK                         \
+        (pulse_sink_get_type ())
+#define PULSE_SINK(o)                           \
+        (G_TYPE_CHECK_INSTANCE_CAST ((o), PULSE_TYPE_SINK, PulseSink))
+#define PULSE_IS_SINK(o)                        \
+        (G_TYPE_CHECK_INSTANCE_TYPE ((o), PULSE_TYPE_SINK))
+#define PULSE_SINK_CLASS(k)                     \
+        (G_TYPE_CHECK_CLASS_CAST ((k), PULSE_TYPE_SINK, PulseSinkClass))
+#define PULSE_IS_SINK_CLASS(k)                  \
+        (G_TYPE_CLASS_CHECK_CLASS_TYPE ((k), PULSE_TYPE_SINK))
+#define PULSE_SINK_GET_CLASS(o)                 \
+        (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_TYPE_SINK, PulseSinkClass))
 
-typedef struct _MateMixerPulseSink         MateMixerPulseSink;
-typedef struct _MateMixerPulseSinkClass    MateMixerPulseSinkClass;
-typedef struct _MateMixerPulseSinkPrivate  MateMixerPulseSinkPrivate;
+typedef struct _PulseSink         PulseSink;
+typedef struct _PulseSinkClass    PulseSinkClass;
+typedef struct _PulseSinkPrivate  PulseSinkPrivate;
 
-struct _MateMixerPulseSink
+struct _PulseSink
 {
-    GObject parent;
+    PulseStream parent;
 
-    MateMixerPulseSinkPrivate *priv;
+    PulseSinkPrivate *priv;
 };
 
-struct _MateMixerPulseSinkClass
+struct _PulseSinkClass
 {
-    GObjectClass parent;
+    PulseStreamClass parent;
 };
 
-GType mate_mixer_pulse_sink_get_type (void) G_GNUC_CONST;
+GType        pulse_sink_get_type   (void) G_GNUC_CONST;
 
-MateMixerPulseStream *mate_mixer_pulse_sink_new (MateMixerPulseConnection *connection,
-                                                const pa_sink_info *info);
+PulseStream *pulse_sink_new        (PulseConnection    *connection,
+                                    const pa_sink_info *info);
 
-gboolean mate_mixer_pulse_sink_set_volume (MateMixerStream *stream, guint32 volume);
-gboolean mate_mixer_pulse_sink_set_mute (MateMixerStream *stream, gboolean mute);
+gboolean     pulse_sink_update     (PulseStream        *stream,
+                                    const pa_sink_info *info);
 
 G_END_DECLS
 
-#endif /* MATEMIXER_PULSE_SINK_H */
+#endif /* PULSE_SINK_H */

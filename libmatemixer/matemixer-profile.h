@@ -42,25 +42,25 @@ typedef struct _MateMixerProfilePrivate  MateMixerProfilePrivate;
 
 struct _MateMixerProfile
 {
-    GObject parent;
-
-    MateMixerProfilePrivate *priv;
+    /*< private >*/
+    GObject                     parent;
+    MateMixerProfilePrivate    *priv;
 };
 
 struct _MateMixerProfileClass
 {
-    GObjectClass parent;
+    /*< private >*/
+    GObjectClass                parent;
 };
 
-GType mate_mixer_profile_get_type (void) G_GNUC_CONST;
-
+GType             mate_mixer_profile_get_type        (void) G_GNUC_CONST;
 MateMixerProfile *mate_mixer_profile_new             (const gchar      *name,
                                                       const gchar      *description,
-                                                      guint32           priority);
+                                                      gulong            priority);
 
 const gchar *     mate_mixer_profile_get_name        (MateMixerProfile *profile);
 const gchar *     mate_mixer_profile_get_description (MateMixerProfile *profile);
-guint32           mate_mixer_profile_get_priority    (MateMixerProfile *profile);
+gulong            mate_mixer_profile_get_priority    (MateMixerProfile *profile);
 
 G_END_DECLS
 

@@ -24,6 +24,27 @@
  */
 
 GType
+mate_mixer_state_get_type (void)
+{
+    static GType etype = 0;
+
+    if (etype == 0) {
+        static const GEnumValue values[] = {
+            { MATE_MIXER_STATE_IDLE, "MATE_MIXER_STATE_IDLE", "idle" },
+            { MATE_MIXER_STATE_CONNECTING, "MATE_MIXER_STATE_CONNECTING", "connecting" },
+            { MATE_MIXER_STATE_READY, "MATE_MIXER_STATE_READY", "ready" },
+            { MATE_MIXER_STATE_FAILED, "MATE_MIXER_STATE_FAILED", "failed" },
+            { MATE_MIXER_STATE_UNKNOWN, "MATE_MIXER_STATE_UNKNOWN", "unknown" },
+            { 0, NULL, NULL }
+        };
+        etype = g_enum_register_static (
+            g_intern_static_string ("MateMixerState"),
+            values);
+    }
+    return etype;
+}
+
+GType
 mate_mixer_backend_type_get_type (void)
 {
     static GType etype = 0;
@@ -68,14 +89,19 @@ mate_mixer_stream_flags_get_type (void)
 
     if (etype == 0) {
         static const GFlagsValue values[] = {
+            { MATE_MIXER_STREAM_NO_FLAGS, "MATE_MIXER_STREAM_NO_FLAGS", "no-flags" },
             { MATE_MIXER_STREAM_INPUT, "MATE_MIXER_STREAM_INPUT", "input" },
             { MATE_MIXER_STREAM_OUTPUT, "MATE_MIXER_STREAM_OUTPUT", "output" },
             { MATE_MIXER_STREAM_CLIENT, "MATE_MIXER_STREAM_CLIENT", "client" },
-            { MATE_MIXER_STREAM_VIRTUAL, "MATE_MIXER_STREAM_VIRTUAL", "virtual" },
+            { MATE_MIXER_STREAM_APPLICATION, "MATE_MIXER_STREAM_APPLICATION", "application" },
             { MATE_MIXER_STREAM_OUTPUT_MONITOR, "MATE_MIXER_STREAM_OUTPUT_MONITOR", "output-monitor" },
+            { MATE_MIXER_STREAM_HAS_MUTE, "MATE_MIXER_STREAM_HAS_MUTE", "has-mute" },
+            { MATE_MIXER_STREAM_HAS_VOLUME, "MATE_MIXER_STREAM_HAS_VOLUME", "has-volume" },
+            { MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME, "MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME", "has-decibel-volume" },
+            { MATE_MIXER_STREAM_HAS_FLAT_VOLUME, "MATE_MIXER_STREAM_HAS_FLAT_VOLUME", "has-flat-volume" },
             { MATE_MIXER_STREAM_CAN_BALANCE, "MATE_MIXER_STREAM_CAN_BALANCE", "can-balance" },
             { MATE_MIXER_STREAM_CAN_FADE, "MATE_MIXER_STREAM_CAN_FADE", "can-fade" },
-            { MATE_MIXER_STREAM_FLAT_VOLUME, "MATE_MIXER_STREAM_FLAT_VOLUME", "flat-volume" },
+            { MATE_MIXER_STREAM_CAN_SET_VOLUME, "MATE_MIXER_STREAM_CAN_SET_VOLUME", "can-set-volume" },
             { 0, NULL, NULL }
         };
         etype = g_flags_register_static (

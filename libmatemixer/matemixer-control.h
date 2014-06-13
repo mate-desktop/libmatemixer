@@ -43,26 +43,79 @@ typedef struct _MateMixerControl         MateMixerControl;
 typedef struct _MateMixerControlClass    MateMixerControlClass;
 typedef struct _MateMixerControlPrivate  MateMixerControlPrivate;
 
+/**
+ * MateMixerControl:
+ *
+ * The #MateMixerControl structure contains only private data and should only
+ * be accessed using the provided API.
+ */
 struct _MateMixerControl
 {
-    GObject parent;
-
-    MateMixerControlPrivate *priv;
+    /*< private >*/
+    GObject                     parent;
+    MateMixerControlPrivate    *priv;
 };
 
+/**
+ * MateMixerControlClass:
+ *
+ * The class structure of #MateMixerControl.
+ */
 struct _MateMixerControlClass
 {
-    GObjectClass parent;
+    /*< private >*/
+    GObjectClass                parent;
+
+    /* Signals */
+    void (*device_added)        (MateMixerControl *control,
+                                 const gchar      *name);
+    void (*device_changed)      (MateMixerControl *control,
+                                 const gchar      *name);
+    void (*device_removed)      (MateMixerControl *control,
+                                 const gchar      *name);
+    void (*stream_added)        (MateMixerControl *control,
+                                 const gchar      *name);
+    void (*stream_changed)      (MateMixerControl *control,
+                                 const gchar      *name);
+    void (*stream_removed)      (MateMixerControl *control,
+                                 const gchar      *name);
 };
 
-GType mate_mixer_control_get_type (void) G_GNUC_CONST;
-
+GType                 mate_mixer_control_get_type                  (void) G_GNUC_CONST;
 MateMixerControl *    mate_mixer_control_new                       (void);
-MateMixerControl *    mate_mixer_control_new_backend               (MateMixerBackendType  backend_type);
+
+gboolean              mate_mixer_control_set_backend_type          (MateMixerControl     *control,
+                                                                    MateMixerBackendType  backend_type);
+gboolean              mate_mixer_control_set_app_name              (MateMixerControl     *control,
+                                                                    const gchar          *app_name);
+gboolean              mate_mixer_control_set_app_id                (MateMixerControl     *control,
+                                                                    const gchar          *app_id);
+gboolean              mate_mixer_control_set_app_version           (MateMixerControl     *control,
+                                                                    const gchar          *app_version);
+gboolean              mate_mixer_control_set_app_icon              (MateMixerControl     *control,
+                                                                    const gchar          *app_icon);
+gboolean              mate_mixer_control_set_server_address        (MateMixerControl     *control,
+                                                                    const gchar          *address);
+gboolean              mate_mixer_control_open                      (MateMixerControl     *control);
+
+MateMixerState        mate_mixer_control_get_state                 (MateMixerControl     *control);
+
+MateMixerDevice *     mate_mixer_control_get_device                (MateMixerControl     *control,
+                                                                    const gchar          *name);
+MateMixerStream *     mate_mixer_control_get_stream                (MateMixerControl     *control,
+                                                                    const gchar          *name);
+
 const GList *         mate_mixer_control_list_devices              (MateMixerControl     *control);
 const GList *         mate_mixer_control_list_streams              (MateMixerControl     *control);
+
 MateMixerStream  *    mate_mixer_control_get_default_input_stream  (MateMixerControl     *control);
+gboolean              mate_mixer_control_set_default_input_stream  (MateMixerControl     *control,
+                                                                    MateMixerStream      *stream);
+
 MateMixerStream  *    mate_mixer_control_get_default_output_stream (MateMixerControl     *control);
+gboolean              mate_mixer_control_set_default_output_stream (MateMixerControl     *control,
+                                                                    MateMixerStream      *stream);
+
 const gchar *         mate_mixer_control_get_backend_name          (MateMixerControl     *control);
 MateMixerBackendType  mate_mixer_control_get_backend_type          (MateMixerControl     *control);
 
