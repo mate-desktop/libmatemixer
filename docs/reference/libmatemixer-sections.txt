@@ -2,16 +2,21 @@
 <FILE>matemixer</FILE>
 mate_mixer_init
 mate_mixer_deinit
+LIBMATEMIXER_CHECK_VERSION
 </SECTION>
 
 <SECTION>
 <FILE>matemixer-client-stream</FILE>
 <TITLE>MateMixerClientStream</TITLE>
+MateMixerClientStream
 MateMixerClientStreamInterface
 mate_mixer_client_stream_get_parent
 mate_mixer_client_stream_set_parent
 mate_mixer_client_stream_remove
-MateMixerClientStream
+mate_mixer_client_stream_get_app_name
+mate_mixer_client_stream_get_app_id
+mate_mixer_client_stream_get_app_version
+mate_mixer_client_stream_get_app_icon
 <SUBSECTION Standard>
 MATE_MIXER_CLIENT_STREAM
 MATE_MIXER_CLIENT_STREAM_GET_INTERFACE
@@ -23,8 +28,9 @@ mate_mixer_client_stream_get_type
 <SECTION>
 <FILE>matemixer-control</FILE>
 <TITLE>MateMixerControl</TITLE>
+MateMixerState
+MateMixerBackendType
 MateMixerControl
-MateMixerControlClass
 mate_mixer_control_new
 mate_mixer_control_set_backend_type
 mate_mixer_control_set_app_name
@@ -44,8 +50,8 @@ mate_mixer_control_get_default_output_stream
 mate_mixer_control_set_default_output_stream
 mate_mixer_control_get_backend_name
 mate_mixer_control_get_backend_type
-MateMixerControlPrivate
 <SUBSECTION Standard>
+MateMixerControlClass
 MATE_MIXER_CONTROL
 MATE_MIXER_CONTROL_CLASS
 MATE_MIXER_CONTROL_GET_CLASS
@@ -53,21 +59,22 @@ MATE_MIXER_IS_CONTROL
 MATE_MIXER_IS_CONTROL_CLASS
 MATE_MIXER_TYPE_CONTROL
 mate_mixer_control_get_type
+<SUBSECTION Private>
+MateMixerControlPrivate
 </SECTION>
 
 <SECTION>
 <FILE>matemixer-device</FILE>
 <TITLE>MateMixerDevice</TITLE>
+MateMixerDevice
 MateMixerDeviceInterface
 mate_mixer_device_get_name
 mate_mixer_device_get_description
 mate_mixer_device_get_icon
-mate_mixer_device_list_streams
 mate_mixer_device_list_ports
 mate_mixer_device_list_profiles
 mate_mixer_device_get_active_profile
 mate_mixer_device_set_active_profile
-MateMixerDevice
 <SUBSECTION Standard>
 MATE_MIXER_DEVICE
 MATE_MIXER_DEVICE_GET_INTERFACE
@@ -77,28 +84,18 @@ mate_mixer_device_get_type
 </SECTION>
 
 <SECTION>
-<FILE>matemixer-enums</FILE>
-MateMixerState
-MateMixerBackendType
-MateMixerPortStatus
-MateMixerStreamFlags
-MateMixerStreamStatus
-MateMixerChannelPosition
-</SECTION>
-
-<SECTION>
 <FILE>matemixer-port</FILE>
 <TITLE>MateMixerPort</TITLE>
+MateMixerPortFlags
 MateMixerPort
-MateMixerPortClass
 mate_mixer_port_new
 mate_mixer_port_get_name
 mate_mixer_port_get_description
 mate_mixer_port_get_icon
 mate_mixer_port_get_priority
-mate_mixer_port_get_status
-MateMixerPortPrivate
+mate_mixer_port_get_flags
 <SUBSECTION Standard>
+MateMixerPortClass
 MATE_MIXER_IS_PORT
 MATE_MIXER_IS_PORT_CLASS
 MATE_MIXER_PORT
@@ -106,19 +103,20 @@ MATE_MIXER_PORT_CLASS
 MATE_MIXER_PORT_GET_CLASS
 MATE_MIXER_TYPE_PORT
 mate_mixer_port_get_type
+<SUBSECTION Private>
+MateMixerPortPrivate
 </SECTION>
 
 <SECTION>
 <FILE>matemixer-profile</FILE>
 <TITLE>MateMixerProfile</TITLE>
 MateMixerProfile
-MateMixerProfileClass
 mate_mixer_profile_new
 mate_mixer_profile_get_name
 mate_mixer_profile_get_description
 mate_mixer_profile_get_priority
-MateMixerProfilePrivate
 <SUBSECTION Standard>
+MateMixerProfileClass
 MATE_MIXER_IS_PROFILE
 MATE_MIXER_IS_PROFILE_CLASS
 MATE_MIXER_PROFILE
@@ -126,18 +124,23 @@ MATE_MIXER_PROFILE_CLASS
 MATE_MIXER_PROFILE_GET_CLASS
 MATE_MIXER_TYPE_PROFILE
 mate_mixer_profile_get_type
+<SUBSECTION Private>
+MateMixerProfilePrivate
 </SECTION>
 
 <SECTION>
 <FILE>matemixer-stream</FILE>
 <TITLE>MateMixerStream</TITLE>
+MateMixerChannelPosition
+MateMixerStreamFlags
+MateMixerStreamState
+MateMixerStream
 MateMixerStreamInterface
 mate_mixer_stream_get_name
 mate_mixer_stream_get_description
-mate_mixer_stream_get_icon
 mate_mixer_stream_get_device
 mate_mixer_stream_get_flags
-mate_mixer_stream_get_status
+mate_mixer_stream_get_state
 mate_mixer_stream_get_mute
 mate_mixer_stream_set_mute
 mate_mixer_stream_get_num_channels
@@ -167,21 +170,11 @@ mate_mixer_stream_set_active_port
 mate_mixer_stream_get_min_volume
 mate_mixer_stream_get_max_volume
 mate_mixer_stream_get_normal_volume
-MateMixerStream
 <SUBSECTION Standard>
 MATE_MIXER_IS_STREAM
 MATE_MIXER_STREAM
 MATE_MIXER_STREAM_GET_INTERFACE
 MATE_MIXER_TYPE_STREAM
 mate_mixer_stream_get_type
-</SECTION>
-
-<SECTION>
-<FILE>matemixer-version</FILE>
-LIBMATEMIXER_MAJOR_VERSION
-LIBMATEMIXER_MINOR_VERSION
-LIBMATEMIXER_MICRO_VERSION
-LIBMATEMIXER_VERSION
-LIBMATEMIXER_CHECK_VERSION
 </SECTION>
 

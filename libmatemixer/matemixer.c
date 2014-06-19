@@ -37,8 +37,8 @@ static gboolean  mixer_initialized = FALSE;
  * Initializes the library. You must call this function before using any other
  * function from the library.
  *
- * Returns: %TRUE on success, or %FALSE if the library installation is broken and
- * does not provide support for any sound systems.
+ * Returns: %TRUE on success or %FALSE if the library installation does not
+ * provide support for any sound system backends.
  */
 gboolean
 mate_mixer_init (void)
@@ -52,7 +52,7 @@ mate_mixer_init (void)
             list = mixer_modules;
             while (list) {
                 GTypeModule *module = G_TYPE_MODULE (list->data);
-                GList       *next = list->next;
+                GList *next = list->next;
 
                 /* Attempt to load the module and remove it from the list
                  * if it isn't usable */

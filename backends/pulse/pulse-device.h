@@ -36,7 +36,7 @@ G_BEGIN_DECLS
 #define PULSE_DEVICE_CLASS(k)        \
         (G_TYPE_CHECK_CLASS_CAST ((k), PULSE_TYPE_DEVICE, PulseDeviceClass))
 #define PULSE_IS_DEVICE_CLASS(k)     \
-        (G_TYPE_CLASS_CHECK_CLASS_TYPE ((k), PULSE_TYPE_DEVICE))
+        (G_TYPE_CHECK_CLASS_TYPE ((k), PULSE_TYPE_DEVICE))
 #define PULSE_DEVICE_GET_CLASS(o)    \
         (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_IS_DEVICE, PulseDeviceClass))
 
@@ -48,6 +48,7 @@ struct _PulseDevice
 {
     GObject parent;
 
+    /*< private >*/
     PulseDevicePrivate *priv;
 };
 

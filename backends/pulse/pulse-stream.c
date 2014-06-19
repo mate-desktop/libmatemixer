@@ -28,6 +28,7 @@
 
 #include "pulse-connection.h"
 #include "pulse-helpers.h"
+#include "pulse-monitor.h"
 #include "pulse-stream.h"
 
 struct _PulseStreamPrivate
@@ -36,10 +37,9 @@ struct _PulseStreamPrivate
     guint32                index_device;
     gchar                 *name;
     gchar                 *description;
-    gchar                 *icon;
     MateMixerDevice       *device;
     MateMixerStreamFlags   flags;
-    MateMixerStreamStatus  status;
+    MateMixerStreamState   state;
     gboolean               mute;
     pa_cvolume             volume;
     pa_volume_t            volume_base;
@@ -50,23 +50,22 @@ struct _PulseStreamPrivate
     GList                 *ports;
     MateMixerPort         *port;
     PulseConnection       *connection;
+    PulseMonitor          *monitor;
 };
 
-enum
-{
+enum {
     PROP_0,
     PROP_NAME,
     PROP_DESCRIPTION,
-    PROP_ICON,
     PROP_DEVICE,
     PROP_FLAGS,
-    PROP_STATUS,
+    PROP_STATE,
     PROP_MUTE,
     PROP_NUM_CHANNELS,
     PROP_VOLUME,
-    PROP_VOLUME_DB,
     PROP_BALANCE,
     PROP_FADE,
+    PROP_PORTS,
     PROP_ACTIVE_PORT,
     PROP_INDEX,
     PROP_CONNECTION,
@@ -79,13 +78,16 @@ static void pulse_stream_init                (PulseStream               *stream)
 static void pulse_stream_dispose             (GObject                   *object);
 static void pulse_stream_finalize            (GObject                   *object);
 
+G_DEFINE_ABSTRACT_TYPE_WITH_CODE (PulseStream, pulse_stream, G_TYPE_OBJECT,
+                                  G_IMPLEMENT_INTERFACE (MATE_MIXER_TYPE_STREAM,
+                                                         mate_mixer_stream_interface_init))
+
 /* Interface implementation */
 static const gchar *            stream_get_name               (MateMixerStream          *stream);
 static const gchar *            stream_get_description        (MateMixerStream          *stream);
-static const gchar *            stream_get_icon               (MateMixerStream          *stream);
 static MateMixerDevice *        stream_get_device             (MateMixerStream          *stream);
 static MateMixerStreamFlags     stream_get_flags              (MateMixerStream          *stream);
-static MateMixerStreamStatus    stream_get_status             (MateMixerStream          *stream);
+static MateMixerStreamState     stream_get_state              (MateMixerStream          *stream);
 static gboolean                 stream_get_mute               (MateMixerStream          *stream);
 static gboolean                 stream_set_mute               (MateMixerStream          *stream,
                                                                gboolean                  mute);
@@ -128,27 +130,34 @@ static gboolean                 stream_set_fade               (MateMixerStream  
                                                                gdouble                   fade);
 static gboolean                 stream_suspend                (MateMixerStream          *stream);
 static gboolean                 stream_resume                 (MateMixerStream          *stream);
+
+static gboolean                 stream_monitor_start          (MateMixerStream          *stream);
+static void                     stream_monitor_stop           (MateMixerStream          *stream);
+static gboolean                 stream_monitor_is_running     (MateMixerStream          *stream);
+static void                     stream_monitor_value          (PulseMonitor             *monitor,
+                                                               gdouble                   value,
+                                                               MateMixerStream          *stream);
+
 static const GList *            stream_list_ports             (MateMixerStream          *stream);
 static MateMixerPort *          stream_get_active_port        (MateMixerStream          *stream);
 static gboolean                 stream_set_active_port        (MateMixerStream          *stream,
                                                                const gchar              *port);
+
 static gint64                   stream_get_min_volume         (MateMixerStream          *stream);
 static gint64                   stream_get_max_volume         (MateMixerStream          *stream);
 static gint64                   stream_get_normal_volume      (MateMixerStream          *stream);
 
-G_DEFINE_ABSTRACT_TYPE_WITH_CODE (PulseStream, pulse_stream, G_TYPE_OBJECT,
-                                  G_IMPLEMENT_INTERFACE (MATE_MIXER_TYPE_STREAM,
-                                                         mate_mixer_stream_interface_init))
+static gboolean                 stream_set_cvolume            (MateMixerStream          *stream,
+                                                               pa_cvolume               *volume);
 
 static void
 mate_mixer_stream_interface_init (MateMixerStreamInterface *iface)
 {
     iface->get_name                 = stream_get_name;
     iface->get_description          = stream_get_description;
-    iface->get_icon                 = stream_get_icon;
     iface->get_device               = stream_get_device;
     iface->get_flags                = stream_get_flags;
-    iface->get_status               = stream_get_status;
+    iface->get_state                = stream_get_state;
     iface->get_mute                 = stream_get_mute;
     iface->set_mute                 = stream_set_mute;
     iface->get_num_channels         = stream_get_num_channels;
@@ -172,6 +181,9 @@ mate_mixer_stream_interface_init (MateMixerStreamInterface *iface)
     iface->set_fade                 = stream_set_fade;
     iface->suspend                  = stream_suspend;
     iface->resume                   = stream_resume;
+    iface->monitor_start            = stream_monitor_start;
+    iface->monitor_stop             = stream_monitor_stop;
+    iface->monitor_is_running       = stream_monitor_is_running;
     iface->list_ports               = stream_list_ports;
     iface->get_active_port          = stream_get_active_port;
     iface->set_active_port          = stream_set_active_port;
@@ -197,17 +209,14 @@ pulse_stream_get_property (GObject    *object,
     case PROP_DESCRIPTION:
         g_value_set_string (value, stream->priv->description);
         break;
-    case PROP_ICON:
-        g_value_set_string (value, stream->priv->icon);
-        break;
     case PROP_DEVICE:
         g_value_set_object (value, stream->priv->device);
         break;
     case PROP_FLAGS:
         g_value_set_flags (value, stream->priv->flags);
         break;
-    case PROP_STATUS:
-        g_value_set_enum (value, stream->priv->status);
+    case PROP_STATE:
+        g_value_set_enum (value, stream->priv->state);
         break;
     case PROP_MUTE:
         g_value_set_boolean (value, stream->priv->mute);
@@ -218,14 +227,14 @@ pulse_stream_get_property (GObject    *object,
     case PROP_VOLUME:
         g_value_set_int64 (value, stream_get_volume (MATE_MIXER_STREAM (stream)));
         break;
-    case PROP_VOLUME_DB:
-        g_value_set_double (value, stream_get_volume_db (MATE_MIXER_STREAM (stream)));
-        break;
     case PROP_BALANCE:
-        g_value_set_double (value, stream->priv->balance);
+        g_value_set_double (value, stream_get_balance (MATE_MIXER_STREAM (stream)));
         break;
     case PROP_FADE:
-        g_value_set_double (value, stream->priv->fade);
+        g_value_set_double (value, stream_get_fade (MATE_MIXER_STREAM (stream)));
+        break;
+    case PROP_PORTS:
+        g_value_set_pointer (value, stream->priv->ports);
         break;
     case PROP_ACTIVE_PORT:
         g_value_set_object (value, stream->priv->port);
@@ -253,36 +262,12 @@ pulse_stream_set_property (GObject      *object,
     stream = PULSE_STREAM (object);
 
     switch (param_id) {
-    case PROP_NAME:
-        stream->priv->name = g_strdup (g_value_dup_string (value));
-        break;
-    case PROP_DESCRIPTION:
-        stream->priv->description = g_strdup (g_value_get_string (value));
-        break;
-    case PROP_ICON:
-        stream->priv->icon = g_strdup (g_value_get_string (value));
-        break;
-    case PROP_DEVICE:
-        // XXX may be NULL and the device may become known after the stream,
-        // figure this out..
-        // stream->priv->device = g_object_ref (g_value_get_object (value));
-        break;
-    case PROP_FLAGS:
-        stream->priv->flags = g_value_get_flags (value);
-        break;
-    case PROP_STATUS:
-        stream->priv->status = g_value_get_enum (value);
-        break;
-    case PROP_MUTE:
-        stream->priv->mute = g_value_get_boolean (value);
-        break;
     case PROP_INDEX:
         stream->priv->index = g_value_get_uint (value);
         break;
     case PROP_CONNECTION:
+        /* Construct-only object property */
         stream->priv->connection = g_value_dup_object (value);
-        break;
-    case PROP_ACTIVE_PORT:
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -312,6 +297,7 @@ pulse_stream_class_init (PulseStreamClass *klass)
                                                         G_PARAM_CONSTRUCT_ONLY |
                                                         G_PARAM_READWRITE |
                                                         G_PARAM_STATIC_STRINGS));
+
     g_object_class_install_property (object_class,
                                      PROP_CONNECTION,
                                      g_param_spec_object ("connection",
@@ -324,16 +310,15 @@ pulse_stream_class_init (PulseStreamClass *klass)
 
     g_object_class_override_property (object_class, PROP_NAME, "name");
     g_object_class_override_property (object_class, PROP_DESCRIPTION, "description");
-    g_object_class_override_property (object_class, PROP_ICON, "icon");
     g_object_class_override_property (object_class, PROP_DEVICE, "device");
     g_object_class_override_property (object_class, PROP_FLAGS, "flags");
-    g_object_class_override_property (object_class, PROP_STATUS, "status");
+    g_object_class_override_property (object_class, PROP_STATE, "state");
     g_object_class_override_property (object_class, PROP_MUTE, "mute");
     g_object_class_override_property (object_class, PROP_NUM_CHANNELS, "num-channels");
     g_object_class_override_property (object_class, PROP_VOLUME, "volume");
-    g_object_class_override_property (object_class, PROP_VOLUME_DB, "volume-db");
     g_object_class_override_property (object_class, PROP_BALANCE, "balance");
     g_object_class_override_property (object_class, PROP_FADE, "fade");
+    g_object_class_override_property (object_class, PROP_PORTS, "ports");
     g_object_class_override_property (object_class, PROP_ACTIVE_PORT, "active-port");
 
     g_type_class_add_private (object_class, sizeof (PulseStreamPrivate));
@@ -375,7 +360,6 @@ pulse_stream_finalize (GObject *object)
 
     g_free (stream->priv->name);
     g_free (stream->priv->description);
-    g_free (stream->priv->icon);
 
     G_OBJECT_CLASS (pulse_stream_parent_class)->finalize (object);
 }
@@ -394,6 +378,14 @@ pulse_stream_get_connection (PulseStream *stream)
     g_return_val_if_fail (PULSE_IS_STREAM (stream), NULL);
 
     return stream->priv->connection;
+}
+
+PulseMonitor *
+pulse_stream_get_monitor (PulseStream *stream)
+{
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), NULL);
+
+    return stream->priv->monitor;
 }
 
 gboolean
@@ -439,13 +431,13 @@ pulse_stream_update_flags (PulseStream *stream, MateMixerStreamFlags flags)
 }
 
 gboolean
-pulse_stream_update_status (PulseStream *stream, MateMixerStreamStatus status)
+pulse_stream_update_state (PulseStream *stream, MateMixerStreamState state)
 {
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
 
-    if (stream->priv->status != status) {
-        stream->priv->status = status;
-        g_object_notify (G_OBJECT (stream), "status");
+    if (stream->priv->state != state) {
+        stream->priv->state = state;
+        g_object_notify (G_OBJECT (stream), "state");
     }
     return TRUE;
 }
@@ -463,53 +455,42 @@ pulse_stream_update_mute (PulseStream *stream, gboolean mute)
 }
 
 gboolean
-pulse_stream_update_volume (PulseStream *stream, const pa_cvolume *volume)
+pulse_stream_update_volume (PulseStream          *stream,
+                            const pa_cvolume     *volume,
+                            const pa_channel_map *map)
 {
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
 
-    if (!pa_cvolume_equal (&stream->priv->volume, volume)) {
-        stream->priv->volume = *volume;
-
-        g_object_notify (G_OBJECT (stream), "volume");
-
-        // XXX probably should notify about volume-db too but the flags may
-        // be known later
-    }
-    return TRUE;
-}
-
-gboolean
-pulse_stream_update_volume_extended (PulseStream      *stream,
-                                     const pa_cvolume *volume,
-                                     pa_volume_t       volume_base,
-                                     guint32           volume_steps)
-{
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
-
-    // XXX use volume_base and volume_steps
-
-    if (!pa_cvolume_equal (&stream->priv->volume, volume)) {
-        stream->priv->volume = *volume;
-
-        g_object_notify (G_OBJECT (stream), "volume");
-
-        // XXX probably should notify about volume-db too but the flags may
-        // be known later
-    }
-
-    stream->priv->volume_base  = volume_base;
-    stream->priv->volume_steps = volume_steps;
-    return TRUE;
-}
-
-gboolean
-pulse_stream_update_channel_map (PulseStream *stream, const pa_channel_map *map)
-{
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
-
+    /* The channel_map argument is always present, but volume is not always
+     * supported and might be NULL */
     if (!pa_channel_map_equal (&stream->priv->channel_map, map))
         stream->priv->channel_map = *map;
 
+    if (volume != NULL) {
+        if (!pa_cvolume_equal (&stream->priv->volume, volume)) {
+            stream->priv->volume = *volume;
+
+            g_object_notify (G_OBJECT (stream), "volume");
+
+            // XXX notify fade, balance if changed
+        }
+    }
+    return TRUE;
+}
+
+gboolean
+pulse_stream_update_volume_extended (PulseStream          *stream,
+                                     const pa_cvolume     *volume,
+                                     const pa_channel_map *map,
+                                     pa_volume_t           volume_base,
+                                     guint32               volume_steps)
+{
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+
+    pulse_stream_update_volume (stream, volume, map);
+
+    stream->priv->volume_base  = volume_base;
+    stream->priv->volume_steps = volume_steps;
     return TRUE;
 }
 
@@ -518,8 +499,9 @@ pulse_stream_update_ports (PulseStream *stream, GList *ports)
 {
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
 
-    /* Right now we do not change the list of ports during update */
-    g_warn_if_fail (stream->priv->ports == NULL);
+    // XXX sort them
+    if (stream->priv->ports)
+        g_list_free_full (stream->priv->ports, g_object_unref);
 
     stream->priv->ports = ports;
     return TRUE;
@@ -555,10 +537,12 @@ pulse_stream_update_active_port (PulseStream *stream, const gchar *port_name)
     return TRUE;
 }
 
+// XXX check these functions according to flags
+
 static const gchar *
 stream_get_name (MateMixerStream *stream)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), NULL);
 
     return PULSE_STREAM (stream)->priv->name;
 }
@@ -566,23 +550,15 @@ stream_get_name (MateMixerStream *stream)
 static const gchar *
 stream_get_description (MateMixerStream *stream)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), NULL);
 
     return PULSE_STREAM (stream)->priv->description;
-}
-
-static const gchar *
-stream_get_icon (MateMixerStream *stream)
-{
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
-
-    return PULSE_STREAM (stream)->priv->icon;
 }
 
 static MateMixerDevice *
 stream_get_device (MateMixerStream *stream)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), NULL);
 
     return PULSE_STREAM (stream)->priv->device;
 }
@@ -590,17 +566,17 @@ stream_get_device (MateMixerStream *stream)
 static MateMixerStreamFlags
 stream_get_flags (MateMixerStream *stream)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), MATE_MIXER_STREAM_NO_FLAGS);
 
     return PULSE_STREAM (stream)->priv->flags;
 }
 
-static MateMixerStreamStatus
-stream_get_status (MateMixerStream *stream)
+static MateMixerStreamState
+stream_get_state (MateMixerStream *stream)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), MATE_MIXER_STREAM_UNKNOWN_STATE);
 
-    return PULSE_STREAM (stream)->priv->status;
+    return PULSE_STREAM (stream)->priv->state;
 }
 
 static gboolean
@@ -614,16 +590,19 @@ stream_get_mute (MateMixerStream *stream)
 static gboolean
 stream_set_mute (MateMixerStream *stream, gboolean mute)
 {
-    PulseStream *ps;
+    PulseStream *pulse;
+    gboolean     ret = TRUE;
 
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
 
-    ps = PULSE_STREAM (stream);
+    pulse = PULSE_STREAM (stream);
 
-    if (ps->priv->mute == mute)
-        return TRUE;
-
-    return PULSE_STREAM_GET_CLASS (stream)->set_mute (stream, mute);
+    if (pulse->priv->mute != mute) {
+        ret = PULSE_STREAM_GET_CLASS (stream)->set_mute (stream, mute);
+        if (ret)
+            pulse->priv->mute = mute;
+    }
+    return ret;
 }
 
 static guint
@@ -645,34 +624,32 @@ stream_get_volume (MateMixerStream *stream)
 static gboolean
 stream_set_volume (MateMixerStream *stream, gint64 volume)
 {
-    pa_cvolume             cvolume;
-    PulseStream  *ps;
+    PulseStream  *pulse;
+    pa_cvolume    cvolume;
 
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
 
-    ps = PULSE_STREAM (stream);
-    cvolume = ps->priv->volume;
+    if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_CAN_SET_VOLUME))
+        return FALSE;
+
+    pulse = PULSE_STREAM (stream);
+    cvolume = pulse->priv->volume;
 
     if (pa_cvolume_scale (&cvolume, (pa_volume_t) volume) == NULL) {
-        g_warning ("Invalid PulseAudio volume value %" G_GINT64_FORMAT, volume);
+        g_warning ("Invalid volume passed to stream %s",
+                   mate_mixer_stream_get_name (stream));
         return FALSE;
     }
-
-    /* This is the only function which passes a volume request to the real class, so
-     * all the pa_cvolume validations are only done here */
-
-
-
-    return PULSE_STREAM_GET_CLASS (stream)->set_volume (stream, &cvolume);
+    return stream_set_cvolume (stream, &cvolume);
 }
 
 static gdouble
 stream_get_volume_db (MateMixerStream *stream)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), 0.0);
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), 0);
 
     if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME))
-        return FALSE;
+        return 0;
 
     return pa_sw_volume_to_dB (stream_get_volume (stream));
 }
@@ -691,74 +668,72 @@ stream_set_volume_db (MateMixerStream *stream, gdouble volume_db)
 static MateMixerChannelPosition
 stream_get_channel_position (MateMixerStream *stream, guint channel)
 {
-    PulseStream *ps;
+    PulseStream *pulse;
 
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), MATE_MIXER_CHANNEL_UNKNOWN_POSITION);
 
-    ps = PULSE_STREAM (stream);
+    pulse = PULSE_STREAM (stream);
 
-    if (channel >= ps->priv->channel_map.channels) {
-        g_warning ("Invalid channel %u of stream %s", channel, ps->priv->name);
+    if (channel >= pulse->priv->channel_map.channels) {
+        g_warning ("Invalid channel %u of stream %s", channel, pulse->priv->name);
         return MATE_MIXER_CHANNEL_UNKNOWN_POSITION;
     }
-    return pulse_convert_position_to_pulse (ps->priv->channel_map.map[channel]);
+    return pulse_convert_position_to_pulse (pulse->priv->channel_map.map[channel]);
 }
 
 static gint64
 stream_get_channel_volume (MateMixerStream *stream, guint channel)
 {
-    PulseStream *ps;
+    PulseStream *pulse;
 
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), 0);
 
-    ps = PULSE_STREAM (stream);
+    pulse = PULSE_STREAM (stream);
 
-    if (channel >= ps->priv->volume.channels) {
-        g_warning ("Invalid channel %u of stream %s", channel, ps->priv->name);
+    if (channel >= pulse->priv->volume.channels) {
+        g_warning ("Invalid channel %u of stream %s", channel, pulse->priv->name);
         return stream_get_min_volume (stream);
     }
-    return (gint64) ps->priv->volume.values[channel];
+    return (gint64) pulse->priv->volume.values[channel];
 }
 
 static gboolean
 stream_set_channel_volume (MateMixerStream *stream, guint channel, gint64 volume)
 {
-    pa_cvolume             cvolume;
-    PulseStream  *pstream;
+    PulseStream  *pulse;
+    pa_cvolume    cvolume;
 
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
 
-    pstream = PULSE_STREAM (stream);
-    cvolume = pstream->priv->volume;
+    pulse = PULSE_STREAM (stream);
+    cvolume = pulse->priv->volume;
 
-    if (channel >= pstream->priv->volume.channels) {
-        g_warning ("Invalid channel %u of stream %s", channel, pstream->priv->name);
+    if (channel >= pulse->priv->volume.channels) {
+        g_warning ("Invalid channel %u of stream %s", channel, pulse->priv->name);
         return FALSE;
     }
-
     cvolume.values[channel] = (pa_volume_t) volume;
 
-    if (!pa_cvolume_valid (&cvolume)) {
-        g_warning ("Invalid PulseAudio volume value %" G_GINT64_FORMAT, volume);
-        return FALSE;
-    }
-    return PULSE_STREAM_GET_CLASS (stream)->set_volume (stream, &cvolume);
+    return stream_set_cvolume (stream, &cvolume);
 }
 
 static gdouble
 stream_get_channel_volume_db (MateMixerStream *stream, guint channel)
 {
-    PulseStream *pstream;
+    PulseStream *pulse;
 
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), 0.0);
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), 0);
 
-    pstream = PULSE_STREAM (stream);
+    if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME))
+        return 0;
 
-    if (channel >= pstream->priv->volume.channels) {
-        g_warning ("Invalid channel %u of stream %s", channel, pstream->priv->name);
-        return 0.0;
+    pulse = PULSE_STREAM (stream);
+
+    if (channel >= pulse->priv->volume.channels) {
+        g_warning ("Invalid channel %u of stream %s", channel, pulse->priv->name);
+        return 0;
     }
-    return pa_sw_volume_to_dB (pstream->priv->volume.values[channel]);
+    return pa_sw_volume_to_dB (pulse->priv->volume.values[channel]);
 }
 
 static gboolean
@@ -768,6 +743,9 @@ stream_set_channel_volume_db (MateMixerStream *stream,
 {
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
 
+    if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME))
+        return FALSE;
+
     return stream_set_channel_volume (stream,
                                       channel,
                                       pa_sw_volume_from_dB (volume_db));
@@ -776,13 +754,13 @@ stream_set_channel_volume_db (MateMixerStream *stream,
 static gboolean
 stream_has_position (MateMixerStream *stream, MateMixerChannelPosition position)
 {
-    PulseStreamPrivate *priv;
+    PulseStream *pulse;
 
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
 
-    priv = PULSE_STREAM (stream)->priv;
+    pulse = PULSE_STREAM (stream);
 
-    return pa_channel_map_has_position (&priv->channel_map,
+    return pa_channel_map_has_position (&pulse->priv->channel_map,
                                         pulse_convert_position_to_pulse (position));
 }
 
@@ -790,14 +768,14 @@ static gint64
 stream_get_position_volume (MateMixerStream          *stream,
                             MateMixerChannelPosition  position)
 {
-    PulseStreamPrivate *priv;
+    PulseStream *pulse;
 
     g_return_val_if_fail (PULSE_IS_STREAM (stream), 0);
 
-    priv = PULSE_STREAM (stream)->priv;
+    pulse = PULSE_STREAM (stream);
 
-    return pa_cvolume_get_position (&priv->volume,
-                                    &priv->channel_map,
+    return pa_cvolume_get_position (&pulse->priv->volume,
+                                    &pulse->priv->channel_map,
                                     pulse_convert_position_to_pulse (position));
 }
 
@@ -806,28 +784,32 @@ stream_set_position_volume (MateMixerStream          *stream,
                             MateMixerChannelPosition  position,
                             gint64                    volume)
 {
-    PulseStreamPrivate *priv;
-    pa_cvolume cvolume;
+    PulseStream *pulse;
+    pa_cvolume   cvolume;
 
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
 
-    priv = PULSE_STREAM (stream)->priv;
-    cvolume = priv->volume;
+    pulse = PULSE_STREAM (stream);
+    cvolume = pulse->priv->volume;
 
     if (!pa_cvolume_set_position (&cvolume,
-                                  &priv->channel_map,
+                                  &pulse->priv->channel_map,
                                   pulse_convert_position_to_pulse (position),
                                   (pa_volume_t) volume)) {
+        // XXX
         return FALSE;
     }
-    return PULSE_STREAM_GET_CLASS (stream)->set_volume (stream, &cvolume);
+    return stream_set_cvolume (stream, &cvolume);
 }
 
 static gdouble
 stream_get_position_volume_db (MateMixerStream          *stream,
                                MateMixerChannelPosition  position)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), 0.0);
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), 0);
+
+    if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME))
+        return 0;
 
     return pa_sw_volume_to_dB (stream_get_position_volume (stream, position));
 }
@@ -839,87 +821,163 @@ stream_set_position_volume_db (MateMixerStream          *stream,
 {
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
 
+    if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME))
+        return FALSE;
+
     return stream_set_position_volume (stream, position, pa_sw_volume_from_dB (volume_db));
 }
 
 static gdouble
 stream_get_balance (MateMixerStream *stream)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), 0.0);
+    PulseStream *pulse;
 
-    return PULSE_STREAM (stream)->priv->balance;
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), 0);
+
+    pulse = PULSE_STREAM (stream);
+
+    return pa_cvolume_get_balance (&pulse->priv->volume,
+                                   &pulse->priv->channel_map);
 }
 
 static gboolean
 stream_set_balance (MateMixerStream *stream, gdouble balance)
 {
-    PulseStream *pstream;
-    pa_cvolume            cvolume;
+    PulseStream *pulse;
+    pa_cvolume   cvolume;
 
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
 
-    pstream = PULSE_STREAM (stream);
-    cvolume = pstream->priv->volume;
-
-    if (balance == pstream->priv->balance)
-        return TRUE;
+    pulse = PULSE_STREAM (stream);
+    cvolume = pulse->priv->volume;
 
     if (pa_cvolume_set_balance (&cvolume,
-                                &pstream->priv->channel_map,
+                                &pulse->priv->channel_map,
                                 (float) balance) == NULL) {
+        // XXX
         return FALSE;
     }
-    return PULSE_STREAM_GET_CLASS (stream)->set_volume (stream, &cvolume);
+    return stream_set_cvolume (stream, &cvolume);
 }
 
 static gdouble
 stream_get_fade (MateMixerStream *stream)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+    PulseStream *pulse;
 
-    return PULSE_STREAM (stream)->priv->fade;
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), 0);
+
+    pulse = PULSE_STREAM (stream);
+
+    return pa_cvolume_get_fade (&pulse->priv->volume,
+                                &pulse->priv->channel_map);
 }
 
 static gboolean
 stream_set_fade (MateMixerStream *stream, gdouble fade)
 {
+    PulseStream *pulse;
     pa_cvolume   cvolume;
-    PulseStream *pstream;
 
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
 
-    pstream = PULSE_STREAM (stream);
-    cvolume = pstream->priv->volume;
-
-    if (fade == pstream->priv->fade)
-        return TRUE;
+    pulse = PULSE_STREAM (stream);
+    cvolume = pulse->priv->volume;
 
     if (pa_cvolume_set_fade (&cvolume,
-                             &pstream->priv->channel_map,
+                             &pulse->priv->channel_map,
                              (float) fade) == NULL) {
+        // XXX
         return FALSE;
     }
-    return PULSE_STREAM_GET_CLASS (stream)->set_volume (stream, &cvolume);
+    return stream_set_cvolume (stream, &cvolume);
 }
 
 static gboolean
 stream_suspend (MateMixerStream *stream)
 {
-    // TODO
-    return TRUE;
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+
+    if (!(PULSE_STREAM (stream)->priv->flags & MATE_MIXER_STREAM_CAN_SUSPEND))
+        return FALSE;
+
+    return PULSE_STREAM_GET_CLASS (stream)->suspend (stream);
 }
 
 static gboolean
 stream_resume (MateMixerStream *stream)
 {
-    // TODO
-    return TRUE;
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+
+    if (!(PULSE_STREAM (stream)->priv->flags & MATE_MIXER_STREAM_CAN_SUSPEND))
+        return FALSE;
+
+    return PULSE_STREAM_GET_CLASS (stream)->resume (stream);
+}
+
+static gboolean
+stream_monitor_start (MateMixerStream *stream)
+{
+    PulseStream *pulse;
+
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+
+    pulse = PULSE_STREAM (stream);
+
+    if (!pulse->priv->monitor) {
+        pulse->priv->monitor = PULSE_STREAM_GET_CLASS (stream)->create_monitor (stream);
+
+        if (G_UNLIKELY (pulse->priv->monitor == NULL))
+            return FALSE;
+
+        g_signal_connect (G_OBJECT (pulse->priv->monitor),
+                          "value",
+                          G_CALLBACK (stream_monitor_value),
+                          stream);
+    }
+    return pulse_monitor_enable (pulse->priv->monitor);
+}
+
+static void
+stream_monitor_stop (MateMixerStream *stream)
+{
+    PulseStream *pulse;
+
+    g_return_if_fail (PULSE_IS_STREAM (stream));
+
+    pulse = PULSE_STREAM (stream);
+
+    if (pulse->priv->monitor)
+        pulse_monitor_disable (pulse->priv->monitor);
+}
+
+static gboolean
+stream_monitor_is_running (MateMixerStream *stream)
+{
+    PulseStream *pulse;
+
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+
+    pulse = PULSE_STREAM (stream);
+
+    if (pulse->priv->monitor)
+        return pulse_monitor_is_enabled (pulse->priv->monitor);
+
+    return FALSE;
+}
+
+static void
+stream_monitor_value (PulseMonitor *monitor, gdouble value, MateMixerStream *stream)
+{
+    g_signal_emit_by_name (G_OBJECT (stream),
+                           "monitor-value",
+                           value);
 }
 
 static const GList *
 stream_list_ports (MateMixerStream *stream)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), NULL);
 
     return (const GList *) PULSE_STREAM (stream)->priv->ports;
 }
@@ -927,18 +985,18 @@ stream_list_ports (MateMixerStream *stream)
 static MateMixerPort *
 stream_get_active_port (MateMixerStream *stream)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), NULL);
 
     return PULSE_STREAM (stream)->priv->port;
 }
 
 static gboolean
-stream_set_active_port (MateMixerStream *stream, const gchar *port_name)
+stream_set_active_port (MateMixerStream *stream, const gchar *port)
 {
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
-    g_return_val_if_fail (port_name != NULL, FALSE);
+    g_return_val_if_fail (port != NULL, FALSE);
 
-    return PULSE_STREAM_GET_CLASS (stream)->set_active_port (stream, port_name);
+    return PULSE_STREAM_GET_CLASS (stream)->set_active_port (stream, port);
 }
 
 static gint64
@@ -957,4 +1015,23 @@ static gint64
 stream_get_normal_volume (MateMixerStream *stream)
 {
     return (gint64) PA_VOLUME_NORM;
+}
+
+static gboolean
+stream_set_cvolume (MateMixerStream *stream, pa_cvolume *volume)
+{
+    PulseStream *pulse;
+    gboolean     ret = TRUE;
+
+    if (!pa_cvolume_valid (volume))
+        return FALSE;
+
+    pulse = PULSE_STREAM (stream);
+
+    if (!pa_cvolume_equal (volume, &pulse->priv->volume)) {
+            ret = PULSE_STREAM_GET_CLASS (stream)->set_volume (stream, volume);
+        if (ret)
+            pulse->priv->volume = *volume;
+    }
+    return ret;
 }

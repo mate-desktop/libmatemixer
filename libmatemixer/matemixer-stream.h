@@ -41,15 +41,14 @@ typedef struct _MateMixerStreamInterface  MateMixerStreamInterface;
 
 struct _MateMixerStreamInterface
 {
-    /*< private >*/
-    GTypeInterface parent;
+    GTypeInterface parent_iface;
 
+    /*< private >*/
     const gchar *            (*get_name)               (MateMixerStream          *stream);
     const gchar *            (*get_description)        (MateMixerStream          *stream);
-    const gchar *            (*get_icon)               (MateMixerStream          *stream);
     MateMixerDevice *        (*get_device)             (MateMixerStream          *stream);
     MateMixerStreamFlags     (*get_flags)              (MateMixerStream          *stream);
-    MateMixerStreamStatus    (*get_status)             (MateMixerStream          *stream);
+    MateMixerStreamState     (*get_state)              (MateMixerStream          *stream);
     gboolean                 (*get_mute)               (MateMixerStream          *stream);
     gboolean                 (*set_mute)               (MateMixerStream          *stream,
                                                         gboolean                  mute);
@@ -83,7 +82,7 @@ struct _MateMixerStreamInterface
                                                         MateMixerChannelPosition  position);
     gboolean                 (*set_position_volume_db) (MateMixerStream          *stream,
                                                         MateMixerChannelPosition  position,
-                                                        gdouble                   volume);
+                                                        gdouble                   volume_db);
     gdouble                  (*get_balance)            (MateMixerStream          *stream);
     gboolean                 (*set_balance)            (MateMixerStream          *stream,
                                                         gdouble                   balance);
@@ -92,23 +91,29 @@ struct _MateMixerStreamInterface
                                                         gdouble                   fade);
     gboolean                 (*suspend)                (MateMixerStream          *stream);
     gboolean                 (*resume)                 (MateMixerStream          *stream);
+    gboolean                 (*monitor_start)          (MateMixerStream          *stream);
+    void                     (*monitor_stop)           (MateMixerStream          *stream);
+    gboolean                 (*monitor_is_running)     (MateMixerStream          *stream);
     const GList *            (*list_ports)             (MateMixerStream          *stream);
     MateMixerPort *          (*get_active_port)        (MateMixerStream          *stream);
     gboolean                 (*set_active_port)        (MateMixerStream          *stream,
-                                                        const gchar              *port_name);
+                                                        const gchar              *port);
     gint64                   (*get_min_volume)         (MateMixerStream          *stream);
     gint64                   (*get_max_volume)         (MateMixerStream          *stream);
     gint64                   (*get_normal_volume)      (MateMixerStream          *stream);
+
+    /* Signals */
+    void                     (*monitor_value)          (MateMixerStream          *stream,
+                                                        gdouble                   value);
 };
 
 GType                    mate_mixer_stream_get_type               (void) G_GNUC_CONST;
 
 const gchar *            mate_mixer_stream_get_name               (MateMixerStream          *stream);
 const gchar *            mate_mixer_stream_get_description        (MateMixerStream          *stream);
-const gchar *            mate_mixer_stream_get_icon               (MateMixerStream          *stream);
 MateMixerDevice *        mate_mixer_stream_get_device             (MateMixerStream          *stream);
 MateMixerStreamFlags     mate_mixer_stream_get_flags              (MateMixerStream          *stream);
-MateMixerStreamStatus    mate_mixer_stream_get_status             (MateMixerStream          *stream);
+MateMixerStreamState     mate_mixer_stream_get_state              (MateMixerStream          *stream);
 
 gboolean                 mate_mixer_stream_get_mute               (MateMixerStream          *stream);
 gboolean                 mate_mixer_stream_set_mute               (MateMixerStream          *stream,
@@ -164,6 +169,11 @@ gboolean                 mate_mixer_stream_set_fade               (MateMixerStre
 
 gboolean                 mate_mixer_stream_suspend                (MateMixerStream          *stream);
 gboolean                 mate_mixer_stream_resume                 (MateMixerStream          *stream);
+
+gboolean                 mate_mixer_stream_monitor_start          (MateMixerStream          *stream);
+void                     mate_mixer_stream_monitor_stop           (MateMixerStream          *stream);
+
+gboolean                 mate_mixer_stream_monitor_is_running     (MateMixerStream          *stream);
 
 const GList *            mate_mixer_stream_list_ports             (MateMixerStream          *stream);
 

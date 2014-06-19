@@ -43,77 +43,99 @@ mate_mixer_backend_default_init (MateMixerBackendInterface *iface)
     g_object_interface_install_property (iface,
                                          g_param_spec_enum ("state",
                                                             "State",
-                                                            "Backend connection state",
+                                                            "Current backend connection state",
                                                             MATE_MIXER_TYPE_STATE,
                                                             MATE_MIXER_STATE_IDLE,
                                                             G_PARAM_READABLE |
                                                             G_PARAM_STATIC_STRINGS));
 
-    signals[DEVICE_ADDED] = g_signal_new ("device-added",
-                                          G_TYPE_FROM_INTERFACE (iface),
-                                          G_SIGNAL_RUN_LAST,
-                                          G_STRUCT_OFFSET (MateMixerBackendInterface, device_added),
-                                          NULL,
-                                          NULL,
-                                          g_cclosure_marshal_VOID__STRING,
-                                          G_TYPE_NONE,
-                                          1,
-                                          G_TYPE_STRING);
+    g_object_interface_install_property (iface,
+                                         g_param_spec_object ("default-input",
+                                                              "Default input",
+                                                              "Default input stream",
+                                                              MATE_MIXER_TYPE_STREAM,
+                                                              G_PARAM_READABLE |
+                                                              G_PARAM_STATIC_STRINGS));
 
-    signals[DEVICE_CHANGED] = g_signal_new ("device-changed",
-                                            G_TYPE_FROM_INTERFACE (iface),
-                                            G_SIGNAL_RUN_LAST,
-                                            G_STRUCT_OFFSET (MateMixerBackendInterface, device_changed),
-                                            NULL,
-                                            NULL,
-                                            g_cclosure_marshal_VOID__STRING,
-                                            G_TYPE_NONE,
-                                            1,
-                                            G_TYPE_STRING);
+    g_object_interface_install_property (iface,
+                                         g_param_spec_object ("default-output",
+                                                              "Default output",
+                                                              "Default output stream",
+                                                              MATE_MIXER_TYPE_STREAM,
+                                                              G_PARAM_READABLE |
+                                                              G_PARAM_STATIC_STRINGS));
 
-    signals[DEVICE_REMOVED] = g_signal_new ("device-removed",
-                                            G_TYPE_FROM_INTERFACE (iface),
-                                            G_SIGNAL_RUN_LAST,
-                                            G_STRUCT_OFFSET (MateMixerBackendInterface, device_removed),
-                                            NULL,
-                                            NULL,
-                                            g_cclosure_marshal_VOID__STRING,
-                                            G_TYPE_NONE,
-                                            1,
-                                            G_TYPE_STRING);
+    signals[DEVICE_ADDED] =
+        g_signal_new ("device-added",
+                      G_TYPE_FROM_INTERFACE (iface),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (MateMixerBackendInterface, device_added),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__STRING,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_STRING);
 
-    signals[STREAM_ADDED] = g_signal_new ("stream-added",
-                                          G_TYPE_FROM_INTERFACE (iface),
-                                          G_SIGNAL_RUN_LAST,
-                                          G_STRUCT_OFFSET (MateMixerBackendInterface, stream_added),
-                                          NULL,
-                                          NULL,
-                                          g_cclosure_marshal_VOID__STRING,
-                                          G_TYPE_NONE,
-                                          1,
-                                          G_TYPE_STRING);
+    signals[DEVICE_CHANGED] =
+        g_signal_new ("device-changed",
+                      G_TYPE_FROM_INTERFACE (iface),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (MateMixerBackendInterface, device_changed),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__STRING,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_STRING);
 
-    signals[STREAM_CHANGED] = g_signal_new ("stream-changed",
-                                            G_TYPE_FROM_INTERFACE (iface),
-                                            G_SIGNAL_RUN_LAST,
-                                            G_STRUCT_OFFSET (MateMixerBackendInterface, stream_changed),
-                                            NULL,
-                                            NULL,
-                                            g_cclosure_marshal_VOID__STRING,
-                                            G_TYPE_NONE,
-                                            1,
-                                            G_TYPE_STRING);
+    signals[DEVICE_REMOVED] =
+        g_signal_new ("device-removed",
+                      G_TYPE_FROM_INTERFACE (iface),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (MateMixerBackendInterface, device_removed),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__STRING,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_STRING);
 
-    signals[STREAM_REMOVED] = g_signal_new ("stream-removed",
-                                            G_TYPE_FROM_INTERFACE (iface),
-                                            G_SIGNAL_RUN_LAST,
-                                            G_STRUCT_OFFSET (MateMixerBackendInterface, stream_removed),
-                                            NULL,
-                                            NULL,
-                                            g_cclosure_marshal_VOID__STRING,
-                                            G_TYPE_NONE,
-                                            1,
-                                            G_TYPE_STRING);
+    signals[STREAM_ADDED] =
+        g_signal_new ("stream-added",
+                      G_TYPE_FROM_INTERFACE (iface),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (MateMixerBackendInterface, stream_added),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__STRING,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_STRING);
+
+    signals[STREAM_CHANGED] =
+        g_signal_new ("stream-changed",
+                      G_TYPE_FROM_INTERFACE (iface),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (MateMixerBackendInterface, stream_changed),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__STRING,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_STRING);
+
+    signals[STREAM_REMOVED] =
+        g_signal_new ("stream-removed",
+                      G_TYPE_FROM_INTERFACE (iface),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (MateMixerBackendInterface, stream_removed),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__STRING,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_STRING);
 }
 
 void
@@ -129,25 +151,12 @@ mate_mixer_backend_set_data (MateMixerBackend *backend, const MateMixerBackendDa
         iface->set_data (backend, data);
 }
 
-/*
- * Required behaviour:
- * if the function returns TRUE, the state must be either MATE_MIXER_STATE_READY or
- * MATE_MIXER_STATE_CONNECTING.
- */
 gboolean
 mate_mixer_backend_open (MateMixerBackend *backend)
 {
-    MateMixerBackendInterface *iface;
-
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), FALSE);
 
-    iface = MATE_MIXER_BACKEND_GET_INTERFACE (backend);
-
-    if (!iface->open) {
-        g_critical ("Backend module does not implement the open() method");
-        return FALSE;
-    }
-    return iface->open (backend);
+    return MATE_MIXER_BACKEND_GET_INTERFACE (backend)->open (backend);
 }
 
 void
@@ -166,17 +175,9 @@ mate_mixer_backend_close (MateMixerBackend *backend)
 MateMixerState
 mate_mixer_backend_get_state (MateMixerBackend *backend)
 {
-    MateMixerBackendInterface *iface;
-
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), MATE_MIXER_STATE_UNKNOWN);
 
-    iface = MATE_MIXER_BACKEND_GET_INTERFACE (backend);
-
-    if (!iface->get_state) {
-        g_critical ("Backend module does not implement the get_state() method");
-        return MATE_MIXER_STATE_UNKNOWN;
-    }
-    return iface->get_state (backend);
+    return MATE_MIXER_BACKEND_GET_INTERFACE (backend)->get_state (backend);
 }
 
 GList *

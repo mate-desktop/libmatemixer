@@ -21,6 +21,8 @@
 #include <glib.h>
 #include <glib-object.h>
 
+#include <libmatemixer/matemixer-backend.h>
+
 #define PULSE_TYPE_BACKEND                      \
         (pulse_backend_get_type ())
 #define PULSE_BACKEND(o)                        \
@@ -30,7 +32,7 @@
 #define PULSE_BACKEND_CLASS(k)                  \
         (G_TYPE_CHECK_CLASS_CAST ((k), PULSE_TYPE_BACKEND, PulseBackendClass))
 #define PULSE_IS_BACKEND_CLASS(k)               \
-        (G_TYPE_CLASS_CHECK_CLASS_TYPE ((k), PULSE_TYPE_BACKEND))
+        (G_TYPE_CHECK_CLASS_TYPE ((k), PULSE_TYPE_BACKEND))
 #define PULSE_BACKEND_GET_CLASS(o)              \
         (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_TYPE_BACKEND, PulseBackendClass))
 
@@ -40,15 +42,15 @@ typedef struct _PulseBackendPrivate  PulseBackendPrivate;
 
 struct _PulseBackend
 {
+    GObject parent;
+
     /*< private >*/
-    GObject                 parent;
-    PulseBackendPrivate    *priv;
+    PulseBackendPrivate *priv;
 };
 
 struct _PulseBackendClass
 {
-    /*< private >*/
-    GObjectClass            parent;
+    GObjectClass parent_class;
 };
 
 GType                       pulse_backend_get_type  (void) G_GNUC_CONST;

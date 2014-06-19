@@ -21,11 +21,11 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include <libmatemixer/matemixer-stream.h>
-
 #include <pulse/pulseaudio.h>
 
 #include "pulse-client-stream.h"
+#include "pulse-connection.h"
+#include "pulse-stream.h"
 
 G_BEGIN_DECLS
 
@@ -38,33 +38,32 @@ G_BEGIN_DECLS
 #define PULSE_SINK_INPUT_CLASS(k)               \
         (G_TYPE_CHECK_CLASS_CAST ((k), PULSE_TYPE_SINK_INPUT, PulseSinkInputClass))
 #define PULSE_IS_SINK_INPUT_CLASS(k)            \
-        (G_TYPE_CLASS_CHECK_CLASS_TYPE ((k), PULSE_TYPE_SINK_INPUT))
+        (G_TYPE_CHECK_CLASS_TYPE ((k), PULSE_TYPE_SINK_INPUT))
 #define PULSE_SINK_INPUT_GET_CLASS(o)           \
         (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_TYPE_SINK_INPUT, PulseSinkInputClass))
 
-typedef struct _PulseSinkInput         PulseSinkInput;
-typedef struct _PulseSinkInputClass    PulseSinkInputClass;
-typedef struct _PulseSinkInputPrivate  PulseSinkInputPrivate;
+typedef struct _PulseSinkInput       PulseSinkInput;
+typedef struct _PulseSinkInputClass  PulseSinkInputClass;
 
 struct _PulseSinkInput
 {
     PulseClientStream parent;
-
-    PulseSinkInputPrivate *priv;
 };
 
 struct _PulseSinkInputClass
 {
-    PulseClientStreamClass parent;
+    PulseClientStreamClass parent_class;
 };
 
 GType        pulse_sink_input_get_type   (void) G_GNUC_CONST;
 
 PulseStream *pulse_sink_input_new        (PulseConnection          *connection,
-                                          const pa_sink_input_info *info);
+                                          const pa_sink_input_info *info,
+                                          PulseStream              *parent);
 
 gboolean     pulse_sink_input_update     (PulseStream              *stream,
-                                          const pa_sink_input_info *info);
+                                          const pa_sink_input_info *info,
+                                          PulseStream              *parent);
 
 G_END_DECLS
 

@@ -21,10 +21,9 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include <libmatemixer/matemixer-stream.h>
-
 #include <pulse/pulseaudio.h>
 
+#include "pulse-connection.h"
 #include "pulse-stream.h"
 
 G_BEGIN_DECLS
@@ -38,7 +37,7 @@ G_BEGIN_DECLS
 #define PULSE_SINK_CLASS(k)                     \
         (G_TYPE_CHECK_CLASS_CAST ((k), PULSE_TYPE_SINK, PulseSinkClass))
 #define PULSE_IS_SINK_CLASS(k)                  \
-        (G_TYPE_CLASS_CHECK_CLASS_TYPE ((k), PULSE_TYPE_SINK))
+        (G_TYPE_CHECK_CLASS_TYPE ((k), PULSE_TYPE_SINK))
 #define PULSE_SINK_GET_CLASS(o)                 \
         (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_TYPE_SINK, PulseSinkClass))
 
@@ -50,21 +49,24 @@ struct _PulseSink
 {
     PulseStream parent;
 
+    /*< private >*/
     PulseSinkPrivate *priv;
 };
 
 struct _PulseSinkClass
 {
-    PulseStreamClass parent;
+    PulseStreamClass parent_class;
 };
 
-GType        pulse_sink_get_type   (void) G_GNUC_CONST;
+GType        pulse_sink_get_type          (void) G_GNUC_CONST;
 
-PulseStream *pulse_sink_new        (PulseConnection    *connection,
-                                    const pa_sink_info *info);
+PulseStream *pulse_sink_new               (PulseConnection    *connection,
+                                           const pa_sink_info *info);
 
-gboolean     pulse_sink_update     (PulseStream        *stream,
-                                    const pa_sink_info *info);
+guint32      pulse_sink_get_monitor_index (PulseStream        *stream);
+
+gboolean     pulse_sink_update            (PulseStream        *stream,
+                                           const pa_sink_info *info);
 
 G_END_DECLS
 

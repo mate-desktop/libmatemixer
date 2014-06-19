@@ -21,6 +21,7 @@
 #include <glib.h>
 #include <glib-object.h>
 
+#include <libmatemixer/matemixer-device.h>
 #include <libmatemixer/matemixer-enums.h>
 #include <libmatemixer/matemixer-stream.h>
 
@@ -35,7 +36,7 @@ G_BEGIN_DECLS
 #define MATE_MIXER_CONTROL_CLASS(k)             \
         (G_TYPE_CHECK_CLASS_CAST ((k), MATE_MIXER_TYPE_CONTROL, MateMixerControlClass))
 #define MATE_MIXER_IS_CONTROL_CLASS(k)          \
-        (G_TYPE_CLASS_CHECK_CLASS_TYPE ((k), MATE_MIXER_TYPE_CONTROL))
+        (G_TYPE_CHECK_CLASS_TYPE ((k), MATE_MIXER_TYPE_CONTROL))
 #define MATE_MIXER_CONTROL_GET_CLASS(o)         \
         (G_TYPE_INSTANCE_GET_CLASS ((o), MATE_MIXER_TYPE_CONTROL, MateMixerControlClass))
 
@@ -51,9 +52,10 @@ typedef struct _MateMixerControlPrivate  MateMixerControlPrivate;
  */
 struct _MateMixerControl
 {
+    GObject parent;
+
     /*< private >*/
-    GObject                     parent;
-    MateMixerControlPrivate    *priv;
+    MateMixerControlPrivate *priv;
 };
 
 /**
@@ -63,10 +65,9 @@ struct _MateMixerControl
  */
 struct _MateMixerControlClass
 {
-    /*< private >*/
-    GObjectClass                parent;
+    GObjectClass parent_class;
 
-    /* Signals */
+    /*< private >*/
     void (*device_added)        (MateMixerControl *control,
                                  const gchar      *name);
     void (*device_changed)      (MateMixerControl *control,
@@ -97,6 +98,7 @@ gboolean              mate_mixer_control_set_app_icon              (MateMixerCon
 gboolean              mate_mixer_control_set_server_address        (MateMixerControl     *control,
                                                                     const gchar          *address);
 gboolean              mate_mixer_control_open                      (MateMixerControl     *control);
+void                  mate_mixer_control_close                     (MateMixerControl     *control);
 
 MateMixerState        mate_mixer_control_get_state                 (MateMixerControl     *control);
 

@@ -24,6 +24,18 @@
 #include "matemixer-port.h"
 #include "matemixer-stream.h"
 
+/**
+ * SECTION:matemixer-stream
+ * @include: libmatemixer/matemixer.h
+ */
+
+enum {
+    MONITOR_VALUE,
+    N_SIGNALS
+};
+
+static guint signals[N_SIGNALS] = { 0, };
+
 G_DEFINE_INTERFACE (MateMixerStream, mate_mixer_stream, G_TYPE_OBJECT)
 
 static void
@@ -34,8 +46,7 @@ mate_mixer_stream_default_init (MateMixerStreamInterface *iface)
                                                               "Name",
                                                               "Name of the stream",
                                                               NULL,
-                                                              G_PARAM_CONSTRUCT_ONLY |
-                                                              G_PARAM_READWRITE |
+                                                              G_PARAM_READABLE |
                                                               G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
@@ -43,17 +54,7 @@ mate_mixer_stream_default_init (MateMixerStreamInterface *iface)
                                                               "Description",
                                                               "Description of the stream",
                                                               NULL,
-                                                              G_PARAM_CONSTRUCT_ONLY |
-                                                              G_PARAM_READWRITE |
-                                                              G_PARAM_STATIC_STRINGS));
-
-    g_object_interface_install_property (iface,
-                                         g_param_spec_string ("icon",
-                                                              "Icon",
-                                                              "Name of the stream icon",
-                                                              NULL,
-                                                              G_PARAM_CONSTRUCT_ONLY |
-                                                              G_PARAM_READWRITE |
+                                                              G_PARAM_READABLE |
                                                               G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
@@ -61,8 +62,7 @@ mate_mixer_stream_default_init (MateMixerStreamInterface *iface)
                                                               "Device",
                                                               "Device the stream belongs to",
                                                               MATE_MIXER_TYPE_DEVICE,
-                                                              G_PARAM_CONSTRUCT_ONLY |
-                                                              G_PARAM_READWRITE |
+                                                              G_PARAM_READABLE |
                                                               G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
@@ -71,18 +71,16 @@ mate_mixer_stream_default_init (MateMixerStreamInterface *iface)
                                                              "Capability flags of the stream",
                                                               MATE_MIXER_TYPE_STREAM_FLAGS,
                                                               MATE_MIXER_STREAM_NO_FLAGS,
-                                                              G_PARAM_CONSTRUCT_ONLY |
-                                                              G_PARAM_READWRITE |
+                                                              G_PARAM_READABLE |
                                                               G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
-                                         g_param_spec_enum ("status",
-                                                            "Status",
-                                                            "Status of the stream",
-                                                            MATE_MIXER_TYPE_STREAM_STATUS,
-                                                            MATE_MIXER_STREAM_UNKNOWN_STATUS,
-                                                            G_PARAM_CONSTRUCT_ONLY |
-                                                            G_PARAM_READWRITE |
+                                         g_param_spec_enum ("state",
+                                                            "State",
+                                                            "Current state of the stream",
+                                                            MATE_MIXER_TYPE_STREAM_STATE,
+                                                            MATE_MIXER_STREAM_UNKNOWN_STATE,
+                                                            G_PARAM_READABLE |
                                                             G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
@@ -90,8 +88,7 @@ mate_mixer_stream_default_init (MateMixerStreamInterface *iface)
                                                                "Mute",
                                                                "Mute state of the stream",
                                                                FALSE,
-                                                               G_PARAM_CONSTRUCT_ONLY |
-                                                               G_PARAM_READWRITE |
+                                                               G_PARAM_READABLE |
                                                                G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
@@ -115,16 +112,6 @@ mate_mixer_stream_default_init (MateMixerStreamInterface *iface)
                                                              G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
-                                         g_param_spec_double ("volume-db",
-                                                              "Volume dB",
-                                                              "Volume of the stream in decibels",
-                                                              -G_MAXDOUBLE,
-                                                              G_MAXDOUBLE,
-                                                              0.0,
-                                                              G_PARAM_READABLE |
-                                                              G_PARAM_STATIC_STRINGS));
-
-    g_object_interface_install_property (iface,
                                          g_param_spec_double ("balance",
                                                               "Balance",
                                                               "Balance value of the stream",
@@ -145,28 +132,37 @@ mate_mixer_stream_default_init (MateMixerStreamInterface *iface)
                                                               G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
+                                         g_param_spec_pointer ("ports",
+                                                               "Ports",
+                                                               "GList of the sound device ports",
+                                                               G_PARAM_READABLE |
+                                                               G_PARAM_STATIC_STRINGS));
+
+    g_object_interface_install_property (iface,
                                          g_param_spec_object ("active-port",
                                                               "Active port",
                                                               "The currently active port of the stream",
                                                               MATE_MIXER_TYPE_PORT,
-                                                              G_PARAM_CONSTRUCT_ONLY |
-                                                              G_PARAM_READWRITE |
+                                                              G_PARAM_READABLE |
                                                               G_PARAM_STATIC_STRINGS));
+
+    signals[MONITOR_VALUE] =
+        g_signal_new ("monitor-value",
+                      G_TYPE_FROM_INTERFACE (iface),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (MateMixerStreamInterface, monitor_value),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__DOUBLE,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_DOUBLE);
 }
 
 const gchar *
 mate_mixer_stream_get_name (MateMixerStream *stream)
 {
-    MateMixerStreamInterface *iface;
-
-    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), NULL);
-
-    iface = MATE_MIXER_STREAM_GET_INTERFACE (stream);
-
-    if (iface->get_name)
-        return iface->get_name (stream);
-
-    return NULL;
+    return MATE_MIXER_STREAM_GET_INTERFACE (stream)->get_name (stream);
 }
 
 const gchar *
@@ -180,21 +176,6 @@ mate_mixer_stream_get_description (MateMixerStream *stream)
 
     if (iface->get_description)
         return iface->get_description (stream);
-
-    return NULL;
-}
-
-const gchar *
-mate_mixer_stream_get_icon (MateMixerStream *stream)
-{
-    MateMixerStreamInterface *iface;
-
-    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), NULL);
-
-    iface = MATE_MIXER_STREAM_GET_INTERFACE (stream);
-
-    if (iface->get_icon)
-        return iface->get_icon (stream);
 
     return NULL;
 }
@@ -214,19 +195,34 @@ mate_mixer_stream_get_device (MateMixerStream *stream)
     return NULL;
 }
 
-MateMixerStreamStatus
-mate_mixer_stream_get_status (MateMixerStream *stream)
+MateMixerStreamFlags
+mate_mixer_stream_get_flags (MateMixerStream *stream)
 {
     MateMixerStreamInterface *iface;
 
-    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), MATE_MIXER_STREAM_UNKNOWN_STATUS);
+    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), MATE_MIXER_STREAM_NO_FLAGS);
 
     iface = MATE_MIXER_STREAM_GET_INTERFACE (stream);
 
-    if (iface->get_status)
-        return iface->get_status (stream);
+    if (iface->get_flags)
+        return iface->get_flags (stream);
 
-    return MATE_MIXER_STREAM_UNKNOWN_STATUS;
+    return MATE_MIXER_STREAM_NO_FLAGS;
+}
+
+MateMixerStreamState
+mate_mixer_stream_get_state (MateMixerStream *stream)
+{
+    MateMixerStreamInterface *iface;
+
+    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), MATE_MIXER_STREAM_UNKNOWN_STATE);
+
+    iface = MATE_MIXER_STREAM_GET_INTERFACE (stream);
+
+    if (iface->get_state)
+        return iface->get_state (stream);
+
+    return MATE_MIXER_STREAM_UNKNOWN_STATE;
 }
 
 gboolean
@@ -585,6 +581,49 @@ mate_mixer_stream_resume (MateMixerStream *stream)
     return FALSE;
 }
 
+gboolean
+mate_mixer_stream_monitor_start (MateMixerStream *stream)
+{
+    MateMixerStreamInterface *iface;
+
+    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), FALSE);
+
+    iface = MATE_MIXER_STREAM_GET_INTERFACE (stream);
+
+    if (iface->monitor_start)
+        return iface->monitor_start (stream);
+
+    return FALSE;
+}
+
+void
+mate_mixer_stream_monitor_stop (MateMixerStream *stream)
+{
+    MateMixerStreamInterface *iface;
+
+    g_return_if_fail (MATE_MIXER_IS_STREAM (stream));
+
+    iface = MATE_MIXER_STREAM_GET_INTERFACE (stream);
+
+    if (iface->monitor_stop)
+        iface->monitor_stop (stream);
+}
+
+gboolean
+mate_mixer_stream_monitor_is_running (MateMixerStream *stream)
+{
+    MateMixerStreamInterface *iface;
+
+    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), FALSE);
+
+    iface = MATE_MIXER_STREAM_GET_INTERFACE (stream);
+
+    if (iface->monitor_is_running)
+        return iface->monitor_is_running (stream);
+
+    return FALSE;
+}
+
 const GList *
 mate_mixer_stream_list_ports (MateMixerStream *stream)
 {
@@ -616,17 +655,17 @@ mate_mixer_stream_get_active_port (MateMixerStream *stream)
 }
 
 gboolean
-mate_mixer_stream_set_active_port (MateMixerStream *stream, const gchar *port_name)
+mate_mixer_stream_set_active_port (MateMixerStream *stream, const gchar *port)
 {
     MateMixerStreamInterface *iface;
 
     g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), FALSE);
-    g_return_val_if_fail (port_name != NULL, FALSE);
+    g_return_val_if_fail (port != NULL, FALSE);
 
     iface = MATE_MIXER_STREAM_GET_INTERFACE (stream);
 
     if (iface->set_active_port)
-        return iface->set_active_port (stream, port_name);
+        return iface->set_active_port (stream, port);
 
     return FALSE;
 }

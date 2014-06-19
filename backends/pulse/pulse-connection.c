@@ -26,14 +26,14 @@
 #include "pulse-connection.h"
 #include "pulse-enums.h"
 #include "pulse-enum-types.h"
+#include "pulse-monitor.h"
 
 struct _PulseConnectionPrivate
 {
     gchar                *server;
     guint                 outstanding;
-    gboolean              reconnect;
-    gboolean              connected_once;
     pa_context           *context;
+    pa_proplist          *proplist;
     pa_glib_mainloop     *mainloop;
     PulseConnectionState  state;
 };
@@ -41,10 +41,11 @@ struct _PulseConnectionPrivate
 enum {
     PROP_0,
     PROP_SERVER,
-    PROP_RECONNECT,
     PROP_STATE,
     N_PROPERTIES
 };
+
+static GParamSpec *properties[N_PROPERTIES] = { NULL, };
 
 enum {
     SERVER_INFO,
@@ -61,55 +62,229 @@ enum {
     N_SIGNALS
 };
 
-static gchar        *connection_get_app_name            (void);
-static gboolean      connection_load_lists              (PulseConnection              *connection);
+static guint signals[N_SIGNALS] = { 0, };
 
-static void          connection_state_cb                (pa_context                   *c,
-                                                         void                         *userdata);
-static void          connection_subscribe_cb            (pa_context                   *c,
-                                                         pa_subscription_event_type_t  t,
-                                                         uint32_t                      idx,
-                                                         void                         *userdata);
-static void          connection_server_info_cb          (pa_context *c,
-                                                         const pa_server_info         *info,
-                                                         void                         *userdata);
-static void          connection_card_info_cb            (pa_context                   *c,
-                                                         const pa_card_info           *info,
-                                                         int                           eol,
-                                                         void                         *userdata);
-static void          connection_sink_info_cb            (pa_context                   *c,
-                                                         const pa_sink_info           *info,
-                                                         int                           eol,
-                                                         void                         *userdata);
-static void          connection_source_info_cb          (pa_context                   *c,
-                                                         const pa_source_info         *info,
-                                                         int                           eol,
-                                                         void                         *userdata);
-static void          connection_sink_input_info_cb      (pa_context                   *c,
-                                                         const pa_sink_input_info     *info,
-                                                         int                           eol,
-                                                         void                         *userdata);
-static void          connection_source_output_info_cb   (pa_context *c,
-                                                         const pa_source_output_info  *info,
-                                                         int                           eol,
-                                                         void                         *userdata);
+static void pulse_connection_class_init   (PulseConnectionClass *klass);
 
-static void         connection_list_loaded              (PulseConnection              *connection);
-static gboolean     connection_process_operation        (PulseConnection              *connection,
-                                                         pa_operation                 *op);
+static void pulse_connection_get_property (GObject              *object,
+                                           guint                 param_id,
+                                           GValue               *value,
+                                           GParamSpec           *pspec);
+static void pulse_connection_set_property (GObject              *object,
+                                           guint                 param_id,
+                                           const GValue         *value,
+                                           GParamSpec           *pspec);
+
+static void pulse_connection_init         (PulseConnection      *connection);
+static void pulse_connection_finalize     (GObject              *object);
 
 G_DEFINE_TYPE (PulseConnection, pulse_connection, G_TYPE_OBJECT);
 
-static GParamSpec *properties[N_PROPERTIES] = { NULL, };
+static gchar    *connection_get_app_name          (void);
 
-static guint signals[N_SIGNALS] = { 0, };
+static gboolean  connection_load_lists            (PulseConnection              *connection);
+
+static void      connection_state_cb              (pa_context                   *c,
+                                                   void                         *userdata);
+static void      connection_subscribe_cb          (pa_context                   *c,
+                                                   pa_subscription_event_type_t  t,
+                                                   uint32_t                      idx,
+                                                   void                         *userdata);
+static void      connection_server_info_cb        (pa_context *c,
+                                                   const pa_server_info         *info,
+                                                   void                         *userdata);
+static void      connection_card_info_cb          (pa_context                   *c,
+                                                   const pa_card_info           *info,
+                                                   int                           eol,
+                                                   void                         *userdata);
+static void      connection_sink_info_cb          (pa_context                   *c,
+                                                   const pa_sink_info           *info,
+                                                   int                           eol,
+                                                   void                         *userdata);
+static void      connection_source_info_cb        (pa_context                   *c,
+                                                   const pa_source_info         *info,
+                                                   int                           eol,
+                                                   void                         *userdata);
+static void      connection_sink_input_info_cb    (pa_context                   *c,
+                                                   const pa_sink_input_info     *info,
+                                                   int                           eol,
+                                                   void                         *userdata);
+static void      connection_source_output_info_cb (pa_context *c,
+                                                   const pa_source_output_info  *info,
+                                                   int                           eol,
+                                                   void                         *userdata);
+
+static void     connection_change_state           (PulseConnection              *connection,
+                                                   PulseConnectionState          state);
+
+static void     connection_list_loaded            (PulseConnection              *connection);
+
+static gboolean connection_process_operation      (PulseConnection              *connection,
+                                                   pa_operation                 *op);
 
 static void
-pulse_connection_init (PulseConnection *connection)
+pulse_connection_class_init (PulseConnectionClass *klass)
 {
-    connection->priv = G_TYPE_INSTANCE_GET_PRIVATE (connection,
-                                                    PULSE_TYPE_CONNECTION,
-                                                    PulseConnectionPrivate);
+    GObjectClass *object_class;
+
+    object_class = G_OBJECT_CLASS (klass);
+    object_class->finalize     = pulse_connection_finalize;
+    object_class->get_property = pulse_connection_get_property;
+    object_class->set_property = pulse_connection_set_property;
+
+    properties[PROP_SERVER] =
+        g_param_spec_string ("server",
+                             "Server",
+                             "PulseAudio server to connect to",
+                             NULL,
+                             G_PARAM_CONSTRUCT_ONLY |
+                             G_PARAM_READWRITE |
+                             G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_STATE] =
+        g_param_spec_enum ("state",
+                           "State",
+                           "Connection state",
+                           PULSE_TYPE_CONNECTION_STATE,
+                           PULSE_CONNECTION_DISCONNECTED,
+                           G_PARAM_READABLE |
+                           G_PARAM_STATIC_STRINGS);
+
+    signals[SERVER_INFO] =
+        g_signal_new ("server-info",
+                      G_TYPE_FROM_CLASS (object_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (PulseConnectionClass, server_info),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__POINTER,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_POINTER);
+
+    signals[CARD_INFO] =
+        g_signal_new ("card-info",
+                      G_TYPE_FROM_CLASS (object_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (PulseConnectionClass, card_info),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__POINTER,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_POINTER);
+
+    signals[CARD_REMOVED] =
+        g_signal_new ("card-removed",
+                      G_TYPE_FROM_CLASS (object_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (PulseConnectionClass, card_removed),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__UINT,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_UINT);
+
+    signals[SINK_INFO] =
+        g_signal_new ("sink-info",
+                      G_TYPE_FROM_CLASS (object_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (PulseConnectionClass, sink_info),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__POINTER,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_POINTER);
+
+    signals[SINK_REMOVED] =
+        g_signal_new ("sink-removed",
+                      G_TYPE_FROM_CLASS (object_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (PulseConnectionClass, sink_removed),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__UINT,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_UINT);
+
+    signals[SINK_INPUT_INFO] =
+        g_signal_new ("sink-input-info",
+                      G_TYPE_FROM_CLASS (object_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (PulseConnectionClass, sink_input_info),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__POINTER,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_POINTER);
+
+    signals[SINK_INPUT_REMOVED] =
+        g_signal_new ("sink-input-removed",
+                      G_TYPE_FROM_CLASS (object_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (PulseConnectionClass, sink_input_removed),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__UINT,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_UINT);
+
+    signals[SOURCE_INFO] =
+        g_signal_new ("source-info",
+                      G_TYPE_FROM_CLASS (object_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (PulseConnectionClass, source_info),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__POINTER,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_POINTER);
+
+    signals[SOURCE_REMOVED] =
+        g_signal_new ("source-removed",
+                      G_TYPE_FROM_CLASS (object_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (PulseConnectionClass, source_removed),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__UINT,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_UINT);
+
+    signals[SOURCE_OUTPUT_INFO] =
+        g_signal_new ("source-output-info",
+                      G_TYPE_FROM_CLASS (object_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (PulseConnectionClass, source_output_info),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__POINTER,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_POINTER);
+
+    signals[SOURCE_OUTPUT_REMOVED] =
+        g_signal_new ("source-output-removed",
+                      G_TYPE_FROM_CLASS (object_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (PulseConnectionClass, source_output_removed),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__UINT,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_UINT);
+
+    g_object_class_install_properties (object_class, N_PROPERTIES, properties);
+
+    g_type_class_add_private (object_class, sizeof (PulseConnectionPrivate));
 }
 
 static void
@@ -125,9 +300,6 @@ pulse_connection_get_property (GObject    *object,
     switch (param_id) {
     case PROP_SERVER:
         g_value_set_string (value, connection->priv->server);
-        break;
-    case PROP_RECONNECT:
-        g_value_set_boolean (value, connection->priv->reconnect);
         break;
     case PROP_STATE:
         g_value_set_enum (value, connection->priv->state);
@@ -150,17 +322,21 @@ pulse_connection_set_property (GObject      *object,
 
     switch (param_id) {
     case PROP_SERVER:
-        g_free (connection->priv->server);
-
-        connection->priv->server = g_value_dup_string (value);
-        break;
-    case PROP_RECONNECT:
-        connection->priv->reconnect = g_value_get_boolean (value);
+        /* Construct-only string */
+        connection->priv->server = g_strdup (g_value_get_string (value));
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
         break;
     }
+}
+
+static void
+pulse_connection_init (PulseConnection *connection)
+{
+    connection->priv = G_TYPE_INSTANCE_GET_PRIVATE (connection,
+                                                    PULSE_TYPE_CONNECTION,
+                                                    PulseConnectionPrivate);
 }
 
 static void
@@ -172,165 +348,12 @@ pulse_connection_finalize (GObject *object)
 
     g_free (connection->priv->server);
 
+    pa_context_unref (connection->priv->context);
+    pa_proplist_free (connection->priv->proplist);
+
+    pa_glib_mainloop_free (connection->priv->mainloop);
+
     G_OBJECT_CLASS (pulse_connection_parent_class)->finalize (object);
-}
-
-static void
-pulse_connection_class_init (PulseConnectionClass *klass)
-{
-    GObjectClass *object_class;
-
-    object_class = G_OBJECT_CLASS (klass);
-    object_class->finalize     = pulse_connection_finalize;
-    object_class->get_property = pulse_connection_get_property;
-    object_class->set_property = pulse_connection_set_property;
-
-    properties[PROP_SERVER] = g_param_spec_string ("server",
-                                                   "Server",
-                                                   "PulseAudio server to connect to",
-                                                   NULL,
-                                                   G_PARAM_READWRITE |
-                                                   G_PARAM_STATIC_STRINGS);
-
-    properties[PROP_RECONNECT] = g_param_spec_boolean ("reconnect",
-                                                       "Reconnect",
-                                                       "Try to reconnect when connection is lost",
-                                                       TRUE,
-                                                       G_PARAM_READWRITE |
-                                                       G_PARAM_STATIC_STRINGS);
-
-    properties[PROP_STATE] = g_param_spec_enum ("state",
-                                                "State",
-                                                "Connection state",
-                                                 PULSE_TYPE_CONNECTION_STATE,
-                                                 PULSE_CONNECTION_DISCONNECTED,
-                                                 G_PARAM_READABLE |
-                                                 G_PARAM_STATIC_STRINGS);
-
-    signals[SERVER_INFO] = g_signal_new ("server-info",
-                                         G_TYPE_FROM_CLASS (object_class),
-                                         G_SIGNAL_RUN_LAST,
-                                         G_STRUCT_OFFSET (PulseConnectionClass, server_info),
-                                         NULL,
-                                         NULL,
-                                         g_cclosure_marshal_VOID__POINTER,
-                                         G_TYPE_NONE,
-                                         1,
-                                         G_TYPE_POINTER);
-
-    signals[CARD_INFO] = g_signal_new ("card-info",
-                                       G_TYPE_FROM_CLASS (object_class),
-                                       G_SIGNAL_RUN_LAST,
-                                       G_STRUCT_OFFSET (PulseConnectionClass, card_removed),
-                                       NULL,
-                                       NULL,
-                                       g_cclosure_marshal_VOID__POINTER,
-                                       G_TYPE_NONE,
-                                       1,
-                                       G_TYPE_POINTER);
-
-    signals[CARD_REMOVED] = g_signal_new ("card-removed",
-                                          G_TYPE_FROM_CLASS (object_class),
-                                          G_SIGNAL_RUN_LAST,
-                                          G_STRUCT_OFFSET (PulseConnectionClass, card_removed),
-                                          NULL,
-                                          NULL,
-                                          g_cclosure_marshal_VOID__UINT,
-                                          G_TYPE_NONE,
-                                          1,
-                                          G_TYPE_UINT);
-
-    signals[SINK_INFO] = g_signal_new ("sink-info",
-                                       G_TYPE_FROM_CLASS (object_class),
-                                       G_SIGNAL_RUN_LAST,
-                                       G_STRUCT_OFFSET (PulseConnectionClass, sink_info),
-                                       NULL,
-                                       NULL,
-                                       g_cclosure_marshal_VOID__POINTER,
-                                       G_TYPE_NONE,
-                                       1,
-                                       G_TYPE_POINTER);
-
-    signals[SINK_REMOVED] = g_signal_new ("sink-removed",
-                                          G_TYPE_FROM_CLASS (object_class),
-                                          G_SIGNAL_RUN_LAST,
-                                          G_STRUCT_OFFSET (PulseConnectionClass, sink_removed),
-                                          NULL,
-                                          NULL,
-                                          g_cclosure_marshal_VOID__UINT,
-                                          G_TYPE_NONE,
-                                          1,
-                                          G_TYPE_UINT);
-
-    signals[SINK_INPUT_INFO] = g_signal_new ("sink-input-info",
-                                             G_TYPE_FROM_CLASS (object_class),
-                                             G_SIGNAL_RUN_LAST,
-                                             G_STRUCT_OFFSET (PulseConnectionClass, sink_input_info),
-                                             NULL,
-                                             NULL,
-                                             g_cclosure_marshal_VOID__POINTER,
-                                             G_TYPE_NONE,
-                                             1,
-                                             G_TYPE_POINTER);
-
-    signals[SINK_INPUT_REMOVED] = g_signal_new ("sink-input-removed",
-                                                G_TYPE_FROM_CLASS (object_class),
-                                                G_SIGNAL_RUN_LAST,
-                                                G_STRUCT_OFFSET (PulseConnectionClass, sink_input_removed),
-                                                NULL,
-                                                NULL,
-                                                g_cclosure_marshal_VOID__UINT,
-                                                G_TYPE_NONE,
-                                                1,
-                                                G_TYPE_UINT);
-
-    signals[SOURCE_INFO] = g_signal_new ("source-info",
-                                         G_TYPE_FROM_CLASS (object_class),
-                                         G_SIGNAL_RUN_LAST,
-                                         G_STRUCT_OFFSET (PulseConnectionClass, source_info),
-                                         NULL,
-                                         NULL,
-                                         g_cclosure_marshal_VOID__POINTER,
-                                         G_TYPE_NONE,
-                                         1,
-                                         G_TYPE_POINTER);
-
-    signals[SOURCE_REMOVED] = g_signal_new ("source-removed",
-                                            G_TYPE_FROM_CLASS (object_class),
-                                            G_SIGNAL_RUN_LAST,
-                                            G_STRUCT_OFFSET (PulseConnectionClass, source_removed),
-                                            NULL,
-                                            NULL,
-                                            g_cclosure_marshal_VOID__UINT,
-                                            G_TYPE_NONE,
-                                            1,
-                                            G_TYPE_UINT);
-
-    signals[SOURCE_OUTPUT_INFO] = g_signal_new ("source-output-info",
-                                                G_TYPE_FROM_CLASS (object_class),
-                                                G_SIGNAL_RUN_LAST,
-                                                G_STRUCT_OFFSET (PulseConnectionClass, source_output_info),
-                                                NULL,
-                                                NULL,
-                                                g_cclosure_marshal_VOID__POINTER,
-                                                G_TYPE_NONE,
-                                                1,
-                                                G_TYPE_POINTER);
-
-    signals[SOURCE_OUTPUT_REMOVED] = g_signal_new ("source-output-removed",
-                                                   G_TYPE_FROM_CLASS (object_class),
-                                                   G_SIGNAL_RUN_LAST,
-                                                   G_STRUCT_OFFSET (PulseConnectionClass, source_output_removed),
-                                                   NULL,
-                                                   NULL,
-                                                   g_cclosure_marshal_VOID__UINT,
-                                                   G_TYPE_NONE,
-                                                   1,
-                                                   G_TYPE_UINT);
-
-    g_object_class_install_properties (object_class, N_PROPERTIES, properties);
-
-    g_type_class_add_private (object_class, sizeof (PulseConnectionPrivate));
 }
 
 PulseConnection *
@@ -351,6 +374,9 @@ pulse_connection_new (const gchar *app_name,
         return NULL;
     }
 
+    /* Create a property list to hold information about the application,
+     * the list will be kept with the connection as it may be reused later
+     * when creating PulseAudio streams */
     proplist = pa_proplist_new ();
     if (app_name)
         pa_proplist_sets (proplist, PA_PROP_APPLICATION_NAME, app_name);
@@ -366,78 +392,88 @@ pulse_connection_new (const gchar *app_name,
                                                 app_name,
                                                 proplist);
     } else {
+        /* Try to set some sensible default name when application does not
+         * provide a name */
         gchar *name = connection_get_app_name ();
 
         context = pa_context_new_with_proplist (pa_glib_mainloop_get_api (mainloop),
                                                 name,
                                                 proplist);
-
         g_free (name);
     }
-    pa_proplist_free (proplist);
 
     if (G_UNLIKELY (context == NULL)) {
         g_warning ("Failed to create PulseAudio context");
+
         pa_glib_mainloop_free (mainloop);
+        pa_proplist_free (proplist);
         return NULL;
     }
 
     connection = g_object_new (PULSE_TYPE_CONNECTION,
                                "server", server_address,
-                               "reconnect", TRUE,
                                NULL);
+
+    /* Set function to monitor status changes */
+    pa_context_set_state_callback (context,
+                                   connection_state_cb,
+                                   connection);
 
     connection->priv->mainloop = mainloop;
     connection->priv->context  = context;
+    connection->priv->proplist = proplist;
+
     return connection;
 }
 
 gboolean
 pulse_connection_connect (PulseConnection *connection)
 {
-    int ret;
-
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
     if (connection->priv->state != PULSE_CONNECTION_DISCONNECTED)
         return TRUE;
 
-    /* Set function to monitor status changes */
-    pa_context_set_state_callback (connection->priv->context,
-                                   connection_state_cb,
-                                   connection);
-
-    /* Initiate a connection, this call does not guarantee the connection
-     * to be established and usable */
-    ret = pa_context_connect (connection->priv->context, NULL, PA_CONTEXT_NOFLAGS, NULL);
-    if (ret < 0) {
-        g_warning ("Failed to connect to PulseAudio server: %s", pa_strerror (ret));
+    /* Initiate a connection, state changes will be delivered asynchronously */
+    if (pa_context_connect (connection->priv->context,
+                            connection->priv->server,
+                            PA_CONTEXT_NOFLAGS,
+                            NULL) == 0)
+        return TRUE;
+    else
         return FALSE;
-    }
-    return TRUE;
 }
 
 void
 pulse_connection_disconnect (PulseConnection *connection)
 {
-    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+    g_return_if_fail (PULSE_IS_CONNECTION (connection));
 
     if (connection->priv->state == PULSE_CONNECTION_DISCONNECTED)
         return;
 
     pa_context_disconnect (connection->priv->context);
 
-    connection->priv->state = PULSE_CONNECTION_DISCONNECTED;
-
-    g_object_notify_by_pspec (G_OBJECT (connection), properties[PROP_STATE]);
+    connection_change_state (connection, PULSE_CONNECTION_DISCONNECTED);
 }
 
 PulseConnectionState
 pulse_connection_get_state (PulseConnection *connection)
 {
-    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), PULSE_CONNECTION_DISCONNECTED);
 
     return connection->priv->state;
+}
+
+PulseMonitor *
+pulse_connection_create_monitor (PulseConnection *connection,
+                                 guint32          index_source,
+                                 guint32          index_sink_input)
+{
+    return pulse_monitor_new (connection->priv->context,
+                              connection->priv->proplist,
+                              index_source,
+                              index_sink_input);
 }
 
 gboolean
@@ -666,6 +702,40 @@ pulse_connection_set_source_output_volume (PulseConnection  *connection,
 }
 
 gboolean
+pulse_connection_suspend_sink (PulseConnection *connection,
+                               guint32          index,
+                               gboolean         suspend)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    op = pa_context_suspend_sink_by_index (connection->priv->context,
+                                           index,
+                                           (int) suspend,
+                                           NULL, NULL);
+
+    return connection_process_operation (connection, op);
+}
+
+gboolean
+pulse_connection_suspend_source (PulseConnection *connection,
+                                 guint32          index,
+                                 gboolean         suspend)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    op = pa_context_suspend_source_by_index (connection->priv->context,
+                                             index,
+                                             (int) suspend,
+                                             NULL, NULL);
+
+    return connection_process_operation (connection, op);
+}
+
+gboolean
 pulse_connection_move_sink_input (PulseConnection *connection,
                                   guint32          index,
                                   guint32          sink_index)
@@ -755,18 +825,9 @@ connection_load_lists (PulseConnection *connection)
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
     if (G_UNLIKELY (connection->priv->outstanding)) {
-        /* This can only mean a bug */
         g_warn_if_reached ();
         return FALSE;
     }
-
-    op = pa_context_get_server_info (connection->priv->context,
-                                     connection_server_info_cb,
-                                     connection);
-    if (G_UNLIKELY (op == NULL))
-        goto error;
-
-    ops = g_list_prepend (ops, op);
 
     op = pa_context_get_card_info_list (connection->priv->context,
                                         connection_card_info_cb,
@@ -834,9 +895,16 @@ connection_state_cb (pa_context *c, void *userdata)
     if (state == PA_CONTEXT_READY) {
         pa_operation *op;
 
-        // XXX check state
+        if (connection->priv->state == PULSE_CONNECTION_LOADING ||
+            connection->priv->state == PULSE_CONNECTION_CONNECTED) {
+            g_warn_if_reached ();
+            return;
+        }
 
+        /* We are connected, let's subscribe to notifications and load the
+         * initial lists */
         op = pa_context_subscribe (connection->priv->context,
+                                   PA_SUBSCRIPTION_MASK_SERVER |
                                    PA_SUBSCRIPTION_MASK_CARD |
                                    PA_SUBSCRIPTION_MASK_SINK |
                                    PA_SUBSCRIPTION_MASK_SOURCE |
@@ -844,25 +912,22 @@ connection_state_cb (pa_context *c, void *userdata)
                                    PA_SUBSCRIPTION_MASK_SOURCE_OUTPUT,
                                    NULL, NULL);
         if (op) {
-            connection->priv->state = PULSE_CONNECTION_LOADING;
-            connection->priv->connected_once = TRUE;
-
             pa_context_set_subscribe_callback (connection->priv->context,
                                                connection_subscribe_cb,
                                                connection);
             pa_operation_unref (op);
 
             connection_load_lists (connection);
-
-            g_object_notify_by_pspec (G_OBJECT (connection), properties[PROP_STATE]);
-        } else {
-            /* If we could not subscribe to notifications, we consider it the
-             * same as a connection failture */
-            g_warning ("Failed to subscribe to PulseAudio notifications: %s",
-                pa_strerror (pa_context_errno (connection->priv->context)));
-
-            state = PA_CONTEXT_FAILED;
+            connection_change_state (connection, PULSE_CONNECTION_LOADING);
+            return;
         }
+
+        /* If we could not subscribe to notifications, we consider it the
+         * same as a connection failture */
+        g_warning ("Failed to subscribe to PulseAudio notifications: %s",
+                   pa_strerror (pa_context_errno (connection->priv->context)));
+
+        state = PA_CONTEXT_FAILED;
     }
 
     if (state == PA_CONTEXT_TERMINATED || state == PA_CONTEXT_FAILED) {
@@ -870,10 +935,14 @@ connection_state_cb (pa_context *c, void *userdata)
          * change which should not normally happen, because the signal subscription
          * is cancelled before disconnecting */
         pulse_connection_disconnect (connection);
-
-        if (connection->priv->connected_once && connection->priv->reconnect)
-            pulse_connection_connect (connection);
+        return;
     }
+
+    if (state == PA_CONTEXT_CONNECTING)
+        connection_change_state (connection, PULSE_CONNECTION_CONNECTING);
+    else if (state == PA_CONTEXT_AUTHORIZING ||
+             state == PA_CONTEXT_SETTING_NAME)
+        connection_change_state (connection, PULSE_CONNECTION_AUTHORIZING);
 }
 
 static void
@@ -970,10 +1039,19 @@ connection_server_info_cb (pa_context           *c,
                            const pa_server_info *info,
                            void                 *userdata)
 {
-    g_signal_emit (G_OBJECT (userdata),
+    PulseConnection *connection;
+
+    connection = PULSE_CONNECTION (userdata);
+
+    g_signal_emit (G_OBJECT (connection),
                    signals[SERVER_INFO],
                    0,
                    info);
+
+    /* This notification may arrive at any time, but it also finalizes the
+     * connection process */
+    if (connection->priv->state == PULSE_CONNECTION_LOADING)
+        connection_change_state (connection, PULSE_CONNECTION_CONNECTED);
 }
 
 static void
@@ -1008,13 +1086,16 @@ connection_sink_info_cb (pa_context         *c,
 
     connection = PULSE_CONNECTION (userdata);
 
-    if (eol)
-        connection_list_loaded (connection);
-    else
-        g_signal_emit (G_OBJECT (connection),
-                       signals[SINK_INFO],
-                       0,
-                       info);
+    if (eol) {
+        if (connection->priv->state == PULSE_CONNECTION_LOADING)
+            connection_list_loaded (connection);
+        return;
+    }
+
+    g_signal_emit (G_OBJECT (connection),
+                   signals[SINK_INFO],
+                   0,
+                   info);
 }
 
 static void
@@ -1084,6 +1165,17 @@ connection_source_output_info_cb (pa_context                  *c,
 }
 
 static void
+connection_change_state (PulseConnection *connection, PulseConnectionState state)
+{
+    if (connection->priv->state == state)
+        return;
+
+    connection->priv->state = state;
+
+    g_object_notify_by_pspec (G_OBJECT (connection), properties[PROP_STATE]);
+}
+
+static void
 connection_list_loaded (PulseConnection *connection)
 {
     connection->priv->outstanding--;
@@ -1093,9 +1185,14 @@ connection_list_loaded (PulseConnection *connection)
         connection->priv->outstanding = 0;
     }
     if (connection->priv->outstanding == 0) {
-        connection->priv->state = PULSE_CONNECTION_CONNECTED;
+        pa_operation *op;
 
-        g_object_notify_by_pspec (G_OBJECT (connection), properties[PROP_STATE]);
+        op = pa_context_get_server_info (connection->priv->context,
+                                         connection_server_info_cb,
+                                         connection);
+
+        if (G_UNLIKELY (!connection_process_operation (connection, op)))
+            pulse_connection_disconnect (connection);
     }
 }
 

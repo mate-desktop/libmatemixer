@@ -34,15 +34,31 @@ struct _MateMixerBackendModulePrivate
     const MateMixerBackendInfo *(*get_info) (void);
 };
 
-static void     mate_mixer_backend_module_class_init (MateMixerBackendModuleClass *klass);
-static void     mate_mixer_backend_module_init       (MateMixerBackendModule      *module);
-static void     mate_mixer_backend_module_dispose    (GObject                     *object);
-static void     mate_mixer_backend_module_finalize   (GObject                     *object);
+enum {
+    PROP_0,
+    PROP_PATH,
+    N_PROPERTIES
+};
 
-static gboolean mate_mixer_backend_module_load       (GTypeModule *gmodule);
-static void     mate_mixer_backend_module_unload     (GTypeModule *gmodule);
+static void mate_mixer_backend_module_class_init (MateMixerBackendModuleClass *klass);
+
+static void mate_mixer_backend_module_get_property (GObject      *object,
+                                                    guint         param_id,
+                                                    GValue       *value,
+                                                    GParamSpec   *pspec);
+static void mate_mixer_backend_module_set_property (GObject      *object,
+                                                    guint         param_id,
+                                                    const GValue *value,
+                                                    GParamSpec   *pspec);
+
+static void mate_mixer_backend_module_init         (MateMixerBackendModule *module);
+static void mate_mixer_backend_module_dispose      (GObject                *object);
+static void mate_mixer_backend_module_finalize     (GObject                *object);
 
 G_DEFINE_TYPE (MateMixerBackendModule, mate_mixer_backend_module, G_TYPE_TYPE_MODULE);
+
+static gboolean backend_module_load   (GTypeModule *gmodule);
+static void     backend_module_unload (GTypeModule *gmodule);
 
 static void
 mate_mixer_backend_module_class_init (MateMixerBackendModuleClass *klass)
@@ -51,14 +67,67 @@ mate_mixer_backend_module_class_init (MateMixerBackendModuleClass *klass)
     GTypeModuleClass *module_class;
 
     object_class = G_OBJECT_CLASS (klass);
-    object_class->dispose  = mate_mixer_backend_module_dispose;
-    object_class->finalize = mate_mixer_backend_module_finalize;
+    object_class->dispose      = mate_mixer_backend_module_dispose;
+    object_class->finalize     = mate_mixer_backend_module_finalize;
+    object_class->get_property = mate_mixer_backend_module_get_property;
+    object_class->set_property = mate_mixer_backend_module_set_property;
+
+    g_object_class_install_property (object_class,
+                                     PROP_PATH,
+                                     g_param_spec_string ("path",
+                                                          "Path",
+                                                          "File path to the module",
+                                                          0,
+                                                          G_PARAM_CONSTRUCT_ONLY |
+                                                          G_PARAM_READWRITE |
+                                                          G_PARAM_STATIC_STRINGS));
 
     module_class = G_TYPE_MODULE_CLASS (klass);
-    module_class->load   = mate_mixer_backend_module_load;
-    module_class->unload = mate_mixer_backend_module_unload;
+    module_class->load   = backend_module_load;
+    module_class->unload = backend_module_unload;
 
-    g_type_class_add_private (klass, sizeof (MateMixerBackendModulePrivate));
+    g_type_class_add_private (object_class, sizeof (MateMixerBackendModulePrivate));
+}
+
+static void
+mate_mixer_backend_module_get_property (GObject    *object,
+                                        guint       param_id,
+                                        GValue     *value,
+                                        GParamSpec *pspec)
+{
+    MateMixerBackendModule *module;
+
+    module = MATE_MIXER_BACKEND_MODULE (object);
+
+    switch (param_id) {
+    case PROP_PATH:
+        g_value_set_string (value, module->priv->path);
+        break;
+    default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
+        break;
+    }
+}
+
+static void
+mate_mixer_backend_module_set_property (GObject      *object,
+                                        guint         param_id,
+                                        const GValue *value,
+                                        GParamSpec   *pspec)
+{
+    MateMixerBackendModule *module;
+
+    module = MATE_MIXER_BACKEND_MODULE (object);
+
+    switch (param_id) {
+    case PROP_PATH:
+        /* Construct-only string property */
+        module->priv->path = g_strdup (g_value_get_string (value));
+        break;
+    default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
+        break;
+    }
 }
 
 static void
@@ -88,13 +157,70 @@ mate_mixer_backend_module_dispose (GObject *object)
 static void
 mate_mixer_backend_module_finalize (GObject *object)
 {
+    /* This is in fact never called */
     g_free (MATE_MIXER_BACKEND_MODULE (object)->priv->path);
 
     G_OBJECT_CLASS (mate_mixer_backend_module_parent_class)->finalize (object);
 }
 
+/**
+ * mate_mixer_backend_module_new:
+ * @path: path to a backend module
+ *
+ * Creates a new #MateMixerBackendModule instance.
+ *
+ * Returns: a new #MateMixerBackendModule instance.
+ */
+MateMixerBackendModule *
+mate_mixer_backend_module_new (const gchar *path)
+{
+    MateMixerBackendModule *module;
+
+    g_return_val_if_fail (path != NULL, NULL);
+
+    module = g_object_new (MATE_MIXER_TYPE_BACKEND_MODULE,
+                           "path", path,
+                           NULL);
+
+    g_type_module_set_name (G_TYPE_MODULE (module), path);
+
+    return module;
+}
+
+/**
+ * mate_mixer_backend_module_get_info:
+ * @module: a #MateMixerBackendModule
+ *
+ * Gets information about the loaded backend.
+ *
+ * Returns: a #MateMixerBackendInfo.
+ */
+const MateMixerBackendInfo *
+mate_mixer_backend_module_get_info (MateMixerBackendModule *module)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_BACKEND_MODULE (module), NULL);
+
+    return module->priv->get_info ();
+}
+
+/**
+ * mate_mixer_backend_module_get_path:
+ * @module: a #MateMixerBackendModule
+ *
+ * Gets file path to the backend module.
+ *
+ * Returns: string containing the path.
+ */
+const gchar *
+mate_mixer_backend_module_get_path (MateMixerBackendModule *module)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_BACKEND_MODULE (module), NULL);
+
+    return module->priv->path;
+}
+
 static gboolean
-mate_mixer_backend_module_load (GTypeModule *type_module)
+backend_module_load (GTypeModule *type_module)
 {
     MateMixerBackendModule *module;
 
@@ -127,7 +253,7 @@ mate_mixer_backend_module_load (GTypeModule *type_module)
             return FALSE;
         }
 
-        /* Optional backend functions */
+        /* Optional backend function */
         g_module_symbol (module->priv->gmodule,
                          "backend_module_deinit",
                          (gpointer *) &module->priv->deinit);
@@ -135,11 +261,11 @@ mate_mixer_backend_module_load (GTypeModule *type_module)
         module->priv->init (type_module);
         module->priv->loaded = TRUE;
 
-        /* Make sure get_info() returns something so we can avoid checking it
+        /* Make sure get_info() returns something, so we can avoid checking it
          * in other parts of the library */
         if (G_UNLIKELY (module->priv->get_info () == NULL)) {
-            g_warning ("Backend module %s does not provide module information",
-                       module->priv->path);
+            g_critical ("Backend module %s does not provide module information",
+                        module->priv->path);
 
             /* Close the module but keep the loaded flag to avoid unreffing
              * this instance as the GType has most likely been registered */
@@ -154,14 +280,14 @@ mate_mixer_backend_module_load (GTypeModule *type_module)
 
         g_debug ("Loaded backend module %s", module->priv->path);
     } else {
-        /* This function was called before, so initialize only */
+        /* This function was called before, so avoid loading and initialize only */
         module->priv->init (type_module);
     }
     return TRUE;
 }
 
 static void
-mate_mixer_backend_module_unload (GTypeModule *type_module)
+backend_module_unload (GTypeModule *type_module)
 {
     MateMixerBackendModule *module;
 
@@ -171,35 +297,4 @@ mate_mixer_backend_module_unload (GTypeModule *type_module)
      * as the module remains loaded */
     if (module->priv->deinit)
         module->priv->deinit ();
-}
-
-MateMixerBackendModule *
-mate_mixer_backend_module_new (const gchar *path)
-{
-    MateMixerBackendModule *module;
-
-    g_return_val_if_fail (path != NULL, NULL);
-
-    module = g_object_newv (MATE_MIXER_TYPE_BACKEND_MODULE, 0, NULL);
-    module->priv->path = g_strdup (path);
-
-    g_type_module_set_name (G_TYPE_MODULE (module), path);
-
-    return module;
-}
-
-const MateMixerBackendInfo *
-mate_mixer_backend_module_get_info (MateMixerBackendModule *module)
-{
-    g_return_val_if_fail (MATE_MIXER_IS_BACKEND_MODULE (module), NULL);
-
-    return module->priv->get_info ();
-}
-
-const gchar *
-mate_mixer_backend_module_get_path (MateMixerBackendModule *module)
-{
-    g_return_val_if_fail (MATE_MIXER_IS_BACKEND_MODULE (module), NULL);
-
-    return module->priv->path;
 }

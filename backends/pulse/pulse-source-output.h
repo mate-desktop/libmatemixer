@@ -21,10 +21,10 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include <libmatemixer/matemixer-stream.h>
-
 #include <pulse/pulseaudio.h>
 
+#include "pulse-client-stream.h"
+#include "pulse-connection.h"
 #include "pulse-stream.h"
 
 G_BEGIN_DECLS
@@ -38,7 +38,7 @@ G_BEGIN_DECLS
 #define PULSE_SOURCE_OUTPUT_CLASS(k)            \
         (G_TYPE_CHECK_CLASS_CAST ((k), PULSE_TYPE_SOURCE_OUTPUT, PulseSourceOutputClass))
 #define PULSE_IS_SOURCE_OUTPUT_CLASS(k)         \
-        (G_TYPE_CLASS_CHECK_CLASS_TYPE ((k), PULSE_TYPE_SOURCE_OUTPUT))
+        (G_TYPE_CHECK_CLASS_TYPE ((k), PULSE_TYPE_SOURCE_OUTPUT))
 #define PULSE_SOURCE_OUTPUT_GET_CLASS(o)        \
         (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_TYPE_SOURCE_OUTPUT, PulseSourceOutputClass))
 
@@ -48,14 +48,12 @@ typedef struct _PulseSourceOutputPrivate  PulseSourceOutputPrivate;
 
 struct _PulseSourceOutput
 {
-    PulseStream parent;
-
-    PulseSourceOutputPrivate *priv;
+    PulseClientStream parent;
 };
 
 struct _PulseSourceOutputClass
 {
-    PulseStreamClass parent;
+    PulseClientStreamClass parent_class;
 };
 
 GType        pulse_source_output_get_type   (void) G_GNUC_CONST;

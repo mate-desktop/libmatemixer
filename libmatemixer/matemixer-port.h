@@ -34,7 +34,7 @@ G_BEGIN_DECLS
 #define MATE_MIXER_PORT_CLASS(k)                \
         (G_TYPE_CHECK_CLASS_CAST ((k), MATE_MIXER_TYPE_PORT, MateMixerPortClass))
 #define MATE_MIXER_IS_PORT_CLASS(k)             \
-        (G_TYPE_CLASS_CHECK_CLASS_TYPE ((k), MATE_MIXER_TYPE_PORT))
+        (G_TYPE_CHECK_CLASS_TYPE ((k), MATE_MIXER_TYPE_PORT))
 #define MATE_MIXER_PORT_GET_CLASS(o)            \
         (G_TYPE_INSTANCE_GET_CLASS ((o), MATE_MIXER_TYPE_PORT, MateMixerPortClass))
 
@@ -44,29 +44,30 @@ typedef struct _MateMixerPortPrivate  MateMixerPortPrivate;
 
 struct _MateMixerPort
 {
+    GObject parent;
+
     /*< private >*/
-    GObject                 parent;
-    MateMixerPortPrivate   *priv;
+    MateMixerPortPrivate *priv;
 };
 
 struct _MateMixerPortClass
 {
-    /*< private >*/
-    GObjectClass            parent;
+    GObjectClass parent_class;
 };
 
-GType               mate_mixer_port_get_type        (void) G_GNUC_CONST;
-MateMixerPort *     mate_mixer_port_new             (const gchar         *name,
-                                                     const gchar         *description,
-                                                     const gchar         *icon,
-                                                     gulong               priority,
-                                                     MateMixerPortStatus  status);
+GType              mate_mixer_port_get_type        (void) G_GNUC_CONST;
 
-const gchar *       mate_mixer_port_get_name        (MateMixerPort *port);
-const gchar *       mate_mixer_port_get_description (MateMixerPort *port);
-const gchar *       mate_mixer_port_get_icon        (MateMixerPort *port);
-gulong              mate_mixer_port_get_priority    (MateMixerPort *port);
-MateMixerPortStatus mate_mixer_port_get_status      (MateMixerPort *port);
+MateMixerPort *    mate_mixer_port_new             (const gchar        *name,
+                                                    const gchar        *description,
+                                                    const gchar        *icon,
+                                                    gulong              priority,
+                                                    MateMixerPortFlags  flags);
+
+const gchar *      mate_mixer_port_get_name        (MateMixerPort      *port);
+const gchar *      mate_mixer_port_get_description (MateMixerPort      *port);
+const gchar *      mate_mixer_port_get_icon        (MateMixerPort      *port);
+gulong             mate_mixer_port_get_priority    (MateMixerPort      *port);
+MateMixerPortFlags mate_mixer_port_get_flags       (MateMixerPort      *port);
 
 G_END_DECLS
 

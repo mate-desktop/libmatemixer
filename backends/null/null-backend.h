@@ -32,7 +32,7 @@
 #define NULL_BACKEND_CLASS(k)                   \
         (G_TYPE_CHECK_CLASS_CAST ((k), NULL_TYPE_BACKEND, NullBackendClass))
 #define NULL_IS_BACKEND_CLASS(k)                \
-        (G_TYPE_CLASS_CHECK_CLASS_TYPE ((k), NULL_TYPE_BACKEND))
+        (G_TYPE_CHECK_CLASS_TYPE ((k), NULL_TYPE_BACKEND))
 #define NULL_BACKEND_GET_CLASS(o)               \
         (G_TYPE_INSTANCE_GET_CLASS ((o), NULL_TYPE_BACKEND, NullBackendClass))
 
@@ -41,14 +41,12 @@ typedef struct _NullBackendClass  NullBackendClass;
 
 struct _NullBackend
 {
-    /*< private >*/
     GObject parent;
 };
 
 struct _NullBackendClass
 {
-    /*< private >*/
-    GObjectClass parent;
+    GObjectClass parent_class;
 };
 
 GType                       null_backend_get_type   (void) G_GNUC_CONST;

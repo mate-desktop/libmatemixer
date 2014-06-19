@@ -32,7 +32,7 @@ G_BEGIN_DECLS
 #define MATE_MIXER_PROFILE_CLASS(k)             \
         (G_TYPE_CHECK_CLASS_CAST ((k), MATE_MIXER_TYPE_PROFILE, MateMixerProfileClass))
 #define MATE_MIXER_IS_PROFILE_CLASS(k)          \
-        (G_TYPE_CLASS_CHECK_CLASS_TYPE ((k), MATE_MIXER_TYPE_PROFILE))
+        (G_TYPE_CHECK_CLASS_TYPE ((k), MATE_MIXER_TYPE_PROFILE))
 #define MATE_MIXER_PROFILE_GET_CLASS(o)         \
         (G_TYPE_INSTANCE_GET_CLASS ((o), MATE_MIXER_TYPE_PROFILE, MateMixerProfileClass))
 
@@ -42,18 +42,19 @@ typedef struct _MateMixerProfilePrivate  MateMixerProfilePrivate;
 
 struct _MateMixerProfile
 {
+    GObject parent;
+
     /*< private >*/
-    GObject                     parent;
-    MateMixerProfilePrivate    *priv;
+    MateMixerProfilePrivate *priv;
 };
 
 struct _MateMixerProfileClass
 {
-    /*< private >*/
-    GObjectClass                parent;
+    GObjectClass parent_class;
 };
 
 GType             mate_mixer_profile_get_type        (void) G_GNUC_CONST;
+
 MateMixerProfile *mate_mixer_profile_new             (const gchar      *name,
                                                       const gchar      *description,
                                                       gulong            priority);

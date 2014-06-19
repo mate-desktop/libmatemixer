@@ -31,17 +31,32 @@ typedef enum {
     MATE_MIXER_STATE_UNKNOWN
 } MateMixerState;
 
+/**
+ * MateMixerBackendType:
+ * @MATE_MIXER_BACKEND_UNKNOWN:
+ *     Unknown or undefined backend type.
+ * @MATE_MIXER_BACKEND_PULSE:
+ *     PulseAudio sound system backend. It has the highest priority and
+ *     will be the first one to try unless you select a specific backend
+ *     to connect to.
+ * @MATE_MIXER_BACKEND_NULL:
+ *     Fallback backend which never fails to initialize, but provides no
+ *     functionality. This backend has the lowest priority and will be used
+ *     if you do not select a specific backend to connect to and all the
+ *     "real" backends fail to initialize.
+ */
 typedef enum {
     MATE_MIXER_BACKEND_UNKNOWN = 0,
     MATE_MIXER_BACKEND_PULSE,
     MATE_MIXER_BACKEND_NULL
 } MateMixerBackendType;
 
-typedef enum {
-    MATE_MIXER_PORT_UNKNOWN_STATUS,
-    MATE_MIXER_PORT_AVAILABLE,
-    MATE_MIXER_PORT_UNAVAILABLE
-} MateMixerPortStatus;
+typedef enum { /*< flags >*/
+    MATE_MIXER_PORT_NO_FLAGS    = 0,
+    MATE_MIXER_PORT_AVAILABLE   = 1 << 0,
+    MATE_MIXER_PORT_INPUT       = 1 << 1,
+    MATE_MIXER_PORT_OUTPUT      = 1 << 2
+} MateMixerPortFlags;
 
 typedef enum { /*< flags >*/
     MATE_MIXER_STREAM_NO_FLAGS            = 0,
@@ -49,22 +64,24 @@ typedef enum { /*< flags >*/
     MATE_MIXER_STREAM_OUTPUT              = 1 << 1,
     MATE_MIXER_STREAM_CLIENT              = 1 << 2,
     MATE_MIXER_STREAM_APPLICATION         = 1 << 3,
-    MATE_MIXER_STREAM_OUTPUT_MONITOR      = 1 << 4,
+    MATE_MIXER_STREAM_EVENT               = 1 << 4,
     MATE_MIXER_STREAM_HAS_MUTE            = 1 << 5,
     MATE_MIXER_STREAM_HAS_VOLUME          = 1 << 6,
     MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME  = 1 << 7,
     MATE_MIXER_STREAM_HAS_FLAT_VOLUME     = 1 << 8,
-    MATE_MIXER_STREAM_CAN_BALANCE         = 1 << 9,
-    MATE_MIXER_STREAM_CAN_FADE            = 1 << 10,
-    MATE_MIXER_STREAM_CAN_SET_VOLUME      = 1 << 11
+    MATE_MIXER_STREAM_HAS_MONITOR         = 1 << 9,
+    MATE_MIXER_STREAM_CAN_BALANCE         = 1 << 10,
+    MATE_MIXER_STREAM_CAN_FADE            = 1 << 11,
+    MATE_MIXER_STREAM_CAN_SET_VOLUME      = 1 << 12,
+    MATE_MIXER_STREAM_CAN_SUSPEND         = 1 << 13
 } MateMixerStreamFlags;
 
 typedef enum {
-    MATE_MIXER_STREAM_UNKNOWN_STATUS,
+    MATE_MIXER_STREAM_UNKNOWN_STATE,
     MATE_MIXER_STREAM_RUNNING,
     MATE_MIXER_STREAM_IDLE,
     MATE_MIXER_STREAM_SUSPENDED
-} MateMixerStreamStatus;
+} MateMixerStreamState;
 
 typedef enum {
     MATE_MIXER_CHANNEL_UNKNOWN_POSITION,

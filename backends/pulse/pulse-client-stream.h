@@ -22,8 +22,7 @@
 #include <glib-object.h>
 
 #include <libmatemixer/matemixer-client-stream.h>
-
-#include <pulse/pulseaudio.h>
+#include <libmatemixer/matemixer-stream.h>
 
 #include "pulse-stream.h"
 
@@ -38,7 +37,7 @@ G_BEGIN_DECLS
 #define PULSE_CLIENT_STREAM_CLASS(k)                   \
         (G_TYPE_CHECK_CLASS_CAST ((k), PULSE_TYPE_CLIENT_STREAM, PulseClientStreamClass))
 #define PULSE_IS_CLIENT_STREAM_CLASS(k)                \
-        (G_TYPE_CLASS_CHECK_CLASS_TYPE ((k), PULSE_TYPE_CLIENT_STREAM))
+        (G_TYPE_CHECK_CLASS_TYPE ((k), PULSE_TYPE_CLIENT_STREAM))
 #define PULSE_CLIENT_STREAM_GET_CLASS(o)               \
         (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_TYPE_CLIENT_STREAM, PulseClientStreamClass))
 
@@ -50,19 +49,32 @@ struct _PulseClientStream
 {
     PulseStream parent;
 
+    /*< private >*/
     PulseClientStreamPrivate *priv;
 };
 
 struct _PulseClientStreamClass
 {
-    PulseStreamClass parent;
+    PulseStreamClass parent_class;
 
-    gboolean         (*set_parent) (MateMixerClientStream *client,
-                                    MateMixerStream       *stream);
-    gboolean         (*remove)     (MateMixerClientStream *client);
+    gboolean (*set_parent) (MateMixerClientStream *client,
+                            MateMixerStream       *stream);
+    gboolean (*remove)     (MateMixerClientStream *client);
 };
 
-GType             pulse_client_stream_get_type       (void) G_GNUC_CONST;
+GType    pulse_client_stream_get_type           (void) G_GNUC_CONST;
+
+gboolean pulse_client_stream_update_parent      (MateMixerClientStream *client,
+                                                 MateMixerStream       *parent);
+
+gboolean pulse_client_stream_update_app_name    (MateMixerClientStream *client,
+                                                 const gchar           *app_name);
+gboolean pulse_client_stream_update_app_id      (MateMixerClientStream *client,
+                                                 const gchar           *app_id);
+gboolean pulse_client_stream_update_app_version (MateMixerClientStream *client,
+                                                 const gchar           *app_version);
+gboolean pulse_client_stream_update_app_icon    (MateMixerClientStream *client,
+                                                 const gchar           *app_icon);
 
 G_END_DECLS
 

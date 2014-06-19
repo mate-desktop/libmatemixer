@@ -39,20 +39,29 @@ typedef struct _MateMixerClientStreamInterface  MateMixerClientStreamInterface;
 
 struct _MateMixerClientStreamInterface
 {
-    /*< private >*/
-    GTypeInterface parent;
+    GTypeInterface parent_iface;
 
-    MateMixerStream *(*get_parent) (MateMixerClientStream *client);
-    gboolean         (*set_parent) (MateMixerClientStream *client,
-                                    MateMixerStream       *stream);
-    gboolean         (*remove)     (MateMixerClientStream *client);
+    /*< private >*/
+    MateMixerStream *(*get_parent)      (MateMixerClientStream *client);
+    gboolean         (*set_parent)      (MateMixerClientStream *client,
+                                         MateMixerStream       *stream);
+    gboolean         (*remove)          (MateMixerClientStream *client);
+    const gchar     *(*get_app_name)    (MateMixerClientStream *client);
+    const gchar     *(*get_app_id)      (MateMixerClientStream *client);
+    const gchar     *(*get_app_version) (MateMixerClientStream *client);
+    const gchar     *(*get_app_icon)    (MateMixerClientStream *client);
 };
 
-GType            mate_mixer_client_stream_get_type   (void) G_GNUC_CONST;
-MateMixerStream *mate_mixer_client_stream_get_parent (MateMixerClientStream *client);
-gboolean         mate_mixer_client_stream_set_parent (MateMixerClientStream *client,
-                                                      MateMixerStream       *parent);
-gboolean         mate_mixer_client_stream_remove     (MateMixerClientStream *client);
+GType            mate_mixer_client_stream_get_type        (void) G_GNUC_CONST;
+MateMixerStream *mate_mixer_client_stream_get_parent      (MateMixerClientStream *client);
+gboolean         mate_mixer_client_stream_set_parent      (MateMixerClientStream *client,
+                                                           MateMixerStream       *parent);
+gboolean         mate_mixer_client_stream_remove          (MateMixerClientStream *client);
+
+const gchar *    mate_mixer_client_stream_get_app_name    (MateMixerClientStream *client);
+const gchar *    mate_mixer_client_stream_get_app_id      (MateMixerClientStream *client);
+const gchar *    mate_mixer_client_stream_get_app_version (MateMixerClientStream *client);
+const gchar *    mate_mixer_client_stream_get_app_icon    (MateMixerClientStream *client);
 
 G_END_DECLS
 

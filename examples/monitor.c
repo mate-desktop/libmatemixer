@@ -17,12 +17,34 @@
 
 #include <glib.h>
 #include <glib-object.h>
-#include <glib-unix.h>
+#include <string.h>
 #include <locale.h>
+
+#ifdef G_OS_UNIX
+#include <glib-unix.h>
+#endif
 
 #include <libmatemixer/matemixer.h>
 
 static MateMixerControl *control;
+static GMainLoop *mainloop;
+
+static gchar *
+create_app_string (const gchar *app_name,
+                   const gchar *app_id,
+                   const gchar *app_version)
+{
+    GString *string;
+
+    string = g_string_new (app_name);
+
+    if (app_version)
+        g_string_append_printf (string, " %s", app_version);
+    if (app_id)
+        g_string_append_printf (string, " (%s)", app_id);
+
+    return g_string_free (string, FALSE);
+}
 
 static gchar *
 create_volume_bar (MateMixerStream *stream, double *percent)
@@ -118,31 +140,33 @@ print_devices (void)
 static void
 print_streams (void)
 {
-    const GList      *streams;
-    const GList      *ports;
-    const GList      *profiles;
-    MateMixerProfile *active_profile;
+    const GList *streams;
+    const GList *ports;
 
     streams = mate_mixer_control_list_streams (control);
 
     while (streams) {
         MateMixerStream *stream = MATE_MIXER_STREAM (streams->data);
-        gchar   *volume_bar;
-        gdouble  volume;
+        gchar           *volume_bar;
+        gdouble          volume;
+
+        /* Ignore event streams */
+        if (mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_EVENT) {
+            streams = streams->next;
+            continue;
+        }
 
         volume_bar = create_volume_bar (stream, &volume);
 
         g_print ("Stream %s\n"
                  "       |-| Description : %s\n"
-                 "       |-| Icon Name   : %s\n"
                  "       |-| Volume      : %s %.1f %%\n"
                  "       |-| Muted       : %s\n"
                  "       |-| Channels    : %d\n"
                  "       |-| Balance     : %.1f\n"
-                 "       |-| Fade        : %.1f\n\n",
+                 "       |-| Fade        : %.1f\n",
                  mate_mixer_stream_get_name (stream),
                  mate_mixer_stream_get_description (stream),
-                 mate_mixer_stream_get_icon (stream),
                  volume_bar,
                  volume,
                  mate_mixer_stream_get_mute (stream) ? "Yes" : "No",
@@ -150,6 +174,23 @@ print_streams (void)
                  mate_mixer_stream_get_balance (stream),
                  mate_mixer_stream_get_fade (stream));
 
+        if (mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_APPLICATION) {
+            MateMixerClientStream *client;
+            gchar *app;
+
+            /* The application-specific details are accessible through the client
+             * interface, which all client streams implement */
+            client = MATE_MIXER_CLIENT_STREAM (stream);
+
+            app = create_app_string (mate_mixer_client_stream_get_app_name (client),
+                                     mate_mixer_client_stream_get_app_id (client),
+                                     mate_mixer_client_stream_get_app_version (client));
+
+            g_print ("       |-| Application : %s\n", app);
+            g_free (app);
+        }
+
+        g_print ("\n");
         g_free (volume_bar);
 
         ports = mate_mixer_stream_list_ports (stream);
@@ -197,44 +238,91 @@ state_cb (void)
         connected ();
         break;
     case MATE_MIXER_STATE_FAILED:
-        g_printerr ("aaa");
+        g_printerr ("Connection failed.\n");
+        g_main_loop_quit (mainloop);
         break;
     default:
-        g_assert_not_reached ();
         break;
     }
 }
 
+#ifdef G_OS_UNIX
 static gboolean
 signal_cb (gpointer mainloop)
 {
     g_idle_add ((GSourceFunc) g_main_loop_quit, mainloop);
     return FALSE;
 }
+#endif
 
-int main ()
+int main (int argc, char *argv[])
 {
     MateMixerState  state;
-    GMainLoop      *mainloop;
+    GOptionContext *context;
+    gchar          *backend = NULL;
+    gchar          *server = NULL;
+    GError         *error = NULL;
 
-    setlocale (LC_ALL, "");
+    GOptionEntry    entries[] = {
+        { "backend", 'b', 0, G_OPTION_ARG_STRING, &backend, "Sound system to use (pulse, null)", NULL },
+        { "server",  's', 0, G_OPTION_ARG_STRING, &server,  "Sound server address", NULL },
+        { NULL }
+    };
 
-    /* The library */
-
+    /* Initialize the library, if the function returns FALSE, it is not usable */
     if (!mate_mixer_init ())
         return 1;
 
+    context = g_option_context_new ("- libmatemixer monitor");
+
+    g_option_context_add_main_entries (context, entries, NULL);
+
+    if (!g_option_context_parse (context, &argc, &argv, &error)) {
+        g_printerr ("%s\n", error->message);
+        g_error_free (error);
+        return 1;
+    }
+
+    setlocale (LC_ALL, "");
+
+    /* Set up the controller, through which we access the main functionality */
     control = mate_mixer_control_new ();
 
+    /* Some details about our application, only used with the PulseAudio backend */
     mate_mixer_control_set_app_name (control, "MateMixer Monitor");
+    mate_mixer_control_set_app_id (control, "org.mate-desktop.libmatemixer-monitor");
+    mate_mixer_control_set_app_version (control, "1.0");
     mate_mixer_control_set_app_icon (control, "multimedia-volume-control");
 
+    if (backend) {
+        if (!strcmp (backend, "pulse"))
+            mate_mixer_control_set_backend_type (control, MATE_MIXER_BACKEND_PULSE);
+        else if (!strcmp (backend, "null"))
+            mate_mixer_control_set_backend_type (control, MATE_MIXER_BACKEND_NULL);
+        else
+            g_printerr ("Sound system backend '%s' is unknown, it will be auto-detected.",
+                        backend);
+
+        g_free (backend);
+    }
+
+    if (server) {
+        mate_mixer_control_set_server_address (control, server);
+        g_free (server);
+    }
+
+    /* Initiate connection to the sound server */
     if (!mate_mixer_control_open (control)) {
         g_object_unref (control);
         mate_mixer_deinit ();
         return 1;
     }
 
+    /* If mate_mixer_control_open() returns TRUE, the state will be either
+     * MATE_MIXER_STATE_READY or MATE_MIXER_STATE_CONNECTING.
+     *
+     * In case mate_mixer_control_open() returned FALSE, the current state
+     * would be MATE_MIXER_STATE_FAILED */
     state = mate_mixer_control_get_state (control);
 
     switch (state) {
@@ -244,27 +332,28 @@ int main ()
     case MATE_MIXER_STATE_CONNECTING:
         g_print ("Waiting for connection...\n");
 
-        /* This state means that the result will be determined asynchronously, so
-         * let's wait until the state transitions to a different value */
-        g_signal_connect (control, "notify::state", G_CALLBACK (state_cb), NULL);
+        /* Wait for the state transition */
+        g_signal_connect (control,
+                          "notify::state",
+                          G_CALLBACK (state_cb),
+                          NULL);
         break;
     default:
-        /* If mate_mixer_control_open() returns TRUE, these two are the only
-         * possible states.
-         * In case mate_mixer_control_open() returned FALSE, the current state
-         * would be MATE_MIXER_STATE_FAILED */
         g_assert_not_reached ();
         break;
     }
 
     mainloop = g_main_loop_new (NULL, FALSE);
 
+#ifdef G_OS_UNIX
     g_unix_signal_add (SIGTERM, signal_cb, mainloop);
     g_unix_signal_add (SIGINT,  signal_cb, mainloop);
+#endif
 
     g_main_loop_run (mainloop);
 
     g_object_unref (control);
     mate_mixer_deinit ();
+
     return 0;
 }

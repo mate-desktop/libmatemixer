@@ -34,14 +34,14 @@ GType mate_mixer_state_get_type (void) G_GNUC_CONST;
 #define MATE_MIXER_TYPE_BACKEND_TYPE (mate_mixer_backend_type_get_type ())
 GType mate_mixer_backend_type_get_type (void) G_GNUC_CONST;
 
-#define MATE_MIXER_TYPE_PORT_STATUS (mate_mixer_port_status_get_type ())
-GType mate_mixer_port_status_get_type (void) G_GNUC_CONST;
+#define MATE_MIXER_TYPE_PORT_FLAGS (mate_mixer_port_flags_get_type ())
+GType mate_mixer_port_flags_get_type (void) G_GNUC_CONST;
 
 #define MATE_MIXER_TYPE_STREAM_FLAGS (mate_mixer_stream_flags_get_type ())
 GType mate_mixer_stream_flags_get_type (void) G_GNUC_CONST;
 
-#define MATE_MIXER_TYPE_STREAM_STATUS (mate_mixer_stream_status_get_type ())
-GType mate_mixer_stream_status_get_type (void) G_GNUC_CONST;
+#define MATE_MIXER_TYPE_STREAM_STATE (mate_mixer_stream_state_get_type ())
+GType mate_mixer_stream_state_get_type (void) G_GNUC_CONST;
 
 #define MATE_MIXER_TYPE_CHANNEL_POSITION (mate_mixer_channel_position_get_type ())
 GType mate_mixer_channel_position_get_type (void) G_GNUC_CONST;

@@ -21,6 +21,11 @@
 #include "matemixer-device.h"
 #include "matemixer-profile.h"
 
+/**
+ * SECTION:matemixer-device
+ * @include: libmatemixer/matemixer.h
+ */
+
 G_DEFINE_INTERFACE (MateMixerDevice, mate_mixer_device, G_TYPE_OBJECT)
 
 static void
@@ -31,8 +36,7 @@ mate_mixer_device_default_init (MateMixerDeviceInterface *iface)
                                                               "Name",
                                                               "Name of the sound device",
                                                               NULL,
-                                                              G_PARAM_CONSTRUCT_ONLY |
-                                                              G_PARAM_READWRITE |
+                                                              G_PARAM_READABLE |
                                                               G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
@@ -40,8 +44,7 @@ mate_mixer_device_default_init (MateMixerDeviceInterface *iface)
                                                               "Description",
                                                               "Description of the sound device",
                                                               NULL,
-                                                              G_PARAM_CONSTRUCT_ONLY |
-                                                              G_PARAM_READWRITE |
+                                                              G_PARAM_READABLE |
                                                               G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
@@ -49,9 +52,22 @@ mate_mixer_device_default_init (MateMixerDeviceInterface *iface)
                                                               "Icon",
                                                               "Name of the sound device icon",
                                                               NULL,
-                                                              G_PARAM_CONSTRUCT_ONLY |
-                                                              G_PARAM_READWRITE |
+                                                              G_PARAM_READABLE |
                                                               G_PARAM_STATIC_STRINGS));
+
+    g_object_interface_install_property (iface,
+                                         g_param_spec_pointer ("ports",
+                                                               "Ports",
+                                                               "GList of the sound device ports",
+                                                               G_PARAM_READABLE |
+                                                               G_PARAM_STATIC_STRINGS));
+
+    g_object_interface_install_property (iface,
+                                         g_param_spec_pointer ("profiles",
+                                                               "Profiles",
+                                                               "GList of the sound device profiles",
+                                                               G_PARAM_READABLE |
+                                                               G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
                                          g_param_spec_object ("active-profile",
@@ -65,16 +81,9 @@ mate_mixer_device_default_init (MateMixerDeviceInterface *iface)
 const gchar *
 mate_mixer_device_get_name (MateMixerDevice *device)
 {
-    MateMixerDeviceInterface *iface;
-
     g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), NULL);
 
-    iface = MATE_MIXER_DEVICE_GET_INTERFACE (device);
-
-    if (iface->get_name)
-        return iface->get_name (device);
-
-    return NULL;
+    return MATE_MIXER_DEVICE_GET_INTERFACE (device)->get_name (device);
 }
 
 const gchar *
@@ -103,21 +112,6 @@ mate_mixer_device_get_icon (MateMixerDevice *device)
 
     if (iface->get_icon)
         return iface->get_icon (device);
-
-    return NULL;
-}
-
-const GList *
-mate_mixer_device_list_streams (MateMixerDevice *device)
-{
-    MateMixerDeviceInterface *iface;
-
-    g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), NULL);
-
-    iface = MATE_MIXER_DEVICE_GET_INTERFACE (device);
-
-    if (iface->list_streams)
-        return iface->list_streams (device);
 
     return NULL;
 }

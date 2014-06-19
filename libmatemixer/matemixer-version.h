@@ -18,33 +18,7 @@
 #ifndef MATEMIXER_VERSION_H
 #define MATEMIXER_VERSION_H
 
-/**
- * LIBMATEMIXER_MAJOR_VERSION:
- *
- * Libmatemixer major version component (e.g. 1 if %LIBMATEMIXER_VERSION is 1.2.3).
- */
-#define LIBMATEMIXER_MAJOR_VERSION (@LIBMATEMIXER_MAJOR_VERSION@)
-
-/**
- * LIBMATEMIXER_MINOR_VERSION:
- *
- * Libmatemixer minor version component (e.g. 2 if %LIBMATEMIXER_VERSION is 1.2.3).
- */
-#define LIBMATEMIXER_MINOR_VERSION (@LIBMATEMIXER_MINOR_VERSION@)
-
-/**
- * LIBMATEMIXER_MICRO_VERSION:
- *
- * Libmatemixer micro version component (e.g. 3 if %LIBMATEMIXER_VERSION is 1.2.3).
- */
-#define LIBMATEMIXER_MICRO_VERSION (@LIBMATEMIXER_MICRO_VERSION@)
-
-/**
- * LIBMATEMIXER_VERSION:
- *
- * Libmatemixer version.
- */
-#define LIBMATEMIXER_VERSION       (@LIBMATEMIXER_VERSION@)
+G_BEGIN_DECLS
 
 /**
  * LIBMATEMIXER_CHECK_VERSION:
@@ -61,4 +35,6 @@
          (LIBMATEMIXER_MAJOR_VERSION == (major) && LIBMATEMIXER_MINOR_VERSION == (minor) && \
           LIBMATEMIXER_MICRO_VERSION >= (micro)))
 
-#endif /* LIBMATEMIXER_VERSION_H */
+G_END_DECLS
+
+#endif /* MATEMIXER_VERSION_H */

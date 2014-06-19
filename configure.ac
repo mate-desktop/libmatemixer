@@ -41,7 +41,7 @@ AC_PROG_INSTALL
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([string.h sys/types.h unistd.h])
+AC_CHECK_HEADERS([string.h sys/types.h unistd.h locale.h])
 
 # =======================================================================
 # Libtool
@@ -154,7 +154,6 @@ AC_SUBST(CFLAGS)
 AC_CONFIG_FILES([
 Makefile
 libmatemixer/Makefile
-libmatemixer/matemixer-version.h
 backends/Makefile
 backends/null/Makefile
 backends/pulse/Makefile

@@ -44,6 +44,4 @@ libmatemixer_la_LDFLAGS =                                       \
         -no-undefined                                           \
         -export-dynamic
 
-EXTRA_DIST = matemixer-version.h.in
-
 -include $(top_srcdir)/git.mk

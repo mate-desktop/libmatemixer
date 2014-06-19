@@ -20,15 +20,19 @@
 
 #include "matemixer-profile.h"
 
+/**
+ * SECTION:matemixer-profile
+ * @include: libmatemixer/matemixer.h
+ */
+
 struct _MateMixerProfilePrivate
 {
-    gchar   *name;
-    gchar   *description;
-    gulong   priority;
+    gchar  *name;
+    gchar  *description;
+    gulong  priority;
 };
 
-enum
-{
+enum {
     PROP_0,
     PROP_NAME,
     PROP_DESCRIPTION,
@@ -39,10 +43,64 @@ enum
 static GParamSpec *properties[N_PROPERTIES] = { NULL, };
 
 static void mate_mixer_profile_class_init (MateMixerProfileClass *klass);
-static void mate_mixer_profile_init       (MateMixerProfile      *profile);
-static void mate_mixer_profile_finalize   (GObject               *object);
+
+static void mate_mixer_profile_get_property (GObject          *object,
+                                             guint             param_id,
+                                             GValue           *value,
+                                             GParamSpec       *pspec);
+static void mate_mixer_profile_set_property (GObject          *object,
+                                             guint             param_id,
+                                             const GValue     *value,
+                                             GParamSpec       *pspec);
+
+static void mate_mixer_profile_init         (MateMixerProfile *profile);
+static void mate_mixer_profile_finalize     (GObject          *object);
 
 G_DEFINE_TYPE (MateMixerProfile, mate_mixer_profile, G_TYPE_OBJECT);
+
+static void
+mate_mixer_profile_class_init (MateMixerProfileClass *klass)
+{
+    GObjectClass *object_class;
+
+    object_class = G_OBJECT_CLASS (klass);
+    object_class->finalize     = mate_mixer_profile_finalize;
+    object_class->get_property = mate_mixer_profile_get_property;
+    object_class->set_property = mate_mixer_profile_set_property;
+
+    properties[PROP_NAME] =
+        g_param_spec_string ("name",
+                             "Name",
+                             "Name of the profile",
+                             NULL,
+                             G_PARAM_CONSTRUCT_ONLY |
+                             G_PARAM_READWRITE |
+                             G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_DESCRIPTION] =
+        g_param_spec_string ("description",
+                             "Description",
+                             "Description of the profile",
+                             NULL,
+                             G_PARAM_CONSTRUCT_ONLY |
+                             G_PARAM_READWRITE |
+                             G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_PRIORITY] =
+        g_param_spec_ulong ("priority",
+                            "Priority",
+                            "Priority of the profile",
+                            0,
+                            G_MAXULONG,
+                            0,
+                            G_PARAM_CONSTRUCT_ONLY |
+                            G_PARAM_READWRITE |
+                            G_PARAM_STATIC_STRINGS);
+
+    g_object_class_install_properties (object_class, N_PROPERTIES, properties);
+
+    g_type_class_add_private (object_class, sizeof (MateMixerProfilePrivate));
+}
 
 static void
 mate_mixer_profile_get_property (GObject    *object,
@@ -82,9 +140,11 @@ mate_mixer_profile_set_property (GObject      *object,
 
     switch (param_id) {
     case PROP_NAME:
+        /* Construct-only string */
         profile->priv->name = g_strdup (g_value_get_string (value));
         break;
     case PROP_DESCRIPTION:
+        /* Construct-only string */
         profile->priv->description = g_strdup (g_value_get_string (value));
         break;
     case PROP_PRIORITY:
@@ -94,47 +154,6 @@ mate_mixer_profile_set_property (GObject      *object,
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
         break;
     }
-}
-
-static void
-mate_mixer_profile_class_init (MateMixerProfileClass *klass)
-{
-    GObjectClass *object_class;
-
-    object_class = G_OBJECT_CLASS (klass);
-    object_class->finalize     = mate_mixer_profile_finalize;
-    object_class->get_property = mate_mixer_profile_get_property;
-    object_class->set_property = mate_mixer_profile_set_property;
-
-    properties[PROP_NAME] = g_param_spec_string ("name",
-                                                 "Name",
-                                                 "Name of the profile",
-                                                 NULL,
-                                                 G_PARAM_CONSTRUCT_ONLY |
-                                                 G_PARAM_READWRITE |
-                                                 G_PARAM_STATIC_STRINGS);
-
-    properties[PROP_DESCRIPTION] = g_param_spec_string ("description",
-                                                        "Description",
-                                                        "Description of the profile",
-                                                        NULL,
-                                                        G_PARAM_CONSTRUCT_ONLY |
-                                                        G_PARAM_READWRITE |
-                                                        G_PARAM_STATIC_STRINGS);
-
-    properties[PROP_PRIORITY] = g_param_spec_ulong ("priority",
-                                                    "Priority",
-                                                    "Priority of the profile",
-                                                    0,
-                                                    G_MAXULONG,
-                                                    0,
-                                                    G_PARAM_CONSTRUCT_ONLY |
-                                                    G_PARAM_READWRITE |
-                                                    G_PARAM_STATIC_STRINGS);
-
-    g_object_class_install_properties (object_class, N_PROPERTIES, properties);
-
-    g_type_class_add_private (object_class, sizeof (MateMixerProfilePrivate));
 }
 
 static void
