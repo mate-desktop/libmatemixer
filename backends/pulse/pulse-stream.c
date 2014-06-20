@@ -459,7 +459,13 @@ pulse_stream_update_volume (PulseStream          *stream,
                             const pa_cvolume     *volume,
                             const pa_channel_map *map)
 {
+    gdouble fade;
+    gdouble balance;
+
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+
+    fade = stream_get_fade (MATE_MIXER_STREAM (stream));
+    balance = stream_get_balance (MATE_MIXER_STREAM (stream));
 
     /* The channel_map argument is always present, but volume is not always
      * supported and might be NULL */
@@ -472,7 +478,13 @@ pulse_stream_update_volume (PulseStream          *stream,
 
             g_object_notify (G_OBJECT (stream), "volume");
 
-            // XXX notify fade, balance if changed
+            // XXX update flags using pa_cvolume_can_fade, pa_cvolume_can_balance
+
+            if (pa_cvolume_get_fade (volume, map) != fade)
+                g_object_notify (G_OBJECT (stream), "fade");
+
+            if (pa_cvolume_get_balance (volume, map) != balance)
+                g_object_notify (G_OBJECT (stream), "balance");
         }
     }
     return TRUE;
@@ -591,18 +603,19 @@ static gboolean
 stream_set_mute (MateMixerStream *stream, gboolean mute)
 {
     PulseStream *pulse;
-    gboolean     ret = TRUE;
 
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
 
     pulse = PULSE_STREAM (stream);
 
     if (pulse->priv->mute != mute) {
-        ret = PULSE_STREAM_GET_CLASS (stream)->set_mute (stream, mute);
-        if (ret)
-            pulse->priv->mute = mute;
+        if (PULSE_STREAM_GET_CLASS (stream)->set_mute (stream, mute) == FALSE)
+            return FALSE;
+
+        pulse->priv->mute = mute;
+        g_object_notify (G_OBJECT (stream), "mute");
     }
-    return ret;
+    return TRUE;
 }
 
 static guint
@@ -996,6 +1009,7 @@ stream_set_active_port (MateMixerStream *stream, const gchar *port)
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
     g_return_val_if_fail (port != NULL, FALSE);
 
+    // XXX save and notify
     return PULSE_STREAM_GET_CLASS (stream)->set_active_port (stream, port);
 }
 
@@ -1021,7 +1035,6 @@ static gboolean
 stream_set_cvolume (MateMixerStream *stream, pa_cvolume *volume)
 {
     PulseStream *pulse;
-    gboolean     ret = TRUE;
 
     if (!pa_cvolume_valid (volume))
         return FALSE;
@@ -1029,9 +1042,13 @@ stream_set_cvolume (MateMixerStream *stream, pa_cvolume *volume)
     pulse = PULSE_STREAM (stream);
 
     if (!pa_cvolume_equal (volume, &pulse->priv->volume)) {
-            ret = PULSE_STREAM_GET_CLASS (stream)->set_volume (stream, volume);
-        if (ret)
-            pulse->priv->volume = *volume;
+        if (PULSE_STREAM_GET_CLASS (stream)->set_volume (stream, volume) == FALSE)
+            return FALSE;
+
+        pulse->priv->volume = *volume;
+        g_object_notify (G_OBJECT (stream), "volume");
+
+        // XXX notify fade and balance
     }
-    return ret;
+    return TRUE;
 }
