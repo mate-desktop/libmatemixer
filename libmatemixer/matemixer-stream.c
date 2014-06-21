@@ -15,6 +15,9 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+// XXX
+// consider using guint for volumes, but see the other backends first
+
 #include <glib.h>
 #include <glib-object.h>
 
@@ -711,6 +714,21 @@ mate_mixer_stream_get_normal_volume (MateMixerStream *stream)
 
     if (iface->get_normal_volume)
         return iface->get_normal_volume (stream);
+
+    return 0;
+}
+
+gint64
+mate_mixer_stream_get_base_volume (MateMixerStream *stream)
+{
+    MateMixerStreamInterface *iface;
+
+    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), 0);
+
+    iface = MATE_MIXER_STREAM_GET_INTERFACE (stream);
+
+    if (iface->get_base_volume)
+        return iface->get_base_volume (stream);
 
     return 0;
 }

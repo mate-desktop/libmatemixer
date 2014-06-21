@@ -15,6 +15,12 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+// XXX
+// - make sure all functions work correctly with flags
+// - make sure all functions notify
+// - figure out whether functions should g_warning on errors
+// - distinguish MateMixer and Pulse variable names
+
 #include <glib.h>
 #include <glib-object.h>
 #include <string.h>
@@ -45,8 +51,6 @@ struct _PulseStreamPrivate
     pa_volume_t            volume_base;
     guint32                volume_steps;
     pa_channel_map         channel_map;
-    gdouble                balance;
-    gdouble                fade;
     GList                 *ports;
     MateMixerPort         *port;
     PulseConnection       *connection;
@@ -141,11 +145,12 @@ static void                     stream_monitor_value          (PulseMonitor     
 static const GList *            stream_list_ports             (MateMixerStream          *stream);
 static MateMixerPort *          stream_get_active_port        (MateMixerStream          *stream);
 static gboolean                 stream_set_active_port        (MateMixerStream          *stream,
-                                                               const gchar              *port);
+                                                               const gchar              *port_name);
 
 static gint64                   stream_get_min_volume         (MateMixerStream          *stream);
 static gint64                   stream_get_max_volume         (MateMixerStream          *stream);
 static gint64                   stream_get_normal_volume      (MateMixerStream          *stream);
+static gint64                   stream_get_base_volume        (MateMixerStream          *stream);
 
 static gboolean                 stream_set_cvolume            (MateMixerStream          *stream,
                                                                pa_cvolume               *volume);
@@ -190,6 +195,7 @@ mate_mixer_stream_interface_init (MateMixerStreamInterface *iface)
     iface->get_min_volume           = stream_get_min_volume;
     iface->get_max_volume           = stream_get_max_volume;
     iface->get_normal_volume        = stream_get_normal_volume;
+    iface->get_base_volume          = stream_get_base_volume;
 }
 
 static void
@@ -548,8 +554,6 @@ pulse_stream_update_active_port (PulseStream *stream, const gchar *port_name)
     }
     return TRUE;
 }
-
-// XXX check these functions according to flags
 
 static const gchar *
 stream_get_name (MateMixerStream *stream)
@@ -1001,13 +1005,38 @@ stream_get_active_port (MateMixerStream *stream)
 }
 
 static gboolean
-stream_set_active_port (MateMixerStream *stream, const gchar *port)
+stream_set_active_port (MateMixerStream *stream, const gchar *port_name)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
-    g_return_val_if_fail (port != NULL, FALSE);
+    PulseStream   *pulse;
+    GList         *list;
+    MateMixerPort *port = NULL;
 
-    // XXX save and notify
-    return PULSE_STREAM_GET_CLASS (stream)->set_active_port (stream, port);
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+    g_return_val_if_fail (port_name != NULL, FALSE);
+
+    pulse = PULSE_STREAM (stream);
+    list  = pulse->priv->ports;
+    while (list) {
+        port = MATE_MIXER_PORT (list->data);
+
+        if (!g_strcmp0 (mate_mixer_port_get_name (port), port_name))
+            break;
+
+        port = NULL;
+        list = list->next;
+    }
+
+    if (port == NULL ||
+        PULSE_STREAM_GET_CLASS (stream)->set_active_port (stream, port_name) == FALSE)
+        return FALSE;
+
+    if (pulse->priv->port)
+        g_object_unref (pulse->priv->port);
+
+    pulse->priv->port = g_object_ref (port);
+
+    g_object_notify (G_OBJECT (stream), "active-port");
+    return TRUE;
 }
 
 static gint64
@@ -1025,6 +1054,23 @@ stream_get_max_volume (MateMixerStream *stream)
 static gint64
 stream_get_normal_volume (MateMixerStream *stream)
 {
+    return (gint64) PA_VOLUME_NORM;
+}
+
+static gint64
+stream_get_base_volume (MateMixerStream *stream)
+{
+    PulseStream *pulse;
+
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), 0);
+
+    pulse = PULSE_STREAM (stream);
+
+    /* The base volume as set by PulseAudio will never be 0, so treat 0 as a
+     * non-set value and use a default instead */
+    if (pulse->priv->volume_base)
+        return pulse->priv->volume_base;
+
     return (gint64) PA_VOLUME_NORM;
 }
 

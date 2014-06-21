@@ -19,7 +19,6 @@
 #define MATEMIXER_STREAM_H
 
 #include <math.h>
-#include <stdlib.h>
 #include <glib.h>
 #include <glib-object.h>
 
@@ -32,7 +31,7 @@ G_BEGIN_DECLS
 #ifdef INFINITY
 #define MATE_MIXER_INFINITY INFINITY
 #else
-#define MATE_MIXER_INFINITY (atof ("inf"))
+#define MATE_MIXER_INFINITY G_MAXDOUBLE
 #endif
 
 #define MATE_MIXER_TYPE_STREAM                  \
@@ -109,6 +108,7 @@ struct _MateMixerStreamInterface
     gint64                   (*get_min_volume)         (MateMixerStream          *stream);
     gint64                   (*get_max_volume)         (MateMixerStream          *stream);
     gint64                   (*get_normal_volume)      (MateMixerStream          *stream);
+    gint64                   (*get_base_volume)        (MateMixerStream          *stream);
 
     /* Signals */
     void                     (*monitor_value)          (MateMixerStream          *stream,
@@ -192,6 +192,7 @@ gboolean                 mate_mixer_stream_set_active_port        (MateMixerStre
 gint64                   mate_mixer_stream_get_min_volume         (MateMixerStream          *stream);
 gint64                   mate_mixer_stream_get_max_volume         (MateMixerStream          *stream);
 gint64                   mate_mixer_stream_get_normal_volume      (MateMixerStream          *stream);
+gint64                   mate_mixer_stream_get_base_volume        (MateMixerStream          *stream);
 
 G_END_DECLS
 
