@@ -761,7 +761,7 @@ mate_mixer_control_open (MateMixerControl *control)
 
     if (G_UNLIKELY (state != MATE_MIXER_STATE_READY &&
                     state != MATE_MIXER_STATE_CONNECTING)) {
-        /* This would a backend bug */
+        /* This would be a backend bug */
         g_warn_if_reached ();
 
         control_close (control);

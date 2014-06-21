@@ -95,9 +95,9 @@ static guint                    stream_get_num_channels       (MateMixerStream  
 static gint64                   stream_get_volume             (MateMixerStream          *stream);
 static gboolean                 stream_set_volume             (MateMixerStream          *stream,
                                                                gint64                    volume);
-static gdouble                  stream_get_volume_db          (MateMixerStream          *stream);
-static gboolean                 stream_set_volume_db          (MateMixerStream          *stream,
-                                                               gdouble                   volume_db);
+static gdouble                  stream_get_decibel            (MateMixerStream          *stream);
+static gboolean                 stream_set_decibel            (MateMixerStream          *stream,
+                                                               gdouble                   decibel);
 static MateMixerChannelPosition stream_get_channel_position   (MateMixerStream          *stream,
                                                                guint                     channel);
 static gint64                   stream_get_channel_volume     (MateMixerStream          *stream,
@@ -105,11 +105,11 @@ static gint64                   stream_get_channel_volume     (MateMixerStream  
 static gboolean                 stream_set_channel_volume     (MateMixerStream          *stream,
                                                                guint                     channel,
                                                                gint64                    volume);
-static gdouble                  stream_get_channel_volume_db  (MateMixerStream          *stream,
+static gdouble                  stream_get_channel_decibel    (MateMixerStream          *stream,
                                                                guint                     channel);
-static gboolean                 stream_set_channel_volume_db  (MateMixerStream          *stream,
+static gboolean                 stream_set_channel_decibel    (MateMixerStream          *stream,
                                                                guint                     channel,
-                                                               gdouble                   volume_db);
+                                                               gdouble                   decibel);
 static gboolean                 stream_has_position           (MateMixerStream          *stream,
                                                                MateMixerChannelPosition  position);
 static gint64                   stream_get_position_volume    (MateMixerStream          *stream,
@@ -117,11 +117,11 @@ static gint64                   stream_get_position_volume    (MateMixerStream  
 static gboolean                 stream_set_position_volume    (MateMixerStream          *stream,
                                                                MateMixerChannelPosition  position,
                                                                gint64                    volume);
-static gdouble                  stream_get_position_volume_db (MateMixerStream          *stream,
+static gdouble                  stream_get_position_decibel   (MateMixerStream          *stream,
                                                                MateMixerChannelPosition  position);
-static gboolean                 stream_set_position_volume_db (MateMixerStream          *stream,
+static gboolean                 stream_set_position_decibel   (MateMixerStream          *stream,
                                                                MateMixerChannelPosition  position,
-                                                               gdouble                   volume_db);
+                                                               gdouble                   decibel);
 static gdouble                  stream_get_balance            (MateMixerStream          *stream);
 static gboolean                 stream_set_balance            (MateMixerStream          *stream,
                                                                gdouble                   balance);
@@ -163,18 +163,18 @@ mate_mixer_stream_interface_init (MateMixerStreamInterface *iface)
     iface->get_num_channels         = stream_get_num_channels;
     iface->get_volume               = stream_get_volume;
     iface->set_volume               = stream_set_volume;
-    iface->get_volume_db            = stream_get_volume_db;
-    iface->set_volume_db            = stream_set_volume_db;
+    iface->get_decibel              = stream_get_decibel;
+    iface->set_decibel              = stream_set_decibel;
     iface->get_channel_position     = stream_get_channel_position;
     iface->get_channel_volume       = stream_get_channel_volume;
     iface->set_channel_volume       = stream_set_channel_volume;
-    iface->get_channel_volume_db    = stream_get_channel_volume_db;
-    iface->set_channel_volume_db    = stream_set_channel_volume_db;
+    iface->get_channel_decibel      = stream_get_channel_decibel;
+    iface->set_channel_decibel      = stream_set_channel_decibel;
     iface->has_position             = stream_has_position;
     iface->get_position_volume      = stream_get_position_volume;
     iface->set_position_volume      = stream_set_position_volume;
-    iface->get_position_volume_db   = stream_get_position_volume_db;
-    iface->set_position_volume_db   = stream_set_position_volume_db;
+    iface->get_position_decibel     = stream_get_position_decibel;
+    iface->set_position_decibel     = stream_set_position_decibel;
     iface->get_balance              = stream_get_balance;
     iface->set_balance              = stream_set_balance;
     iface->get_fade                 = stream_get_fade;
@@ -648,34 +648,37 @@ stream_set_volume (MateMixerStream *stream, gint64 volume)
     pulse = PULSE_STREAM (stream);
     cvolume = pulse->priv->volume;
 
-    if (pa_cvolume_scale (&cvolume, (pa_volume_t) volume) == NULL) {
-        g_warning ("Invalid volume passed to stream %s",
-                   mate_mixer_stream_get_name (stream));
+    if (pa_cvolume_scale (&cvolume, (pa_volume_t) volume) == NULL)
         return FALSE;
-    }
+
     return stream_set_cvolume (stream, &cvolume);
 }
 
 static gdouble
-stream_get_volume_db (MateMixerStream *stream)
+stream_get_decibel (MateMixerStream *stream)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), 0);
+    gdouble value;
+
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), -MATE_MIXER_INFINITY);
 
     if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME))
-        return 0;
+        return -MATE_MIXER_INFINITY;
 
-    return pa_sw_volume_to_dB (stream_get_volume (stream));
+    value = pa_sw_volume_to_dB (stream_get_volume (stream));
+
+    return (value == PA_DECIBEL_MININFTY) ? -MATE_MIXER_INFINITY : value;
 }
 
 static gboolean
-stream_set_volume_db (MateMixerStream *stream, gdouble volume_db)
+stream_set_decibel (MateMixerStream *stream, gdouble decibel)
 {
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
 
-    if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME))
+    if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME) ||
+        !(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_CAN_SET_VOLUME))
         return FALSE;
 
-    return stream_set_volume (stream, pa_sw_volume_from_dB (volume_db));
+    return stream_set_volume (stream, pa_sw_volume_from_dB (decibel));
 }
 
 static MateMixerChannelPosition
@@ -687,10 +690,9 @@ stream_get_channel_position (MateMixerStream *stream, guint channel)
 
     pulse = PULSE_STREAM (stream);
 
-    if (channel >= pulse->priv->channel_map.channels) {
-        g_warning ("Invalid channel %u of stream %s", channel, pulse->priv->name);
+    if (channel >= pulse->priv->channel_map.channels)
         return MATE_MIXER_CHANNEL_UNKNOWN_POSITION;
-    }
+
     return pulse_convert_position_to_pulse (pulse->priv->channel_map.map[channel]);
 }
 
@@ -703,10 +705,9 @@ stream_get_channel_volume (MateMixerStream *stream, guint channel)
 
     pulse = PULSE_STREAM (stream);
 
-    if (channel >= pulse->priv->volume.channels) {
-        g_warning ("Invalid channel %u of stream %s", channel, pulse->priv->name);
+    if (channel >= pulse->priv->volume.channels)
         return stream_get_min_volume (stream);
-    }
+
     return (gint64) pulse->priv->volume.values[channel];
 }
 
@@ -721,47 +722,47 @@ stream_set_channel_volume (MateMixerStream *stream, guint channel, gint64 volume
     pulse = PULSE_STREAM (stream);
     cvolume = pulse->priv->volume;
 
-    if (channel >= pulse->priv->volume.channels) {
-        g_warning ("Invalid channel %u of stream %s", channel, pulse->priv->name);
+    if (channel >= pulse->priv->volume.channels)
         return FALSE;
-    }
+
     cvolume.values[channel] = (pa_volume_t) volume;
 
     return stream_set_cvolume (stream, &cvolume);
 }
 
 static gdouble
-stream_get_channel_volume_db (MateMixerStream *stream, guint channel)
+stream_get_channel_decibel (MateMixerStream *stream, guint channel)
 {
     PulseStream *pulse;
+    gdouble      value;
 
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), 0);
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), -MATE_MIXER_INFINITY);
 
     if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME))
-        return 0;
+        return -MATE_MIXER_INFINITY;
 
     pulse = PULSE_STREAM (stream);
 
-    if (channel >= pulse->priv->volume.channels) {
-        g_warning ("Invalid channel %u of stream %s", channel, pulse->priv->name);
-        return 0;
-    }
-    return pa_sw_volume_to_dB (pulse->priv->volume.values[channel]);
+    if (channel >= pulse->priv->volume.channels)
+        return -MATE_MIXER_INFINITY;
+
+    value = pa_sw_volume_to_dB (pulse->priv->volume.values[channel]);
+
+    return (value == PA_DECIBEL_MININFTY) ? -MATE_MIXER_INFINITY : value;
 }
 
 static gboolean
-stream_set_channel_volume_db (MateMixerStream *stream,
-                              guint            channel,
-                              gdouble          volume_db)
+stream_set_channel_decibel (MateMixerStream *stream,
+                            guint            channel,
+                            gdouble          decibel)
 {
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
 
-    if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME))
+    if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME) ||
+        !(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_CAN_SET_VOLUME))
         return FALSE;
 
-    return stream_set_channel_volume (stream,
-                                      channel,
-                                      pa_sw_volume_from_dB (volume_db));
+    return stream_set_channel_volume (stream, channel, pa_sw_volume_from_dB (decibel));
 }
 
 static gboolean
@@ -808,36 +809,40 @@ stream_set_position_volume (MateMixerStream          *stream,
     if (!pa_cvolume_set_position (&cvolume,
                                   &pulse->priv->channel_map,
                                   pulse_convert_position_to_pulse (position),
-                                  (pa_volume_t) volume)) {
-        // XXX
+                                  (pa_volume_t) volume))
         return FALSE;
-    }
+
     return stream_set_cvolume (stream, &cvolume);
 }
 
 static gdouble
-stream_get_position_volume_db (MateMixerStream          *stream,
-                               MateMixerChannelPosition  position)
+stream_get_position_decibel (MateMixerStream          *stream,
+                             MateMixerChannelPosition  position)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), 0);
+    gdouble value;
+
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), -MATE_MIXER_INFINITY);
 
     if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME))
-        return 0;
+        return -MATE_MIXER_INFINITY;
 
-    return pa_sw_volume_to_dB (stream_get_position_volume (stream, position));
+    value = pa_sw_volume_to_dB (stream_get_position_volume (stream, position));
+
+    return (value == PA_DECIBEL_MININFTY) ? -MATE_MIXER_INFINITY : value;
 }
 
 static gboolean
-stream_set_position_volume_db (MateMixerStream          *stream,
-                               MateMixerChannelPosition  position,
-                               gdouble                   volume_db)
+stream_set_position_decibel (MateMixerStream          *stream,
+                             MateMixerChannelPosition  position,
+                             gdouble                   decibel)
 {
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
 
-    if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME))
+    if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME) ||
+        !(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_CAN_SET_VOLUME))
         return FALSE;
 
-    return stream_set_position_volume (stream, position, pa_sw_volume_from_dB (volume_db));
+    return stream_set_position_volume (stream, position, pa_sw_volume_from_dB (decibel));
 }
 
 static gdouble
@@ -849,8 +854,7 @@ stream_get_balance (MateMixerStream *stream)
 
     pulse = PULSE_STREAM (stream);
 
-    return pa_cvolume_get_balance (&pulse->priv->volume,
-                                   &pulse->priv->channel_map);
+    return pa_cvolume_get_balance (&pulse->priv->volume, &pulse->priv->channel_map);
 }
 
 static gboolean
@@ -864,12 +868,9 @@ stream_set_balance (MateMixerStream *stream, gdouble balance)
     pulse = PULSE_STREAM (stream);
     cvolume = pulse->priv->volume;
 
-    if (pa_cvolume_set_balance (&cvolume,
-                                &pulse->priv->channel_map,
-                                (float) balance) == NULL) {
-        // XXX
+    if (pa_cvolume_set_balance (&cvolume, &pulse->priv->channel_map, (float) balance) == NULL)
         return FALSE;
-    }
+
     return stream_set_cvolume (stream, &cvolume);
 }
 
@@ -882,8 +883,7 @@ stream_get_fade (MateMixerStream *stream)
 
     pulse = PULSE_STREAM (stream);
 
-    return pa_cvolume_get_fade (&pulse->priv->volume,
-                                &pulse->priv->channel_map);
+    return pa_cvolume_get_fade (&pulse->priv->volume, &pulse->priv->channel_map);
 }
 
 static gboolean
@@ -897,12 +897,9 @@ stream_set_fade (MateMixerStream *stream, gdouble fade)
     pulse = PULSE_STREAM (stream);
     cvolume = pulse->priv->volume;
 
-    if (pa_cvolume_set_fade (&cvolume,
-                             &pulse->priv->channel_map,
-                             (float) fade) == NULL) {
-        // XXX
+    if (pa_cvolume_set_fade (&cvolume, &pulse->priv->channel_map, (float) fade) == NULL)
         return FALSE;
-    }
+
     return stream_set_cvolume (stream, &cvolume);
 }
 

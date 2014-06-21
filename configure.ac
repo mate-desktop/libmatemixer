@@ -41,7 +41,7 @@ AC_PROG_INSTALL
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([string.h sys/types.h unistd.h locale.h])
+AC_CHECK_HEADERS([stdlib.h string.h math.h sys/types.h unistd.h locale.h])
 
 # =======================================================================
 # Libtool

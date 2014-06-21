@@ -286,22 +286,22 @@ mate_mixer_stream_set_volume (MateMixerStream *stream, gint64 volume)
 }
 
 gdouble
-mate_mixer_stream_get_volume_db (MateMixerStream *stream)
+mate_mixer_stream_get_decibel (MateMixerStream *stream)
 {
     MateMixerStreamInterface *iface;
 
-    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), 0);
+    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), -MATE_MIXER_INFINITY);
 
     iface = MATE_MIXER_STREAM_GET_INTERFACE (stream);
 
-    if (iface->get_volume_db)
-        return iface->get_volume_db (stream);
+    if (iface->get_decibel)
+        return iface->get_decibel (stream);
 
-    return 0;
+    return -MATE_MIXER_INFINITY;
 }
 
 gboolean
-mate_mixer_stream_set_volume_db (MateMixerStream *stream, gdouble volume_db)
+mate_mixer_stream_set_decibel (MateMixerStream *stream, gdouble decibel)
 {
     MateMixerStreamInterface *iface;
 
@@ -309,8 +309,8 @@ mate_mixer_stream_set_volume_db (MateMixerStream *stream, gdouble volume_db)
 
     iface = MATE_MIXER_STREAM_GET_INTERFACE (stream);
 
-    if (iface->set_volume_db)
-        return iface->set_volume_db (stream, volume_db);
+    if (iface->set_decibel)
+        return iface->set_decibel (stream, decibel);
 
     return FALSE;
 }
@@ -378,24 +378,24 @@ mate_mixer_stream_set_channel_volume (MateMixerStream *stream,
 }
 
 gdouble
-mate_mixer_stream_get_channel_volume_db (MateMixerStream *stream, guint channel)
+mate_mixer_stream_get_channel_decibel (MateMixerStream *stream, guint channel)
 {
     MateMixerStreamInterface *iface;
 
-    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), 0);
+    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), -MATE_MIXER_INFINITY);
 
     iface = MATE_MIXER_STREAM_GET_INTERFACE (stream);
 
-    if (iface->get_channel_volume_db)
-        return iface->get_channel_volume_db (stream, channel);
+    if (iface->get_channel_decibel)
+        return iface->get_channel_decibel (stream, channel);
 
-    return 0;
+    return -MATE_MIXER_INFINITY;
 }
 
 gboolean
-mate_mixer_stream_set_channel_volume_db (MateMixerStream *stream,
-                                         guint            channel,
-                                         gdouble          volume_db)
+mate_mixer_stream_set_channel_decibel (MateMixerStream *stream,
+                                       guint            channel,
+                                       gdouble          decibel)
 {
     MateMixerStreamInterface *iface;
 
@@ -403,8 +403,8 @@ mate_mixer_stream_set_channel_volume_db (MateMixerStream *stream,
 
     iface = MATE_MIXER_STREAM_GET_INTERFACE (stream);
 
-    if (iface->set_channel_volume_db)
-        return iface->set_channel_volume_db (stream, channel, volume_db);
+    if (iface->set_channel_decibel)
+        return iface->set_channel_decibel (stream, channel, decibel);
 
     return FALSE;
 }
@@ -459,25 +459,25 @@ mate_mixer_stream_set_position_volume (MateMixerStream          *stream,
 }
 
 gdouble
-mate_mixer_stream_get_position_volume_db (MateMixerStream          *stream,
-                                          MateMixerChannelPosition  position)
+mate_mixer_stream_get_position_decibel (MateMixerStream          *stream,
+                                        MateMixerChannelPosition  position)
 {
     MateMixerStreamInterface *iface;
 
-    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), 0);
+    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), -MATE_MIXER_INFINITY);
 
     iface = MATE_MIXER_STREAM_GET_INTERFACE (stream);
 
-    if (iface->get_position_volume_db)
-        return iface->get_position_volume_db (stream, position);
+    if (iface->get_position_decibel)
+        return iface->get_position_decibel (stream, position);
 
-    return 0;
+    return -MATE_MIXER_INFINITY;
 }
 
 gboolean
-mate_mixer_stream_set_position_volume_db (MateMixerStream          *stream,
-                                          MateMixerChannelPosition  position,
-                                          gdouble                   volume_db)
+mate_mixer_stream_set_position_decibel (MateMixerStream          *stream,
+                                        MateMixerChannelPosition  position,
+                                        gdouble                   decibel)
 {
     MateMixerStreamInterface *iface;
 
@@ -485,8 +485,8 @@ mate_mixer_stream_set_position_volume_db (MateMixerStream          *stream,
 
     iface = MATE_MIXER_STREAM_GET_INTERFACE (stream);
 
-    if (iface->set_position_volume_db)
-        return iface->set_position_volume_db (stream, position, volume_db);
+    if (iface->set_position_decibel)
+        return iface->set_position_decibel (stream, position, decibel);
 
     return FALSE;
 }
