@@ -175,6 +175,7 @@ mate_mixer_stream_set_active_port
 mate_mixer_stream_get_min_volume
 mate_mixer_stream_get_max_volume
 mate_mixer_stream_get_normal_volume
+mate_mixer_stream_get_base_volume
 <SUBSECTION Standard>
 MATE_MIXER_IS_STREAM
 MATE_MIXER_STREAM

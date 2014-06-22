@@ -378,13 +378,13 @@ pulse_connection_new (const gchar *app_name,
      * the list will be kept with the connection as it may be reused later
      * when creating PulseAudio streams */
     proplist = pa_proplist_new ();
-    if (app_name)
+    if (app_name != NULL)
         pa_proplist_sets (proplist, PA_PROP_APPLICATION_NAME, app_name);
-    if (app_id)
+    if (app_id != NULL)
         pa_proplist_sets (proplist, PA_PROP_APPLICATION_ID, app_id);
-    if (app_icon)
+    if (app_icon != NULL)
         pa_proplist_sets (proplist, PA_PROP_APPLICATION_ICON_NAME, app_icon);
-    if (app_version)
+    if (app_version != NULL)
         pa_proplist_sets (proplist, PA_PROP_APPLICATION_VERSION, app_version);
 
     if (app_name != NULL) {
@@ -438,10 +438,12 @@ pulse_connection_connect (PulseConnection *connection)
     if (pa_context_connect (connection->priv->context,
                             connection->priv->server,
                             PA_CONTEXT_NOFLAGS,
-                            NULL) == 0)
+                            NULL) == 0) {
+        connection->priv->state = PULSE_CONNECTION_CONNECTING;
         return TRUE;
-    else
-        return FALSE;
+    }
+
+    return FALSE;
 }
 
 void
@@ -470,6 +472,8 @@ pulse_connection_create_monitor (PulseConnection *connection,
                                  guint32          index_source,
                                  guint32          index_sink_input)
 {
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), NULL);
+
     return pulse_monitor_new (connection->priv->context,
                               connection->priv->proplist,
                               index_source,
@@ -822,8 +826,6 @@ connection_load_lists (PulseConnection *connection)
     GList        *ops = NULL;
     pa_operation *op;
 
-    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
-
     if (G_UNLIKELY (connection->priv->outstanding)) {
         g_warn_if_reached ();
         return FALSE;
@@ -911,14 +913,17 @@ connection_state_cb (pa_context *c, void *userdata)
                                    PA_SUBSCRIPTION_MASK_SINK_INPUT |
                                    PA_SUBSCRIPTION_MASK_SOURCE_OUTPUT,
                                    NULL, NULL);
-        if (op) {
+        if (op != NULL) {
             pa_context_set_subscribe_callback (connection->priv->context,
                                                connection_subscribe_cb,
                                                connection);
             pa_operation_unref (op);
 
-            connection_load_lists (connection);
-            connection_change_state (connection, PULSE_CONNECTION_LOADING);
+            if (connection_load_lists (connection) == TRUE)
+                connection_change_state (connection, PULSE_CONNECTION_LOADING);
+            else
+                pulse_connection_disconnect (connection);
+
             return;
         }
 
@@ -931,9 +936,7 @@ connection_state_cb (pa_context *c, void *userdata)
     }
 
     if (state == PA_CONTEXT_TERMINATED || state == PA_CONTEXT_FAILED) {
-        /* We also handle the case of clean connection termination as it is a state
-         * change which should not normally happen, because the signal subscription
-         * is cancelled before disconnecting */
+        /* We do not distinguish between failure and clean connection termination */
         pulse_connection_disconnect (connection);
         return;
     }
@@ -1184,6 +1187,7 @@ connection_list_loaded (PulseConnection *connection)
         g_warn_if_reached ();
         connection->priv->outstanding = 0;
     }
+
     if (connection->priv->outstanding == 0) {
         pa_operation *op;
 
@@ -1191,7 +1195,7 @@ connection_list_loaded (PulseConnection *connection)
                                          connection_server_info_cb,
                                          connection);
 
-        if (G_UNLIKELY (!connection_process_operation (connection, op)))
+        if (G_UNLIKELY (connection_process_operation (connection, op) == FALSE))
             pulse_connection_disconnect (connection);
     }
 }

@@ -424,6 +424,23 @@ pulse_stream_update_description (PulseStream *stream, const gchar *description)
     return TRUE;
 }
 
+// XXX actually use this
+gboolean
+pulse_stream_update_device (PulseStream *stream, MateMixerDevice *device)
+{
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+
+    if (stream->priv->device != device) {
+        g_clear_object (&stream->priv->device);
+
+        if (G_LIKELY (device != NULL))
+            stream->priv->device = g_object_ref (device);
+
+        g_object_notify (G_OBJECT (stream), "device");
+    }
+    return TRUE;
+}
+
 gboolean
 pulse_stream_update_flags (PulseStream *stream, MateMixerStreamFlags flags)
 {

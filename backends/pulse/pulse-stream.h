@@ -21,6 +21,7 @@
 #include <glib.h>
 #include <glib-object.h>
 
+#include <libmatemixer/matemixer-device.h>
 #include <libmatemixer/matemixer-stream.h>
 
 #include <pulse/pulseaudio.h>
@@ -83,6 +84,8 @@ gboolean         pulse_stream_update_name            (PulseStream           *str
                                                       const gchar           *name);
 gboolean         pulse_stream_update_description     (PulseStream           *stream,
                                                       const gchar           *description);
+gboolean         pulse_stream_update_device          (PulseStream           *stream,
+                                                      MateMixerDevice       *device);
 gboolean         pulse_stream_update_flags           (PulseStream           *stream,
                                                       MateMixerStreamFlags   flags);
 gboolean         pulse_stream_update_state           (PulseStream           *stream,

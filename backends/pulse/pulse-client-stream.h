@@ -64,17 +64,17 @@ struct _PulseClientStreamClass
 
 GType    pulse_client_stream_get_type           (void) G_GNUC_CONST;
 
-gboolean pulse_client_stream_update_parent      (MateMixerClientStream *client,
-                                                 MateMixerStream       *parent);
+gboolean pulse_client_stream_update_parent      (PulseClientStream *client,
+                                                 MateMixerStream   *parent);
 
-gboolean pulse_client_stream_update_app_name    (MateMixerClientStream *client,
-                                                 const gchar           *app_name);
-gboolean pulse_client_stream_update_app_id      (MateMixerClientStream *client,
-                                                 const gchar           *app_id);
-gboolean pulse_client_stream_update_app_version (MateMixerClientStream *client,
-                                                 const gchar           *app_version);
-gboolean pulse_client_stream_update_app_icon    (MateMixerClientStream *client,
-                                                 const gchar           *app_icon);
+gboolean pulse_client_stream_update_app_name    (PulseClientStream *client,
+                                                 const gchar       *app_name);
+gboolean pulse_client_stream_update_app_id      (PulseClientStream *client,
+                                                 const gchar       *app_id);
+gboolean pulse_client_stream_update_app_version (PulseClientStream *client,
+                                                 const gchar       *app_version);
+gboolean pulse_client_stream_update_app_icon    (PulseClientStream *client,
+                                                 const gchar       *app_icon);
 
 G_END_DECLS
 

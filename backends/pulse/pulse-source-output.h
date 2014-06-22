@@ -59,10 +59,12 @@ struct _PulseSourceOutputClass
 GType        pulse_source_output_get_type   (void) G_GNUC_CONST;
 
 PulseStream *pulse_source_output_new        (PulseConnection             *connection,
-                                             const pa_source_output_info *info);
+                                             const pa_source_output_info *info,
+                                             PulseStream                 *parent);
 
 gboolean     pulse_source_output_update     (PulseStream                 *stream,
-                                             const pa_source_output_info *info);
+                                             const pa_source_output_info *info,
+                                             PulseStream                 *parent);
 
 G_END_DECLS
 

@@ -172,20 +172,15 @@ pulse_client_stream_finalize (GObject *object)
 }
 
 gboolean
-pulse_client_stream_update_parent (MateMixerClientStream *client,
-                                   MateMixerStream       *parent)
+pulse_client_stream_update_parent (PulseClientStream *client, MateMixerStream *parent)
 {
-    PulseClientStream *pulse;
-
     g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), FALSE);
 
-    pulse = PULSE_CLIENT_STREAM (client);
-
-    if (pulse->priv->parent != parent) {
-        g_clear_object (&pulse->priv->parent);
+    if (client->priv->parent != parent) {
+        g_clear_object (&client->priv->parent);
 
         if (G_LIKELY (parent != NULL))
-            pulse->priv->parent = g_object_ref (parent);
+            client->priv->parent = g_object_ref (parent);
 
         g_object_notify (G_OBJECT (client), "parent");
     }
@@ -193,18 +188,13 @@ pulse_client_stream_update_parent (MateMixerClientStream *client,
 }
 
 gboolean
-pulse_client_stream_update_app_name (MateMixerClientStream *client,
-                                     const gchar           *app_name)
+pulse_client_stream_update_app_name (PulseClientStream *client, const gchar *app_name)
 {
-    PulseClientStream *pulse;
-
     g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), FALSE);
 
-    pulse = PULSE_CLIENT_STREAM (client);
-
-    if (g_strcmp0 (pulse->priv->app_name, app_name)) {
-        g_free (pulse->priv->app_name);
-        pulse->priv->app_name = g_strdup (app_name);
+    if (g_strcmp0 (client->priv->app_name, app_name)) {
+        g_free (client->priv->app_name);
+        client->priv->app_name = g_strdup (app_name);
 
         g_object_notify (G_OBJECT (client), "app-name");
     }
@@ -212,18 +202,13 @@ pulse_client_stream_update_app_name (MateMixerClientStream *client,
 }
 
 gboolean
-pulse_client_stream_update_app_id (MateMixerClientStream *client,
-                                   const gchar           *app_id)
+pulse_client_stream_update_app_id (PulseClientStream *client, const gchar *app_id)
 {
-    PulseClientStream *pulse;
-
     g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), FALSE);
 
-    pulse = PULSE_CLIENT_STREAM (client);
-
-    if (g_strcmp0 (pulse->priv->app_id, app_id)) {
-        g_free (pulse->priv->app_id);
-        pulse->priv->app_id = g_strdup (app_id);
+    if (g_strcmp0 (client->priv->app_id, app_id)) {
+        g_free (client->priv->app_id);
+        client->priv->app_id = g_strdup (app_id);
 
         g_object_notify (G_OBJECT (client), "app-id");
     }
@@ -231,18 +216,13 @@ pulse_client_stream_update_app_id (MateMixerClientStream *client,
 }
 
 gboolean
-pulse_client_stream_update_app_version (MateMixerClientStream *client,
-                                        const gchar           *app_version)
+pulse_client_stream_update_app_version (PulseClientStream *client, const gchar *app_version)
 {
-    PulseClientStream *pulse;
-
     g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), FALSE);
 
-    pulse = PULSE_CLIENT_STREAM (client);
-
-    if (g_strcmp0 (pulse->priv->app_version, app_version)) {
-        g_free (pulse->priv->app_version);
-        pulse->priv->app_version = g_strdup (app_version);
+    if (g_strcmp0 (client->priv->app_version, app_version)) {
+        g_free (client->priv->app_version);
+        client->priv->app_version = g_strdup (app_version);
 
         g_object_notify (G_OBJECT (client), "app-version");
     }
@@ -250,18 +230,13 @@ pulse_client_stream_update_app_version (MateMixerClientStream *client,
 }
 
 gboolean
-pulse_client_stream_update_app_icon (MateMixerClientStream *client,
-                                     const gchar           *app_icon)
+pulse_client_stream_update_app_icon (PulseClientStream *client, const gchar *app_icon)
 {
-    PulseClientStream *pulse;
-
     g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), FALSE);
 
-    pulse = PULSE_CLIENT_STREAM (client);
-
-    if (g_strcmp0 (pulse->priv->app_icon, app_icon)) {
-        g_free (pulse->priv->app_icon);
-        pulse->priv->app_icon = g_strdup (app_icon);
+    if (g_strcmp0 (client->priv->app_icon, app_icon)) {
+        g_free (client->priv->app_icon);
+        client->priv->app_icon = g_strdup (app_icon);
 
         g_object_notify (G_OBJECT (client), "app-icon");
     }

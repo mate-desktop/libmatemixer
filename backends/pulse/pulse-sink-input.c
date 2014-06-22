@@ -175,22 +175,25 @@ pulse_sink_input_update (PulseStream              *stream,
 
     prop = pa_proplist_gets (info->proplist, PA_PROP_APPLICATION_NAME);
     if (prop != NULL)
-        pulse_client_stream_update_app_name (MATE_MIXER_CLIENT_STREAM (stream), prop);
+        pulse_client_stream_update_app_name (PULSE_CLIENT_STREAM (stream), prop);
 
     prop = pa_proplist_gets (info->proplist, PA_PROP_APPLICATION_ID);
     if (prop != NULL)
-        pulse_client_stream_update_app_id (MATE_MIXER_CLIENT_STREAM (stream), prop);
+        pulse_client_stream_update_app_id (PULSE_CLIENT_STREAM (stream), prop);
 
     prop = pa_proplist_gets (info->proplist, PA_PROP_APPLICATION_VERSION);
     if (prop != NULL)
-        pulse_client_stream_update_app_version (MATE_MIXER_CLIENT_STREAM (stream), prop);
+        pulse_client_stream_update_app_version (PULSE_CLIENT_STREAM (stream), prop);
 
     prop = pa_proplist_gets (info->proplist, PA_PROP_APPLICATION_ICON_NAME);
     if (prop != NULL)
-        pulse_client_stream_update_app_icon (MATE_MIXER_CLIENT_STREAM (stream), prop);
+        pulse_client_stream_update_app_icon (PULSE_CLIENT_STREAM (stream), prop);
 
-    pulse_client_stream_update_parent (MATE_MIXER_CLIENT_STREAM (stream),
-                                       MATE_MIXER_STREAM (parent));
+    if (G_LIKELY (parent != NULL))
+        pulse_client_stream_update_parent (PULSE_CLIENT_STREAM (stream),
+                                           MATE_MIXER_STREAM (parent));
+    else
+        pulse_client_stream_update_parent (PULSE_CLIENT_STREAM (stream), NULL);
 
     // XXX needs to fix monitor if parent changes
 

@@ -152,7 +152,7 @@ static gint             backend_compare_devices           (gconstpointer        
                                                            gconstpointer                b);
 static gint             backend_compare_streams           (gconstpointer                a,
                                                            gconstpointer                b);
-static gboolean         backend_compare_stream_name       (gpointer                     key,
+static gboolean         backend_compare_stream_names      (gpointer                     key,
                                                            gpointer                     value,
                                                            gpointer                     user_data);
 
@@ -380,6 +380,7 @@ backend_open (MateMixerBackend *backend)
         g_object_unref (connection);
         return FALSE;
     }
+
     pulse->priv->connection = connection;
     pulse->priv->state = MATE_MIXER_STATE_CONNECTING;
     return TRUE;
@@ -561,6 +562,8 @@ backend_connection_state_cb (PulseConnection *connection,
             /* We managed to connect once before, try to reconnect and if it
              * fails immediately, use an idle source;
              * in case the idle source already exists, just let it try again */
+
+            // XXX need to handle cached streams that are gone when reconnected
             if (!pulse->priv->connect_source &&
                 !pulse_connection_connect (connection)) {
                 pulse->priv->connect_source = g_idle_source_new ();
@@ -613,7 +616,7 @@ backend_server_info_cb (PulseConnection      *connection,
 
         if (info->default_source_name != NULL) {
             MateMixerStream *stream = g_hash_table_find (pulse->priv->sources,
-                                                         backend_compare_stream_name,
+                                                         backend_compare_stream_names,
                                                          (gpointer) info->default_source_name);
 
             /* It is theoretically possible to receive a server info notification
@@ -639,7 +642,7 @@ backend_server_info_cb (PulseConnection      *connection,
 
         if (info->default_sink_name != NULL) {
             MateMixerStream *stream = g_hash_table_find (pulse->priv->sinks,
-                                                         backend_compare_stream_name,
+                                                         backend_compare_stream_names,
                                                          (gpointer) info->default_sink_name);
             if (G_LIKELY (stream != NULL)) {
                 pulse->priv->default_sink = g_object_ref (stream);
@@ -664,26 +667,29 @@ backend_card_info_cb (PulseConnection    *connection,
                       const pa_card_info *info,
                       PulseBackend       *pulse)
 {
-    gpointer p;
+    gpointer     p;
+    PulseDevice *device;
 
     p = g_hash_table_lookup (pulse->priv->devices, GINT_TO_POINTER (info->index));
-    if (!p) {
-        PulseDevice *device = pulse_device_new (connection, info);
+    if (p == NULL) {
+        device = pulse_device_new (connection, info);
+
+        if (G_UNLIKELY (device == NULL))
+            return;
 
         g_hash_table_insert (pulse->priv->devices,
-                             GINT_TO_POINTER (pulse_device_get_index (device)),
+                             GINT_TO_POINTER (info->index),
                              device);
-
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "device-added",
-                               mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)));
     } else {
-        pulse_device_update (PULSE_DEVICE (p), info);
-
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "device-changed",
-                               mate_mixer_device_get_name (MATE_MIXER_DEVICE (p)));
+        device = PULSE_DEVICE (p);
+        pulse_device_update (device, info);
     }
+
+    g_signal_emit_by_name (G_OBJECT (pulse),
+                           (p == NULL)
+                                ? "device-added"
+                                : "device-changed",
+                           mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)));
 }
 
 static void
@@ -713,26 +719,29 @@ backend_sink_info_cb (PulseConnection    *connection,
                       const pa_sink_info *info,
                       PulseBackend       *pulse)
 {
-    gpointer p;
+    gpointer     p;
+    PulseStream *stream;
 
     p = g_hash_table_lookup (pulse->priv->sinks, GINT_TO_POINTER (info->index));
-    if (!p) {
-        PulseStream *stream = pulse_sink_new (connection, info);
+    if (p == NULL) {
+        stream = pulse_sink_new (connection, info);
+
+        if (G_UNLIKELY (stream == NULL))
+            return;
 
         g_hash_table_insert (pulse->priv->sinks,
-                             GINT_TO_POINTER (pulse_stream_get_index (stream)),
+                             GINT_TO_POINTER (info->index),
                              stream);
-
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "stream-added",
-                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
     } else {
-        pulse_sink_update (p, info);
-
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "stream-changed",
-                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (p)));
+        stream = PULSE_STREAM (p);
+        pulse_sink_update (stream, info);
     }
+
+    g_signal_emit_by_name (G_OBJECT (pulse),
+                           (p == NULL)
+                                ? "stream-added"
+                                : "stream-changed",
+                           mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
 }
 
 static void
@@ -762,30 +771,37 @@ backend_sink_input_info_cb (PulseConnection          *connection,
                             const pa_sink_input_info *info,
                             PulseBackend             *pulse)
 {
-    gpointer p;
-    gpointer parent;
+    gpointer     p;
+    gpointer     parent = NULL;
+    PulseStream *stream;
 
-    parent = g_hash_table_lookup (pulse->priv->sinks, GINT_TO_POINTER (info->sink));
+    if (info->sink) {
+        parent = g_hash_table_lookup (pulse->priv->sinks, GINT_TO_POINTER (info->sink));
+        if (G_UNLIKELY (parent == NULL))
+            g_debug ("Unknown parent %d of PulseAudio sink input %d",
+                     info->sink,
+                     info->index);
+    }
 
     p = g_hash_table_lookup (pulse->priv->sink_inputs, GINT_TO_POINTER (info->index));
-    if (!p) {
-        PulseStream *stream;
-
+    if (p == NULL) {
         stream = pulse_sink_input_new (connection, info, parent);
+        if (G_UNLIKELY (stream == NULL))
+            return;
+
         g_hash_table_insert (pulse->priv->sink_inputs,
-                             GINT_TO_POINTER (pulse_stream_get_index (stream)),
+                             GINT_TO_POINTER (info->index),
                              stream);
-
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "stream-added",
-                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
     } else {
-        pulse_sink_input_update (p, info, parent);
-
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "stream-changed",
-                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (p)));
+        stream = PULSE_STREAM (p);
+        pulse_sink_input_update (stream, info, parent);
     }
+
+    g_signal_emit_by_name (G_OBJECT (pulse),
+                           (p == NULL)
+                                ? "stream-added"
+                                : "stream-changed",
+                           mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
 }
 
 static void
@@ -815,30 +831,33 @@ backend_source_info_cb (PulseConnection      *connection,
                         const pa_source_info *info,
                         PulseBackend         *pulse)
 {
-    gpointer p;
+    gpointer     p;
+    PulseStream *stream;
 
     p = g_hash_table_lookup (pulse->priv->sources, GINT_TO_POINTER (info->index));
-    if (!p) {
-        PulseStream *stream;
-
+    if (p == NULL) {
+        /* Skip monitor streams */
         if (info->monitor_of_sink != PA_INVALID_INDEX)
             return;
 
         stream = pulse_source_new (connection, info);
+
+        if (G_UNLIKELY (stream == NULL))
+            return;
+
         g_hash_table_insert (pulse->priv->sources,
-                             GINT_TO_POINTER (pulse_stream_get_index (stream)),
+                             GINT_TO_POINTER (info->index),
                              stream);
-
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "stream-added",
-                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
     } else {
-        pulse_source_update (p, info);
-
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "stream-changed",
-                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (p)));
+        stream = PULSE_STREAM (p);
+        pulse_source_update (stream, info);
     }
+
+    g_signal_emit_by_name (G_OBJECT (pulse),
+                           (p == NULL)
+                                ? "stream-added"
+                                : "stream-changed",
+                           mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
 }
 
 static void
@@ -848,8 +867,6 @@ backend_source_removed_cb (PulseConnection *connection,
 {
     gpointer  p;
     gchar    *name;
-
-    // XXX set parent
 
     p = g_hash_table_lookup (pulse->priv->sources, GINT_TO_POINTER (index));
     if (G_UNLIKELY (p == NULL))
@@ -870,27 +887,37 @@ backend_source_output_info_cb (PulseConnection             *connection,
                                const pa_source_output_info *info,
                                PulseBackend                *pulse)
 {
-    gpointer p;
+    gpointer     p;
+    gpointer     parent = NULL;
+    PulseStream *stream;
+
+    if (G_LIKELY (info->source)) {
+        parent = g_hash_table_lookup (pulse->priv->sources, GINT_TO_POINTER (info->source));
+
+        /* Probably a monitor source that we have skipped */
+        if (parent == NULL)
+            return;
+    }
 
     p = g_hash_table_lookup (pulse->priv->source_outputs, GINT_TO_POINTER (info->index));
-    if (!p) {
-        PulseStream *stream;
+    if (p == NULL) {
+        stream = pulse_source_output_new (connection, info, parent);
+        if (G_UNLIKELY (stream == NULL))
+            return;
 
-        stream = pulse_source_output_new (connection, info);
         g_hash_table_insert (pulse->priv->source_outputs,
-                             GINT_TO_POINTER (pulse_stream_get_index (stream)),
+                             GINT_TO_POINTER (info->index),
                              stream);
-
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "stream-added",
-                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
     } else {
-        pulse_source_output_update (p, info);
-
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "stream-changed",
-                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (p)));
+        stream = PULSE_STREAM (p);
+        pulse_source_output_update (stream, info, parent);
     }
+
+    g_signal_emit_by_name (G_OBJECT (pulse),
+                           (p == NULL)
+                                ? "stream-added"
+                                : "stream-changed",
+                           mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
 }
 
 static void
@@ -956,7 +983,7 @@ backend_compare_streams (gconstpointer a, gconstpointer b)
 }
 
 static gboolean
-backend_compare_stream_name (gpointer key, gpointer value, gpointer user_data)
+backend_compare_stream_names (gpointer key, gpointer value, gpointer user_data)
 {
     MateMixerStream *stream = MATE_MIXER_STREAM (value);
 

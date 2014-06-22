@@ -69,7 +69,9 @@ pulse_source_output_init (PulseSourceOutput *output)
 }
 
 PulseStream *
-pulse_source_output_new (PulseConnection *connection, const pa_source_output_info *info)
+pulse_source_output_new (PulseConnection             *connection,
+                         const pa_source_output_info *info,
+                         PulseStream                 *parent)
 {
     PulseSourceOutput *output;
 
@@ -83,13 +85,15 @@ pulse_source_output_new (PulseConnection *connection, const pa_source_output_inf
                            NULL);
 
     /* Other data may change at any time, so let's make a use of our update function */
-    pulse_source_output_update (PULSE_STREAM (output), info);
+    pulse_source_output_update (PULSE_STREAM (output), info, parent);
 
     return PULSE_STREAM (output);
 }
 
 gboolean
-pulse_source_output_update (PulseStream *stream, const pa_source_output_info *info)
+pulse_source_output_update (PulseStream                 *stream,
+                            const pa_source_output_info *info,
+                            PulseStream                 *parent)
 {
     MateMixerStreamFlags flags = MATE_MIXER_STREAM_INPUT |
                                  MATE_MIXER_STREAM_CLIENT;
@@ -114,19 +118,19 @@ pulse_source_output_update (PulseStream *stream, const pa_source_output_info *in
 
     prop = pa_proplist_gets (info->proplist, PA_PROP_APPLICATION_NAME);
     if (prop != NULL)
-        pulse_client_stream_update_app_name (MATE_MIXER_CLIENT_STREAM (stream), prop);
+        pulse_client_stream_update_app_name (PULSE_CLIENT_STREAM (stream), prop);
 
     prop = pa_proplist_gets (info->proplist, PA_PROP_APPLICATION_ID);
     if (prop != NULL)
-        pulse_client_stream_update_app_id (MATE_MIXER_CLIENT_STREAM (stream), prop);
+        pulse_client_stream_update_app_id (PULSE_CLIENT_STREAM (stream), prop);
 
     prop = pa_proplist_gets (info->proplist, PA_PROP_APPLICATION_VERSION);
     if (prop != NULL)
-        pulse_client_stream_update_app_version (MATE_MIXER_CLIENT_STREAM (stream), prop);
+        pulse_client_stream_update_app_version (PULSE_CLIENT_STREAM (stream), prop);
 
     prop = pa_proplist_gets (info->proplist, PA_PROP_APPLICATION_ICON_NAME);
     if (prop != NULL)
-        pulse_client_stream_update_app_icon (MATE_MIXER_CLIENT_STREAM (stream), prop);
+        pulse_client_stream_update_app_icon (PULSE_CLIENT_STREAM (stream), prop);
 
     prop = pa_proplist_gets (info->proplist, PA_PROP_MEDIA_ROLE);
 
@@ -172,6 +176,12 @@ pulse_source_output_update (PulseStream *stream, const pa_source_output_info *in
     pulse_stream_update_flags (stream, flags);
     pulse_stream_update_volume (stream, NULL, &info->channel_map);
 #endif
+
+    if (G_LIKELY (parent != NULL))
+        pulse_client_stream_update_parent (PULSE_CLIENT_STREAM (stream),
+                                           MATE_MIXER_STREAM (parent));
+    else
+        pulse_client_stream_update_parent (PULSE_CLIENT_STREAM (stream), NULL);
 
     // XXX needs to fix monitor if parent changes
 
