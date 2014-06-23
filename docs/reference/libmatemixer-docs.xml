@@ -16,7 +16,6 @@
   <chapter>
     <title>API Reference</title>
     <xi:include href="xml/matemixer.xml"/>
-    <xi:include href="xml/matemixer-version.xml"/>
     <xi:include href="xml/matemixer-client-stream.xml"/>
     <xi:include href="xml/matemixer-control.xml"/>
     <xi:include href="xml/matemixer-device.xml"/>
