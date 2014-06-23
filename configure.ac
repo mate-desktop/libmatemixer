@@ -27,7 +27,7 @@ AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_AUX_DIR([build-aux])
 AC_CONFIG_SRCDIR([libmatemixer/matemixer.c])
 
-AM_INIT_AUTOMAKE
+AM_INIT_AUTOMAKE([1.9 no-dist-gzip dist-xz])
 
 # Use pretty build output with automake >= 1.11
 m4_ifdef([AM_SILENT_RULES],
