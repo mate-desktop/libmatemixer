@@ -121,7 +121,7 @@ mate_mixer_backend_module_set_property (GObject      *object,
 
     switch (param_id) {
     case PROP_PATH:
-        /* Construct-only string property */
+        /* Construct-only string */
         module->priv->path = g_strdup (g_value_get_string (value));
         break;
     default:

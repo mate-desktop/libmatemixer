@@ -208,7 +208,7 @@ pulse_device_set_property (GObject      *object,
         device->priv->index = g_value_get_uint (value);
         break;
     case PROP_CONNECTION:
-        /* Construct-only object property */
+        /* Construct-only object */
         device->priv->connection = g_value_dup_object (value);
         break;
     default:

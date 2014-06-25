@@ -154,6 +154,8 @@ static gint64                   stream_get_base_volume        (MateMixerStream  
 
 static gboolean                 stream_set_cvolume            (MateMixerStream          *stream,
                                                                pa_cvolume               *volume);
+static gint                     stream_compare_ports          (gconstpointer             a,
+                                                               gconstpointer             b);
 
 static void
 mate_mixer_stream_interface_init (MateMixerStreamInterface *iface)
@@ -272,7 +274,7 @@ pulse_stream_set_property (GObject      *object,
         stream->priv->index = g_value_get_uint (value);
         break;
     case PROP_CONNECTION:
-        /* Construct-only object property */
+        /* Construct-only object */
         stream->priv->connection = g_value_dup_object (value);
         break;
     default:
@@ -373,7 +375,7 @@ pulse_stream_finalize (GObject *object)
 guint32
 pulse_stream_get_index (PulseStream *stream)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), 0);
 
     return stream->priv->index;
 }
@@ -534,11 +536,15 @@ pulse_stream_update_ports (PulseStream *stream, GList *ports)
 {
     g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
 
-    // XXX sort them
     if (stream->priv->ports)
         g_list_free_full (stream->priv->ports, g_object_unref);
 
-    stream->priv->ports = ports;
+    if (ports)
+        stream->priv->ports = g_list_sort (ports, stream_compare_ports);
+    else
+        stream->priv->ports = NULL;
+
+    g_object_notify (G_OBJECT (stream), "ports");
     return TRUE;
 }
 
@@ -642,7 +648,7 @@ stream_set_mute (MateMixerStream *stream, gboolean mute)
 static guint
 stream_get_num_channels (MateMixerStream *stream)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), 0);
 
     return PULSE_STREAM (stream)->priv->volume.channels;
 }
@@ -650,7 +656,7 @@ stream_get_num_channels (MateMixerStream *stream)
 static gint64
 stream_get_volume (MateMixerStream *stream)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), 0);
 
     return (gint64) pa_cvolume_max (&PULSE_STREAM (stream)->priv->volume);
 }
@@ -1111,4 +1117,19 @@ stream_set_cvolume (MateMixerStream *stream, pa_cvolume *volume)
         // XXX notify fade and balance
     }
     return TRUE;
+}
+
+static gint
+stream_compare_ports (gconstpointer a, gconstpointer b)
+{
+    MateMixerPort *p1 = MATE_MIXER_PORT (a);
+    MateMixerPort *p2 = MATE_MIXER_PORT (b);
+
+    gint ret = (gint) (mate_mixer_port_get_priority (p2) -
+                       mate_mixer_port_get_priority (p1));
+    if (ret != 0)
+        return ret;
+    else
+        return strcmp (mate_mixer_port_get_name (p1),
+                       mate_mixer_port_get_name (p2));
 }

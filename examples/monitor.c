@@ -269,10 +269,6 @@ int main (int argc, char *argv[])
         { NULL }
     };
 
-    /* Initialize the library, if the function returns FALSE, it is not usable */
-    if (!mate_mixer_init ())
-        return 1;
-
     context = g_option_context_new ("- libmatemixer monitor");
 
     g_option_context_add_main_entries (context, entries, NULL);
@@ -282,6 +278,10 @@ int main (int argc, char *argv[])
         g_error_free (error);
         return 1;
     }
+
+    /* Initialize the library, if the function returns FALSE, it is not usable */
+    if (!mate_mixer_init ())
+        return 1;
 
     setlocale (LC_ALL, "");
 
@@ -300,7 +300,7 @@ int main (int argc, char *argv[])
         else if (!strcmp (backend, "null"))
             mate_mixer_control_set_backend_type (control, MATE_MIXER_BACKEND_NULL);
         else
-            g_printerr ("Sound system backend '%s' is unknown, it will be auto-detected.",
+            g_printerr ("Sound system backend '%s' is unknown, it will be auto-detected.\n",
                         backend);
 
         g_free (backend);

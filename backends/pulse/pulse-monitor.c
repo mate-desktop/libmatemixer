@@ -149,7 +149,7 @@ pulse_monitor_disable (PulseMonitor *monitor)
 gboolean
 pulse_monitor_is_enabled (PulseMonitor *monitor)
 {
-    g_return_if_fail (PULSE_IS_MONITOR (monitor));
+    g_return_val_if_fail (PULSE_IS_MONITOR (monitor), FALSE);
 
     return monitor->priv->enabled;
 }
@@ -171,7 +171,7 @@ pulse_monitor_update_index (PulseMonitor *monitor,
     if (pulse_monitor_is_enabled (monitor)) {
         pulse_monitor_disable (monitor);
 
-        /* Unset the Pulse stream to let enable recreate it */
+        /* Unset the Pulse stream to let enabling recreate it */
         g_clear_pointer (&monitor->priv->stream, pa_stream_unref);
 
         pulse_monitor_enable (monitor);
@@ -247,13 +247,9 @@ static void
 monitor_read_cb (pa_stream *stream, size_t length, void *userdata)
 {
     const void *data;
-    int         ret;
 
-    ret = pa_stream_peek (stream, &data, &length);
-    if (ret < 0) {
-        g_debug ("Failed to read PulseAudio stream data: %s", pa_strerror (ret));
+    if (pa_stream_peek (stream, &data, &length) < 0)
         return;
-    }
 
     if (data) {
         gdouble v = ((const gfloat *) data)[length / sizeof (gfloat) - 1];
