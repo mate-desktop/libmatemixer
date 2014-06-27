@@ -21,9 +21,9 @@
 // - figure out whether functions should g_warning on errors
 // - distinguish MateMixer and Pulse variable names
 
+#include <string.h>
 #include <glib.h>
 #include <glib-object.h>
-#include <string.h>
 
 #include <libmatemixer/matemixer-device.h>
 #include <libmatemixer/matemixer-enums.h>

@@ -276,7 +276,17 @@ pulse_backend_init (PulseBackend *pulse)
 static void
 pulse_backend_dispose (GObject *object)
 {
+    PulseBackend *pulse;
+
     backend_close (MATE_MIXER_BACKEND (object));
+
+    pulse = PULSE_BACKEND (object);
+
+    g_clear_pointer (&pulse->priv->devices, g_hash_table_destroy);
+    g_clear_pointer (&pulse->priv->sinks, g_hash_table_destroy);
+    g_clear_pointer (&pulse->priv->sink_inputs, g_hash_table_destroy);
+    g_clear_pointer (&pulse->priv->sources, g_hash_table_destroy);
+    g_clear_pointer (&pulse->priv->source_outputs, g_hash_table_destroy);
 
     G_OBJECT_CLASS (pulse_backend_parent_class)->dispose (object);
 }
@@ -395,6 +405,12 @@ backend_close (MateMixerBackend *backend)
 
     pulse = PULSE_BACKEND (backend);
 
+    /* IDLE is the state in which the backend is already closed */
+    if (pulse->priv->state == MATE_MIXER_STATE_IDLE)
+        return;
+
+    backend_remove_connect_source (pulse);
+
     if (pulse->priv->connection) {
         g_signal_handlers_disconnect_by_data (pulse->priv->connection, pulse);
 
@@ -402,30 +418,11 @@ backend_close (MateMixerBackend *backend)
         g_clear_object (&pulse->priv->connection);
     }
 
-    if (pulse->priv->devices) {
-        g_hash_table_destroy (pulse->priv->devices);
-        pulse->priv->devices = NULL;
-    }
-
-    if (pulse->priv->sinks) {
-        g_hash_table_destroy (pulse->priv->sinks);
-        pulse->priv->sinks = NULL;
-    }
-
-    if (pulse->priv->sink_inputs) {
-        g_hash_table_destroy (pulse->priv->sink_inputs);
-        pulse->priv->sink_inputs = NULL;
-    }
-
-    if (pulse->priv->sources) {
-        g_hash_table_destroy (pulse->priv->sources);
-        pulse->priv->sources = NULL;
-    }
-
-    if (pulse->priv->source_outputs) {
-        g_hash_table_destroy (pulse->priv->source_outputs);
-        pulse->priv->source_outputs = NULL;
-    }
+    g_hash_table_remove_all (pulse->priv->devices);
+    g_hash_table_remove_all (pulse->priv->sinks);
+    g_hash_table_remove_all (pulse->priv->sink_inputs);
+    g_hash_table_remove_all (pulse->priv->sources);
+    g_hash_table_remove_all (pulse->priv->source_outputs);
 
     g_clear_object (&pulse->priv->default_sink);
     g_clear_object (&pulse->priv->default_source);
