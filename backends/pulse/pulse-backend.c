@@ -145,6 +145,20 @@ static void             backend_source_output_removed_cb  (PulseConnection      
 
 static gboolean         backend_try_reconnect             (PulseBackend                *pulse);
 static void             backend_remove_connect_source     (PulseBackend                *pulse);
+
+static void             backend_mark_hanging              (PulseBackend                *pulse);
+static void             backend_mark_hanging_hash         (GHashTable                  *hash);
+
+static void             backend_remove_hanging            (PulseBackend                *pulse);
+static void             backend_remove_hanging_hash       (PulseBackend                *pulse,
+                                                           GHashTable                  *hash);
+
+static void             backend_remove_device             (PulseBackend                *pulse,
+                                                           PulseDevice                 *device);
+static void             backend_remove_stream             (PulseBackend                *pulse,
+                                                           GHashTable                  *hash,
+                                                           PulseStream                 *stream);
+
 static void             backend_change_state              (PulseBackend                *backend,
                                                            MateMixerState               state);
 
@@ -166,7 +180,7 @@ backend_module_init (GTypeModule *module)
     info.name         = BACKEND_NAME;
     info.priority     = BACKEND_PRIORITY;
     info.g_type       = PULSE_TYPE_BACKEND;
-    info.backend_type = MATE_MIXER_BACKEND_PULSE;
+    info.backend_type = MATE_MIXER_BACKEND_PULSEAUDIO;
 }
 
 const MateMixerBackendInfo *
@@ -246,6 +260,9 @@ pulse_backend_init (PulseBackend *pulse)
                                                PULSE_TYPE_BACKEND,
                                                PulseBackendPrivate);
 
+    /* These hash tables store PulseDevice and PulseStream instances, the key
+     * is the PulseAudio index which is not unique across different stream
+     * types, hence the separate hash tables */
     pulse->priv->devices =
         g_hash_table_new_full (g_direct_hash,
                                g_direct_equal,
@@ -276,17 +293,7 @@ pulse_backend_init (PulseBackend *pulse)
 static void
 pulse_backend_dispose (GObject *object)
 {
-    PulseBackend *pulse;
-
     backend_close (MATE_MIXER_BACKEND (object));
-
-    pulse = PULSE_BACKEND (object);
-
-    g_clear_pointer (&pulse->priv->devices, g_hash_table_destroy);
-    g_clear_pointer (&pulse->priv->sinks, g_hash_table_destroy);
-    g_clear_pointer (&pulse->priv->sink_inputs, g_hash_table_destroy);
-    g_clear_pointer (&pulse->priv->sources, g_hash_table_destroy);
-    g_clear_pointer (&pulse->priv->source_outputs, g_hash_table_destroy);
 
     G_OBJECT_CLASS (pulse_backend_parent_class)->dispose (object);
 }
@@ -304,6 +311,12 @@ pulse_backend_finalize (GObject *object)
     g_free (pulse->priv->app_icon);
     g_free (pulse->priv->server_address);
 
+    g_hash_table_destroy (pulse->priv->devices);
+    g_hash_table_destroy (pulse->priv->sinks);
+    g_hash_table_destroy (pulse->priv->sink_inputs);
+    g_hash_table_destroy (pulse->priv->sources);
+    g_hash_table_destroy (pulse->priv->source_outputs);
+
     G_OBJECT_CLASS (pulse_backend_parent_class)->finalize (object);
 }
 
@@ -317,8 +330,10 @@ backend_open (MateMixerBackend *backend)
 
     pulse = PULSE_BACKEND (backend);
 
-    if (G_UNLIKELY (pulse->priv->connection != NULL))
+    if (G_UNLIKELY (pulse->priv->connection != NULL)) {
+        g_warn_if_reached ();
         return TRUE;
+    }
 
     connection = pulse_connection_new (pulse->priv->app_name,
                                        pulse->priv->app_id,
@@ -330,7 +345,7 @@ backend_open (MateMixerBackend *backend)
      * but it sets up the PulseAudio structures, which might fail in an
      * unlikely case */
     if (G_UNLIKELY (connection == NULL)) {
-        pulse->priv->state = MATE_MIXER_STATE_FAILED;
+        backend_change_state (pulse, MATE_MIXER_STATE_FAILED);
         return FALSE;
     }
 
@@ -385,14 +400,15 @@ backend_open (MateMixerBackend *backend)
 
     /* Connect to the PulseAudio server, this might fail either instantly or
      * asynchronously, for example when remote connection timeouts */
-    if (!pulse_connection_connect (connection)) {
-        pulse->priv->state = MATE_MIXER_STATE_FAILED;
+    if (!pulse_connection_connect (connection, FALSE)) {
         g_object_unref (connection);
+        backend_change_state (pulse, MATE_MIXER_STATE_FAILED);
         return FALSE;
     }
 
     pulse->priv->connection = connection;
-    pulse->priv->state = MATE_MIXER_STATE_CONNECTING;
+
+    backend_change_state (pulse, MATE_MIXER_STATE_CONNECTING);
     return TRUE;
 }
 
@@ -405,27 +421,18 @@ backend_close (MateMixerBackend *backend)
 
     pulse = PULSE_BACKEND (backend);
 
-    /* IDLE is the state in which the backend is already closed */
-    if (pulse->priv->state == MATE_MIXER_STATE_IDLE)
-        return;
-
     backend_remove_connect_source (pulse);
 
-    if (pulse->priv->connection) {
-        g_signal_handlers_disconnect_by_data (pulse->priv->connection, pulse);
-
-        pulse_connection_disconnect (pulse->priv->connection);
-        g_clear_object (&pulse->priv->connection);
-    }
+    // XXX disconnect from notifies
+    g_clear_object (&pulse->priv->connection);
+    g_clear_object (&pulse->priv->default_sink);
+    g_clear_object (&pulse->priv->default_source);
 
     g_hash_table_remove_all (pulse->priv->devices);
     g_hash_table_remove_all (pulse->priv->sinks);
     g_hash_table_remove_all (pulse->priv->sink_inputs);
     g_hash_table_remove_all (pulse->priv->sources);
     g_hash_table_remove_all (pulse->priv->source_outputs);
-
-    g_clear_object (&pulse->priv->default_sink);
-    g_clear_object (&pulse->priv->default_source);
 
     backend_change_state (pulse, MATE_MIXER_STATE_IDLE);
 }
@@ -444,18 +451,15 @@ backend_set_data (MateMixerBackend *backend, const MateMixerBackendData *data)
     PulseBackend *pulse;
 
     g_return_if_fail (PULSE_IS_BACKEND (backend));
+    g_return_if_fail (data != NULL);
 
     pulse = PULSE_BACKEND (backend);
 
-    g_clear_pointer (&pulse->priv->app_name, g_free);
-    g_clear_pointer (&pulse->priv->app_id, g_free);
-    g_clear_pointer (&pulse->priv->app_version, g_free);
-    g_clear_pointer (&pulse->priv->app_icon, g_free);
-    g_clear_pointer (&pulse->priv->server_address, g_free);
-
-    /* Allow to unset the details by passing NULL data */
-    if (G_UNLIKELY (data == NULL))
-        return;
+    g_free (pulse->priv->app_name);
+    g_free (pulse->priv->app_id);
+    g_free (pulse->priv->app_version);
+    g_free (pulse->priv->app_icon);
+    g_free (pulse->priv->server_address);
 
     pulse->priv->app_name = g_strdup (data->app_name);
     pulse->priv->app_id = g_strdup (data->app_id);
@@ -520,6 +524,11 @@ backend_set_default_input_stream (MateMixerBackend *backend, MateMixerStream *st
 
     pulse = PULSE_BACKEND (backend);
 
+    if (G_UNLIKELY (!PULSE_IS_SOURCE (stream))) {
+        g_warn_if_reached ();
+        return FALSE;
+    }
+
     return pulse_connection_set_default_source (pulse->priv->connection,
                                                 mate_mixer_stream_get_name (stream));
 }
@@ -542,6 +551,11 @@ backend_set_default_output_stream (MateMixerBackend *backend, MateMixerStream *s
 
     pulse = PULSE_BACKEND (backend);
 
+    if (G_UNLIKELY (!PULSE_IS_SINK (stream))) {
+        g_warn_if_reached ();
+        return FALSE;
+    }
+
     return pulse_connection_set_default_sink (pulse->priv->connection,
                                               mate_mixer_stream_get_name (stream));
 }
@@ -557,13 +571,17 @@ backend_connection_state_cb (PulseConnection *connection,
     case PULSE_CONNECTION_DISCONNECTED:
         if (pulse->priv->connected_once) {
             /* We managed to connect once before, try to reconnect and if it
-             * fails immediately, use an idle source;
-             * in case the idle source already exists, just let it try again */
+             * fails immediately, use a timeout source.
+             * All current devices and streams are marked as hanging as it is
+             * unknown whether they are still available, stream callbacks will
+             * unmark them and remaining unavailable streams will be removed
+             * when the CONNECTED state is reached. */
+            backend_mark_hanging (pulse);
+            backend_change_state (pulse, MATE_MIXER_STATE_CONNECTING);
 
-            // XXX need to handle cached streams that are gone when reconnected
             if (!pulse->priv->connect_source &&
-                !pulse_connection_connect (connection)) {
-                pulse->priv->connect_source = g_idle_source_new ();
+                !pulse_connection_connect (connection, TRUE)) {
+                pulse->priv->connect_source = g_timeout_source_new (200);
 
                 g_source_set_callback (pulse->priv->connect_source,
                                        (GSourceFunc) backend_try_reconnect,
@@ -587,7 +605,10 @@ backend_connection_state_cb (PulseConnection *connection,
         break;
 
     case PULSE_CONNECTION_CONNECTED:
-        pulse->priv->connected_once = TRUE;
+        if (pulse->priv->connected_once)
+            backend_remove_hanging (pulse);
+        else
+            pulse->priv->connected_once = TRUE;
 
         backend_change_state (pulse, MATE_MIXER_STATE_READY);
         break;
@@ -602,13 +623,11 @@ backend_server_info_cb (PulseConnection      *connection,
     const gchar *name_source = NULL;
     const gchar *name_sink = NULL;
 
-    if (pulse->priv->default_source)
+    if (pulse->priv->default_source != NULL)
         name_source = mate_mixer_stream_get_name (pulse->priv->default_source);
-    if (pulse->priv->default_sink)
-        name_sink = mate_mixer_stream_get_name (pulse->priv->default_sink);
 
     if (g_strcmp0 (name_source, info->default_source_name)) {
-        if (pulse->priv->default_source)
+        if (pulse->priv->default_source != NULL)
             g_clear_object (&pulse->priv->default_source);
 
         if (info->default_source_name != NULL) {
@@ -626,15 +645,18 @@ backend_server_info_cb (PulseConnection      *connection,
                 pulse->priv->default_source = g_object_ref (stream);
                 g_debug ("Default input stream changed to %s", info->default_source_name);
 
-                g_object_notify (G_OBJECT (pulse), "default-output");
+                g_object_notify (G_OBJECT (pulse), "default-input");
             } else
                 g_debug ("Default input stream %s not yet known",
                          info->default_source_name);
         }
     }
 
+    if (pulse->priv->default_sink != NULL)
+        name_sink = mate_mixer_stream_get_name (pulse->priv->default_sink);
+
     if (g_strcmp0 (name_sink, info->default_sink_name)) {
-        if (pulse->priv->default_sink)
+        if (pulse->priv->default_sink != NULL)
             g_clear_object (&pulse->priv->default_sink);
 
         if (info->default_sink_name != NULL) {
@@ -682,11 +704,18 @@ backend_card_info_cb (PulseConnection    *connection,
         pulse_device_update (device, info);
     }
 
-    g_signal_emit_by_name (G_OBJECT (pulse),
-                           (p == NULL)
-                                ? "device-added"
-                                : "device-changed",
-                           mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)));
+    if (pulse->priv->connected_once) {
+        /* The object might be hanging if reconnecting is in progress, remove the
+         * hanging flag to prevent it from being removed when connected */
+        if (pulse->priv->state != MATE_MIXER_STATE_READY)
+            g_object_steal_data (G_OBJECT (device), "hanging");
+
+        g_signal_emit_by_name (G_OBJECT (pulse),
+                               (p == NULL)
+                                    ? "device-added"
+                                    : "device-changed",
+                               mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)));
+    }
 }
 
 static void
@@ -694,21 +723,13 @@ backend_card_removed_cb (PulseConnection *connection,
                          guint            index,
                          PulseBackend    *pulse)
 {
-    gpointer  p;
-    gchar    *name;
+    gpointer p;
 
     p = g_hash_table_lookup (pulse->priv->devices, GINT_TO_POINTER (index));
     if (G_UNLIKELY (p == NULL))
         return;
 
-    name = g_strdup (mate_mixer_device_get_name (MATE_MIXER_DEVICE (p)));
-
-    g_hash_table_remove (pulse->priv->devices, GINT_TO_POINTER (index));
-    if (G_LIKELY (name != NULL))
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "device-removed",
-                               name);
-    g_free (name);
+    backend_remove_device (pulse, PULSE_DEVICE (p));
 }
 
 static void
@@ -716,12 +737,18 @@ backend_sink_info_cb (PulseConnection    *connection,
                       const pa_sink_info *info,
                       PulseBackend       *pulse)
 {
-    gpointer     p;
+    PulseDevice *device = NULL;
     PulseStream *stream;
+    gpointer     p = NULL;
+
+    if (info->card != PA_INVALID_INDEX)
+        p = g_hash_table_lookup (pulse->priv->devices, GINT_TO_POINTER (info->card));
+    if (p)
+        device = PULSE_DEVICE (p);
 
     p = g_hash_table_lookup (pulse->priv->sinks, GINT_TO_POINTER (info->index));
     if (p == NULL) {
-        stream = pulse_sink_new (connection, info);
+        stream = pulse_sink_new (connection, info, device);
 
         if (G_UNLIKELY (stream == NULL))
             return;
@@ -731,14 +758,21 @@ backend_sink_info_cb (PulseConnection    *connection,
                              stream);
     } else {
         stream = PULSE_STREAM (p);
-        pulse_sink_update (stream, info);
+        pulse_sink_update (stream, info, device);
     }
 
-    g_signal_emit_by_name (G_OBJECT (pulse),
-                           (p == NULL)
-                                ? "stream-added"
-                                : "stream-changed",
-                           mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
+    if (pulse->priv->connected_once) {
+        /* The object might be hanging if reconnecting is in progress, remove the
+         * hanging flag to prevent it from being removed when connected */
+        if (pulse->priv->state != MATE_MIXER_STATE_READY)
+            g_object_steal_data (G_OBJECT (stream), "hanging");
+
+        g_signal_emit_by_name (G_OBJECT (pulse),
+                               (p == NULL)
+                                    ? "stream-added"
+                                    : "stream-changed",
+                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
+    }
 }
 
 static void
@@ -746,21 +780,13 @@ backend_sink_removed_cb (PulseConnection *connection,
                          guint            index,
                          PulseBackend    *pulse)
 {
-    gpointer  p;
-    gchar    *name;
+    gpointer p;
 
     p = g_hash_table_lookup (pulse->priv->sinks, GINT_TO_POINTER (index));
     if (G_UNLIKELY (p == NULL))
         return;
 
-    name = g_strdup (mate_mixer_stream_get_name (MATE_MIXER_STREAM (p)));
-
-    g_hash_table_remove (pulse->priv->sinks, GINT_TO_POINTER (index));
-    if (G_LIKELY (name != NULL))
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "stream-removed",
-                               name);
-    g_free (name);
+    backend_remove_stream (pulse, pulse->priv->sinks, PULSE_STREAM (p));
 }
 
 static void
@@ -768,21 +794,22 @@ backend_sink_input_info_cb (PulseConnection          *connection,
                             const pa_sink_input_info *info,
                             PulseBackend             *pulse)
 {
+    PulseStream *stream;
     gpointer     p;
     gpointer     parent = NULL;
-    PulseStream *stream;
 
-    if (info->sink) {
+    if (G_LIKELY (info->sink)) {
         parent = g_hash_table_lookup (pulse->priv->sinks, GINT_TO_POINTER (info->sink));
         if (G_UNLIKELY (parent == NULL))
-            g_debug ("Unknown parent %d of PulseAudio sink input %d",
+            g_debug ("Unknown parent %d of PulseAudio sink input %s",
                      info->sink,
-                     info->index);
+                     info->name);
     }
 
     p = g_hash_table_lookup (pulse->priv->sink_inputs, GINT_TO_POINTER (info->index));
     if (p == NULL) {
         stream = pulse_sink_input_new (connection, info, parent);
+
         if (G_UNLIKELY (stream == NULL))
             return;
 
@@ -794,11 +821,18 @@ backend_sink_input_info_cb (PulseConnection          *connection,
         pulse_sink_input_update (stream, info, parent);
     }
 
-    g_signal_emit_by_name (G_OBJECT (pulse),
-                           (p == NULL)
-                                ? "stream-added"
-                                : "stream-changed",
-                           mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
+    if (pulse->priv->connected_once) {
+        /* The object might be hanging if reconnecting is in progress, remove the
+         * hanging flag to prevent it from being removed when connected */
+        if (pulse->priv->state != MATE_MIXER_STATE_READY)
+            g_object_steal_data (G_OBJECT (stream), "hanging");
+
+        g_signal_emit_by_name (G_OBJECT (pulse),
+                               (p == NULL)
+                                    ? "stream-added"
+                                    : "stream-changed",
+                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
+    }
 }
 
 static void
@@ -806,21 +840,13 @@ backend_sink_input_removed_cb (PulseConnection *connection,
                                guint            index,
                                PulseBackend    *pulse)
 {
-    gpointer  p;
-    gchar    *name;
+    gpointer p;
 
     p = g_hash_table_lookup (pulse->priv->sink_inputs, GINT_TO_POINTER (index));
     if (G_UNLIKELY (p == NULL))
         return;
 
-    name = g_strdup (mate_mixer_stream_get_name (MATE_MIXER_STREAM (p)));
-
-    g_hash_table_remove (pulse->priv->sink_inputs, GINT_TO_POINTER (index));
-    if (G_LIKELY (name != NULL))
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "stream-removed",
-                               name);
-    g_free (name);
+    backend_remove_stream (pulse, pulse->priv->sink_inputs, PULSE_STREAM (p));
 }
 
 static void
@@ -828,16 +854,22 @@ backend_source_info_cb (PulseConnection      *connection,
                         const pa_source_info *info,
                         PulseBackend         *pulse)
 {
-    gpointer     p;
+    PulseDevice *device = NULL;
     PulseStream *stream;
+    gpointer     p = NULL;
+
+    /* Skip monitor streams */
+    if (info->monitor_of_sink != PA_INVALID_INDEX)
+        return;
+
+    if (info->card != PA_INVALID_INDEX)
+        p = g_hash_table_lookup (pulse->priv->devices, GINT_TO_POINTER (info->card));
+    if (p)
+        device = PULSE_DEVICE (p);
 
     p = g_hash_table_lookup (pulse->priv->sources, GINT_TO_POINTER (info->index));
     if (p == NULL) {
-        /* Skip monitor streams */
-        if (info->monitor_of_sink != PA_INVALID_INDEX)
-            return;
-
-        stream = pulse_source_new (connection, info);
+        stream = pulse_source_new (connection, info, device);
 
         if (G_UNLIKELY (stream == NULL))
             return;
@@ -847,14 +879,21 @@ backend_source_info_cb (PulseConnection      *connection,
                              stream);
     } else {
         stream = PULSE_STREAM (p);
-        pulse_source_update (stream, info);
+        pulse_source_update (stream, info, device);
     }
 
-    g_signal_emit_by_name (G_OBJECT (pulse),
-                           (p == NULL)
-                                ? "stream-added"
-                                : "stream-changed",
-                           mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
+    if (pulse->priv->connected_once) {
+        /* The object might be hanging if reconnecting is in progress, remove the
+         * hanging flag to prevent it from being removed when connected */
+        if (pulse->priv->state != MATE_MIXER_STATE_READY)
+            g_object_steal_data (G_OBJECT (stream), "hanging");
+
+        g_signal_emit_by_name (G_OBJECT (pulse),
+                               (p == NULL)
+                                    ? "stream-added"
+                                    : "stream-changed",
+                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
+    }
 }
 
 static void
@@ -862,21 +901,13 @@ backend_source_removed_cb (PulseConnection *connection,
                            guint            index,
                            PulseBackend    *pulse)
 {
-    gpointer  p;
-    gchar    *name;
+    gpointer p;
 
     p = g_hash_table_lookup (pulse->priv->sources, GINT_TO_POINTER (index));
     if (G_UNLIKELY (p == NULL))
         return;
 
-    name = g_strdup (mate_mixer_stream_get_name (MATE_MIXER_STREAM (p)));
-
-    g_hash_table_remove (pulse->priv->sources, GINT_TO_POINTER (index));
-    if (G_LIKELY (name != NULL))
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "stream-removed",
-                               name);
-    g_free (name);
+    backend_remove_stream (pulse, pulse->priv->sources, PULSE_STREAM (p));
 }
 
 static void
@@ -884,9 +915,9 @@ backend_source_output_info_cb (PulseConnection             *connection,
                                const pa_source_output_info *info,
                                PulseBackend                *pulse)
 {
+    PulseStream *stream;
     gpointer     p;
     gpointer     parent = NULL;
-    PulseStream *stream;
 
     if (G_LIKELY (info->source)) {
         parent = g_hash_table_lookup (pulse->priv->sources, GINT_TO_POINTER (info->source));
@@ -910,11 +941,18 @@ backend_source_output_info_cb (PulseConnection             *connection,
         pulse_source_output_update (stream, info, parent);
     }
 
-    g_signal_emit_by_name (G_OBJECT (pulse),
-                           (p == NULL)
-                                ? "stream-added"
-                                : "stream-changed",
-                           mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
+    if (pulse->priv->connected_once) {
+        /* The object might be hanging if reconnecting is in progress, remove the
+         * hanging flag to prevent it from being removed when connected */
+        if (pulse->priv->state != MATE_MIXER_STATE_READY)
+            g_object_steal_data (G_OBJECT (stream), "hanging");
+
+        g_signal_emit_by_name (G_OBJECT (pulse),
+                               (p == NULL)
+                                    ? "stream-added"
+                                    : "stream-changed",
+                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
+    }
 }
 
 static void
@@ -922,21 +960,13 @@ backend_source_output_removed_cb (PulseConnection *connection,
                                   guint            index,
                                   PulseBackend    *pulse)
 {
-    gpointer  p;
-    gchar    *name;
+    gpointer p;
 
     p = g_hash_table_lookup (pulse->priv->source_outputs, GINT_TO_POINTER (index));
     if (G_UNLIKELY (p == NULL))
         return;
 
-    name = g_strdup (mate_mixer_stream_get_name (MATE_MIXER_STREAM (p)));
-
-    g_hash_table_remove (pulse->priv->source_outputs, GINT_TO_POINTER (index));
-    if (G_LIKELY (name != NULL))
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "stream-removed",
-                               name);
-    g_free (name);
+    backend_remove_stream (pulse, pulse->priv->source_outputs, PULSE_STREAM (p));
 }
 
 static gboolean
@@ -945,13 +975,104 @@ backend_try_reconnect (PulseBackend *pulse)
     /* When the connect call succeeds, return FALSE to remove the idle source
      * and wait for the connection state notifications, otherwise this function
      * will be called again */
-    return !pulse_connection_connect (pulse->priv->connection);
+    return !pulse_connection_connect (pulse->priv->connection, TRUE);
 }
 
 static void
 backend_remove_connect_source (PulseBackend *pulse)
 {
     g_clear_pointer (&pulse->priv->connect_source, g_source_unref);
+}
+
+static void
+backend_mark_hanging (PulseBackend *pulse)
+{
+    backend_mark_hanging_hash (pulse->priv->devices);
+    backend_mark_hanging_hash (pulse->priv->sinks);
+    backend_mark_hanging_hash (pulse->priv->sink_inputs);
+    backend_mark_hanging_hash (pulse->priv->sources);
+    backend_mark_hanging_hash (pulse->priv->source_outputs);
+}
+
+static void
+backend_mark_hanging_hash (GHashTable *hash)
+{
+    GHashTableIter iter;
+    gpointer       value;
+
+    g_hash_table_iter_init (&iter, hash);
+
+    while (g_hash_table_iter_next (&iter, NULL, &value))
+        g_object_set_data (G_OBJECT (value), "hanging", GINT_TO_POINTER (1));
+}
+
+static void
+backend_remove_hanging (PulseBackend *pulse)
+{
+    GHashTableIter iter;
+    gpointer       value;
+
+    g_hash_table_iter_init (&iter, pulse->priv->devices);
+
+    while (g_hash_table_iter_next (&iter, NULL, &value))
+        if (g_object_get_data (G_OBJECT (value), "hanging"))
+            backend_remove_device (pulse, PULSE_DEVICE (value));
+
+    backend_remove_hanging_hash (pulse, pulse->priv->sinks);
+    backend_remove_hanging_hash (pulse, pulse->priv->sink_inputs);
+    backend_remove_hanging_hash (pulse, pulse->priv->sources);
+    backend_remove_hanging_hash (pulse, pulse->priv->source_outputs);
+}
+
+static void
+backend_remove_hanging_hash (PulseBackend *pulse, GHashTable *hash)
+{
+    GHashTableIter iter;
+    gpointer       value;
+
+    g_hash_table_iter_init (&iter, hash);
+
+    while (g_hash_table_iter_next (&iter, NULL, &value))
+        if (g_object_get_data (G_OBJECT (value), "hanging"))
+            backend_remove_stream (pulse, hash, PULSE_STREAM (value));
+}
+
+static void
+backend_remove_device (PulseBackend *pulse, PulseDevice *device)
+{
+    gchar *name;
+
+    name = g_strdup (mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)));
+
+    g_hash_table_remove (pulse->priv->devices,
+                         GINT_TO_POINTER (pulse_device_get_index (device)));
+
+    g_signal_emit_by_name (G_OBJECT (pulse), "device-removed", name);
+    g_free (name);
+}
+
+static void
+backend_remove_stream (PulseBackend *pulse, GHashTable *hash, PulseStream *stream)
+{
+    gchar *name;
+
+    /* Make sure we do not end up with invalid default streams, but this is
+     * very unlikely to happen */
+    if (G_UNLIKELY (MATE_MIXER_STREAM (stream) == pulse->priv->default_sink)) {
+        g_clear_object (&pulse->priv->default_sink);
+        g_object_notify (G_OBJECT (pulse), "default-output");
+    }
+    else if (G_UNLIKELY (MATE_MIXER_STREAM (stream) == pulse->priv->default_source)) {
+        g_clear_object (&pulse->priv->default_source);
+        g_object_notify (G_OBJECT (pulse), "default-input");
+    }
+
+    name = g_strdup (mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
+
+    g_hash_table_remove (hash, GINT_TO_POINTER (pulse_stream_get_index (stream)));
+
+    g_signal_emit_by_name (G_OBJECT (pulse), "stream-removed", name);
+    g_free (name);
 }
 
 static void

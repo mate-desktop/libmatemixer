@@ -156,9 +156,9 @@ pulse_sink_input_update (PulseStream              *stream,
     pulse_stream_update_flags (stream, flags);
 
     if (info->has_volume)
-        pulse_stream_update_volume (stream, &info->volume, &info->channel_map);
+        pulse_stream_update_volume (stream, &info->volume, &info->channel_map, 0);
     else
-        pulse_stream_update_volume (stream, NULL, &info->channel_map);
+        pulse_stream_update_volume (stream, NULL, &info->channel_map, 0);
 #else
     /* Pre-1.0 PulseAudio does not include the has_volume and volume_writable
      * fields, but does include the volume info, so let's give it a try */
@@ -170,7 +170,7 @@ pulse_sink_input_update (PulseStream              *stream,
     /* Flags needed before volume */
     pulse_stream_update_flags (stream, flags);
 
-    pulse_stream_update_volume (stream, &info->volume, &info->channel_map);
+    pulse_stream_update_volume (stream, &info->volume, &info->channel_map, 0);
 #endif
 
     prop = pa_proplist_gets (info->proplist, PA_PROP_APPLICATION_NAME);

@@ -28,7 +28,6 @@
 
 #include "pulse-connection.h"
 #include "pulse-device.h"
-#include "pulse-stream.h"
 
 struct _PulseDevicePrivate
 {

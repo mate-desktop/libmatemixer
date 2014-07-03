@@ -90,7 +90,8 @@ PulseConnection *    pulse_connection_new                      (const gchar     
                                                                 const gchar      *app_icon,
                                                                 const gchar      *server_address);
 
-gboolean             pulse_connection_connect                  (PulseConnection  *connection);
+gboolean             pulse_connection_connect                  (PulseConnection  *connection,
+                                                                gboolean          wait_for_daemon);
 void                 pulse_connection_disconnect               (PulseConnection  *connection);
 
 PulseConnectionState pulse_connection_get_state                (PulseConnection  *connection);

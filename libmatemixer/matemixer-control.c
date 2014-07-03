@@ -19,8 +19,10 @@
 #include <glib.h>
 #include <glib-object.h>
 
+#include "matemixer.h"
 #include "matemixer-backend.h"
 #include "matemixer-backend-module.h"
+#include "matemixer-client-stream.h"
 #include "matemixer-control.h"
 #include "matemixer-enums.h"
 #include "matemixer-enum-types.h"
@@ -954,7 +956,8 @@ mate_mixer_control_get_default_input_stream (MateMixerControl *control)
  * @control: a #MateMixerControl
  * @stream: a #MateMixerStream to set as the default input stream
  *
- * Changes the default input stream in the system.
+ * Changes the default input stream in the system. The @stream must be an
+ * input non-client stream.
  *
  * Returns: %TRUE on success or %FALSE on failure.
  */
@@ -963,9 +966,19 @@ mate_mixer_control_set_default_input_stream (MateMixerControl *control,
                                              MateMixerStream  *stream)
 {
     g_return_val_if_fail (MATE_MIXER_IS_CONTROL (control), FALSE);
+    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), FALSE);
 
     if (control->priv->state != MATE_MIXER_STATE_READY)
         return FALSE;
+
+    if (MATE_MIXER_IS_CLIENT_STREAM (stream)) {
+        g_warning ("Unable to set client stream as the default input stream");
+        return FALSE;
+    }
+    if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_INPUT)) {
+        g_warning ("Unable to set non-input stream as the default input stream");
+        return FALSE;
+    }
 
     return mate_mixer_backend_set_default_input_stream (control->priv->backend, stream);
 }
@@ -996,7 +1009,8 @@ mate_mixer_control_get_default_output_stream (MateMixerControl *control)
  * @control: a #MateMixerControl
  * @stream: a #MateMixerStream to set as the default output stream
  *
- * Changes the default output stream in the system.
+ * Changes the default output stream in the system. The @stream must be an
+ * output non-client stream.
  *
  * Returns: %TRUE on success or %FALSE on failure.
  */
@@ -1005,9 +1019,19 @@ mate_mixer_control_set_default_output_stream (MateMixerControl *control,
                                               MateMixerStream  *stream)
 {
     g_return_val_if_fail (MATE_MIXER_IS_CONTROL (control), FALSE);
+    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), FALSE);
 
     if (control->priv->state != MATE_MIXER_STATE_READY)
         return FALSE;
+
+    if (MATE_MIXER_IS_CLIENT_STREAM (stream)) {
+        g_warning ("Unable to set client stream as the default output stream");
+        return FALSE;
+    }
+    if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_OUTPUT)) {
+        g_warning ("Unable to set non-output stream as the default output stream");
+        return FALSE;
+    }
 
     return mate_mixer_backend_set_default_input_stream (control->priv->backend, stream);
 }
@@ -1177,6 +1201,7 @@ control_try_next_backend (MateMixerControl *control)
 {
     const GList            *modules;
     MateMixerBackendModule *module = NULL;
+    MateMixerState          state;
 
     modules = mate_mixer_get_modules ();
     while (modules) {
@@ -1208,10 +1233,23 @@ control_try_next_backend (MateMixerControl *control)
     if (!mate_mixer_backend_open (control->priv->backend))
         return control_try_next_backend (control);
 
+    state = mate_mixer_backend_get_state (control->priv->backend);
+
+    if (G_UNLIKELY (state != MATE_MIXER_STATE_READY &&
+                    state != MATE_MIXER_STATE_CONNECTING)) {
+        /* This would be a backend bug */
+        g_warn_if_reached ();
+
+        control_close (control);
+        return control_try_next_backend (control);
+    }
+
     g_signal_connect (control->priv->backend,
                       "notify::state",
                       G_CALLBACK (control_state_changed_cb),
                       control);
+
+    control_change_state (control, state);
     return TRUE;
 }
 

@@ -24,6 +24,7 @@
 #include <pulse/pulseaudio.h>
 
 #include "pulse-connection.h"
+#include "pulse-device.h"
 #include "pulse-stream.h"
 
 G_BEGIN_DECLS
@@ -61,12 +62,14 @@ struct _PulseSinkClass
 GType        pulse_sink_get_type          (void) G_GNUC_CONST;
 
 PulseStream *pulse_sink_new               (PulseConnection    *connection,
-                                           const pa_sink_info *info);
+                                           const pa_sink_info *info,
+                                           PulseDevice        *device);
 
 guint32      pulse_sink_get_monitor_index (PulseStream        *stream);
 
 gboolean     pulse_sink_update            (PulseStream        *stream,
-                                           const pa_sink_info *info);
+                                           const pa_sink_info *info,
+                                           PulseDevice        *device);
 
 G_END_DECLS
 

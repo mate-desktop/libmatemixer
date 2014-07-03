@@ -15,9 +15,6 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-// XXX
-// consider using guint for volumes, but see the other backends first
-
 #include <glib.h>
 #include <glib-object.h>
 
@@ -115,24 +112,24 @@ mate_mixer_stream_default_init (MateMixerStreamInterface *iface)
                                                              G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
-                                         g_param_spec_double ("balance",
-                                                              "Balance",
-                                                              "Balance value of the stream",
-                                                              -1.0,
-                                                              1.0,
-                                                              0.0,
-                                                              G_PARAM_READABLE |
-                                                              G_PARAM_STATIC_STRINGS));
+                                         g_param_spec_float ("balance",
+                                                             "Balance",
+                                                             "Balance value of the stream",
+                                                             -1.0f,
+                                                             1.0f,
+                                                             0.0f,
+                                                             G_PARAM_READABLE |
+                                                             G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
-                                         g_param_spec_double ("fade",
-                                                              "Fade",
-                                                              "Fade value of the stream",
-                                                              -1.0,
-                                                              1.0,
-                                                              0.0,
-                                                              G_PARAM_READABLE |
-                                                              G_PARAM_STATIC_STRINGS));
+                                         g_param_spec_float ("fade",
+                                                             "Fade",
+                                                             "Fade value of the stream",
+                                                             -1.0f,
+                                                             1.0f,
+                                                             0.0f,
+                                                             G_PARAM_READABLE |
+                                                             G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
                                          g_param_spec_pointer ("ports",
@@ -258,7 +255,7 @@ mate_mixer_stream_set_mute (MateMixerStream *stream, gboolean mute)
     return FALSE;
 }
 
-gint64
+guint
 mate_mixer_stream_get_volume (MateMixerStream *stream)
 {
     MateMixerStreamInterface *iface;
@@ -274,7 +271,7 @@ mate_mixer_stream_get_volume (MateMixerStream *stream)
 }
 
 gboolean
-mate_mixer_stream_set_volume (MateMixerStream *stream, gint64 volume)
+mate_mixer_stream_set_volume (MateMixerStream *stream, guint volume)
 {
     MateMixerStreamInterface *iface;
 
@@ -348,7 +345,7 @@ mate_mixer_stream_get_channel_position (MateMixerStream *stream, guint channel)
     return MATE_MIXER_CHANNEL_UNKNOWN_POSITION;
 }
 
-gint64
+guint
 mate_mixer_stream_get_channel_volume (MateMixerStream *stream, guint channel)
 {
     MateMixerStreamInterface *iface;
@@ -366,7 +363,7 @@ mate_mixer_stream_get_channel_volume (MateMixerStream *stream, guint channel)
 gboolean
 mate_mixer_stream_set_channel_volume (MateMixerStream *stream,
                                       guint            channel,
-                                      gint64           volume)
+                                      guint            volume)
 {
     MateMixerStreamInterface *iface;
 
@@ -428,7 +425,7 @@ mate_mixer_stream_has_position (MateMixerStream          *stream,
     return FALSE;
 }
 
-gint64
+guint
 mate_mixer_stream_get_position_volume (MateMixerStream          *stream,
                                        MateMixerChannelPosition  position)
 {
@@ -447,7 +444,7 @@ mate_mixer_stream_get_position_volume (MateMixerStream          *stream,
 gboolean
 mate_mixer_stream_set_position_volume (MateMixerStream          *stream,
                                        MateMixerChannelPosition  position,
-                                       gint64                    volume)
+                                       guint                     volume)
 {
     MateMixerStreamInterface *iface;
 
@@ -494,23 +491,23 @@ mate_mixer_stream_set_position_decibel (MateMixerStream          *stream,
     return FALSE;
 }
 
-gdouble
+gfloat
 mate_mixer_stream_get_balance (MateMixerStream *stream)
 {
     MateMixerStreamInterface *iface;
 
-    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), 0);
+    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), 0.0f);
 
     iface = MATE_MIXER_STREAM_GET_INTERFACE (stream);
 
     if (iface->get_balance)
         return iface->get_balance (stream);
 
-    return 0;
+    return 0.0f;
 }
 
 gboolean
-mate_mixer_stream_set_balance (MateMixerStream *stream, gdouble balance)
+mate_mixer_stream_set_balance (MateMixerStream *stream, gfloat balance)
 {
     MateMixerStreamInterface *iface;
 
@@ -524,23 +521,23 @@ mate_mixer_stream_set_balance (MateMixerStream *stream, gdouble balance)
     return FALSE;
 }
 
-gdouble
+gfloat
 mate_mixer_stream_get_fade (MateMixerStream *stream)
 {
     MateMixerStreamInterface *iface;
 
-    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), 0);
+    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), 0.0f);
 
     iface = MATE_MIXER_STREAM_GET_INTERFACE (stream);
 
     if (iface->get_fade)
         return iface->get_fade (stream);
 
-    return 0;
+    return 0.0f;
 }
 
 gboolean
-mate_mixer_stream_set_fade (MateMixerStream *stream, gdouble fade)
+mate_mixer_stream_set_fade (MateMixerStream *stream, gfloat fade)
 {
     MateMixerStreamInterface *iface;
 
@@ -673,7 +670,7 @@ mate_mixer_stream_set_active_port (MateMixerStream *stream, const gchar *port)
     return FALSE;
 }
 
-gint64
+guint
 mate_mixer_stream_get_min_volume (MateMixerStream *stream)
 {
     MateMixerStreamInterface *iface;
@@ -688,7 +685,7 @@ mate_mixer_stream_get_min_volume (MateMixerStream *stream)
     return 0;
 }
 
-gint64
+guint
 mate_mixer_stream_get_max_volume (MateMixerStream *stream)
 {
     MateMixerStreamInterface *iface;
@@ -703,7 +700,7 @@ mate_mixer_stream_get_max_volume (MateMixerStream *stream)
     return 0;
 }
 
-gint64
+guint
 mate_mixer_stream_get_normal_volume (MateMixerStream *stream)
 {
     MateMixerStreamInterface *iface;
@@ -718,7 +715,7 @@ mate_mixer_stream_get_normal_volume (MateMixerStream *stream)
     return 0;
 }
 
-gint64
+guint
 mate_mixer_stream_get_base_volume (MateMixerStream *stream)
 {
     MateMixerStreamInterface *iface;

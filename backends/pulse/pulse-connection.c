@@ -348,9 +348,10 @@ pulse_connection_finalize (GObject *object)
 
     g_free (connection->priv->server);
 
-    pa_context_unref (connection->priv->context);
-    pa_proplist_free (connection->priv->proplist);
+    if (connection->priv->context != NULL)
+        pa_context_unref (connection->priv->context);
 
+    pa_proplist_free (connection->priv->proplist);
     pa_glib_mainloop_free (connection->priv->mainloop);
 
     G_OBJECT_CLASS (pulse_connection_parent_class)->finalize (object);
@@ -364,7 +365,6 @@ pulse_connection_new (const gchar *app_name,
                       const gchar *server_address)
 {
     pa_glib_mainloop *mainloop;
-    pa_context       *context;
     pa_proplist      *proplist;
     PulseConnection  *connection;
 
@@ -375,11 +375,18 @@ pulse_connection_new (const gchar *app_name,
     }
 
     /* Create a property list to hold information about the application,
-     * the list will be kept with the connection as it may be reused later
-     * when creating PulseAudio streams */
+     * the list will be kept with the connection as it will be reused later
+     * when creating PulseAudio contexts and streams */
     proplist = pa_proplist_new ();
-    if (app_name != NULL)
+    if (app_name != NULL) {
         pa_proplist_sets (proplist, PA_PROP_APPLICATION_NAME, app_name);
+    } else {
+        /* Set a sensible default name when application does not provide one */
+        gchar *name = connection_get_app_name ();
+
+        pa_proplist_sets (proplist, PA_PROP_APPLICATION_NAME, name);
+        g_free (name);
+    }
     if (app_id != NULL)
         pa_proplist_sets (proplist, PA_PROP_APPLICATION_ID, app_id);
     if (app_icon != NULL)
@@ -387,62 +394,55 @@ pulse_connection_new (const gchar *app_name,
     if (app_version != NULL)
         pa_proplist_sets (proplist, PA_PROP_APPLICATION_VERSION, app_version);
 
-    if (app_name != NULL) {
-        context = pa_context_new_with_proplist (pa_glib_mainloop_get_api (mainloop),
-                                                app_name,
-                                                proplist);
-    } else {
-        /* Try to set some sensible default name when application does not
-         * provide a name */
-        gchar *name = connection_get_app_name ();
-
-        context = pa_context_new_with_proplist (pa_glib_mainloop_get_api (mainloop),
-                                                name,
-                                                proplist);
-        g_free (name);
-    }
-
-    if (G_UNLIKELY (context == NULL)) {
-        g_warning ("Failed to create PulseAudio context");
-
-        pa_glib_mainloop_free (mainloop);
-        pa_proplist_free (proplist);
-        return NULL;
-    }
-
     connection = g_object_new (PULSE_TYPE_CONNECTION,
                                "server", server_address,
                                NULL);
 
-    /* Set function to monitor status changes */
-    pa_context_set_state_callback (context,
-                                   connection_state_cb,
-                                   connection);
-
     connection->priv->mainloop = mainloop;
-    connection->priv->context  = context;
     connection->priv->proplist = proplist;
 
     return connection;
 }
 
 gboolean
-pulse_connection_connect (PulseConnection *connection)
+pulse_connection_connect (PulseConnection *connection, gboolean wait_for_daemon)
 {
+    pa_context         *context;
+    pa_context_flags_t  flags = PA_CONTEXT_NOFLAGS;
+    pa_mainloop_api    *mainloop;
+
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
     if (connection->priv->state != PULSE_CONNECTION_DISCONNECTED)
         return TRUE;
 
+    mainloop = pa_glib_mainloop_get_api (connection->priv->mainloop);
+    context  = pa_context_new_with_proplist (mainloop,
+                                             NULL,
+                                             connection->priv->proplist);
+    if (G_UNLIKELY (context == NULL)) {
+        g_warning ("Failed to create PulseAudio context");
+        return FALSE;
+    }
+
+    /* Set function to monitor status changes */
+    pa_context_set_state_callback (context,
+                                   connection_state_cb,
+                                   connection);
+    if (wait_for_daemon)
+        flags = PA_CONTEXT_NOFAIL;
+
     /* Initiate a connection, state changes will be delivered asynchronously */
-    if (pa_context_connect (connection->priv->context,
+    if (pa_context_connect (context,
                             connection->priv->server,
-                            PA_CONTEXT_NOFLAGS,
+                            flags,
                             NULL) == 0) {
-        connection->priv->state = PULSE_CONNECTION_CONNECTING;
+        connection->priv->context = context;
+        connection_change_state (connection, PULSE_CONNECTION_CONNECTING);
         return TRUE;
     }
 
+    pa_context_unref (context);
     return FALSE;
 }
 
@@ -454,7 +454,10 @@ pulse_connection_disconnect (PulseConnection *connection)
     if (connection->priv->state == PULSE_CONNECTION_DISCONNECTED)
         return;
 
-    pa_context_disconnect (connection->priv->context);
+    pa_context_unref (connection->priv->context);
+
+    connection->priv->context = NULL;
+    connection->priv->outstanding = 0;
 
     connection_change_state (connection, PULSE_CONNECTION_DISCONNECTED);
 }
@@ -474,6 +477,9 @@ pulse_connection_create_monitor (PulseConnection *connection,
 {
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), NULL);
 
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return NULL;
+
     return pulse_monitor_new (connection->priv->context,
                               connection->priv->proplist,
                               index_source,
@@ -487,6 +493,9 @@ pulse_connection_set_default_sink (PulseConnection *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
 
     op = pa_context_set_default_sink (connection->priv->context,
                                       name,
@@ -503,6 +512,9 @@ pulse_connection_set_default_source (PulseConnection *connection,
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
     op = pa_context_set_default_source (connection->priv->context,
                                         name,
                                         NULL, NULL);
@@ -518,6 +530,9 @@ pulse_connection_set_card_profile (PulseConnection *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
 
     op = pa_context_set_card_profile_by_name (connection->priv->context,
                                               card,
@@ -536,6 +551,9 @@ pulse_connection_set_sink_mute (PulseConnection *connection,
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
     op = pa_context_set_sink_mute_by_index (connection->priv->context,
                                             index,
                                             (int) mute,
@@ -552,6 +570,9 @@ pulse_connection_set_sink_volume (PulseConnection  *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
 
     op = pa_context_set_sink_volume_by_index (connection->priv->context,
                                               index,
@@ -570,6 +591,9 @@ pulse_connection_set_sink_port (PulseConnection *connection,
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
     op = pa_context_set_sink_port_by_index (connection->priv->context,
                                             index,
                                             port,
@@ -586,6 +610,9 @@ pulse_connection_set_sink_input_mute (PulseConnection  *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
 
     op = pa_context_set_sink_input_mute (connection->priv->context,
                                          index,
@@ -604,6 +631,9 @@ pulse_connection_set_sink_input_volume (PulseConnection  *connection,
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
     op = pa_context_set_sink_input_volume (connection->priv->context,
                                            index,
                                            volume,
@@ -620,6 +650,9 @@ pulse_connection_set_source_mute (PulseConnection *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
 
     op = pa_context_set_source_mute_by_index (connection->priv->context,
                                               index,
@@ -638,6 +671,9 @@ pulse_connection_set_source_volume (PulseConnection  *connection,
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
     op = pa_context_set_source_volume_by_index (connection->priv->context,
                                                 index,
                                                 volume,
@@ -654,6 +690,9 @@ pulse_connection_set_source_port (PulseConnection *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
 
     op = pa_context_set_source_port_by_index (connection->priv->context,
                                               index,
@@ -672,6 +711,9 @@ pulse_connection_set_source_output_mute (PulseConnection *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
 
     op = pa_context_set_source_output_mute (connection->priv->context,
                                             index,
@@ -694,6 +736,9 @@ pulse_connection_set_source_output_volume (PulseConnection  *connection,
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
     op = pa_context_set_source_output_volume (connection->priv->context,
                                               index,
                                               volume,
@@ -714,6 +759,9 @@ pulse_connection_suspend_sink (PulseConnection *connection,
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
     op = pa_context_suspend_sink_by_index (connection->priv->context,
                                            index,
                                            (int) suspend,
@@ -730,6 +778,9 @@ pulse_connection_suspend_source (PulseConnection *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
 
     op = pa_context_suspend_source_by_index (connection->priv->context,
                                              index,
@@ -748,6 +799,9 @@ pulse_connection_move_sink_input (PulseConnection *connection,
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
     op = pa_context_move_sink_input_by_index (connection->priv->context,
                                               index,
                                               sink_index,
@@ -765,6 +819,9 @@ pulse_connection_move_source_output (PulseConnection *connection,
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
     op = pa_context_move_source_output_by_index (connection->priv->context,
                                                  index,
                                                  source_index,
@@ -781,6 +838,9 @@ pulse_connection_kill_sink_input (PulseConnection *connection,
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
 
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
     op = pa_context_kill_sink_input (connection->priv->context,
                                      index,
                                      NULL, NULL);
@@ -795,6 +855,9 @@ pulse_connection_kill_source_output (PulseConnection *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
 
     op = pa_context_kill_source_output (connection->priv->context,
                                         index,
@@ -826,7 +889,7 @@ connection_load_lists (PulseConnection *connection)
     GList        *ops = NULL;
     pa_operation *op;
 
-    if (G_UNLIKELY (connection->priv->outstanding)) {
+    if (G_UNLIKELY (connection->priv->outstanding > 0)) {
         g_warn_if_reached ();
         return FALSE;
     }
@@ -919,20 +982,20 @@ connection_state_cb (pa_context *c, void *userdata)
                                                connection);
             pa_operation_unref (op);
 
-            if (connection_load_lists (connection) == TRUE)
+            if (connection_load_lists (connection) == TRUE) {
                 connection_change_state (connection, PULSE_CONNECTION_LOADING);
-            else
-                pulse_connection_disconnect (connection);
+                return;
+            }
 
-            return;
+            /* Treat as a connection failure */
+            state = PA_CONTEXT_FAILED;
+        } else {
+            g_warning ("Failed to subscribe to PulseAudio notifications: %s",
+                       pa_strerror (pa_context_errno (connection->priv->context)));
+
+            /* Treat as a connection failure */
+            state = PA_CONTEXT_FAILED;
         }
-
-        /* If we could not subscribe to notifications, we consider it the
-         * same as a connection failture */
-        g_warning ("Failed to subscribe to PulseAudio notifications: %s",
-                   pa_strerror (pa_context_errno (connection->priv->context)));
-
-        state = PA_CONTEXT_FAILED;
     }
 
     if (state == PA_CONTEXT_TERMINATED || state == PA_CONTEXT_FAILED) {
@@ -1181,6 +1244,9 @@ connection_change_state (PulseConnection *connection, PulseConnectionState state
 static void
 connection_list_loaded (PulseConnection *connection)
 {
+    /* Decrement the number of outstanding requests as a list has just been
+     * downloaded; when the number reaches 0, server information is requested
+     * as the final step in the connection process */
     connection->priv->outstanding--;
 
     if (G_UNLIKELY (connection->priv->outstanding < 0)) {

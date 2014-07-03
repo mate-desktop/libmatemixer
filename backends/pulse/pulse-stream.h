@@ -95,12 +95,8 @@ gboolean         pulse_stream_update_mute            (PulseStream           *str
 
 gboolean         pulse_stream_update_volume          (PulseStream           *stream,
                                                       const pa_cvolume      *volume,
-                                                      const pa_channel_map  *map);
-gboolean         pulse_stream_update_volume_extended (PulseStream           *stream,
-                                                      const pa_cvolume      *volume,
                                                       const pa_channel_map  *map,
-                                                      pa_volume_t            volume_base,
-                                                      guint32                volume_steps);
+                                                      pa_volume_t            base_volume);
 
 gboolean         pulse_stream_update_channel_map     (PulseStream           *stream,
                                                       const pa_channel_map  *map);

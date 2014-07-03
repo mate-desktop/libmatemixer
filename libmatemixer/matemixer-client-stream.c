@@ -108,7 +108,7 @@ mate_mixer_client_stream_get_parent (MateMixerClientStream *client)
  * @parent: a #MateMixerStream
  *
  * Changes the parent stream of the client stream. The parent stream must be a
- * non-client output stream.
+ * non-client input or output stream.
  *
  * Returns: %TRUE on success or %FALSE on failure.
  */

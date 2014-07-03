@@ -24,6 +24,7 @@
 #include <pulse/pulseaudio.h>
 
 #include "pulse-connection.h"
+#include "pulse-device.h"
 #include "pulse-stream.h"
 
 G_BEGIN_DECLS
@@ -57,10 +58,12 @@ struct _PulseSourceClass
 GType        pulse_source_get_type   (void) G_GNUC_CONST;
 
 PulseStream *pulse_source_new        (PulseConnection      *connection,
-                                      const pa_source_info *info);
+                                      const pa_source_info *info,
+                                      PulseDevice          *device);
 
 gboolean     pulse_source_update     (PulseStream          *stream,
-                                      const pa_source_info *info);
+                                      const pa_source_info *info,
+                                      PulseDevice          *device);
 
 G_END_DECLS
 

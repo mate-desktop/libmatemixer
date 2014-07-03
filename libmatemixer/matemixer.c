@@ -76,6 +76,19 @@ mate_mixer_init (void)
 }
 
 /**
+ * mate_mixer_is_initialized:
+ *
+ * Returns TRUE if the library has been initialized.
+ *
+ * Returns: %TRUE or %FALSE
+ */
+gboolean
+mate_mixer_is_initialized (void)
+{
+    return mixer_initialized;
+}
+
+/**
  * mate_mixer_deinit:
  *
  * Deinitializes the library. You should call this function when you do not need
@@ -102,13 +115,6 @@ const GList *
 mate_mixer_get_modules (void)
 {
     return (const GList *) mixer_modules;
-}
-
-/* Internal function: return TRUE if the library has been initialized */
-gboolean
-mate_mixer_is_initialized (void)
-{
-    return mixer_initialized;
 }
 
 static void

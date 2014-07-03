@@ -246,6 +246,42 @@ state_cb (void)
     }
 }
 
+static void
+device_added_cb (MateMixerControl *control, const gchar *name)
+{
+    g_print ("Device added: %s\n", name);
+}
+
+static void
+device_changed_cb (MateMixerControl *control, const gchar *name)
+{
+    g_print ("Device changed: %s\n", name);
+}
+
+static void
+device_removed_cb (MateMixerControl *control, const gchar *name)
+{
+    g_print ("Device removed: %s\n", name);
+}
+
+static void
+stream_added_cb (MateMixerControl *control, const gchar *name)
+{
+    g_print ("Stream added: %s\n", name);
+}
+
+static void
+stream_changed_cb (MateMixerControl *control, const gchar *name)
+{
+    g_print ("Stream changed: %s\n", name);
+}
+
+static void
+stream_removed_cb (MateMixerControl *control, const gchar *name)
+{
+    g_print ("Stream removed: %s\n", name);
+}
+
 #ifdef G_OS_UNIX
 static gboolean
 signal_cb (gpointer mainloop)
@@ -264,7 +300,7 @@ int main (int argc, char *argv[])
     GError         *error = NULL;
 
     GOptionEntry    entries[] = {
-        { "backend", 'b', 0, G_OPTION_ARG_STRING, &backend, "Sound system to use (pulse, null)", NULL },
+        { "backend", 'b', 0, G_OPTION_ARG_STRING, &backend, "Sound system to use (pulseaudio, null)", NULL },
         { "server",  's', 0, G_OPTION_ARG_STRING, &server,  "Sound server address", NULL },
         { NULL }
     };
@@ -295,8 +331,8 @@ int main (int argc, char *argv[])
     mate_mixer_control_set_app_icon (control, "multimedia-volume-control");
 
     if (backend) {
-        if (!strcmp (backend, "pulse"))
-            mate_mixer_control_set_backend_type (control, MATE_MIXER_BACKEND_PULSE);
+        if (!strcmp (backend, "pulseaudio"))
+            mate_mixer_control_set_backend_type (control, MATE_MIXER_BACKEND_PULSEAUDIO);
         else if (!strcmp (backend, "null"))
             mate_mixer_control_set_backend_type (control, MATE_MIXER_BACKEND_NULL);
         else
@@ -317,6 +353,31 @@ int main (int argc, char *argv[])
         mate_mixer_deinit ();
         return 1;
     }
+
+    g_signal_connect (control,
+                      "device-added",
+                      G_CALLBACK (device_added_cb),
+                      NULL);
+    g_signal_connect (control,
+                      "device-changed",
+                      G_CALLBACK (device_changed_cb),
+                      NULL);
+    g_signal_connect (control,
+                      "device-removed",
+                      G_CALLBACK (device_removed_cb),
+                      NULL);
+    g_signal_connect (control,
+                      "stream-added",
+                      G_CALLBACK (stream_added_cb),
+                      NULL);
+    g_signal_connect (control,
+                      "stream-changed",
+                      G_CALLBACK (stream_changed_cb),
+                      NULL);
+    g_signal_connect (control,
+                      "stream-removed",
+                      G_CALLBACK (stream_removed_cb),
+                      NULL);
 
     /* If mate_mixer_control_open() returns TRUE, the state will be either
      * MATE_MIXER_STATE_READY or MATE_MIXER_STATE_CONNECTING.

@@ -23,6 +23,7 @@
 #include <pulse/pulseaudio.h>
 
 #include "pulse-connection.h"
+#include "pulse-device.h"
 #include "pulse-monitor.h"
 #include "pulse-stream.h"
 #include "pulse-sink.h"
@@ -75,23 +76,25 @@ pulse_sink_init (PulseSink *sink)
 }
 
 PulseStream *
-pulse_sink_new (PulseConnection *connection, const pa_sink_info *info)
+pulse_sink_new (PulseConnection    *connection,
+                const pa_sink_info *info,
+                PulseDevice        *device)
 {
-    PulseSink *sink;
+    PulseStream *stream;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), NULL);
     g_return_val_if_fail (info != NULL, NULL);
 
     /* Consider the sink index as unchanging parameter */
-    sink = g_object_new (PULSE_TYPE_SINK,
-                         "connection", connection,
-                         "index", info->index,
-                         NULL);
+    stream = g_object_new (PULSE_TYPE_SINK,
+                           "connection", connection,
+                           "index", info->index,
+                           NULL);
 
     /* Other data may change at any time, so let's make a use of our update function */
-    pulse_sink_update (PULSE_STREAM (sink), info);
+    pulse_sink_update (stream, info, device);
 
-    return PULSE_STREAM (sink);
+    return stream;
 }
 
 guint32
@@ -103,7 +106,7 @@ pulse_sink_get_monitor_index (PulseStream *stream)
 }
 
 gboolean
-pulse_sink_update (PulseStream *stream, const pa_sink_info *info)
+pulse_sink_update (PulseStream *stream, const pa_sink_info *info, PulseDevice *device)
 {
     MateMixerStreamFlags flags = MATE_MIXER_STREAM_OUTPUT |
                                  MATE_MIXER_STREAM_HAS_MUTE |
@@ -177,11 +180,12 @@ pulse_sink_update (PulseStream *stream, const pa_sink_info *info)
     /* Flags must be updated before volume */
     pulse_stream_update_flags (stream, flags);
 
-    pulse_stream_update_volume_extended (stream,
-                                         &info->volume,
-                                         &info->channel_map,
-                                         info->base_volume,
-                                         info->n_volume_steps);
+    pulse_stream_update_volume (stream,
+                                &info->volume,
+                                &info->channel_map,
+                                info->base_volume);
+
+    pulse_stream_update_device (stream, MATE_MIXER_DEVICE (device));
 
     sink = PULSE_SINK (stream);
 

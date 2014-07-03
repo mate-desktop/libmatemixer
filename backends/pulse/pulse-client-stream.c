@@ -25,6 +25,7 @@
 #include <pulse/pulseaudio.h>
 
 #include "pulse-client-stream.h"
+#include "pulse-stream.h"
 
 struct _PulseClientStreamPrivate
 {

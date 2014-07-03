@@ -32,8 +32,9 @@
 
 G_BEGIN_DECLS
 
-gboolean mate_mixer_init   (void);
-void     mate_mixer_deinit (void);
+gboolean mate_mixer_init           (void);
+gboolean mate_mixer_is_initialized (void);
+void     mate_mixer_deinit         (void);
 
 G_END_DECLS
 

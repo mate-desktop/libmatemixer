@@ -24,6 +24,7 @@
 #include <pulse/pulseaudio.h>
 
 #include "pulse-connection.h"
+#include "pulse-device.h"
 #include "pulse-monitor.h"
 #include "pulse-stream.h"
 #include "pulse-source.h"
@@ -60,27 +61,31 @@ pulse_source_init (PulseSource *source)
 }
 
 PulseStream *
-pulse_source_new (PulseConnection *connection, const pa_source_info *info)
+pulse_source_new (PulseConnection      *connection,
+                  const pa_source_info *info,
+                  PulseDevice          *device)
 {
-    PulseSource *source;
+    PulseStream *stream;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), NULL);
     g_return_val_if_fail (info != NULL, NULL);
 
     /* Consider the sink index as unchanging parameter */
-    source = g_object_new (PULSE_TYPE_SOURCE,
+    stream = g_object_new (PULSE_TYPE_SOURCE,
                            "connection", connection,
                            "index", info->index,
                            NULL);
 
     /* Other data may change at any time, so let's make a use of our update function */
-    pulse_source_update (PULSE_STREAM (source), info);
+    pulse_source_update (stream, info, device);
 
-    return PULSE_STREAM (source);
+    return stream;
 }
 
 gboolean
-pulse_source_update (PulseStream *stream, const pa_source_info *info)
+pulse_source_update (PulseStream          *stream,
+                     const pa_source_info *info,
+                     PulseDevice          *device)
 {
     MateMixerStreamFlags flags = MATE_MIXER_STREAM_INPUT |
                                  MATE_MIXER_STREAM_HAS_MUTE |
@@ -152,11 +157,12 @@ pulse_source_update (PulseStream *stream, const pa_source_info *info)
     /* Flags must be updated before volume */
     pulse_stream_update_flags (stream, flags);
 
-    pulse_stream_update_volume_extended (stream,
-                                         &info->volume,
-                                         &info->channel_map,
-                                         info->base_volume,
-                                         info->n_volume_steps);
+    pulse_stream_update_volume (stream,
+                                &info->volume,
+                                &info->channel_map,
+                                info->base_volume);
+
+    pulse_stream_update_device (stream, MATE_MIXER_DEVICE (device));
 
     g_object_thaw_notify (G_OBJECT (stream));
     return TRUE;

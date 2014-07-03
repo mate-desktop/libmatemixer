@@ -52,7 +52,7 @@ mate_mixer_backend_type_get_type (void)
     if (etype == 0) {
         static const GEnumValue values[] = {
             { MATE_MIXER_BACKEND_UNKNOWN, "MATE_MIXER_BACKEND_UNKNOWN", "unknown" },
-            { MATE_MIXER_BACKEND_PULSE, "MATE_MIXER_BACKEND_PULSE", "pulse" },
+            { MATE_MIXER_BACKEND_PULSEAUDIO, "MATE_MIXER_BACKEND_PULSEAUDIO", "pulseaudio" },
             { MATE_MIXER_BACKEND_NULL, "MATE_MIXER_BACKEND_NULL", "null" },
             { 0, NULL, NULL }
         };

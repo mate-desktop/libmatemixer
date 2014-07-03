@@ -169,12 +169,12 @@ pulse_source_output_update (PulseStream                 *stream,
     pulse_stream_update_mute (stream, info->mute ? TRUE : FALSE);
 
     if (info->has_volume)
-        pulse_stream_update_volume (stream, &info->volume, &info->channel_map);
+        pulse_stream_update_volume (stream, &info->volume, &info->channel_map, 0);
     else
-        pulse_stream_update_volume (stream, NULL, &info->channel_map);
+        pulse_stream_update_volume (stream, NULL, &info->channel_map, 0);
 #else
     pulse_stream_update_flags (stream, flags);
-    pulse_stream_update_volume (stream, NULL, &info->channel_map);
+    pulse_stream_update_volume (stream, NULL, &info->channel_map, 0);
 #endif
 
     if (G_LIKELY (parent != NULL))

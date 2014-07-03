@@ -35,7 +35,7 @@ typedef enum {
  * MateMixerBackendType:
  * @MATE_MIXER_BACKEND_UNKNOWN:
  *     Unknown or undefined backend type.
- * @MATE_MIXER_BACKEND_PULSE:
+ * @MATE_MIXER_BACKEND_PULSEAUDIO:
  *     PulseAudio sound system backend. It has the highest priority and
  *     will be the first one to try unless you select a specific backend
  *     to connect to.
@@ -47,7 +47,7 @@ typedef enum {
  */
 typedef enum {
     MATE_MIXER_BACKEND_UNKNOWN = 0,
-    MATE_MIXER_BACKEND_PULSE,
+    MATE_MIXER_BACKEND_PULSEAUDIO,
     MATE_MIXER_BACKEND_NULL
 } MateMixerBackendType;
 
