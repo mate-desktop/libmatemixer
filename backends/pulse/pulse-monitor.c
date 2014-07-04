@@ -27,6 +27,7 @@ struct _PulseMonitorPrivate
     pa_context  *context;
     pa_proplist *proplist;
     pa_stream   *stream;
+    gchar       *name;
     guint32      index_source;
     guint32      index_sink_input;
     gboolean     enabled;
@@ -143,6 +144,11 @@ pulse_monitor_disable (PulseMonitor *monitor)
 
     pa_stream_disconnect (monitor->priv->stream);
 
+    // XXX stream must be destroyed on disable, re-enabling does not work, this
+    // is just a quick temporary solution
+    pa_stream_unref (monitor->priv->stream);
+    monitor->priv->stream = NULL;
+
     monitor->priv->enabled = FALSE;
 }
 
@@ -182,17 +188,43 @@ pulse_monitor_update_index (PulseMonitor *monitor,
     return TRUE;
 }
 
+const gchar *
+pulse_monitor_get_name (PulseMonitor *monitor)
+{
+    g_return_val_if_fail (PULSE_IS_MONITOR (monitor), NULL);
+
+    return monitor->priv->name;
+}
+
+gboolean
+pulse_monitor_set_name (PulseMonitor *monitor, const gchar *name)
+{
+    g_return_val_if_fail (PULSE_IS_MONITOR (monitor), FALSE);
+
+    g_free (monitor->priv->name);
+
+    monitor->priv->name = g_strdup (name);
+    return TRUE;
+}
+
 static gboolean
 monitor_prepare (PulseMonitor *monitor)
 {
-    pa_sample_spec spec;
+    pa_sample_spec  spec;
+    const gchar    *name;
 
-    spec.channels  = 1;
-    spec.format    = PA_SAMPLE_FLOAT32;
-    spec.rate      = 25;
+    spec.channels = 1;
+    spec.format   = PA_SAMPLE_FLOAT32;
+    spec.rate     = 25;
+
+    if (monitor->priv->name != NULL)
+        name = monitor->priv->name;
+    else
+        name = "Peak detect";
 
     monitor->priv->stream =
-        pa_stream_new_with_proplist (monitor->priv->context, "Peak detect",
+        pa_stream_new_with_proplist (monitor->priv->context,
+                                     name,
                                      &spec,
                                      NULL,
                                      monitor->priv->proplist);

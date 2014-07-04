@@ -56,6 +56,7 @@ struct _PulseStreamPrivate
     MateMixerPort         *port;
     PulseConnection       *connection;
     PulseMonitor          *monitor;
+    gchar                 *monitor_name;
 };
 
 enum {
@@ -139,6 +140,8 @@ static gboolean                 stream_resume                 (MateMixerStream  
 static gboolean                 stream_monitor_start          (MateMixerStream          *stream);
 static void                     stream_monitor_stop           (MateMixerStream          *stream);
 static gboolean                 stream_monitor_is_running     (MateMixerStream          *stream);
+static gboolean                 stream_monitor_set_name       (MateMixerStream          *stream,
+                                                               const gchar              *name);
 static void                     stream_monitor_value          (PulseMonitor             *monitor,
                                                                gdouble                   value,
                                                                MateMixerStream          *stream);
@@ -192,6 +195,7 @@ mate_mixer_stream_interface_init (MateMixerStreamInterface *iface)
     iface->monitor_start            = stream_monitor_start;
     iface->monitor_stop             = stream_monitor_stop;
     iface->monitor_is_running       = stream_monitor_is_running;
+    iface->monitor_set_name         = stream_monitor_set_name;
     iface->list_ports               = stream_list_ports;
     iface->get_active_port          = stream_get_active_port;
     iface->set_active_port          = stream_set_active_port;
@@ -942,7 +946,6 @@ stream_resume (MateMixerStream *stream)
     return PULSE_STREAM_GET_CLASS (stream)->resume (stream);
 }
 
-// XXX allow to provide custom translated monitor name
 static gboolean
 stream_monitor_start (MateMixerStream *stream)
 {
@@ -958,11 +961,16 @@ stream_monitor_start (MateMixerStream *stream)
         if (G_UNLIKELY (pulse->priv->monitor == NULL))
             return FALSE;
 
+        pulse_monitor_set_name (pulse->priv->monitor,
+                                pulse->priv->monitor_name);
+
         g_signal_connect (G_OBJECT (pulse->priv->monitor),
                           "value",
                           G_CALLBACK (stream_monitor_value),
                           stream);
     }
+    g_debug ("Enabling monitor for stream %s", pulse->priv->name);
+
     return pulse_monitor_enable (pulse->priv->monitor);
 }
 
@@ -975,8 +983,12 @@ stream_monitor_stop (MateMixerStream *stream)
 
     pulse = PULSE_STREAM (stream);
 
-    if (pulse->priv->monitor)
+    if (pulse->priv->monitor &&
+        pulse_monitor_is_enabled (pulse->priv->monitor)) {
+        g_debug ("Disabling monitor for stream %s", pulse->priv->name);
+
         pulse_monitor_disable (pulse->priv->monitor);
+    }
 }
 
 static gboolean
@@ -992,6 +1004,22 @@ stream_monitor_is_running (MateMixerStream *stream)
         return pulse_monitor_is_enabled (pulse->priv->monitor);
 
     return FALSE;
+}
+
+static gboolean
+stream_monitor_set_name (MateMixerStream *stream, const gchar *name)
+{
+    PulseStream *pulse;
+
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), FALSE);
+
+    pulse = PULSE_STREAM (stream);
+
+    if (pulse->priv->monitor)
+        pulse_monitor_set_name (pulse->priv->monitor, name);
+
+    pulse->priv->monitor_name = g_strdup (name);
+    return TRUE;
 }
 
 static void

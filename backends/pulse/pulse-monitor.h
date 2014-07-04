@@ -70,6 +70,10 @@ gboolean      pulse_monitor_enable       (PulseMonitor *monitor);
 void          pulse_monitor_disable      (PulseMonitor *monitor);
 gboolean      pulse_monitor_is_enabled   (PulseMonitor *monitor);
 
+const gchar * pulse_monitor_get_name     (PulseMonitor *monitor);
+gboolean      pulse_monitor_set_name     (PulseMonitor *monitor,
+                                          const gchar  *name);
+
 gboolean      pulse_monitor_update_index (PulseMonitor *monitor,
                                           guint32       index_source,
                                           guint32       index_sink_input);

@@ -486,6 +486,9 @@ pulse_connection_create_monitor (PulseConnection *connection,
                               index_sink_input);
 }
 
+// XXX watch for some operation failures and eventually reload data
+// to restore the previous state
+
 gboolean
 pulse_connection_set_default_sink (PulseConnection *connection,
                                    const gchar     *name)

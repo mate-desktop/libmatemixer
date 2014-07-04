@@ -529,8 +529,12 @@ backend_set_default_input_stream (MateMixerBackend *backend, MateMixerStream *st
         return FALSE;
     }
 
-    return pulse_connection_set_default_source (pulse->priv->connection,
-                                                mate_mixer_stream_get_name (stream));
+    if (!pulse_connection_set_default_source (pulse->priv->connection,
+                                              mate_mixer_stream_get_name (stream)))
+        return FALSE;
+
+    g_object_notify (G_OBJECT (pulse), "default-input");
+    return TRUE;
 }
 
 static MateMixerStream *
@@ -556,8 +560,12 @@ backend_set_default_output_stream (MateMixerBackend *backend, MateMixerStream *s
         return FALSE;
     }
 
-    return pulse_connection_set_default_sink (pulse->priv->connection,
-                                              mate_mixer_stream_get_name (stream));
+    if (!pulse_connection_set_default_sink (pulse->priv->connection,
+                                            mate_mixer_stream_get_name (stream)))
+        return FALSE;
+
+    g_object_notify (G_OBJECT (pulse), "default-output");
+    return TRUE;
 }
 
 static void
@@ -625,6 +633,9 @@ backend_server_info_cb (PulseConnection      *connection,
 
     if (pulse->priv->default_source != NULL)
         name_source = mate_mixer_stream_get_name (pulse->priv->default_source);
+
+    // XXX
+    // default input might be monitor !!!
 
     if (g_strcmp0 (name_source, info->default_source_name)) {
         if (pulse->priv->default_source != NULL)

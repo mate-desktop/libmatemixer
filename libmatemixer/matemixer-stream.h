@@ -101,6 +101,8 @@ struct _MateMixerStreamInterface
     gboolean                 (*monitor_start)          (MateMixerStream          *stream);
     void                     (*monitor_stop)           (MateMixerStream          *stream);
     gboolean                 (*monitor_is_running)     (MateMixerStream          *stream);
+    gboolean                 (*monitor_set_name)       (MateMixerStream          *stream,
+                                                        const gchar              *name);
     const GList *            (*list_ports)             (MateMixerStream          *stream);
     MateMixerPort *          (*get_active_port)        (MateMixerStream          *stream);
     gboolean                 (*set_active_port)        (MateMixerStream          *stream,
@@ -182,6 +184,8 @@ gboolean                 mate_mixer_stream_monitor_start          (MateMixerStre
 void                     mate_mixer_stream_monitor_stop           (MateMixerStream          *stream);
 
 gboolean                 mate_mixer_stream_monitor_is_running     (MateMixerStream          *stream);
+gboolean                 mate_mixer_stream_monitor_set_name       (MateMixerStream          *stream,
+                                                                   const gchar              *name);
 
 const GList *            mate_mixer_stream_list_ports             (MateMixerStream          *stream);
 

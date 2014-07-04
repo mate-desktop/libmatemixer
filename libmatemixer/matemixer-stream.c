@@ -624,6 +624,21 @@ mate_mixer_stream_monitor_is_running (MateMixerStream *stream)
     return FALSE;
 }
 
+gboolean
+mate_mixer_stream_monitor_set_name (MateMixerStream *stream, const gchar *name)
+{
+    MateMixerStreamInterface *iface;
+
+    g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), FALSE);
+
+    iface = MATE_MIXER_STREAM_GET_INTERFACE (stream);
+
+    if (iface->monitor_set_name)
+        return iface->monitor_set_name (stream, name);
+
+    return FALSE;
+}
+
 const GList *
 mate_mixer_stream_list_ports (MateMixerStream *stream)
 {
