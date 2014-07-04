@@ -2,6 +2,7 @@
 <FILE>matemixer</FILE>
 mate_mixer_init
 mate_mixer_deinit
+mate_mixer_is_initialized
 LIBMATEMIXER_CHECK_VERSION
 </SECTION>
 
@@ -85,6 +86,29 @@ mate_mixer_device_get_type
 </SECTION>
 
 <SECTION>
+<FILE>matemixer-device-profile</FILE>
+<TITLE>MateMixerDeviceProfile</TITLE>
+MateMixerDeviceProfile
+mate_mixer_device_profile_new
+mate_mixer_device_profile_get_name
+mate_mixer_device_profile_get_description
+mate_mixer_device_profile_get_priority
+mate_mixer_device_profile_get_num_input_streams
+mate_mixer_device_profile_get_num_output_streams
+<SUBSECTION Standard>
+MateMixerDeviceProfileClass
+MATE_MIXER_IS_DEVICE_PROFILE
+MATE_MIXER_IS_DEVICE_PROFILE_CLASS
+MATE_MIXER_DEVICE_PROFILE
+MATE_MIXER_DEVICE_PROFILE_CLASS
+MATE_MIXER_DEVICE_PROFILE_GET_CLASS
+MATE_MIXER_TYPE_DEVICE_PROFILE
+mate_mixer_device_profile_get_type
+<SUBSECTION Private>
+MateMixerDeviceProfilePrivate
+</SECTION>
+
+<SECTION>
 <FILE>matemixer-port</FILE>
 <TITLE>MateMixerPort</TITLE>
 MateMixerPortFlags
@@ -106,27 +130,6 @@ MATE_MIXER_TYPE_PORT
 mate_mixer_port_get_type
 <SUBSECTION Private>
 MateMixerPortPrivate
-</SECTION>
-
-<SECTION>
-<FILE>matemixer-profile</FILE>
-<TITLE>MateMixerProfile</TITLE>
-MateMixerProfile
-mate_mixer_profile_new
-mate_mixer_profile_get_name
-mate_mixer_profile_get_description
-mate_mixer_profile_get_priority
-<SUBSECTION Standard>
-MateMixerProfileClass
-MATE_MIXER_IS_PROFILE
-MATE_MIXER_IS_PROFILE_CLASS
-MATE_MIXER_PROFILE
-MATE_MIXER_PROFILE_CLASS
-MATE_MIXER_PROFILE_GET_CLASS
-MATE_MIXER_TYPE_PROFILE
-mate_mixer_profile_get_type
-<SUBSECTION Private>
-MateMixerProfilePrivate
 </SECTION>
 
 <SECTION>

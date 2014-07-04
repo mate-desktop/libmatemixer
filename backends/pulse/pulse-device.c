@@ -20,9 +20,9 @@
 #include <string.h>
 
 #include <libmatemixer/matemixer-device.h>
+#include <libmatemixer/matemixer-device-profile.h>
 #include <libmatemixer/matemixer-enums.h>
 #include <libmatemixer/matemixer-port.h>
-#include <libmatemixer/matemixer-profile.h>
 
 #include <pulse/pulseaudio.h>
 
@@ -31,16 +31,16 @@
 
 struct _PulseDevicePrivate
 {
-    guint32           index;
-    gchar            *name;
-    gchar            *description;
-    GList            *profiles;
-    GList            *ports;
-    GList            *streams;
-    gboolean          streams_sorted;
-    gchar            *icon;
-    PulseConnection  *connection;
-    MateMixerProfile *profile;
+    guint32                 index;
+    gchar                  *name;
+    gchar                  *description;
+    GList                  *profiles;
+    GList                  *ports;
+    GList                  *streams;
+    gboolean                streams_sorted;
+    gchar                  *icon;
+    PulseConnection        *connection;
+    MateMixerDeviceProfile *profile;
 };
 
 enum
@@ -78,24 +78,24 @@ G_DEFINE_TYPE_WITH_CODE (PulseDevice, pulse_device, G_TYPE_OBJECT,
                          G_IMPLEMENT_INTERFACE (MATE_MIXER_TYPE_DEVICE,
                                                 mate_mixer_device_interface_init))
 
-static const gchar *     device_get_name           (MateMixerDevice *device);
-static const gchar *     device_get_description    (MateMixerDevice *device);
-static const gchar *     device_get_icon           (MateMixerDevice *device);
+static const gchar *           device_get_name           (MateMixerDevice *device);
+static const gchar *           device_get_description    (MateMixerDevice *device);
+static const gchar *           device_get_icon           (MateMixerDevice *device);
 
-static const GList *     device_list_ports         (MateMixerDevice *device);
-static const GList *     device_list_profiles      (MateMixerDevice *device);
+static const GList *           device_list_ports         (MateMixerDevice *device);
+static const GList *           device_list_profiles      (MateMixerDevice *device);
 
-static MateMixerProfile *device_get_active_profile (MateMixerDevice *device);
-static gboolean          device_set_active_profile (MateMixerDevice *device,
-                                                    const gchar     *profile);
+static MateMixerDeviceProfile *device_get_active_profile (MateMixerDevice *device);
+static gboolean                device_set_active_profile (MateMixerDevice *device,
+                                                          const gchar     *profile);
 
-static gint              device_compare_ports      (gconstpointer    a,
-                                                    gconstpointer    b);
-static gint              device_compare_profiles   (gconstpointer    a,
-                                                    gconstpointer    b);
+static gint                    device_compare_ports      (gconstpointer    a,
+                                                          gconstpointer    b);
+static gint                    device_compare_profiles   (gconstpointer    a,
+                                                          gconstpointer    b);
 
-static void              device_free_ports         (PulseDevice     *device);
-static void              device_free_profiles      (PulseDevice     *device);
+static void                    device_free_ports         (PulseDevice     *device);
+static void                    device_free_profiles      (PulseDevice     *device);
 
 static void
 mate_mixer_device_interface_init (MateMixerDeviceInterface *iface)
@@ -352,7 +352,7 @@ pulse_device_update (PulseDevice *device, const pa_card_info *info)
     device_free_profiles (device);
 
     for (i = 0; i < info->n_profiles; i++) {
-        MateMixerProfile *profile;
+        MateMixerDeviceProfile *profile;
 
 #if PA_CHECK_VERSION(5, 0, 0)
         pa_card_profile_info2 *p_info = info->profiles2[i];
@@ -366,10 +366,12 @@ pulse_device_update (PulseDevice *device, const pa_card_info *info)
         /* The old profile list is an array of structs, not pointers */
         pa_card_profile_info *p_info = &info->profiles[i];
 #endif
-        profile = mate_mixer_profile_new (
+        profile = mate_mixer_device_profile_new (
             p_info->name,
             p_info->description,
-            p_info->priority);
+            p_info->priority,
+            p_info->n_sources,
+            p_info->n_sinks);
 
         if (device->priv->profile == NULL) {
 #if PA_CHECK_VERSION(5, 0, 0)
@@ -447,7 +449,7 @@ device_list_profiles (MateMixerDevice *device)
     return (const GList *) PULSE_DEVICE (device)->priv->profiles;
 }
 
-static MateMixerProfile *
+static MateMixerDeviceProfile *
 device_get_active_profile (MateMixerDevice *device)
 {
     g_return_val_if_fail (PULSE_IS_DEVICE (device), NULL);
@@ -484,16 +486,16 @@ device_compare_ports (gconstpointer a, gconstpointer b)
 static gint
 device_compare_profiles (gconstpointer a, gconstpointer b)
 {
-    MateMixerProfile *p1 = MATE_MIXER_PROFILE (a);
-    MateMixerProfile *p2 = MATE_MIXER_PROFILE (b);
+    MateMixerDeviceProfile *p1 = MATE_MIXER_DEVICE_PROFILE (a);
+    MateMixerDeviceProfile *p2 = MATE_MIXER_DEVICE_PROFILE (b);
 
-    gint ret = (gint) (mate_mixer_profile_get_priority (p2) -
-                       mate_mixer_profile_get_priority (p1));
+    gint ret = (gint) (mate_mixer_device_profile_get_priority (p2) -
+                       mate_mixer_device_profile_get_priority (p1));
     if (ret != 0)
         return ret;
     else
-        return strcmp (mate_mixer_profile_get_name (p1),
-                       mate_mixer_profile_get_name (p2));
+        return strcmp (mate_mixer_device_profile_get_name (p1),
+                       mate_mixer_device_profile_get_name (p2));
 }
 
 static void

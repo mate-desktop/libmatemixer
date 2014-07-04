@@ -19,8 +19,8 @@
     <xi:include href="xml/matemixer-client-stream.xml"/>
     <xi:include href="xml/matemixer-control.xml"/>
     <xi:include href="xml/matemixer-device.xml"/>
+    <xi:include href="xml/matemixer-device-profile.xml"/>
     <xi:include href="xml/matemixer-port.xml"/>
-    <xi:include href="xml/matemixer-profile.xml"/>
     <xi:include href="xml/matemixer-stream.xml"/>
   </chapter>
   <index id="api-index-full">

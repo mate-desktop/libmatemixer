@@ -24,9 +24,9 @@
 #include <libmatemixer/matemixer-client-stream.h>
 #include <libmatemixer/matemixer-control.h>
 #include <libmatemixer/matemixer-device.h>
+#include <libmatemixer/matemixer-device-profile.h>
 #include <libmatemixer/matemixer-enums.h>
 #include <libmatemixer/matemixer-port.h>
-#include <libmatemixer/matemixer-profile.h>
 #include <libmatemixer/matemixer-stream.h>
 #include <libmatemixer/matemixer-version.h>
 

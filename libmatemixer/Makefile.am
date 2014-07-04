@@ -13,9 +13,9 @@ libmatemixer_include_HEADERS =                                  \
         matemixer-client-stream.h                               \
         matemixer-control.h                                     \
         matemixer-device.h                                      \
+        matemixer-device-profile.h                              \
         matemixer-enums.h                                       \
         matemixer-port.h                                        \
-        matemixer-profile.h                                     \
         matemixer-stream.h                                      \
         matemixer-version.h
 
@@ -31,10 +31,10 @@ libmatemixer_la_SOURCES =                                       \
         matemixer-client-stream.c                               \
         matemixer-control.c                                     \
         matemixer-device.c                                      \
+        matemixer-device-profile.c                              \
         matemixer-enum-types.c                                  \
         matemixer-enum-types.h                                  \
         matemixer-port.c                                        \
-        matemixer-profile.c                                     \
         matemixer-stream.c
 
 libmatemixer_la_LIBADD = $(GLIB_LIBS)

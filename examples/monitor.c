@@ -79,10 +79,10 @@ create_volume_bar (MateMixerStream *stream, double *percent)
 static void
 print_devices (void)
 {
-    const GList      *devices;
-    const GList      *ports;
-    const GList      *profiles;
-    MateMixerProfile *active_profile;
+    const GList            *devices;
+    const GList            *ports;
+    const GList            *profiles;
+    MateMixerDeviceProfile *active_profile;
 
     devices = mate_mixer_control_list_devices (control);
 
@@ -117,17 +117,21 @@ print_devices (void)
 
         active_profile = mate_mixer_device_get_active_profile (device);
         while (profiles) {
-            MateMixerProfile *profile = MATE_MIXER_PROFILE (profiles->data);
+            MateMixerDeviceProfile *profile = MATE_MIXER_DEVICE_PROFILE (profiles->data);
 
             g_print ("       |%c| Profile %s\n"
                      "                |-| Description : %s\n"
-                     "                |-| Priority    : %lu\n\n",
+                     "                |-| Priority    : %u\n"
+                     "                |-| Inputs      : %u\n"
+                     "                |-| Outputs     : %u\n\n",
                      (profile == active_profile)
                         ? 'A'
                         : '-',
-                     mate_mixer_profile_get_name (profile),
-                     mate_mixer_profile_get_description (profile),
-                     mate_mixer_profile_get_priority (profile));
+                     mate_mixer_device_profile_get_name (profile),
+                     mate_mixer_device_profile_get_description (profile),
+                     mate_mixer_device_profile_get_priority (profile),
+                     mate_mixer_device_profile_get_num_input_streams (profile),
+                     mate_mixer_device_profile_get_num_output_streams (profile));
 
             profiles = profiles->next;
         }

@@ -19,7 +19,7 @@
 #include <glib-object.h>
 
 #include "matemixer-device.h"
-#include "matemixer-profile.h"
+#include "matemixer-device-profile.h"
 
 /**
  * SECTION:matemixer-device
@@ -73,7 +73,7 @@ mate_mixer_device_default_init (MateMixerDeviceInterface *iface)
                                          g_param_spec_object ("active-profile",
                                                               "Active profile",
                                                               "The currently active profile of the sound device",
-                                                              MATE_MIXER_TYPE_PROFILE,
+                                                              MATE_MIXER_TYPE_DEVICE_PROFILE,
                                                               G_PARAM_READABLE |
                                                               G_PARAM_STATIC_STRINGS));
 }
@@ -146,7 +146,7 @@ mate_mixer_device_list_profiles (MateMixerDevice *device)
     return NULL;
 }
 
-MateMixerProfile *
+MateMixerDeviceProfile *
 mate_mixer_device_get_active_profile (MateMixerDevice *device)
 {
     MateMixerDeviceInterface *iface;

@@ -102,14 +102,14 @@ mate_mixer_stream_default_init (MateMixerStreamInterface *iface)
                                                             G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
-                                         g_param_spec_int64 ("volume",
-                                                             "Volume",
-                                                             "Volume of the stream",
-                                                             G_MININT64,
-                                                             G_MAXINT64,
-                                                             0,
-                                                             G_PARAM_READABLE |
-                                                             G_PARAM_STATIC_STRINGS));
+                                         g_param_spec_uint ("volume",
+                                                            "Volume",
+                                                            "Volume of the stream",
+                                                            0,
+                                                            G_MAXUINT,
+                                                            0,
+                                                            G_PARAM_READABLE |
+                                                            G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
                                          g_param_spec_float ("balance",
