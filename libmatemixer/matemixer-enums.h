@@ -47,6 +47,7 @@ typedef enum {
  *     PulseAudio sound system backend. It has the highest priority and
  *     will be the first one to try unless you select a specific backend
  *     to connect to.
+ * @MATE_MIXER_BACKEND_OSS:
  * @MATE_MIXER_BACKEND_NULL:
  *     Fallback backend which never fails to initialize, but provides no
  *     functionality. This backend has the lowest priority and will be used
@@ -56,6 +57,7 @@ typedef enum {
 typedef enum {
     MATE_MIXER_BACKEND_UNKNOWN,
     MATE_MIXER_BACKEND_PULSEAUDIO,
+    MATE_MIXER_BACKEND_OSS,
     MATE_MIXER_BACKEND_NULL
 } MateMixerBackendType;
 
