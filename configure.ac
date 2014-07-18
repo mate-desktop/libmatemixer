@@ -74,11 +74,26 @@ GTK_DOC_CHECK([1.10], [--flavour no-tmpl])
 # =======================================================================
 # Check for backend module support
 # =======================================================================
+AC_ARG_ENABLE([null],
+              AS_HELP_STRING([--enable-null],
+                             [Enable Null backend module @<:@default=yes@:>@]),
+              enable_null=$enableval, enable_null=yes)
+
+if test "x$enable_null" != "xno" ; then
+  AC_DEFINE(HAVE_NULL, [], [Define if we have Null module])
+  have_null=yes
+else
+  have_null=no
+fi
+
+AM_CONDITIONAL(HAVE_NULL, test "x$have_null" = "xyes")
+AC_SUBST(HAVE_NULL)
+
 PA_REQUIRED_VERSION=0.9.23
 
 AC_ARG_ENABLE([pulseaudio],
               AS_HELP_STRING([--enable-pulseaudio],
-                             [Enable PulseAudio support @<:@default=auto@:>@]),
+                             [Enable PulseAudio backend module @<:@default=auto@:>@]),
               enable_pulseaudio=$enableval, enable_pulseaudio=auto)
 
 if test "x$enable_pulseaudio" != "xno"; then
@@ -93,7 +108,7 @@ if test "x$enable_pulseaudio" != "xno"; then
   fi
 
   if test "x$have_pulseaudio" = "xyes" ; then
-    AC_DEFINE(HAVE_PULSEAUDIO, [], [Define if we have pulseaudio])
+    AC_DEFINE(HAVE_PULSEAUDIO, [], [Define if we have PulseAudio support])
   fi
 fi
 
@@ -176,6 +191,7 @@ echo "
         Compiler:                    ${CC}
         CFLAGS:                      ${CFLAGS}
 
-        PulseAudio backend support:  $have_pulseaudio
+        Build Null module:           $have_null
+        Build PulseAudio module:     $have_pulseaudio
 
 "

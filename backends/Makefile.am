@@ -1,4 +1,8 @@
-SUBDIRS = null
+SUBDIRS =
+
+if HAVE_NULL
+SUBDIRS += null
+endif
 
 if HAVE_PULSEAUDIO
 SUBDIRS += pulse
