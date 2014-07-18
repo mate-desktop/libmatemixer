@@ -57,17 +57,11 @@ struct _MateMixerPortClass
 
 GType              mate_mixer_port_get_type        (void) G_GNUC_CONST;
 
-MateMixerPort *    mate_mixer_port_new             (const gchar        *name,
-                                                    const gchar        *description,
-                                                    const gchar        *icon,
-                                                    gulong              priority,
-                                                    MateMixerPortFlags  flags);
-
-const gchar *      mate_mixer_port_get_name        (MateMixerPort      *port);
-const gchar *      mate_mixer_port_get_description (MateMixerPort      *port);
-const gchar *      mate_mixer_port_get_icon        (MateMixerPort      *port);
-gulong             mate_mixer_port_get_priority    (MateMixerPort      *port);
-MateMixerPortFlags mate_mixer_port_get_flags       (MateMixerPort      *port);
+const gchar *      mate_mixer_port_get_name        (MateMixerPort *port);
+const gchar *      mate_mixer_port_get_description (MateMixerPort *port);
+const gchar *      mate_mixer_port_get_icon        (MateMixerPort *port);
+guint              mate_mixer_port_get_priority    (MateMixerPort *port);
+MateMixerPortFlags mate_mixer_port_get_flags       (MateMixerPort *port);
 
 G_END_DECLS
 

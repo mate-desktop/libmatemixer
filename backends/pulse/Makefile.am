@@ -22,6 +22,8 @@ libmatemixer_pulse_la_SOURCES =                                 \
         pulse-enums.h                                           \
         pulse-enum-types.c                                      \
         pulse-enum-types.h                                      \
+        pulse-ext-stream.c                                      \
+        pulse-ext-stream.h                                      \
         pulse-helpers.c                                         \
         pulse-helpers.h                                         \
         pulse-monitor.c                                         \

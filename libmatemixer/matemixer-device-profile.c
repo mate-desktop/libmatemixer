@@ -19,9 +19,11 @@
 #include <glib-object.h>
 
 #include "matemixer-device-profile.h"
+#include "matemixer-device-profile-private.h"
 
 /**
  * SECTION:matemixer-device-profile
+ * @short_description: Device profile
  * @include: libmatemixer/matemixer.h
  */
 
@@ -46,19 +48,19 @@ enum {
 
 static GParamSpec *properties[N_PROPERTIES] = { NULL, };
 
-static void mate_mixer_device_profile_class_init (MateMixerDeviceProfileClass *klass);
+static void mate_mixer_device_profile_class_init   (MateMixerDeviceProfileClass *klass);
 
-static void mate_mixer_device_profile_get_property (GObject                *object,
-                                                    guint                   param_id,
-                                                    GValue                 *value,
-                                                    GParamSpec             *pspec);
-static void mate_mixer_device_profile_set_property (GObject                *object,
-                                                    guint                   param_id,
-                                                    const GValue           *value,
-                                                    GParamSpec             *pspec);
+static void mate_mixer_device_profile_get_property (GObject                     *object,
+                                                    guint                        param_id,
+                                                    GValue                      *value,
+                                                    GParamSpec                  *pspec);
+static void mate_mixer_device_profile_set_property (GObject                     *object,
+                                                    guint                        param_id,
+                                                    const GValue                *value,
+                                                    GParamSpec                  *pspec);
 
-static void mate_mixer_device_profile_init         (MateMixerDeviceProfile *profile);
-static void mate_mixer_device_profile_finalize     (GObject                *object);
+static void mate_mixer_device_profile_init         (MateMixerDeviceProfile      *profile);
+static void mate_mixer_device_profile_finalize     (GObject                     *object);
 
 G_DEFINE_TYPE (MateMixerDeviceProfile, mate_mixer_device_profile, G_TYPE_OBJECT);
 
@@ -215,12 +217,72 @@ mate_mixer_device_profile_finalize (GObject *object)
     G_OBJECT_CLASS (mate_mixer_device_profile_parent_class)->finalize (object);
 }
 
+/**
+ * mate_mixer_device_profile_get_name:
+ * @profile: a #MateMixerDeviceProfile
+ */
+const gchar *
+mate_mixer_device_profile_get_name (MateMixerDeviceProfile *profile)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), NULL);
+
+    return profile->priv->name;
+}
+
+/**
+ * mate_mixer_device_profile_get_description:
+ * @profile: a #MateMixerDeviceProfile
+ */
+const gchar *
+mate_mixer_device_profile_get_description (MateMixerDeviceProfile *profile)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), NULL);
+
+    return profile->priv->description;
+}
+
+/**
+ * mate_mixer_device_profile_get_priority:
+ * @profile: a #MateMixerDeviceProfile
+ */
+guint
+mate_mixer_device_profile_get_priority (MateMixerDeviceProfile *profile)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), 0);
+
+    return profile->priv->priority;
+}
+
+/**
+ * mate_mixer_device_profile_get_num_input_streams:
+ * @profile: a #MateMixerDeviceProfile
+ */
+guint
+mate_mixer_device_profile_get_num_input_streams (MateMixerDeviceProfile *profile)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), 0);
+
+    return profile->priv->num_input_streams;
+}
+
+/**
+ * mate_mixer_device_profile_get_num_output_streams:
+ * @profile: a #MateMixerDeviceProfile
+ */
+guint
+mate_mixer_device_profile_get_num_output_streams (MateMixerDeviceProfile *profile)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), 0);
+
+    return profile->priv->num_output_streams;
+}
+
 MateMixerDeviceProfile *
-mate_mixer_device_profile_new (const gchar *name,
-                               const gchar *description,
-                               guint        priority,
-                               guint        input_streams,
-                               guint        output_streams)
+_mate_mixer_device_profile_new (const gchar *name,
+                                const gchar *description,
+                                guint        priority,
+                                guint        input_streams,
+                                guint        output_streams)
 {
     return g_object_new (MATE_MIXER_TYPE_DEVICE_PROFILE,
                          "name", name,
@@ -231,42 +293,68 @@ mate_mixer_device_profile_new (const gchar *name,
                          NULL);
 }
 
-const gchar *
-mate_mixer_device_profile_get_name (MateMixerDeviceProfile *profile)
+gboolean
+_mate_mixer_device_profile_update_description (MateMixerDeviceProfile *profile,
+                                               const gchar            *description)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), NULL);
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), FALSE);
 
-    return profile->priv->name;
+    if (g_strcmp0 (profile->priv->description, description) != 0) {
+        g_free (profile->priv->description);
+
+        profile->priv->description = g_strdup (description);
+
+        g_object_notify_by_pspec (G_OBJECT (profile), properties[PROP_DESCRIPTION]);
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
-const gchar *
-mate_mixer_device_profile_get_description (MateMixerDeviceProfile *profile)
+gboolean
+_mate_mixer_device_profile_update_priority (MateMixerDeviceProfile *profile,
+                                            guint                   priority)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), NULL);
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), FALSE);
 
-    return profile->priv->description;
+    if (profile->priv->priority != priority) {
+        profile->priv->priority = priority;
+
+        g_object_notify_by_pspec (G_OBJECT (profile), properties[PROP_PRIORITY]);
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
-guint
-mate_mixer_device_profile_get_priority (MateMixerDeviceProfile *profile)
+gboolean
+_mate_mixer_device_profile_update_num_input_streams (MateMixerDeviceProfile *profile,
+                                                     guint                   num)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), 0);
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), FALSE);
 
-    return profile->priv->priority;
+    if (profile->priv->num_input_streams != num) {
+        profile->priv->num_input_streams = num;
+
+        g_object_notify_by_pspec (G_OBJECT (profile), properties[PROP_NUM_INPUT_STREAMS]);
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
-guint
-mate_mixer_device_profile_get_num_input_streams (MateMixerDeviceProfile *profile)
+gboolean
+_mate_mixer_device_profile_update_num_output_streams (MateMixerDeviceProfile *profile,
+                                                      guint                   num)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), 0);
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), FALSE);
 
-    return profile->priv->num_input_streams;
-}
+    if (profile->priv->num_output_streams != num) {
+        profile->priv->num_output_streams = num;
 
-guint
-mate_mixer_device_profile_get_num_output_streams (MateMixerDeviceProfile *profile)
-{
-    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), 0);
+        g_object_notify_by_pspec (G_OBJECT (profile), properties[PROP_NUM_OUTPUT_STREAMS]);
+        return TRUE;
+    }
 
-    return profile->priv->num_output_streams;
+    return FALSE;
 }

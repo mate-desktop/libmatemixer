@@ -25,11 +25,19 @@
 #include "matemixer-private.h"
 #include "matemixer-backend-module.h"
 
-static void mixer_load_modules    (void);
-static gint mixer_compare_modules (gconstpointer a, gconstpointer b);
+/**
+ * SECTION:matemixer
+ * @short_description: Library initialization and support functions
+ * @title: MateMixer
+ * @include: libmatemixer/matemixer.h
+ */
 
-static GList    *mixer_modules = NULL;
-static gboolean  mixer_initialized = FALSE;
+static void       load_modules     (void);
+static gint       compare_modules  (gconstpointer a,
+                                    gconstpointer b);
+
+static GList     *modules = NULL;
+static gboolean   initialized = FALSE;
 
 /**
  * mate_mixer_init:
@@ -43,89 +51,89 @@ static gboolean  mixer_initialized = FALSE;
 gboolean
 mate_mixer_init (void)
 {
-    if (!mixer_initialized) {
-        mixer_load_modules ();
+    if (initialized == TRUE)
+        return TRUE;
 
-        if (mixer_modules) {
-            GList *list;
+    load_modules ();
 
-            list = mixer_modules;
-            while (list) {
-                GTypeModule *module = G_TYPE_MODULE (list->data);
-                GList *next = list->next;
+    if (modules != NULL) {
+        GList *list = modules;
 
-                /* Attempt to load the module and remove it from the list
-                 * if it isn't usable */
-                if (!g_type_module_use (module)) {
-                    g_object_unref (module);
-                    mixer_modules = g_list_delete_link (mixer_modules, list);
-                }
-                list = next;
+        while (list != NULL) {
+            GTypeModule *module = G_TYPE_MODULE (list->data);
+            GList       *next = list->next;
+
+            /* Load the plugin and remove it from the list if it fails */
+            if (g_type_module_use (module) == FALSE) {
+                g_object_unref (module);
+                modules = g_list_delete_link (modules, list);
             }
-
-            if (mixer_modules) {
-                /* Sort the usable modules by their priority */
-                mixer_modules = g_list_sort (mixer_modules, mixer_compare_modules);
-                mixer_initialized = TRUE;
-            } else
-                g_critical ("No usable backend modules have been found");
+            list = next;
         }
-    }
 
-    return mixer_initialized;
+        if (modules != NULL) {
+            /* Sort the usable modules by priority */
+            modules = g_list_sort (modules, compare_modules);
+            initialized = TRUE;
+        } else
+            g_critical ("No usable backend modules have been found");
+    } else
+        g_critical ("No backend modules have been found");
+
+    return initialized;
 }
 
 /**
  * mate_mixer_is_initialized:
  *
- * Returns TRUE if the library has been initialized.
+ * Returns %TRUE if the library has been initialized.
  *
- * Returns: %TRUE or %FALSE
+ * Returns: %TRUE or %FALSE.
  */
 gboolean
 mate_mixer_is_initialized (void)
 {
-    return mixer_initialized;
+    return initialized;
 }
 
 /**
  * mate_mixer_deinit:
  *
- * Deinitializes the library. You should call this function when you do not need
- * to use the library any longer or before exitting the application.
+ * Deinitializes the library. You should call this function when you are done
+ * using the library.
  */
 void
 mate_mixer_deinit (void)
 {
     GList *list;
 
-    if (!mixer_initialized)
+    if (initialized == FALSE)
         return;
 
-    list = mixer_modules;
-    while (list) {
+    list = modules;
+    while (list != NULL) {
         g_type_module_unuse (G_TYPE_MODULE (list->data));
         list = list->next;
     }
-    mixer_initialized = FALSE;
+    initialized = FALSE;
 }
 
 /* Internal function: return a list of loaded backend modules */
 const GList *
 mate_mixer_get_modules (void)
 {
-    return (const GList *) mixer_modules;
+    return (const GList *) modules;
 }
 
 static void
-mixer_load_modules (void)
+load_modules (void)
 {
     static gboolean loaded = FALSE;
 
-    if (loaded)
+    if (loaded == TRUE)
         return;
 
-    if (g_module_supported ()) {
+    if (G_LIKELY (g_module_supported () == TRUE)) {
         GDir   *dir;
         GError *error = NULL;
 
@@ -138,17 +146,13 @@ mixer_load_modules (void)
             while ((name = g_dir_read_name (dir)) != NULL) {
                 gchar *file;
 
-                if (!g_str_has_suffix (name, "." G_MODULE_SUFFIX))
+                if (g_str_has_suffix (name, "." G_MODULE_SUFFIX) == FALSE)
                     continue;
 
                 file = g_build_filename (LIBMATEMIXER_BACKEND_DIR, name, NULL);
-                mixer_modules = g_list_prepend (mixer_modules,
-                                                mate_mixer_backend_module_new (file));
+                modules = g_list_prepend (modules, mate_mixer_backend_module_new (file));
                 g_free (file);
             }
-
-            if (mixer_modules == NULL)
-                g_critical ("No backend modules have been found");
 
             g_dir_close (dir);
         } else {
@@ -156,16 +160,15 @@ mixer_load_modules (void)
             g_error_free (error);
         }
     } else {
-        g_critical ("Unable to load backend modules: GModule is not supported in your system");
+        g_critical ("Unable to load backend modules: not supported");
     }
 
     loaded = TRUE;
 }
 
-/* GCompareFunc function to sort backend modules by the priority, higher number means
- * higher priority */
+/* Backend modules sorting function, higher priority number means higher priority */
 static gint
-mixer_compare_modules (gconstpointer a, gconstpointer b)
+compare_modules (gconstpointer a, gconstpointer b)
 {
     const MateMixerBackendInfo *info1, *info2;
 

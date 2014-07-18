@@ -22,6 +22,7 @@
 #include <glib-object.h>
 
 #include <libmatemixer/matemixer-device-profile.h>
+#include <libmatemixer/matemixer-port.h>
 
 G_BEGIN_DECLS
 
@@ -42,29 +43,42 @@ struct _MateMixerDeviceInterface
     GTypeInterface parent_iface;
 
     /*< private >*/
-    const gchar            *(*get_name)           (MateMixerDevice *device);
-    const gchar            *(*get_description)    (MateMixerDevice *device);
-    const gchar            *(*get_icon)           (MateMixerDevice *device);
-    const GList            *(*list_streams)       (MateMixerDevice *device);
-    const GList            *(*list_ports)         (MateMixerDevice *device);
-    const GList            *(*list_profiles)      (MateMixerDevice *device);
-    MateMixerDeviceProfile *(*get_active_profile) (MateMixerDevice *device);
-    gboolean                (*set_active_profile) (MateMixerDevice *device,
-                                                   const gchar     *profile);
+    /* Virtual table */
+    const gchar            *(*get_name)           (MateMixerDevice        *device);
+    const gchar            *(*get_description)    (MateMixerDevice        *device);
+    const gchar            *(*get_icon)           (MateMixerDevice        *device);
+
+    MateMixerPort          *(*get_port)           (MateMixerDevice        *device,
+                                                   const gchar            *name);
+    MateMixerDeviceProfile *(*get_profile)        (MateMixerDevice        *device,
+                                                   const gchar            *name);
+
+    const GList            *(*list_streams)       (MateMixerDevice        *device);
+    const GList            *(*list_ports)         (MateMixerDevice        *device);
+    const GList            *(*list_profiles)      (MateMixerDevice        *device);
+
+    MateMixerDeviceProfile *(*get_active_profile) (MateMixerDevice        *device);
+    gboolean                (*set_active_profile) (MateMixerDevice        *device,
+                                                   MateMixerDeviceProfile *profile);
 };
 
 GType                   mate_mixer_device_get_type           (void) G_GNUC_CONST;
 
-const gchar *           mate_mixer_device_get_name           (MateMixerDevice *device);
-const gchar *           mate_mixer_device_get_description    (MateMixerDevice *device);
-const gchar *           mate_mixer_device_get_icon           (MateMixerDevice *device);
+const gchar *           mate_mixer_device_get_name           (MateMixerDevice        *device);
+const gchar *           mate_mixer_device_get_description    (MateMixerDevice        *device);
+const gchar *           mate_mixer_device_get_icon           (MateMixerDevice        *device);
 
-const GList *           mate_mixer_device_list_ports         (MateMixerDevice *device);
-const GList *           mate_mixer_device_list_profiles      (MateMixerDevice *device);
+MateMixerPort *         mate_mixer_device_get_port           (MateMixerDevice        *device,
+                                                              const gchar            *name);
+MateMixerDeviceProfile *mate_mixer_device_get_profile        (MateMixerDevice        *device,
+                                                              const gchar            *name);
 
-MateMixerDeviceProfile *mate_mixer_device_get_active_profile (MateMixerDevice *device);
-gboolean                mate_mixer_device_set_active_profile (MateMixerDevice *device,
-                                                              const gchar     *profile);
+const GList *           mate_mixer_device_list_ports         (MateMixerDevice        *device);
+const GList *           mate_mixer_device_list_profiles      (MateMixerDevice        *device);
+
+MateMixerDeviceProfile *mate_mixer_device_get_active_profile (MateMixerDevice        *device);
+gboolean                mate_mixer_device_set_active_profile (MateMixerDevice        *device,
+                                                              MateMixerDeviceProfile *profile);
 
 G_END_DECLS
 

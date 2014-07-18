@@ -65,9 +65,9 @@ PulseStream *pulse_sink_new               (PulseConnection    *connection,
                                            const pa_sink_info *info,
                                            PulseDevice        *device);
 
-guint32      pulse_sink_get_monitor_index (PulseStream        *stream);
+guint32      pulse_sink_get_monitor_index (PulseStream        *pstream);
 
-gboolean     pulse_sink_update            (PulseStream        *stream,
+gboolean     pulse_sink_update            (PulseStream        *pstream,
                                            const pa_sink_info *info,
                                            PulseDevice        *device);
 

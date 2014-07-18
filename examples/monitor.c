@@ -36,14 +36,56 @@ create_app_string (const gchar *app_name,
 {
     GString *string;
 
-    string = g_string_new (app_name);
+    string = g_string_new ("");
 
-    if (app_version)
-        g_string_append_printf (string, " %s", app_version);
-    if (app_id)
-        g_string_append_printf (string, " (%s)", app_id);
+    if (app_name != NULL) {
+        g_string_append (string, app_name);
+
+        if (app_version != NULL)
+            g_string_append_printf (string, " %s", app_version);
+        if (app_id != NULL)
+            g_string_append_printf (string, " (%s)", app_id);
+    }
+    else if (app_id != NULL) {
+        g_string_append (string, app_id);
+
+        if (app_version != NULL)
+            g_string_append_printf (string, " %s", app_version);
+    }
 
     return g_string_free (string, FALSE);
+}
+
+static const gchar *
+create_role_string (MateMixerClientStreamRole role)
+{
+    switch (role) {
+    case MATE_MIXER_CLIENT_STREAM_ROLE_NONE:
+        return "None";
+    case MATE_MIXER_CLIENT_STREAM_ROLE_VIDEO:
+        return "Video";
+    case MATE_MIXER_CLIENT_STREAM_ROLE_MUSIC:
+        return "Music";
+    case MATE_MIXER_CLIENT_STREAM_ROLE_GAME:
+        return "Game";
+    case MATE_MIXER_CLIENT_STREAM_ROLE_EVENT:
+        return "Event";
+    case MATE_MIXER_CLIENT_STREAM_ROLE_PHONE:
+        return "Phone";
+    case MATE_MIXER_CLIENT_STREAM_ROLE_ANIMATION:
+        return "Animation";
+    case MATE_MIXER_CLIENT_STREAM_ROLE_PRODUCTION:
+        return "Production";
+    case MATE_MIXER_CLIENT_STREAM_ROLE_A11Y:
+        return "A11y";
+    case MATE_MIXER_CLIENT_STREAM_ROLE_TEST:
+        return "Test";
+    case MATE_MIXER_CLIENT_STREAM_ROLE_ABSTRACT:
+        return "Abstract";
+    case MATE_MIXER_CLIENT_STREAM_ROLE_FILTER:
+        return "Filter";
+    }
+    return "Unknown";
 }
 
 static gchar *
@@ -103,7 +145,7 @@ print_devices (void)
             g_print ("       |-| Port %s\n"
                      "                |-| Description : %s\n"
                      "                |-| Icon Name   : %s\n"
-                     "                |-| Priority    : %lu\n"
+                     "                |-| Priority    : %u\n"
                      "                |-| Status      : \n\n",
                      mate_mixer_port_get_name (port),
                      mate_mixer_port_get_description (port),
@@ -150,14 +192,21 @@ print_streams (void)
     streams = mate_mixer_control_list_streams (control);
 
     while (streams) {
-        MateMixerStream *stream = MATE_MIXER_STREAM (streams->data);
-        gchar           *volume_bar;
-        gdouble          volume;
+        MateMixerStream       *stream = MATE_MIXER_STREAM (streams->data);
+        MateMixerClientStream *client = NULL;
+        gchar                 *volume_bar;
+        gdouble                volume;
 
-        /* Ignore event streams */
-        if (mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_EVENT) {
-            streams = streams->next;
-            continue;
+        if (mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_CLIENT) {
+            /* The application-specific details are accessible through the client
+             * interface, which all client streams implement */
+            client = MATE_MIXER_CLIENT_STREAM (stream);
+
+            /* Ignore event streams */
+            if (mate_mixer_client_stream_get_role (client) == MATE_MIXER_CLIENT_STREAM_ROLE_EVENT) {
+                streams = streams->next;
+                continue;
+            }
         }
 
         volume_bar = create_volume_bar (stream, &volume);
@@ -178,20 +227,19 @@ print_streams (void)
                  mate_mixer_stream_get_balance (stream),
                  mate_mixer_stream_get_fade (stream));
 
-        if (mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_APPLICATION) {
-            MateMixerClientStream *client;
-            gchar *app;
+        if (client != NULL) {
+            MateMixerClientStreamFlags client_flags;
 
-            /* The application-specific details are accessible through the client
-             * interface, which all client streams implement */
-            client = MATE_MIXER_CLIENT_STREAM (stream);
+            client_flags = mate_mixer_client_stream_get_flags (client);
 
-            app = create_app_string (mate_mixer_client_stream_get_app_name (client),
-                                     mate_mixer_client_stream_get_app_id (client),
-                                     mate_mixer_client_stream_get_app_version (client));
+            if (client_flags & MATE_MIXER_CLIENT_STREAM_APPLICATION) {
+                gchar *app = create_app_string (mate_mixer_client_stream_get_app_name (client),
+                                                mate_mixer_client_stream_get_app_id (client),
+                                                mate_mixer_client_stream_get_app_version (client));
 
-            g_print ("       |-| Application : %s\n", app);
-            g_free (app);
+                g_print ("       |-| Application : %s\n", app);
+                g_free (app);
+            }
         }
 
         g_print ("\n");
@@ -204,7 +252,7 @@ print_streams (void)
             g_print ("       |-| Port %s\n"
                      "                |-| Description : %s\n"
                      "                |-| Icon Name   : %s\n"
-                     "                |-| Priority    : %lu\n"
+                     "                |-| Priority    : %u\n"
                      "                |-| Status      : \n\n",
                      mate_mixer_port_get_name (port),
                      mate_mixer_port_get_description (port),
@@ -219,6 +267,59 @@ print_streams (void)
 }
 
 static void
+print_cached_streams (void)
+{
+    const GList *streams;
+
+    streams = mate_mixer_control_list_cached_streams (control);
+
+    while (streams) {
+        MateMixerStream           *stream = MATE_MIXER_STREAM (streams->data);
+        MateMixerClientStream     *client;
+        MateMixerClientStreamFlags client_flags;
+        MateMixerClientStreamRole  client_role;
+        gchar                     *volume_bar;
+        gdouble                    volume;
+
+        client = MATE_MIXER_CLIENT_STREAM (stream);
+        client_flags = mate_mixer_client_stream_get_flags (client);
+        client_role  = mate_mixer_client_stream_get_role (client);
+
+        volume_bar = create_volume_bar (stream, &volume);
+
+        g_print ("Cached stream %s\n"
+                 "       |-| Role        : %s\n"
+                 "       |-| Volume      : %s %.1f %%\n"
+                 "       |-| Muted       : %s\n"
+                 "       |-| Channels    : %d\n"
+                 "       |-| Balance     : %.1f\n"
+                 "       |-| Fade        : %.1f\n",
+                 mate_mixer_stream_get_name (stream),
+                 create_role_string (client_role),
+                 volume_bar,
+                 volume,
+                 mate_mixer_stream_get_mute (stream) ? "Yes" : "No",
+                 mate_mixer_stream_get_num_channels (stream),
+                 mate_mixer_stream_get_balance (stream),
+                 mate_mixer_stream_get_fade (stream));
+
+        if (client_flags & MATE_MIXER_CLIENT_STREAM_APPLICATION) {
+            gchar *app = create_app_string (mate_mixer_client_stream_get_app_name (client),
+                                            mate_mixer_client_stream_get_app_id (client),
+                                            mate_mixer_client_stream_get_app_version (client));
+
+            g_print ("       |-| Application : %s\n", app);
+            g_free (app);
+        }
+
+        g_print ("\n");
+        g_free (volume_bar);
+
+        streams = streams->next;
+    }
+}
+
+static void
 connected (void)
 {
     g_print ("Connected using the %s backend.\n\n",
@@ -226,6 +327,7 @@ connected (void)
 
     print_devices ();
     print_streams ();
+    print_cached_streams ();
 
     g_print ("Waiting for events. Hit CTRL+C to quit.\n");
 }
@@ -257,12 +359,6 @@ device_added_cb (MateMixerControl *control, const gchar *name)
 }
 
 static void
-device_changed_cb (MateMixerControl *control, const gchar *name)
-{
-    g_print ("Device changed: %s\n", name);
-}
-
-static void
 device_removed_cb (MateMixerControl *control, const gchar *name)
 {
     g_print ("Device removed: %s\n", name);
@@ -272,12 +368,6 @@ static void
 stream_added_cb (MateMixerControl *control, const gchar *name)
 {
     g_print ("Stream added: %s\n", name);
-}
-
-static void
-stream_changed_cb (MateMixerControl *control, const gchar *name)
-{
-    g_print ("Stream changed: %s\n", name);
 }
 
 static void
@@ -358,27 +448,19 @@ int main (int argc, char *argv[])
         return 1;
     }
 
-    g_signal_connect (control,
+    g_signal_connect (G_OBJECT (control),
                       "device-added",
                       G_CALLBACK (device_added_cb),
                       NULL);
-    g_signal_connect (control,
-                      "device-changed",
-                      G_CALLBACK (device_changed_cb),
-                      NULL);
-    g_signal_connect (control,
+    g_signal_connect (G_OBJECT (control),
                       "device-removed",
                       G_CALLBACK (device_removed_cb),
                       NULL);
-    g_signal_connect (control,
+    g_signal_connect (G_OBJECT (control),
                       "stream-added",
                       G_CALLBACK (stream_added_cb),
                       NULL);
-    g_signal_connect (control,
-                      "stream-changed",
-                      G_CALLBACK (stream_changed_cb),
-                      NULL);
-    g_signal_connect (control,
+    g_signal_connect (G_OBJECT (control),
                       "stream-removed",
                       G_CALLBACK (stream_removed_cb),
                       NULL);

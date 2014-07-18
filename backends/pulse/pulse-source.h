@@ -61,7 +61,7 @@ PulseStream *pulse_source_new        (PulseConnection      *connection,
                                       const pa_source_info *info,
                                       PulseDevice          *device);
 
-gboolean     pulse_source_update     (PulseStream          *stream,
+gboolean     pulse_source_update     (PulseStream          *pstream,
                                       const pa_source_info *info,
                                       PulseDevice          *device);
 

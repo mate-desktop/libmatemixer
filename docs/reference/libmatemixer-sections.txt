@@ -9,8 +9,12 @@ LIBMATEMIXER_CHECK_VERSION
 <SECTION>
 <FILE>matemixer-client-stream</FILE>
 <TITLE>MateMixerClientStream</TITLE>
+MateMixerClientStreamFlags
+MateMixerClientStreamRole
 MateMixerClientStream
 MateMixerClientStreamInterface
+mate_mixer_client_stream_get_flags
+mate_mixer_client_stream_get_role
 mate_mixer_client_stream_get_parent
 mate_mixer_client_stream_set_parent
 mate_mixer_client_stream_remove
@@ -44,8 +48,10 @@ mate_mixer_control_close
 mate_mixer_control_get_state
 mate_mixer_control_get_device
 mate_mixer_control_get_stream
+mate_mixer_control_get_cached_stream
 mate_mixer_control_list_devices
 mate_mixer_control_list_streams
+mate_mixer_control_list_cached_streams
 mate_mixer_control_get_default_input_stream
 mate_mixer_control_set_default_input_stream
 mate_mixer_control_get_default_output_stream
@@ -73,6 +79,8 @@ MateMixerDeviceInterface
 mate_mixer_device_get_name
 mate_mixer_device_get_description
 mate_mixer_device_get_icon
+mate_mixer_device_get_port
+mate_mixer_device_get_profile
 mate_mixer_device_list_ports
 mate_mixer_device_list_profiles
 mate_mixer_device_get_active_profile
@@ -89,7 +97,6 @@ mate_mixer_device_get_type
 <FILE>matemixer-device-profile</FILE>
 <TITLE>MateMixerDeviceProfile</TITLE>
 MateMixerDeviceProfile
-mate_mixer_device_profile_new
 mate_mixer_device_profile_get_name
 mate_mixer_device_profile_get_description
 mate_mixer_device_profile_get_priority
@@ -113,7 +120,6 @@ MateMixerDeviceProfilePrivate
 <TITLE>MateMixerPort</TITLE>
 MateMixerPortFlags
 MateMixerPort
-mate_mixer_port_new
 mate_mixer_port_get_name
 mate_mixer_port_get_description
 mate_mixer_port_get_icon
@@ -158,11 +164,7 @@ mate_mixer_stream_get_channel_volume
 mate_mixer_stream_set_channel_volume
 mate_mixer_stream_get_channel_decibel
 mate_mixer_stream_set_channel_decibel
-mate_mixer_stream_has_position
-mate_mixer_stream_get_position_volume
-mate_mixer_stream_set_position_volume
-mate_mixer_stream_get_position_decibel
-mate_mixer_stream_set_position_decibel
+mate_mixer_stream_has_channel_position
 mate_mixer_stream_get_balance
 mate_mixer_stream_set_balance
 mate_mixer_stream_get_fade

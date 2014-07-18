@@ -52,6 +52,7 @@ struct _MateMixerBackendInterface
     GTypeInterface parent_iface;
 
     /*< private >*/
+    /* Virtual table */
     void             (*set_data)                  (MateMixerBackend           *backend,
                                                    const MateMixerBackendData *data);
 
@@ -62,6 +63,7 @@ struct _MateMixerBackendInterface
 
     GList           *(*list_devices)              (MateMixerBackend           *backend);
     GList           *(*list_streams)              (MateMixerBackend           *backend);
+    GList           *(*list_cached_streams)       (MateMixerBackend           *backend);
 
     MateMixerStream *(*get_default_input_stream)  (MateMixerBackend           *backend);
     gboolean         (*set_default_input_stream)  (MateMixerBackend           *backend,
@@ -74,15 +76,15 @@ struct _MateMixerBackendInterface
     /* Signals */
     void             (*device_added)              (MateMixerBackend           *backend,
                                                    const gchar                *name);
-    void             (*device_changed)            (MateMixerBackend           *backend,
-                                                   const gchar                *name);
     void             (*device_removed)            (MateMixerBackend           *backend,
                                                    const gchar                *name);
     void             (*stream_added)              (MateMixerBackend           *backend,
                                                    const gchar                *name);
-    void             (*stream_changed)            (MateMixerBackend           *backend,
-                                                   const gchar                *name);
     void             (*stream_removed)            (MateMixerBackend           *backend,
+                                                   const gchar                *name);
+    void             (*cached_stream_added)       (MateMixerBackend           *backend,
+                                                   const gchar                *name);
+    void             (*cached_stream_removed)     (MateMixerBackend           *backend,
                                                    const gchar                *name);
 };
 
@@ -98,6 +100,7 @@ MateMixerState   mate_mixer_backend_get_state                 (MateMixerBackend 
 
 GList *          mate_mixer_backend_list_devices              (MateMixerBackend           *backend);
 GList *          mate_mixer_backend_list_streams              (MateMixerBackend           *backend);
+GList *          mate_mixer_backend_list_cached_streams       (MateMixerBackend           *backend);
 
 MateMixerStream *mate_mixer_backend_get_default_input_stream  (MateMixerBackend           *backend);
 gboolean         mate_mixer_backend_set_default_input_stream  (MateMixerBackend           *backend,

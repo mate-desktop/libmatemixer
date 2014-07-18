@@ -15,11 +15,12 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <string.h>
 #include <glib.h>
 #include <glib-object.h>
-#include <string.h>
 
 #include <libmatemixer/matemixer-client-stream.h>
+#include <libmatemixer/matemixer-enums.h>
 #include <libmatemixer/matemixer-stream.h>
 
 #include <pulse/pulseaudio.h>
@@ -29,23 +30,32 @@
 
 struct _PulseClientStreamPrivate
 {
-    gchar           *app_name;
-    gchar           *app_id;
-    gchar           *app_version;
-    gchar           *app_icon;
-    MateMixerStream *parent;
+    gchar                     *app_name;
+    gchar                     *app_id;
+    gchar                     *app_version;
+    gchar                     *app_icon;
+    MateMixerStream           *parent;
+    MateMixerClientStreamFlags flags;
+    MateMixerClientStreamRole  role;
 };
 
-enum
-{
+enum {
     PROP_0,
+    PROP_CLIENT_FLAGS,
+    PROP_ROLE,
     PROP_PARENT,
     PROP_APP_NAME,
     PROP_APP_ID,
     PROP_APP_VERSION,
-    PROP_APP_ICON,
-    N_PROPERTIES
+    PROP_APP_ICON
 };
+
+enum {
+    REMOVED,
+    N_SIGNALS
+};
+
+static guint signals[N_SIGNALS] = { 0, };
 
 static void mate_mixer_client_stream_interface_init (MateMixerClientStreamInterface *iface);
 
@@ -64,26 +74,32 @@ G_DEFINE_ABSTRACT_TYPE_WITH_CODE (PulseClientStream, pulse_client_stream, PULSE_
                                   G_IMPLEMENT_INTERFACE (MATE_MIXER_TYPE_CLIENT_STREAM,
                                                          mate_mixer_client_stream_interface_init))
 
-static MateMixerStream *client_stream_get_parent      (MateMixerClientStream  *client);
-static gboolean         client_stream_set_parent      (MateMixerClientStream  *client,
-                                                       MateMixerStream        *parent);
-static gboolean         client_stream_remove          (MateMixerClientStream  *client);
+static MateMixerClientStreamFlags pulse_client_stream_get_flags       (MateMixerClientStream *client);
+static MateMixerClientStreamRole  pulse_client_stream_get_role        (MateMixerClientStream *client);
 
-static const gchar *    client_stream_get_app_name    (MateMixerClientStream  *client);
-static const gchar *    client_stream_get_app_id      (MateMixerClientStream  *client);
-static const gchar *    client_stream_get_app_version (MateMixerClientStream  *client);
-static const gchar *    client_stream_get_app_icon    (MateMixerClientStream  *client);
+static MateMixerStream *          pulse_client_stream_get_parent      (MateMixerClientStream *client);
+static gboolean                   pulse_client_stream_set_parent      (MateMixerClientStream *client,
+                                                                       MateMixerStream       *parent);
+
+static gboolean                   pulse_client_stream_remove          (MateMixerClientStream *client);
+
+static const gchar *              pulse_client_stream_get_app_name    (MateMixerClientStream *client);
+static const gchar *              pulse_client_stream_get_app_id      (MateMixerClientStream *client);
+static const gchar *              pulse_client_stream_get_app_version (MateMixerClientStream *client);
+static const gchar *              pulse_client_stream_get_app_icon    (MateMixerClientStream *client);
 
 static void
 mate_mixer_client_stream_interface_init (MateMixerClientStreamInterface *iface)
 {
-    iface->get_parent      = client_stream_get_parent;
-    iface->set_parent      = client_stream_set_parent;
-    iface->remove          = client_stream_remove;
-    iface->get_app_name    = client_stream_get_app_name;
-    iface->get_app_id      = client_stream_get_app_id;
-    iface->get_app_version = client_stream_get_app_version;
-    iface->get_app_icon    = client_stream_get_app_icon;
+    iface->get_flags       = pulse_client_stream_get_flags;
+    iface->get_role        = pulse_client_stream_get_role;
+    iface->get_parent      = pulse_client_stream_get_parent;
+    iface->set_parent      = pulse_client_stream_set_parent;
+    iface->remove          = pulse_client_stream_remove;
+    iface->get_app_name    = pulse_client_stream_get_app_name;
+    iface->get_app_id      = pulse_client_stream_get_app_id;
+    iface->get_app_version = pulse_client_stream_get_app_version;
+    iface->get_app_icon    = pulse_client_stream_get_app_icon;
 }
 
 static void
@@ -96,6 +112,20 @@ pulse_client_stream_class_init (PulseClientStreamClass *klass)
     object_class->finalize     = pulse_client_stream_finalize;
     object_class->get_property = pulse_client_stream_get_property;
 
+    signals[REMOVED] =
+        g_signal_new ("removed",
+                      G_TYPE_FROM_CLASS (object_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (PulseClientStreamClass, removed),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__VOID,
+                      G_TYPE_NONE,
+                      0,
+                      G_TYPE_NONE);
+
+    g_object_class_override_property (object_class, PROP_CLIENT_FLAGS, "client-flags");
+    g_object_class_override_property (object_class, PROP_ROLE, "role");
     g_object_class_override_property (object_class, PROP_PARENT, "parent");
     g_object_class_override_property (object_class, PROP_APP_NAME, "app-name");
     g_object_class_override_property (object_class, PROP_APP_ID, "app-id");
@@ -116,6 +146,12 @@ pulse_client_stream_get_property (GObject    *object,
     client = PULSE_CLIENT_STREAM (object);
 
     switch (param_id) {
+    case PROP_CLIENT_FLAGS:
+        g_value_set_flags (value, client->priv->flags);
+        break;
+    case PROP_ROLE:
+        g_value_set_enum (value, client->priv->role);
+        break;
     case PROP_PARENT:
         g_value_set_object (value, client->priv->parent);
         break;
@@ -173,79 +209,123 @@ pulse_client_stream_finalize (GObject *object)
 }
 
 gboolean
-pulse_client_stream_update_parent (PulseClientStream *client, MateMixerStream *parent)
+pulse_client_stream_update_flags (PulseClientStream         *pclient,
+                                  MateMixerClientStreamFlags flags)
 {
-    g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), FALSE);
+    g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (pclient), FALSE);
 
-    if (client->priv->parent != parent) {
-        g_clear_object (&client->priv->parent);
+    if (pclient->priv->flags != flags) {
+        pclient->priv->flags = flags;
+
+        g_object_notify (G_OBJECT (pclient), "client-flags");
+    }
+    return TRUE;
+}
+
+gboolean
+pulse_client_stream_update_parent (PulseClientStream *pclient, MateMixerStream *parent)
+{
+    g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (pclient), FALSE);
+
+    if (pclient->priv->parent != parent) {
+        g_clear_object (&pclient->priv->parent);
 
         if (G_LIKELY (parent != NULL))
-            client->priv->parent = g_object_ref (parent);
+            pclient->priv->parent = g_object_ref (parent);
 
-        g_object_notify (G_OBJECT (client), "parent");
+        g_object_notify (G_OBJECT (pclient), "parent");
     }
     return TRUE;
 }
 
 gboolean
-pulse_client_stream_update_app_name (PulseClientStream *client, const gchar *app_name)
+pulse_client_stream_update_role (PulseClientStream        *pclient,
+                                 MateMixerClientStreamRole role)
 {
-    g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), FALSE);
+    g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (pclient), FALSE);
 
-    if (g_strcmp0 (client->priv->app_name, app_name)) {
-        g_free (client->priv->app_name);
-        client->priv->app_name = g_strdup (app_name);
+    if (pclient->priv->role != role) {
+        pclient->priv->role = role;
 
-        g_object_notify (G_OBJECT (client), "app-name");
+        g_object_notify (G_OBJECT (pclient), "role");
     }
     return TRUE;
 }
 
 gboolean
-pulse_client_stream_update_app_id (PulseClientStream *client, const gchar *app_id)
+pulse_client_stream_update_app_name (PulseClientStream *pclient, const gchar *app_name)
 {
-    g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), FALSE);
+    g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (pclient), FALSE);
 
-    if (g_strcmp0 (client->priv->app_id, app_id)) {
-        g_free (client->priv->app_id);
-        client->priv->app_id = g_strdup (app_id);
+    if (g_strcmp0 (pclient->priv->app_name, app_name) != 0) {
+        g_free (pclient->priv->app_name);
+        pclient->priv->app_name = g_strdup (app_name);
 
-        g_object_notify (G_OBJECT (client), "app-id");
+        g_object_notify (G_OBJECT (pclient), "app-name");
     }
     return TRUE;
 }
 
 gboolean
-pulse_client_stream_update_app_version (PulseClientStream *client, const gchar *app_version)
+pulse_client_stream_update_app_id (PulseClientStream *pclient, const gchar *app_id)
 {
-    g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), FALSE);
+    g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (pclient), FALSE);
 
-    if (g_strcmp0 (client->priv->app_version, app_version)) {
-        g_free (client->priv->app_version);
-        client->priv->app_version = g_strdup (app_version);
+    if (g_strcmp0 (pclient->priv->app_id, app_id) != 0) {
+        g_free (pclient->priv->app_id);
+        pclient->priv->app_id = g_strdup (app_id);
 
-        g_object_notify (G_OBJECT (client), "app-version");
+        g_object_notify (G_OBJECT (pclient), "app-id");
     }
     return TRUE;
 }
 
 gboolean
-pulse_client_stream_update_app_icon (PulseClientStream *client, const gchar *app_icon)
+pulse_client_stream_update_app_version (PulseClientStream *pclient, const gchar *app_version)
 {
-    g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), FALSE);
+    g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (pclient), FALSE);
 
-    if (g_strcmp0 (client->priv->app_icon, app_icon)) {
-        g_free (client->priv->app_icon);
-        client->priv->app_icon = g_strdup (app_icon);
+    if (g_strcmp0 (pclient->priv->app_version, app_version) != 0) {
+        g_free (pclient->priv->app_version);
+        pclient->priv->app_version = g_strdup (app_version);
 
-        g_object_notify (G_OBJECT (client), "app-icon");
+        g_object_notify (G_OBJECT (pclient), "app-version");
     }
     return TRUE;
+}
+
+gboolean
+pulse_client_stream_update_app_icon (PulseClientStream *pclient, const gchar *app_icon)
+{
+    g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (pclient), FALSE);
+
+    if (g_strcmp0 (pclient->priv->app_icon, app_icon) != 0) {
+        g_free (pclient->priv->app_icon);
+        pclient->priv->app_icon = g_strdup (app_icon);
+
+        g_object_notify (G_OBJECT (pclient), "app-icon");
+    }
+    return TRUE;
+}
+
+static MateMixerClientStreamFlags
+pulse_client_stream_get_flags (MateMixerClientStream *client)
+{
+    g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), MATE_MIXER_CLIENT_STREAM_NO_FLAGS);
+
+    return PULSE_CLIENT_STREAM (client)->priv->flags;
+}
+
+static MateMixerClientStreamRole
+pulse_client_stream_get_role (MateMixerClientStream *client)
+{
+    g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), MATE_MIXER_CLIENT_STREAM_ROLE_NONE);
+
+    return PULSE_CLIENT_STREAM (client)->priv->role;
 }
 
 static MateMixerStream *
-client_stream_get_parent (MateMixerClientStream *client)
+pulse_client_stream_get_parent (MateMixerClientStream *client)
 {
     g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), NULL);
 
@@ -253,23 +333,58 @@ client_stream_get_parent (MateMixerClientStream *client)
 }
 
 static gboolean
-client_stream_set_parent (MateMixerClientStream *client, MateMixerStream *parent)
+pulse_client_stream_set_parent (MateMixerClientStream *client, MateMixerStream *parent)
 {
-    g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), FALSE);
+    PulseClientStream      *pclient;
+    PulseClientStreamClass *klass;
 
-    return PULSE_CLIENT_STREAM_GET_CLASS (client)->set_parent (client, parent);
+    g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), FALSE);
+    g_return_val_if_fail (PULSE_IS_STREAM (parent), FALSE);
+
+    pclient = PULSE_CLIENT_STREAM (client);
+    klass   = PULSE_CLIENT_STREAM_GET_CLASS (pclient);
+
+    if (pclient->priv->parent == parent)
+        return TRUE;
+
+    if (klass->set_parent (pclient, PULSE_STREAM (parent)) == FALSE)
+        return FALSE;
+
+    if (pclient->priv->parent != NULL)
+        g_object_unref (pclient->priv->parent);
+
+    /* It is allowed for the parent to be NULL when the instance is created, but
+     * changing the parent requires a valid parent stream */
+    pclient->priv->parent = g_object_ref (parent);
+
+    g_object_notify (G_OBJECT (client), "parent");
+    return TRUE;
 }
 
 static gboolean
-client_stream_remove (MateMixerClientStream *client)
+pulse_client_stream_remove (MateMixerClientStream *client)
 {
+    PulseClientStream      *pclient;
+    PulseClientStreamClass *klass;
+
     g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), FALSE);
 
-    return PULSE_CLIENT_STREAM_GET_CLASS (client)->remove (client);
+    pclient = PULSE_CLIENT_STREAM (client);
+    klass   = PULSE_CLIENT_STREAM_GET_CLASS (pclient);
+
+    if (klass->remove (pclient) == FALSE)
+        return FALSE;
+
+    // XXX handle this in the backend
+    g_signal_emit (G_OBJECT (client),
+                   signals[REMOVED],
+                   0);
+
+    return TRUE;
 }
 
 static const gchar *
-client_stream_get_app_name (MateMixerClientStream *client)
+pulse_client_stream_get_app_name (MateMixerClientStream *client)
 {
     g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), NULL);
 
@@ -277,7 +392,7 @@ client_stream_get_app_name (MateMixerClientStream *client)
 }
 
 static const gchar *
-client_stream_get_app_id (MateMixerClientStream *client)
+pulse_client_stream_get_app_id (MateMixerClientStream *client)
 {
     g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), NULL);
 
@@ -285,7 +400,7 @@ client_stream_get_app_id (MateMixerClientStream *client)
 }
 
 static const gchar *
-client_stream_get_app_version (MateMixerClientStream *client)
+pulse_client_stream_get_app_version (MateMixerClientStream *client)
 {
     g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), NULL);
 
@@ -293,7 +408,7 @@ client_stream_get_app_version (MateMixerClientStream *client)
 }
 
 static const gchar *
-client_stream_get_app_icon (MateMixerClientStream *client)
+pulse_client_stream_get_app_icon (MateMixerClientStream *client)
 {
     g_return_val_if_fail (PULSE_IS_CLIENT_STREAM (client), NULL);
 

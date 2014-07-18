@@ -21,6 +21,7 @@
 #include <glib.h>
 #include <glib-object.h>
 
+#include <libmatemixer/matemixer-enums.h>
 #include <libmatemixer/matemixer-stream.h>
 
 G_BEGIN_DECLS
@@ -42,26 +43,37 @@ struct _MateMixerClientStreamInterface
     GTypeInterface parent_iface;
 
     /*< private >*/
-    MateMixerStream *(*get_parent)      (MateMixerClientStream *client);
-    gboolean         (*set_parent)      (MateMixerClientStream *client,
-                                         MateMixerStream       *stream);
-    gboolean         (*remove)          (MateMixerClientStream *client);
-    const gchar     *(*get_app_name)    (MateMixerClientStream *client);
-    const gchar     *(*get_app_id)      (MateMixerClientStream *client);
-    const gchar     *(*get_app_version) (MateMixerClientStream *client);
-    const gchar     *(*get_app_icon)    (MateMixerClientStream *client);
+    /* Virtual table */
+    MateMixerClientStreamFlags (*get_flags)       (MateMixerClientStream *client);
+    MateMixerClientStreamRole  (*get_role)        (MateMixerClientStream *client);
+
+    MateMixerStream           *(*get_parent)      (MateMixerClientStream *client);
+    gboolean                   (*set_parent)      (MateMixerClientStream *client,
+                                                   MateMixerStream       *stream);
+
+    gboolean                   (*remove)          (MateMixerClientStream *client);
+
+    const gchar               *(*get_app_name)    (MateMixerClientStream *client);
+    const gchar               *(*get_app_id)      (MateMixerClientStream *client);
+    const gchar               *(*get_app_version) (MateMixerClientStream *client);
+    const gchar               *(*get_app_icon)    (MateMixerClientStream *client);
 };
 
-GType            mate_mixer_client_stream_get_type        (void) G_GNUC_CONST;
-MateMixerStream *mate_mixer_client_stream_get_parent      (MateMixerClientStream *client);
-gboolean         mate_mixer_client_stream_set_parent      (MateMixerClientStream *client,
-                                                           MateMixerStream       *parent);
-gboolean         mate_mixer_client_stream_remove          (MateMixerClientStream *client);
+GType                      mate_mixer_client_stream_get_type        (void) G_GNUC_CONST;
 
-const gchar *    mate_mixer_client_stream_get_app_name    (MateMixerClientStream *client);
-const gchar *    mate_mixer_client_stream_get_app_id      (MateMixerClientStream *client);
-const gchar *    mate_mixer_client_stream_get_app_version (MateMixerClientStream *client);
-const gchar *    mate_mixer_client_stream_get_app_icon    (MateMixerClientStream *client);
+MateMixerClientStreamFlags mate_mixer_client_stream_get_flags       (MateMixerClientStream *client);
+MateMixerClientStreamRole  mate_mixer_client_stream_get_role        (MateMixerClientStream *client);
+
+MateMixerStream *          mate_mixer_client_stream_get_parent      (MateMixerClientStream *client);
+gboolean                   mate_mixer_client_stream_set_parent      (MateMixerClientStream *client,
+                                                                     MateMixerStream       *parent);
+
+gboolean                   mate_mixer_client_stream_remove          (MateMixerClientStream *client);
+
+const gchar *              mate_mixer_client_stream_get_app_name    (MateMixerClientStream *client);
+const gchar *              mate_mixer_client_stream_get_app_id      (MateMixerClientStream *client);
+const gchar *              mate_mixer_client_stream_get_app_version (MateMixerClientStream *client);
+const gchar *              mate_mixer_client_stream_get_app_icon    (MateMixerClientStream *client);
 
 G_END_DECLS
 

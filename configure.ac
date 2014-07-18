@@ -68,8 +68,6 @@ PKG_CHECK_MODULES(GLIB, [
         gobject-2.0 >= $GLIB_REQUIRED_VERSION
         gmodule-2.0 >= $GLIB_REQUIRED_VERSION
 ])
-AC_PATH_PROG(GLIB_GENMARSHAL, glib-genmarshal)
-AC_PATH_PROG(GLIB_MKENUMS, glib-mkenums)
 
 GTK_DOC_CHECK([1.10], [--flavour no-tmpl])
 

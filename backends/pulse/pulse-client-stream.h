@@ -22,6 +22,7 @@
 #include <glib-object.h>
 
 #include <libmatemixer/matemixer-client-stream.h>
+#include <libmatemixer/matemixer-enums.h>
 #include <libmatemixer/matemixer-stream.h>
 
 #include "pulse-stream.h"
@@ -57,24 +58,36 @@ struct _PulseClientStreamClass
 {
     PulseStreamClass parent_class;
 
-    gboolean (*set_parent) (MateMixerClientStream *client,
-                            MateMixerStream       *stream);
-    gboolean (*remove)     (MateMixerClientStream *client);
+    /*< private >*/
+    /* Virtual table */
+    gboolean (*set_parent) (PulseClientStream *pclient,
+                            PulseStream       *pstream);
+
+    gboolean (*remove)     (PulseClientStream *pclient);
+
+    /* Signals */
+    void     (*removed)    (PulseClientStream *pclient);
 };
 
 GType    pulse_client_stream_get_type           (void) G_GNUC_CONST;
 
-gboolean pulse_client_stream_update_parent      (PulseClientStream *client,
-                                                 MateMixerStream   *parent);
+gboolean pulse_client_stream_update_flags       (PulseClientStream         *pclient,
+                                                 MateMixerClientStreamFlags flags);
 
-gboolean pulse_client_stream_update_app_name    (PulseClientStream *client,
-                                                 const gchar       *app_name);
-gboolean pulse_client_stream_update_app_id      (PulseClientStream *client,
-                                                 const gchar       *app_id);
-gboolean pulse_client_stream_update_app_version (PulseClientStream *client,
-                                                 const gchar       *app_version);
-gboolean pulse_client_stream_update_app_icon    (PulseClientStream *client,
-                                                 const gchar       *app_icon);
+gboolean pulse_client_stream_update_role        (PulseClientStream         *pclient,
+                                                 MateMixerClientStreamRole  role);
+
+gboolean pulse_client_stream_update_parent      (PulseClientStream         *pclient,
+                                                 MateMixerStream           *parent);
+
+gboolean pulse_client_stream_update_app_name    (PulseClientStream         *pclient,
+                                                 const gchar               *app_name);
+gboolean pulse_client_stream_update_app_id      (PulseClientStream         *pclient,
+                                                 const gchar               *app_id);
+gboolean pulse_client_stream_update_app_version (PulseClientStream         *pclient,
+                                                 const gchar               *app_version);
+gboolean pulse_client_stream_update_app_icon    (PulseClientStream         *pclient,
+                                                 const gchar               *app_icon);
 
 G_END_DECLS
 

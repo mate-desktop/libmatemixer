@@ -20,9 +20,11 @@
 
 #include "matemixer-device.h"
 #include "matemixer-device-profile.h"
+#include "matemixer-port.h"
 
 /**
  * SECTION:matemixer-device
+ * @short_description: Hardware or software device in the sound system
  * @include: libmatemixer/matemixer.h
  */
 
@@ -34,7 +36,7 @@ mate_mixer_device_default_init (MateMixerDeviceInterface *iface)
     g_object_interface_install_property (iface,
                                          g_param_spec_string ("name",
                                                               "Name",
-                                                              "Name of the sound device",
+                                                              "Name of the device",
                                                               NULL,
                                                               G_PARAM_READABLE |
                                                               G_PARAM_STATIC_STRINGS));
@@ -42,7 +44,7 @@ mate_mixer_device_default_init (MateMixerDeviceInterface *iface)
     g_object_interface_install_property (iface,
                                          g_param_spec_string ("description",
                                                               "Description",
-                                                              "Description of the sound device",
+                                                              "Description of the device",
                                                               NULL,
                                                               G_PARAM_READABLE |
                                                               G_PARAM_STATIC_STRINGS));
@@ -56,36 +58,31 @@ mate_mixer_device_default_init (MateMixerDeviceInterface *iface)
                                                               G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
-                                         g_param_spec_pointer ("ports",
-                                                               "Ports",
-                                                               "GList of the sound device ports",
-                                                               G_PARAM_READABLE |
-                                                               G_PARAM_STATIC_STRINGS));
-
-    g_object_interface_install_property (iface,
-                                         g_param_spec_pointer ("profiles",
-                                                               "Profiles",
-                                                               "GList of the sound device profiles",
-                                                               G_PARAM_READABLE |
-                                                               G_PARAM_STATIC_STRINGS));
-
-    g_object_interface_install_property (iface,
                                          g_param_spec_object ("active-profile",
                                                               "Active profile",
-                                                              "The currently active profile of the sound device",
+                                                              "The currently active profile of the device",
                                                               MATE_MIXER_TYPE_DEVICE_PROFILE,
                                                               G_PARAM_READABLE |
                                                               G_PARAM_STATIC_STRINGS));
 }
 
+/**
+ * mate_mixer_device_get_name:
+ * @device: a #MateMixerDevice
+ */
 const gchar *
 mate_mixer_device_get_name (MateMixerDevice *device)
 {
     g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), NULL);
 
+    /* Implementation required */
     return MATE_MIXER_DEVICE_GET_INTERFACE (device)->get_name (device);
 }
 
+/**
+ * mate_mixer_device_get_description:
+ * @device: a #MateMixerDevice
+ */
 const gchar *
 mate_mixer_device_get_description (MateMixerDevice *device)
 {
@@ -101,6 +98,10 @@ mate_mixer_device_get_description (MateMixerDevice *device)
     return NULL;
 }
 
+/**
+ * mate_mixer_device_get_icon:
+ * @device: a #MateMixerDevice
+ */
 const gchar *
 mate_mixer_device_get_icon (MateMixerDevice *device)
 {
@@ -116,6 +117,52 @@ mate_mixer_device_get_icon (MateMixerDevice *device)
     return NULL;
 }
 
+/**
+ * mate_mixer_device_get_port:
+ * @device: a #MateMixerDevice
+ * @name: a port name
+ */
+MateMixerPort *
+mate_mixer_device_get_port (MateMixerDevice *device, const gchar *name)
+{
+    MateMixerDeviceInterface *iface;
+
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), NULL);
+    g_return_val_if_fail (name != NULL, NULL);
+
+    iface = MATE_MIXER_DEVICE_GET_INTERFACE (device);
+
+    if (iface->get_port)
+        return iface->get_port (device, name);
+
+    return NULL;
+}
+
+/**
+ * mate_mixer_device_get_profile:
+ * @device: a #MateMixerDevice
+ * @name: a profile name
+ */
+MateMixerDeviceProfile *
+mate_mixer_device_get_profile (MateMixerDevice *device, const gchar *name)
+{
+    MateMixerDeviceInterface *iface;
+
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), NULL);
+    g_return_val_if_fail (name != NULL, NULL);
+
+    iface = MATE_MIXER_DEVICE_GET_INTERFACE (device);
+
+    if (iface->get_profile)
+        return iface->get_profile (device, name);
+
+    return NULL;
+}
+
+/**
+ * mate_mixer_device_list_ports:
+ * @device: a #MateMixerDevice
+ */
 const GList *
 mate_mixer_device_list_ports (MateMixerDevice *device)
 {
@@ -131,6 +178,10 @@ mate_mixer_device_list_ports (MateMixerDevice *device)
     return NULL;
 }
 
+/**
+ * mate_mixer_device_list_profiles:
+ * @device: a #MateMixerDevice
+ */
 const GList *
 mate_mixer_device_list_profiles (MateMixerDevice *device)
 {
@@ -146,6 +197,10 @@ mate_mixer_device_list_profiles (MateMixerDevice *device)
     return NULL;
 }
 
+/**
+ * mate_mixer_device_get_active_profile:
+ * @device: a #MateMixerDevice
+ */
 MateMixerDeviceProfile *
 mate_mixer_device_get_active_profile (MateMixerDevice *device)
 {
@@ -161,13 +216,19 @@ mate_mixer_device_get_active_profile (MateMixerDevice *device)
     return NULL;
 }
 
+/**
+ * mate_mixer_device_set_active_profile:
+ * @device: a #MateMixerDevice
+ * @profile: a #MateMixerDeviceProfile
+ */
 gboolean
-mate_mixer_device_set_active_profile (MateMixerDevice *device, const gchar *profile)
+mate_mixer_device_set_active_profile (MateMixerDevice        *device,
+                                      MateMixerDeviceProfile *profile)
 {
     MateMixerDeviceInterface *iface;
 
     g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), FALSE);
-    g_return_val_if_fail (profile != NULL, FALSE);
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), FALSE);
 
     iface = MATE_MIXER_DEVICE_GET_INTERFACE (device);
 

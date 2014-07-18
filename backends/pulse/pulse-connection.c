@@ -15,13 +15,14 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <unistd.h>
+#include <sys/types.h>
 #include <glib.h>
 #include <glib-object.h>
-#include <sys/types.h>
-#include <unistd.h>
 
 #include <pulse/pulseaudio.h>
 #include <pulse/glib-mainloop.h>
+#include <pulse/ext-stream-restore.h>
 
 #include "pulse-connection.h"
 #include "pulse-enums.h"
@@ -35,6 +36,8 @@ struct _PulseConnectionPrivate
     pa_context           *context;
     pa_proplist          *proplist;
     pa_glib_mainloop     *mainloop;
+    gboolean              ext_streams_loading;
+    gboolean              ext_streams_dirty;
     PulseConnectionState  state;
 };
 
@@ -59,6 +62,9 @@ enum {
     SINK_INPUT_REMOVED,
     SOURCE_OUTPUT_INFO,
     SOURCE_OUTPUT_REMOVED,
+    EXT_STREAM_LOADING,
+    EXT_STREAM_LOADED,
+    EXT_STREAM_INFO,
     N_SIGNALS
 };
 
@@ -80,47 +86,53 @@ static void pulse_connection_finalize     (GObject              *object);
 
 G_DEFINE_TYPE (PulseConnection, pulse_connection, G_TYPE_OBJECT);
 
-static gchar    *connection_get_app_name          (void);
+static gchar    *create_app_name             (void);
 
-static gboolean  connection_load_lists            (PulseConnection              *connection);
+static gboolean  load_lists                  (PulseConnection                  *connection);
+static gboolean  load_list_finished          (PulseConnection                  *connection);
 
-static void      connection_state_cb              (pa_context                   *c,
-                                                   void                         *userdata);
-static void      connection_subscribe_cb          (pa_context                   *c,
-                                                   pa_subscription_event_type_t  t,
-                                                   uint32_t                      idx,
-                                                   void                         *userdata);
-static void      connection_server_info_cb        (pa_context *c,
-                                                   const pa_server_info         *info,
-                                                   void                         *userdata);
-static void      connection_card_info_cb          (pa_context                   *c,
-                                                   const pa_card_info           *info,
-                                                   int                           eol,
-                                                   void                         *userdata);
-static void      connection_sink_info_cb          (pa_context                   *c,
-                                                   const pa_sink_info           *info,
-                                                   int                           eol,
-                                                   void                         *userdata);
-static void      connection_source_info_cb        (pa_context                   *c,
-                                                   const pa_source_info         *info,
-                                                   int                           eol,
-                                                   void                         *userdata);
-static void      connection_sink_input_info_cb    (pa_context                   *c,
-                                                   const pa_sink_input_info     *info,
-                                                   int                           eol,
-                                                   void                         *userdata);
-static void      connection_source_output_info_cb (pa_context *c,
-                                                   const pa_source_output_info  *info,
-                                                   int                           eol,
-                                                   void                         *userdata);
+static void      pulse_state_cb              (pa_context                       *c,
+                                              void                             *userdata);
+static void      pulse_subscribe_cb          (pa_context                       *c,
+                                              pa_subscription_event_type_t      t,
+                                              uint32_t                          idx,
+                                              void                             *userdata);
 
-static void     connection_change_state           (PulseConnection              *connection,
-                                                   PulseConnectionState          state);
+static void      pulse_restore_subscribe_cb  (pa_context                       *c,
+                                              void                             *userdata);
+static void      pulse_server_info_cb        (pa_context                       *c,
+                                              const pa_server_info             *info,
+                                              void                             *userdata);
+static void      pulse_card_info_cb          (pa_context                       *c,
+                                              const pa_card_info               *info,
+                                              int                               eol,
+                                              void                             *userdata);
+static void      pulse_sink_info_cb          (pa_context                       *c,
+                                              const pa_sink_info               *info,
+                                              int                               eol,
+                                              void                             *userdata);
+static void      pulse_source_info_cb        (pa_context                       *c,
+                                              const pa_source_info             *info,
+                                              int                               eol,
+                                              void                             *userdata);
+static void      pulse_sink_input_info_cb    (pa_context                       *c,
+                                              const pa_sink_input_info         *info,
+                                              int                               eol,
+                                              void                             *userdata);
+static void      pulse_source_output_info_cb (pa_context                       *c,
+                                              const pa_source_output_info      *info,
+                                              int                               eol,
+                                              void                             *userdata);
+static void      pulse_ext_stream_restore_cb (pa_context                       *c,
+                                              const pa_ext_stream_restore_info *info,
+                                              int                               eol,
+                                              void                             *userdata);
 
-static void     connection_list_loaded            (PulseConnection              *connection);
+static void      change_state                (PulseConnection                  *connection,
+                                              PulseConnectionState              state);
 
-static gboolean connection_process_operation      (PulseConnection              *connection,
-                                                   pa_operation                 *op);
+static gboolean  process_pulse_operation     (PulseConnection                  *connection,
+                                              pa_operation                     *op);
 
 static void
 pulse_connection_class_init (PulseConnectionClass *klass)
@@ -149,6 +161,8 @@ pulse_connection_class_init (PulseConnectionClass *klass)
                            PULSE_CONNECTION_DISCONNECTED,
                            G_PARAM_READABLE |
                            G_PARAM_STATIC_STRINGS);
+
+    g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
     signals[SERVER_INFO] =
         g_signal_new ("server-info",
@@ -282,7 +296,41 @@ pulse_connection_class_init (PulseConnectionClass *klass)
                       1,
                       G_TYPE_UINT);
 
-    g_object_class_install_properties (object_class, N_PROPERTIES, properties);
+    signals[EXT_STREAM_LOADING] =
+        g_signal_new ("ext-stream-loading",
+                      G_TYPE_FROM_CLASS (object_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (PulseConnectionClass, ext_stream_loading),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__VOID,
+                      G_TYPE_NONE,
+                      0,
+                      G_TYPE_NONE);
+
+    signals[EXT_STREAM_LOADED] =
+        g_signal_new ("ext-stream-loaded",
+                      G_TYPE_FROM_CLASS (object_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (PulseConnectionClass, ext_stream_loaded),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__VOID,
+                      G_TYPE_NONE,
+                      0,
+                      G_TYPE_NONE);
+
+    signals[EXT_STREAM_INFO] =
+        g_signal_new ("ext-stream-info",
+                      G_TYPE_FROM_CLASS (object_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (PulseConnectionClass, ext_stream_info),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__POINTER,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_POINTER);
 
     g_type_class_add_private (object_class, sizeof (PulseConnectionPrivate));
 }
@@ -382,7 +430,7 @@ pulse_connection_new (const gchar *app_name,
         pa_proplist_sets (proplist, PA_PROP_APPLICATION_NAME, app_name);
     } else {
         /* Set a sensible default name when application does not provide one */
-        gchar *name = connection_get_app_name ();
+        gchar *name = create_app_name ();
 
         pa_proplist_sets (proplist, PA_PROP_APPLICATION_NAME, name);
         g_free (name);
@@ -427,9 +475,9 @@ pulse_connection_connect (PulseConnection *connection, gboolean wait_for_daemon)
 
     /* Set function to monitor status changes */
     pa_context_set_state_callback (context,
-                                   connection_state_cb,
+                                   pulse_state_cb,
                                    connection);
-    if (wait_for_daemon)
+    if (wait_for_daemon == TRUE)
         flags = PA_CONTEXT_NOFAIL;
 
     /* Initiate a connection, state changes will be delivered asynchronously */
@@ -438,7 +486,7 @@ pulse_connection_connect (PulseConnection *connection, gboolean wait_for_daemon)
                             flags,
                             NULL) == 0) {
         connection->priv->context = context;
-        connection_change_state (connection, PULSE_CONNECTION_CONNECTING);
+        change_state (connection, PULSE_CONNECTION_CONNECTING);
         return TRUE;
     }
 
@@ -458,8 +506,10 @@ pulse_connection_disconnect (PulseConnection *connection)
 
     connection->priv->context = NULL;
     connection->priv->outstanding = 0;
+    connection->priv->ext_streams_loading = FALSE;
+    connection->priv->ext_streams_dirty = FALSE;
 
-    connection_change_state (connection, PULSE_CONNECTION_DISCONNECTED);
+    change_state (connection, PULSE_CONNECTION_DISCONNECTED);
 }
 
 PulseConnectionState
@@ -468,6 +518,248 @@ pulse_connection_get_state (PulseConnection *connection)
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), PULSE_CONNECTION_DISCONNECTED);
 
     return connection->priv->state;
+}
+
+gboolean
+pulse_connection_load_server_info (PulseConnection *connection)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_LOADING &&
+        connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
+    op = pa_context_get_server_info (connection->priv->context,
+                                     pulse_server_info_cb,
+                                     connection);
+
+    return process_pulse_operation (connection, op);
+}
+
+gboolean
+pulse_connection_load_card_info (PulseConnection *connection, guint32 index)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_LOADING &&
+        connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
+    if (index == PA_INVALID_INDEX)
+        op = pa_context_get_card_info_by_index (connection->priv->context,
+                                                index,
+                                                pulse_card_info_cb,
+                                                connection);
+    else
+        op = pa_context_get_card_info_list (connection->priv->context,
+                                            pulse_card_info_cb,
+                                            connection);
+
+    return process_pulse_operation (connection, op);
+}
+
+gboolean
+pulse_connection_load_card_info_name (PulseConnection *connection, const gchar *name)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (name != NULL, FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_LOADING &&
+        connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
+    op = pa_context_get_card_info_by_name (connection->priv->context,
+                                           name,
+                                           pulse_card_info_cb,
+                                           connection);
+
+    return process_pulse_operation (connection, op);
+}
+
+gboolean
+pulse_connection_load_sink_info (PulseConnection *connection, guint32 index)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_LOADING &&
+        connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
+    if (index == PA_INVALID_INDEX)
+        op = pa_context_get_sink_info_by_index (connection->priv->context,
+                                                index,
+                                                pulse_sink_info_cb,
+                                                connection);
+    else
+        op = pa_context_get_sink_info_list (connection->priv->context,
+                                            pulse_sink_info_cb,
+                                            connection);
+
+    return process_pulse_operation (connection, op);
+}
+
+gboolean
+pulse_connection_load_sink_info_name (PulseConnection *connection, const gchar *name)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (name != NULL, FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_LOADING &&
+        connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
+    op = pa_context_get_sink_info_by_name (connection->priv->context,
+                                           name,
+                                           pulse_sink_info_cb,
+                                           connection);
+
+    return process_pulse_operation (connection, op);
+}
+
+gboolean
+pulse_connection_load_sink_input_info (PulseConnection *connection, guint32 index)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_LOADING &&
+        connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
+    if (index == PA_INVALID_INDEX)
+        op = pa_context_get_sink_input_info (connection->priv->context,
+                                             index,
+                                             pulse_sink_input_info_cb,
+                                             connection);
+    else
+        op = pa_context_get_sink_input_info_list (connection->priv->context,
+                                                  pulse_sink_input_info_cb,
+                                                  connection);
+
+    return process_pulse_operation (connection, op);
+}
+
+gboolean
+pulse_connection_load_source_info (PulseConnection *connection, guint32 index)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_LOADING &&
+        connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
+    if (index == PA_INVALID_INDEX)
+        op = pa_context_get_source_info_by_index (connection->priv->context,
+                                                  index,
+                                                  pulse_source_info_cb,
+                                                  connection);
+    else
+        op = pa_context_get_source_info_list (connection->priv->context,
+                                              pulse_source_info_cb,
+                                              connection);
+
+    return process_pulse_operation (connection, op);
+}
+
+gboolean
+pulse_connection_load_source_info_name (PulseConnection *connection, const gchar *name)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (name != NULL, FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_LOADING &&
+        connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
+    op = pa_context_get_source_info_by_name (connection->priv->context,
+                                             name,
+                                             pulse_source_info_cb,
+                                             connection);
+
+    return process_pulse_operation (connection, op);
+}
+
+gboolean
+pulse_connection_load_source_output_info (PulseConnection *connection, guint32 index)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_LOADING &&
+        connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
+    if (index == PA_INVALID_INDEX)
+        op = pa_context_get_source_output_info (connection->priv->context,
+                                                index,
+                                                pulse_source_output_info_cb,
+                                                connection);
+    else
+        op = pa_context_get_source_output_info_list (connection->priv->context,
+                                                     pulse_source_output_info_cb,
+                                                     connection);
+
+    return process_pulse_operation (connection, op);
+}
+
+gboolean
+pulse_connection_load_ext_stream_info (PulseConnection *connection)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_LOADING &&
+        connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
+    /* When we receive a request to load the list of ext-streams, see if
+     * loading is already in progress and if it is, wait until the current
+     * loading finishes.
+     * The PulseBackend class relies on this behaviour to ensure it always
+     * contains a correct list of ext-streams, also PulseAudio always sends
+     * a list of all streams in the database and these requests may arrive
+     * very often, so this also optimizaes the amount of traffic. */
+    if (connection->priv->ext_streams_loading == TRUE) {
+        connection->priv->ext_streams_dirty = TRUE;
+        return TRUE;
+    }
+
+    connection->priv->ext_streams_dirty = FALSE;
+    connection->priv->ext_streams_loading = TRUE;
+    g_signal_emit (G_OBJECT (connection),
+                   signals[EXT_STREAM_LOADING],
+                   0);
+
+    op = pa_ext_stream_restore_read (connection->priv->context,
+                                     pulse_ext_stream_restore_cb,
+                                     connection);
+
+    if (process_pulse_operation (connection, op) == FALSE) {
+        connection->priv->ext_streams_loading = FALSE;
+
+        g_signal_emit (G_OBJECT (connection),
+                       signals[EXT_STREAM_LOADED],
+                       0);
+        return FALSE;
+    }
+    return TRUE;
 }
 
 PulseMonitor *
@@ -482,12 +774,10 @@ pulse_connection_create_monitor (PulseConnection *connection,
 
     return pulse_monitor_new (connection->priv->context,
                               connection->priv->proplist,
+                              NULL,
                               index_source,
                               index_sink_input);
 }
-
-// XXX watch for some operation failures and eventually reload data
-// to restore the previous state
 
 gboolean
 pulse_connection_set_default_sink (PulseConnection *connection,
@@ -504,7 +794,7 @@ pulse_connection_set_default_sink (PulseConnection *connection,
                                       name,
                                       NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
 }
 
 gboolean
@@ -522,7 +812,7 @@ pulse_connection_set_default_source (PulseConnection *connection,
                                         name,
                                         NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
 }
 
 gboolean
@@ -542,7 +832,7 @@ pulse_connection_set_card_profile (PulseConnection *connection,
                                               profile,
                                               NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
 }
 
 gboolean
@@ -562,7 +852,7 @@ pulse_connection_set_sink_mute (PulseConnection *connection,
                                             (int) mute,
                                             NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
 }
 
 gboolean
@@ -582,7 +872,7 @@ pulse_connection_set_sink_volume (PulseConnection  *connection,
                                               volume,
                                               NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
 }
 
 gboolean
@@ -602,7 +892,7 @@ pulse_connection_set_sink_port (PulseConnection *connection,
                                             port,
                                             NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
 }
 
 gboolean
@@ -622,7 +912,7 @@ pulse_connection_set_sink_input_mute (PulseConnection  *connection,
                                          (int) mute,
                                          NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
 }
 
 gboolean
@@ -642,7 +932,7 @@ pulse_connection_set_sink_input_volume (PulseConnection  *connection,
                                            volume,
                                            NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
 }
 
 gboolean
@@ -662,7 +952,7 @@ pulse_connection_set_source_mute (PulseConnection *connection,
                                               (int) mute,
                                               NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
 }
 
 gboolean
@@ -682,7 +972,7 @@ pulse_connection_set_source_volume (PulseConnection  *connection,
                                                 volume,
                                                 NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
 }
 
 gboolean
@@ -702,7 +992,7 @@ pulse_connection_set_source_port (PulseConnection *connection,
                                               port,
                                               NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
 }
 
 gboolean
@@ -723,7 +1013,7 @@ pulse_connection_set_source_output_mute (PulseConnection *connection,
                                             (int) mute,
                                             NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
 #else
     return FALSE;
 #endif
@@ -747,7 +1037,7 @@ pulse_connection_set_source_output_volume (PulseConnection  *connection,
                                               volume,
                                               NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
 #else
     return FALSE;
 #endif
@@ -770,7 +1060,7 @@ pulse_connection_suspend_sink (PulseConnection *connection,
                                            (int) suspend,
                                            NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
 }
 
 gboolean
@@ -790,7 +1080,7 @@ pulse_connection_suspend_source (PulseConnection *connection,
                                              (int) suspend,
                                              NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
 }
 
 gboolean
@@ -810,7 +1100,7 @@ pulse_connection_move_sink_input (PulseConnection *connection,
                                               sink_index,
                                               NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
 }
 
 gboolean
@@ -830,7 +1120,7 @@ pulse_connection_move_source_output (PulseConnection *connection,
                                                  source_index,
                                                  NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
 }
 
 gboolean
@@ -848,7 +1138,7 @@ pulse_connection_kill_sink_input (PulseConnection *connection,
                                      index,
                                      NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
 }
 
 gboolean
@@ -866,14 +1156,59 @@ pulse_connection_kill_source_output (PulseConnection *connection,
                                         index,
                                         NULL, NULL);
 
-    return connection_process_operation (connection, op);
+    return process_pulse_operation (connection, op);
+}
+
+gboolean
+pulse_connection_write_ext_stream (PulseConnection                  *connection,
+                                   const pa_ext_stream_restore_info *info)
+{
+    pa_operation *op;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
+    op = pa_ext_stream_restore_write (connection->priv->context,
+                                      PA_UPDATE_REPLACE,
+                                      info, 1,
+                                      TRUE,
+                                      NULL, NULL);
+
+    return process_pulse_operation (connection, op);
+}
+
+gboolean
+pulse_connection_delete_ext_stream (PulseConnection *connection,
+                                    const gchar     *name)
+{
+    pa_operation *op;
+    gchar       **names;
+
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+
+    if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
+        return FALSE;
+
+    names    = g_new (gchar *, 2);
+    names[0] = (gchar *) name;
+    names[1] = NULL;
+
+    op = pa_ext_stream_restore_delete (connection->priv->context,
+                                       (const char * const *) names,
+                                       NULL, NULL);
+
+    g_strfreev (names);
+
+    return process_pulse_operation (connection, op);
 }
 
 static gchar *
-connection_get_app_name (void)
+create_app_name (void)
 {
-    const char *name_app;
-    char        name_buf[256];
+    const gchar *name_app;
+    char         name_buf[256];
 
     /* Inspired by GStreamer's pulse plugin */
     name_app = g_get_application_name ();
@@ -887,9 +1222,9 @@ connection_get_app_name (void)
 }
 
 static gboolean
-connection_load_lists (PulseConnection *connection)
+load_lists (PulseConnection *connection)
 {
-    GList        *ops = NULL;
+    GSList       *ops = NULL;
     pa_operation *op;
 
     if (G_UNLIKELY (connection->priv->outstanding > 0)) {
@@ -898,60 +1233,95 @@ connection_load_lists (PulseConnection *connection)
     }
 
     op = pa_context_get_card_info_list (connection->priv->context,
-                                        connection_card_info_cb,
+                                        pulse_card_info_cb,
                                         connection);
     if (G_UNLIKELY (op == NULL))
         goto error;
 
-    ops = g_list_prepend (ops, op);
+    ops = g_slist_prepend (ops, op);
 
     op = pa_context_get_sink_info_list (connection->priv->context,
-                                        connection_sink_info_cb,
+                                        pulse_sink_info_cb,
                                         connection);
     if (G_UNLIKELY (op == NULL))
         goto error;
 
-    ops = g_list_prepend (ops, op);
+    ops = g_slist_prepend (ops, op);
 
     op = pa_context_get_sink_input_info_list (connection->priv->context,
-                                              connection_sink_input_info_cb,
+                                              pulse_sink_input_info_cb,
                                               connection);
     if (G_UNLIKELY (op == NULL))
         goto error;
 
-    ops = g_list_prepend (ops, op);
+    ops = g_slist_prepend (ops, op);
 
     op = pa_context_get_source_info_list (connection->priv->context,
-                                          connection_source_info_cb,
+                                          pulse_source_info_cb,
                                           connection);
     if (G_UNLIKELY (op == NULL))
         goto error;
 
-    ops = g_list_prepend (ops, op);
+    ops = g_slist_prepend (ops, op);
 
     op = pa_context_get_source_output_info_list (connection->priv->context,
-                                                 connection_source_output_info_cb,
+                                                 pulse_source_output_info_cb,
                                                  connection);
     if (G_UNLIKELY (op == NULL))
         goto error;
 
-    ops = g_list_prepend (ops, op);
-
-    g_list_foreach (ops, (GFunc) pa_operation_unref, NULL);
-    g_list_free (ops);
+    ops = g_slist_prepend (ops, op);
 
     connection->priv->outstanding = 5;
+
+    /* This might not always be supported */
+    op = pa_ext_stream_restore_read (connection->priv->context,
+                                     pulse_ext_stream_restore_cb,
+                                     connection);
+    if (op != NULL) {
+        ops = g_slist_prepend (ops, op);
+        connection->priv->outstanding++;
+    }
+
+    g_slist_foreach (ops, (GFunc) pa_operation_unref, NULL);
+    g_slist_free (ops);
+
     return TRUE;
 
 error:
-    g_list_foreach (ops, (GFunc) pa_operation_cancel, NULL);
-    g_list_foreach (ops, (GFunc) pa_operation_unref, NULL);
-    g_list_free (ops);
+    g_slist_foreach (ops, (GFunc) pa_operation_cancel, NULL);
+    g_slist_foreach (ops, (GFunc) pa_operation_unref, NULL);
+    g_slist_free (ops);
     return FALSE;
 }
 
+static gboolean
+load_list_finished (PulseConnection *connection)
+{
+    /* Decrement the number of outstanding requests as a list has just been
+     * downloaded; when the number reaches 0, server information is requested
+     * as the final step in the connection process */
+    connection->priv->outstanding--;
+
+    if (G_UNLIKELY (connection->priv->outstanding < 0)) {
+        g_warn_if_reached ();
+        connection->priv->outstanding = 0;
+    }
+
+    if (connection->priv->outstanding == 0) {
+        gboolean ret = pulse_connection_load_server_info (connection);
+
+        if (G_UNLIKELY (ret == FALSE)) {
+            pulse_connection_disconnect (connection);
+            return FALSE;
+        }
+    }
+
+    return TRUE;
+}
+
 static void
-connection_state_cb (pa_context *c, void *userdata)
+pulse_state_cb (pa_context *c, void *userdata)
 {
     PulseConnection    *connection;
     pa_context_state_t  state;
@@ -971,6 +1341,20 @@ connection_state_cb (pa_context *c, void *userdata)
 
         /* We are connected, let's subscribe to notifications and load the
          * initial lists */
+        pa_context_set_subscribe_callback (connection->priv->context,
+                                           pulse_subscribe_cb,
+                                           connection);
+        pa_ext_stream_restore_set_subscribe_cb (connection->priv->context,
+                                                pulse_restore_subscribe_cb,
+                                                connection);
+
+        op = pa_ext_stream_restore_subscribe (connection->priv->context,
+                                              TRUE,
+                                              NULL, NULL);
+
+        /* Keep going if this operation fails */
+        process_pulse_operation (connection, op);
+
         op = pa_context_subscribe (connection->priv->context,
                                    PA_SUBSCRIPTION_MASK_SERVER |
                                    PA_SUBSCRIPTION_MASK_CARD |
@@ -979,26 +1363,14 @@ connection_state_cb (pa_context *c, void *userdata)
                                    PA_SUBSCRIPTION_MASK_SINK_INPUT |
                                    PA_SUBSCRIPTION_MASK_SOURCE_OUTPUT,
                                    NULL, NULL);
-        if (op != NULL) {
-            pa_context_set_subscribe_callback (connection->priv->context,
-                                               connection_subscribe_cb,
-                                               connection);
-            pa_operation_unref (op);
 
-            if (connection_load_lists (connection) == TRUE) {
-                connection_change_state (connection, PULSE_CONNECTION_LOADING);
-                return;
-            }
+        if (process_pulse_operation (connection, op) == TRUE) {
+            change_state (connection, PULSE_CONNECTION_LOADING);
 
-            /* Treat as a connection failure */
+            if (load_lists (connection) == FALSE)
+                state = PA_CONTEXT_FAILED;
+        } else
             state = PA_CONTEXT_FAILED;
-        } else {
-            g_warning ("Failed to subscribe to PulseAudio notifications: %s",
-                       pa_strerror (pa_context_errno (connection->priv->context)));
-
-            /* Treat as a connection failure */
-            state = PA_CONTEXT_FAILED;
-        }
     }
 
     if (state == PA_CONTEXT_TERMINATED || state == PA_CONTEXT_FAILED) {
@@ -1008,105 +1380,93 @@ connection_state_cb (pa_context *c, void *userdata)
     }
 
     if (state == PA_CONTEXT_CONNECTING)
-        connection_change_state (connection, PULSE_CONNECTION_CONNECTING);
+        change_state (connection, PULSE_CONNECTION_CONNECTING);
     else if (state == PA_CONTEXT_AUTHORIZING ||
              state == PA_CONTEXT_SETTING_NAME)
-        connection_change_state (connection, PULSE_CONNECTION_AUTHORIZING);
+        change_state (connection, PULSE_CONNECTION_AUTHORIZING);
 }
 
 static void
-connection_subscribe_cb (pa_context                   *c,
-                         pa_subscription_event_type_t  t,
-                         uint32_t                      idx,
-                         void                         *userdata)
+pulse_subscribe_cb (pa_context                   *c,
+                    pa_subscription_event_type_t  t,
+                    uint32_t                      idx,
+                    void                         *userdata)
 {
     PulseConnection *connection;
-    pa_operation    *op;
 
     connection = PULSE_CONNECTION (userdata);
 
     switch (t & PA_SUBSCRIPTION_EVENT_FACILITY_MASK) {
+    case PA_SUBSCRIPTION_EVENT_SERVER:
+        pulse_connection_load_server_info (connection);
+        break;
+
     case PA_SUBSCRIPTION_EVENT_CARD:
-        if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
+        if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE)
             g_signal_emit (G_OBJECT (connection),
                            signals[CARD_REMOVED],
                            0,
                            idx);
-        } else {
-            op = pa_context_get_card_info_by_index (connection->priv->context,
-                                                    idx,
-                                                    connection_card_info_cb,
-                                                    connection);
-            connection_process_operation (connection, op);
-        }
+        else
+            pulse_connection_load_card_info (connection, idx);
         break;
 
     case PA_SUBSCRIPTION_EVENT_SINK:
-        if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
+        if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE)
             g_signal_emit (G_OBJECT (connection),
                            signals[SINK_REMOVED],
                            0,
                            idx);
-        } else {
-            op = pa_context_get_sink_info_by_index (connection->priv->context,
-                                                    idx,
-                                                    connection_sink_info_cb,
-                                                    connection);
-            connection_process_operation (connection, op);
-        }
+        else
+            pulse_connection_load_sink_info (connection, idx);
         break;
 
     case PA_SUBSCRIPTION_EVENT_SINK_INPUT:
-        if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
+        if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE)
             g_signal_emit (G_OBJECT (connection),
                            signals[SINK_INPUT_REMOVED],
                            0,
                            idx);
-        } else {
-            op = pa_context_get_sink_input_info (connection->priv->context,
-                                                 idx,
-                                                 connection_sink_input_info_cb,
-                                                 connection);
-            connection_process_operation (connection, op);
-        }
+        else
+            pulse_connection_load_sink_input_info (connection, idx);
         break;
 
     case PA_SUBSCRIPTION_EVENT_SOURCE:
-        if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
+        if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE)
             g_signal_emit (G_OBJECT (connection),
                            signals[SOURCE_REMOVED],
                            0,
                            idx);
-        } else {
-            op = pa_context_get_source_info_by_index (connection->priv->context,
-                                                      idx,
-                                                      connection_source_info_cb,
-                                                      connection);
-            connection_process_operation (connection, op);
-        }
+        else
+            pulse_connection_load_source_info (connection, idx);
         break;
 
     case PA_SUBSCRIPTION_EVENT_SOURCE_OUTPUT:
-        if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE) {
+        if ((t & PA_SUBSCRIPTION_EVENT_TYPE_MASK) == PA_SUBSCRIPTION_EVENT_REMOVE)
             g_signal_emit (G_OBJECT (connection),
                            signals[SOURCE_OUTPUT_REMOVED],
                            0,
                            idx);
-        } else {
-            op = pa_context_get_source_output_info (connection->priv->context,
-                                                    idx,
-                                                    connection_source_output_info_cb,
-                                                    connection);
-            connection_process_operation (connection, op);
-        }
+        else
+            pulse_connection_load_source_output_info (connection, idx);
         break;
     }
 }
 
 static void
-connection_server_info_cb (pa_context           *c,
-                           const pa_server_info *info,
-                           void                 *userdata)
+pulse_restore_subscribe_cb (pa_context *c, void *userdata)
+{
+    PulseConnection *connection;
+
+    connection = PULSE_CONNECTION (userdata);
+
+    pulse_connection_load_ext_stream_info (connection);
+}
+
+static void
+pulse_server_info_cb (pa_context           *c,
+                      const pa_server_info *info,
+                      void                 *userdata)
 {
     PulseConnection *connection;
 
@@ -1120,14 +1480,14 @@ connection_server_info_cb (pa_context           *c,
     /* This notification may arrive at any time, but it also finalizes the
      * connection process */
     if (connection->priv->state == PULSE_CONNECTION_LOADING)
-        connection_change_state (connection, PULSE_CONNECTION_CONNECTED);
+        change_state (connection, PULSE_CONNECTION_CONNECTED);
 }
 
 static void
-connection_card_info_cb (pa_context         *c,
-                         const pa_card_info *info,
-                         int                 eol,
-                         void               *userdata)
+pulse_card_info_cb (pa_context         *c,
+                    const pa_card_info *info,
+                    int                 eol,
+                    void               *userdata)
 {
     PulseConnection *connection;
 
@@ -1135,7 +1495,7 @@ connection_card_info_cb (pa_context         *c,
 
     if (eol) {
         if (connection->priv->state == PULSE_CONNECTION_LOADING)
-            connection_list_loaded (connection);
+            load_list_finished (connection);
         return;
     }
 
@@ -1146,10 +1506,10 @@ connection_card_info_cb (pa_context         *c,
 }
 
 static void
-connection_sink_info_cb (pa_context         *c,
-                         const pa_sink_info *info,
-                         int                 eol,
-                         void               *userdata)
+pulse_sink_info_cb (pa_context         *c,
+                    const pa_sink_info *info,
+                    int                 eol,
+                    void               *userdata)
 {
     PulseConnection *connection;
 
@@ -1157,7 +1517,7 @@ connection_sink_info_cb (pa_context         *c,
 
     if (eol) {
         if (connection->priv->state == PULSE_CONNECTION_LOADING)
-            connection_list_loaded (connection);
+            load_list_finished (connection);
         return;
     }
 
@@ -1168,10 +1528,10 @@ connection_sink_info_cb (pa_context         *c,
 }
 
 static void
-connection_sink_input_info_cb (pa_context               *c,
-                               const pa_sink_input_info *info,
-                               int                       eol,
-                               void                     *userdata)
+pulse_sink_input_info_cb (pa_context               *c,
+                          const pa_sink_input_info *info,
+                          int                       eol,
+                          void                     *userdata)
 {
     PulseConnection *connection;
 
@@ -1179,7 +1539,7 @@ connection_sink_input_info_cb (pa_context               *c,
 
     if (eol) {
         if (connection->priv->state == PULSE_CONNECTION_LOADING)
-            connection_list_loaded (connection);
+            load_list_finished (connection);
         return;
     }
 
@@ -1190,10 +1550,10 @@ connection_sink_input_info_cb (pa_context               *c,
 }
 
 static void
-connection_source_info_cb (pa_context           *c,
-                           const pa_source_info *info,
-                           int                   eol,
-                           void                 *userdata)
+pulse_source_info_cb (pa_context           *c,
+                      const pa_source_info *info,
+                      int                   eol,
+                      void                 *userdata)
 {
     PulseConnection *connection;
 
@@ -1201,7 +1561,7 @@ connection_source_info_cb (pa_context           *c,
 
     if (eol) {
         if (connection->priv->state == PULSE_CONNECTION_LOADING)
-            connection_list_loaded (connection);
+            load_list_finished (connection);
         return;
     }
 
@@ -1212,10 +1572,10 @@ connection_source_info_cb (pa_context           *c,
 }
 
 static void
-connection_source_output_info_cb (pa_context                  *c,
-                                  const pa_source_output_info *info,
-                                  int                          eol,
-                                  void                        *userdata)
+pulse_source_output_info_cb (pa_context                  *c,
+                             const pa_source_output_info *info,
+                             int                          eol,
+                             void                        *userdata)
 {
     PulseConnection *connection;
 
@@ -1223,7 +1583,7 @@ connection_source_output_info_cb (pa_context                  *c,
 
     if (eol) {
         if (connection->priv->state == PULSE_CONNECTION_LOADING)
-            connection_list_loaded (connection);
+            load_list_finished (connection);
         return;
     }
 
@@ -1234,7 +1594,40 @@ connection_source_output_info_cb (pa_context                  *c,
 }
 
 static void
-connection_change_state (PulseConnection *connection, PulseConnectionState state)
+pulse_ext_stream_restore_cb (pa_context                       *c,
+                             const pa_ext_stream_restore_info *info,
+                             int                               eol,
+                             void                             *userdata)
+{
+    PulseConnection *connection;
+
+    connection = PULSE_CONNECTION (userdata);
+
+    if (eol) {
+        connection->priv->ext_streams_loading = FALSE;
+        g_signal_emit (G_OBJECT (connection),
+                       signals[EXT_STREAM_LOADED],
+                       0);
+
+        if (connection->priv->state == PULSE_CONNECTION_LOADING) {
+            if (load_list_finished (connection) == FALSE)
+                return;
+        }
+
+        if (connection->priv->ext_streams_dirty == TRUE)
+            pulse_connection_load_ext_stream_info (connection);
+
+        return;
+    }
+
+    g_signal_emit (G_OBJECT (connection),
+                   signals[EXT_STREAM_INFO],
+                   0,
+                   info);
+}
+
+static void
+change_state (PulseConnection *connection, PulseConnectionState state)
 {
     if (connection->priv->state == state)
         return;
@@ -1244,33 +1637,8 @@ connection_change_state (PulseConnection *connection, PulseConnectionState state
     g_object_notify_by_pspec (G_OBJECT (connection), properties[PROP_STATE]);
 }
 
-static void
-connection_list_loaded (PulseConnection *connection)
-{
-    /* Decrement the number of outstanding requests as a list has just been
-     * downloaded; when the number reaches 0, server information is requested
-     * as the final step in the connection process */
-    connection->priv->outstanding--;
-
-    if (G_UNLIKELY (connection->priv->outstanding < 0)) {
-        g_warn_if_reached ();
-        connection->priv->outstanding = 0;
-    }
-
-    if (connection->priv->outstanding == 0) {
-        pa_operation *op;
-
-        op = pa_context_get_server_info (connection->priv->context,
-                                         connection_server_info_cb,
-                                         connection);
-
-        if (G_UNLIKELY (connection_process_operation (connection, op) == FALSE))
-            pulse_connection_disconnect (connection);
-    }
-}
-
 static gboolean
-connection_process_operation (PulseConnection *connection, pa_operation *op)
+process_pulse_operation (PulseConnection *connection, pa_operation *op)
 {
     if (G_UNLIKELY (op == NULL)) {
         g_warning ("PulseAudio operation failed: %s",

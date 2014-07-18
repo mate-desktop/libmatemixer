@@ -34,23 +34,44 @@ struct _PulseMonitorPrivate
 };
 
 enum {
+    PROP_0,
+    PROP_ENABLED,
+    PROP_NAME,
+    PROP_INDEX_SOURCE,
+    PROP_INDEX_SINK_INPUT,
+    N_PROPERTIES
+};
+
+static GParamSpec *properties[N_PROPERTIES] = { NULL, };
+
+enum {
     VALUE,
     N_SIGNALS
 };
 
 static guint signals[N_SIGNALS] = { 0, };
 
-static void pulse_monitor_class_init (PulseMonitorClass *klass);
-static void pulse_monitor_init       (PulseMonitor      *port);
-static void pulse_monitor_finalize   (GObject           *object);
+static void pulse_monitor_class_init   (PulseMonitorClass *klass);
+
+static void pulse_monitor_get_property (GObject           *object,
+                                        guint              param_id,
+                                        GValue            *value,
+                                        GParamSpec        *pspec);
+static void pulse_monitor_set_property (GObject           *object,
+                                        guint              param_id,
+                                        const GValue      *value,
+                                        GParamSpec        *pspec);
+
+static void pulse_monitor_init         (PulseMonitor      *monitor);
+static void pulse_monitor_finalize     (GObject           *object);
 
 G_DEFINE_TYPE (PulseMonitor, pulse_monitor, G_TYPE_OBJECT);
 
-static gboolean monitor_prepare        (PulseMonitor *monitor);
-static gboolean monitor_connect_record (PulseMonitor *monitor);
-static void     monitor_read_cb        (pa_stream    *stream,
-                                        size_t        length,
-                                        void         *userdata);
+static gboolean stream_connect (PulseMonitor *monitor);
+
+static void     stream_read_cb (pa_stream    *stream,
+                                size_t        length,
+                                void         *userdata);
 
 static void
 pulse_monitor_class_init (PulseMonitorClass *klass)
@@ -58,7 +79,50 @@ pulse_monitor_class_init (PulseMonitorClass *klass)
     GObjectClass *object_class;
 
     object_class = G_OBJECT_CLASS (klass);
-    object_class->finalize = pulse_monitor_finalize;
+    object_class->finalize     = pulse_monitor_finalize;
+    object_class->get_property = pulse_monitor_get_property;
+    object_class->set_property = pulse_monitor_set_property;
+
+    properties[PROP_ENABLED] =
+        g_param_spec_boolean ("enabled",
+                              "Enabled",
+                              "Monitor enabled",
+                              FALSE,
+                              G_PARAM_READABLE |
+                              G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_NAME] =
+        g_param_spec_string ("name",
+                             "Name",
+                             "Name of the monitor",
+                             NULL,
+                             G_PARAM_READWRITE |
+                             G_PARAM_CONSTRUCT |
+                             G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_INDEX_SOURCE] =
+        g_param_spec_uint ("index-source",
+                           "Index of source",
+                           "Index of the PulseAudio source",
+                           0,
+                           G_MAXUINT,
+                           0,
+                           G_PARAM_READWRITE |
+                           G_PARAM_CONSTRUCT_ONLY |
+                           G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_INDEX_SINK_INPUT] =
+        g_param_spec_uint ("index-sink-input",
+                           "Index of sink input",
+                           "Index of the PulseAudio sink input",
+                           0,
+                           G_MAXUINT,
+                           0,
+                           G_PARAM_READWRITE |
+                           G_PARAM_CONSTRUCT_ONLY |
+                           G_PARAM_STATIC_STRINGS);
+
+    g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
     signals[VALUE] =
         g_signal_new ("value",
@@ -76,6 +140,61 @@ pulse_monitor_class_init (PulseMonitorClass *klass)
 }
 
 static void
+pulse_monitor_get_property (GObject    *object,
+                            guint       param_id,
+                            GValue     *value,
+                            GParamSpec *pspec)
+{
+    PulseMonitor *monitor;
+
+    monitor = PULSE_MONITOR (object);
+
+    switch (param_id) {
+    case PROP_ENABLED:
+        g_value_set_boolean (value, monitor->priv->enabled);
+        break;
+    case PROP_NAME:
+        g_value_set_string (value, monitor->priv->name);
+        break;
+    case PROP_INDEX_SOURCE:
+        g_value_set_uint (value, monitor->priv->index_source);
+        break;
+    case PROP_INDEX_SINK_INPUT:
+        g_value_set_uint (value, monitor->priv->index_sink_input);
+        break;
+    default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
+        break;
+    }
+}
+
+static void
+pulse_monitor_set_property (GObject      *object,
+                            guint         param_id,
+                            const GValue *value,
+                            GParamSpec   *pspec)
+{
+    PulseMonitor *monitor;
+
+    monitor = PULSE_MONITOR (object);
+
+    switch (param_id) {
+    case PROP_NAME:
+        pulse_monitor_set_name (monitor, g_value_get_string (value));
+        break;
+    case PROP_INDEX_SOURCE:
+        monitor->priv->index_source = g_value_get_uint (value);
+        break;
+    case PROP_INDEX_SINK_INPUT:
+        monitor->priv->index_sink_input = g_value_get_uint (value);
+        break;
+    default:
+        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
+        break;
+    }
+}
+
+static void
 pulse_monitor_init (PulseMonitor *monitor)
 {
     monitor->priv = G_TYPE_INSTANCE_GET_PRIVATE (monitor,
@@ -90,11 +209,16 @@ pulse_monitor_finalize (GObject *object)
 
     monitor = PULSE_MONITOR (object);
 
-    if (monitor->priv->stream)
+    /* The pulse stream may exist if the monitor is running */
+    if (monitor->priv->stream != NULL) {
+        pa_stream_disconnect (monitor->priv->stream);
         pa_stream_unref (monitor->priv->stream);
+    }
 
     pa_context_unref (monitor->priv->context);
     pa_proplist_free (monitor->priv->proplist);
+
+    g_free (monitor->priv->name);
 
     G_OBJECT_CLASS (pulse_monitor_parent_class)->finalize (object);
 }
@@ -102,58 +226,29 @@ pulse_monitor_finalize (GObject *object)
 PulseMonitor *
 pulse_monitor_new (pa_context  *context,
                    pa_proplist *proplist,
+                   const gchar *name,
                    guint32      index_source,
                    guint32      index_sink_input)
 {
     PulseMonitor *monitor;
 
-    monitor = g_object_new (PULSE_TYPE_MONITOR, NULL);
+    g_return_val_if_fail (context  != NULL, NULL);
+    g_return_val_if_fail (proplist != NULL, NULL);
+
+    monitor = g_object_new (PULSE_TYPE_MONITOR,
+                            "name", name,
+                            "index-source", index_source,
+                            "index-sink-input", index_sink_input,
+                            NULL);
 
     monitor->priv->context  = pa_context_ref (context);
     monitor->priv->proplist = pa_proplist_copy (proplist);
-
-    monitor->priv->index_source = index_source;
-    monitor->priv->index_sink_input = index_sink_input;
 
     return monitor;
 }
 
 gboolean
-pulse_monitor_enable (PulseMonitor *monitor)
-{
-    g_return_val_if_fail (PULSE_IS_MONITOR (monitor), FALSE);
-
-    if (!monitor->priv->enabled) {
-        if (monitor->priv->stream == NULL)
-            monitor_prepare (monitor);
-
-        if (G_LIKELY (monitor->priv->stream != NULL))
-            monitor->priv->enabled = monitor_connect_record (monitor);
-    }
-
-    return monitor->priv->enabled;
-}
-
-void
-pulse_monitor_disable (PulseMonitor *monitor)
-{
-    g_return_if_fail (PULSE_IS_MONITOR (monitor));
-
-    if (!monitor->priv->enabled)
-        return;
-
-    pa_stream_disconnect (monitor->priv->stream);
-
-    // XXX stream must be destroyed on disable, re-enabling does not work, this
-    // is just a quick temporary solution
-    pa_stream_unref (monitor->priv->stream);
-    monitor->priv->stream = NULL;
-
-    monitor->priv->enabled = FALSE;
-}
-
-gboolean
-pulse_monitor_is_enabled (PulseMonitor *monitor)
+pulse_monitor_get_enabled (PulseMonitor *monitor)
 {
     g_return_val_if_fail (PULSE_IS_MONITOR (monitor), FALSE);
 
@@ -161,30 +256,27 @@ pulse_monitor_is_enabled (PulseMonitor *monitor)
 }
 
 gboolean
-pulse_monitor_update_index (PulseMonitor *monitor,
-                            guint32       index_source,
-                            guint32       index_sink_input)
+pulse_monitor_set_enabled (PulseMonitor *monitor, gboolean enabled)
 {
     g_return_val_if_fail (PULSE_IS_MONITOR (monitor), FALSE);
 
-    if (monitor->priv->index_source == index_source &&
-        monitor->priv->index_sink_input == index_sink_input)
+    if (enabled == monitor->priv->enabled)
         return TRUE;
 
-    monitor->priv->index_source = index_source;
-    monitor->priv->index_sink_input = index_sink_input;
+    if (enabled) {
+        monitor->priv->enabled = stream_connect (monitor);
 
-    if (pulse_monitor_is_enabled (monitor)) {
-        pulse_monitor_disable (monitor);
+        if (monitor->priv->enabled == FALSE)
+            return FALSE;
+    } else {
+        pa_stream_disconnect (monitor->priv->stream);
+        pa_stream_unref (monitor->priv->stream);
 
-        /* Unset the Pulse stream to let enabling recreate it */
-        g_clear_pointer (&monitor->priv->stream, pa_stream_unref);
-
-        pulse_monitor_enable (monitor);
-    } else if (monitor->priv->stream) {
-        /* Disabled now but was enabled before and still holds source index */
-        g_clear_pointer (&monitor->priv->stream, pa_stream_unref);
+        monitor->priv->stream = NULL;
+        monitor->priv->enabled = FALSE;
     }
+    g_object_notify_by_pspec (G_OBJECT (monitor), properties[PROP_ENABLED]);
+
     return TRUE;
 }
 
@@ -201,21 +293,32 @@ pulse_monitor_set_name (PulseMonitor *monitor, const gchar *name)
 {
     g_return_val_if_fail (PULSE_IS_MONITOR (monitor), FALSE);
 
-    g_free (monitor->priv->name);
+    if (g_strcmp0 (name, monitor->priv->name) != 0) {
+        g_free (monitor->priv->name);
+        monitor->priv->name = g_strdup (name);
 
-    monitor->priv->name = g_strdup (name);
+        g_object_notify_by_pspec (G_OBJECT (monitor), properties[PROP_NAME]);
+    }
     return TRUE;
 }
 
 static gboolean
-monitor_prepare (PulseMonitor *monitor)
+stream_connect (PulseMonitor *monitor)
 {
     pa_sample_spec  spec;
+    pa_buffer_attr  attr;
     const gchar    *name;
+    gchar          *idx;
+    int             ret;
 
-    spec.channels = 1;
-    spec.format   = PA_SAMPLE_FLOAT32;
-    spec.rate     = 25;
+    attr.maxlength = (guint32) -1;
+    attr.tlength   = 0;
+    attr.prebuf    = 0;
+    attr.minreq    = 0;
+    attr.fragsize  = sizeof (gfloat);
+    spec.channels  = 1;
+    spec.format    = PA_SAMPLE_FLOAT32;
+    spec.rate      = 25;
 
     if (monitor->priv->name != NULL)
         name = monitor->priv->name;
@@ -230,60 +333,58 @@ monitor_prepare (PulseMonitor *monitor)
                                      monitor->priv->proplist);
 
     if (G_UNLIKELY (monitor->priv->stream == NULL)) {
-        g_warning ("Failed to create PulseAudio monitor: %s",
+        g_warning ("Failed to create peak monitor: %s",
                    pa_strerror (pa_context_errno (monitor->priv->context)));
         return FALSE;
     }
 
+    /* Set sink input index for the stream, source outputs are not supported */
     if (monitor->priv->index_sink_input != PA_INVALID_INDEX)
         pa_stream_set_monitor_stream (monitor->priv->stream,
                                       monitor->priv->index_sink_input);
 
     pa_stream_set_read_callback (monitor->priv->stream,
-                                 monitor_read_cb,
+                                 stream_read_cb,
                                  monitor);
-    return TRUE;
-}
 
-static gboolean
-monitor_connect_record (PulseMonitor *monitor)
-{
-    pa_buffer_attr  attr;
-    gchar          *name;
-    int             ret;
-
-    attr.maxlength = (guint32) -1;
-    attr.tlength   = 0;
-    attr.prebuf    = 0;
-    attr.minreq    = 0;
-    attr.fragsize  = sizeof (gfloat);
-
-    name = g_strdup_printf ("%u", monitor->priv->index_source);
-    ret  = pa_stream_connect_record (monitor->priv->stream,
-                                     name,
-                                     &attr,
-                                     PA_STREAM_DONT_MOVE |
-                                     PA_STREAM_PEAK_DETECT |
-                                     PA_STREAM_ADJUST_LATENCY |
-                                     PA_STREAM_DONT_INHIBIT_AUTO_SUSPEND);
-    g_free (name);
+    /* Source index must be passed as a string */
+    idx = g_strdup_printf ("%u", monitor->priv->index_source);
+    ret = pa_stream_connect_record (monitor->priv->stream,
+                                    idx,
+                                    &attr,
+                                    PA_STREAM_DONT_MOVE |
+                                    PA_STREAM_PEAK_DETECT |
+                                    PA_STREAM_ADJUST_LATENCY);
+    g_free (idx);
 
     if (ret < 0) {
-        g_warning ("Failed to connect PulseAudio monitor: %s", pa_strerror (ret));
+        g_warning ("Failed to connect peak monitor: %s", pa_strerror (ret));
         return FALSE;
     }
     return TRUE;
 }
 
 static void
-monitor_read_cb (pa_stream *stream, size_t length, void *userdata)
+stream_read_cb (pa_stream *stream, size_t length, void *userdata)
 {
     const void *data;
 
+    /* Read the next fragment from the buffer (for recording streams).
+     *
+     * If there is data at the current read index, data will point to the
+     * actual data and length will contain the size of the data in bytes
+     * (which can be less or more than a complete fragment).
+     *
+     * If there is no data at the current read index, it means that either
+     * the buffer is empty or it contains a hole (that is, the write index
+     * is ahead of the read index but there's no data where the read index
+     * points at). If the buffer is empty, data will be NULL and length will
+     * be 0. If there is a hole, data will be NULL and length will contain
+     * the length of the hole. */
     if (pa_stream_peek (stream, &data, &length) < 0)
         return;
 
-    if (data) {
+    if (data != NULL) {
         gdouble v = ((const gfloat *) data)[length / sizeof (gfloat) - 1];
 
         g_signal_emit (G_OBJECT (userdata),
@@ -294,6 +395,6 @@ monitor_read_cb (pa_stream *stream, size_t length, void *userdata)
 
     /* pa_stream_drop() should not be called if the buffer is empty, but it
      * should be called if there is a hole */
-    if (length)
+    if (length > 0)
         pa_stream_drop (stream);
 }

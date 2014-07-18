@@ -21,7 +21,7 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include <libmatemixer/matemixer-backend.h>
+#include <libmatemixer/matemixer-backend-module.h>
 
 #define PULSE_TYPE_BACKEND                      \
         (pulse_backend_get_type ())

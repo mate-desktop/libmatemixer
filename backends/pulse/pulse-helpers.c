@@ -15,9 +15,11 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <string.h>
 #include <glib.h>
 
 #include <libmatemixer/matemixer-enums.h>
+
 #include <pulse/pulseaudio.h>
 
 #include "pulse-helpers.h"
@@ -28,48 +30,88 @@ typedef struct {
 } PositionMap;
 
 static PositionMap const position_map[] = {
-    { MATE_MIXER_CHANNEL_UNKNOWN_POSITION,      PA_CHANNEL_POSITION_INVALID },
-    { MATE_MIXER_CHANNEL_MONO,                  PA_CHANNEL_POSITION_MONO },
-    { MATE_MIXER_CHANNEL_FRONT_LEFT,            PA_CHANNEL_POSITION_FRONT_LEFT },
-    { MATE_MIXER_CHANNEL_FRONT_RIGHT,           PA_CHANNEL_POSITION_FRONT_RIGHT },
-    { MATE_MIXER_CHANNEL_FRONT_CENTER,          PA_CHANNEL_POSITION_FRONT_CENTER },
-    { MATE_MIXER_CHANNEL_LFE,                   PA_CHANNEL_POSITION_LFE },
-    { MATE_MIXER_CHANNEL_BACK_LEFT,             PA_CHANNEL_POSITION_REAR_LEFT },
-    { MATE_MIXER_CHANNEL_BACK_RIGHT,            PA_CHANNEL_POSITION_REAR_RIGHT },
-    { MATE_MIXER_CHANNEL_FRONT_LEFT_CENTER,     PA_CHANNEL_POSITION_FRONT_LEFT_OF_CENTER },
-    { MATE_MIXER_CHANNEL_FRONT_RIGHT_CENTER,    PA_CHANNEL_POSITION_FRONT_RIGHT_OF_CENTER },
-    { MATE_MIXER_CHANNEL_BACK_CENTER,           PA_CHANNEL_POSITION_REAR_CENTER },
-    { MATE_MIXER_CHANNEL_SIDE_LEFT,             PA_CHANNEL_POSITION_SIDE_LEFT },
-    { MATE_MIXER_CHANNEL_SIDE_RIGHT,            PA_CHANNEL_POSITION_SIDE_RIGHT },
-    { MATE_MIXER_CHANNEL_TOP_FRONT_LEFT,        PA_CHANNEL_POSITION_TOP_FRONT_LEFT },
-    { MATE_MIXER_CHANNEL_TOP_FRONT_RIGHT,       PA_CHANNEL_POSITION_TOP_FRONT_RIGHT },
-    { MATE_MIXER_CHANNEL_TOP_FRONT_CENTER,      PA_CHANNEL_POSITION_TOP_FRONT_CENTER },
-    { MATE_MIXER_CHANNEL_TOP_CENTER,            PA_CHANNEL_POSITION_TOP_CENTER },
-    { MATE_MIXER_CHANNEL_TOP_BACK_LEFT,         PA_CHANNEL_POSITION_TOP_REAR_LEFT },
-    { MATE_MIXER_CHANNEL_TOP_BACK_RIGHT,        PA_CHANNEL_POSITION_TOP_REAR_RIGHT },
-    { MATE_MIXER_CHANNEL_TOP_BACK_CENTER,       PA_CHANNEL_POSITION_TOP_REAR_CENTER },
+    { MATE_MIXER_CHANNEL_UNKNOWN,            PA_CHANNEL_POSITION_INVALID },
+    { MATE_MIXER_CHANNEL_MONO,               PA_CHANNEL_POSITION_MONO },
+    { MATE_MIXER_CHANNEL_FRONT_LEFT,         PA_CHANNEL_POSITION_FRONT_LEFT },
+    { MATE_MIXER_CHANNEL_FRONT_RIGHT,        PA_CHANNEL_POSITION_FRONT_RIGHT },
+    { MATE_MIXER_CHANNEL_FRONT_CENTER,       PA_CHANNEL_POSITION_FRONT_CENTER },
+    { MATE_MIXER_CHANNEL_LFE,                PA_CHANNEL_POSITION_LFE },
+    { MATE_MIXER_CHANNEL_BACK_LEFT,          PA_CHANNEL_POSITION_REAR_LEFT },
+    { MATE_MIXER_CHANNEL_BACK_RIGHT,         PA_CHANNEL_POSITION_REAR_RIGHT },
+    { MATE_MIXER_CHANNEL_BACK_CENTER,        PA_CHANNEL_POSITION_REAR_CENTER },
+    { MATE_MIXER_CHANNEL_FRONT_LEFT_CENTER,  PA_CHANNEL_POSITION_FRONT_LEFT_OF_CENTER },
+    { MATE_MIXER_CHANNEL_FRONT_RIGHT_CENTER, PA_CHANNEL_POSITION_FRONT_RIGHT_OF_CENTER },
+    { MATE_MIXER_CHANNEL_SIDE_LEFT,          PA_CHANNEL_POSITION_SIDE_LEFT },
+    { MATE_MIXER_CHANNEL_SIDE_RIGHT,         PA_CHANNEL_POSITION_SIDE_RIGHT },
+    { MATE_MIXER_CHANNEL_TOP_FRONT_LEFT,     PA_CHANNEL_POSITION_TOP_FRONT_LEFT },
+    { MATE_MIXER_CHANNEL_TOP_FRONT_RIGHT,    PA_CHANNEL_POSITION_TOP_FRONT_RIGHT },
+    { MATE_MIXER_CHANNEL_TOP_FRONT_CENTER,   PA_CHANNEL_POSITION_TOP_FRONT_CENTER },
+    { MATE_MIXER_CHANNEL_TOP_CENTER,         PA_CHANNEL_POSITION_TOP_CENTER },
+    { MATE_MIXER_CHANNEL_TOP_BACK_LEFT,      PA_CHANNEL_POSITION_TOP_REAR_LEFT },
+    { MATE_MIXER_CHANNEL_TOP_BACK_RIGHT,     PA_CHANNEL_POSITION_TOP_REAR_RIGHT },
+    { MATE_MIXER_CHANNEL_TOP_BACK_CENTER,    PA_CHANNEL_POSITION_TOP_REAR_CENTER },
 };
 
 MateMixerChannelPosition
 pulse_convert_position_from_pulse (pa_channel_position_t position)
 {
-    int i;
+    guint i;
 
     for (i = 0; i < G_N_ELEMENTS (position_map); i++) {
         if (position == position_map[i].pa_position)
             return position_map[i].mm_position;
     }
-    return MATE_MIXER_CHANNEL_UNKNOWN_POSITION;
+    return MATE_MIXER_CHANNEL_UNKNOWN;
 }
 
 pa_channel_position_t
 pulse_convert_position_to_pulse (MateMixerChannelPosition position)
 {
-    int i;
+    guint i;
 
     for (i = 0; i < G_N_ELEMENTS (position_map); i++) {
         if (position == position_map[i].mm_position)
             return position_map[i].pa_position;
     }
     return PA_CHANNEL_POSITION_INVALID;
+}
+
+MateMixerClientStreamRole
+pulse_convert_media_role_name (const gchar *name)
+{
+    if (!strcmp (name, "video")) {
+        return MATE_MIXER_CLIENT_STREAM_ROLE_VIDEO;
+    }
+    else if (!strcmp (name, "music")) {
+        return MATE_MIXER_CLIENT_STREAM_ROLE_MUSIC;
+    }
+    else if (!strcmp (name, "game")) {
+        return MATE_MIXER_CLIENT_STREAM_ROLE_GAME;
+    }
+    else if (!strcmp (name, "event")) {
+        return MATE_MIXER_CLIENT_STREAM_ROLE_EVENT;
+    }
+    else if (!strcmp (name, "phone")) {
+        return MATE_MIXER_CLIENT_STREAM_ROLE_PHONE;
+    }
+    else if (!strcmp (name, "animation")) {
+        return MATE_MIXER_CLIENT_STREAM_ROLE_ANIMATION;
+    }
+    else if (!strcmp (name, "production")) {
+        return MATE_MIXER_CLIENT_STREAM_ROLE_PRODUCTION;
+    }
+    else if (!strcmp (name, "a11y")) {
+        return MATE_MIXER_CLIENT_STREAM_ROLE_A11Y;
+    }
+    else if (!strcmp (name, "test")) {
+        return MATE_MIXER_CLIENT_STREAM_ROLE_TEST;
+    }
+    else if (!strcmp (name, "abstract")) {
+        return MATE_MIXER_CLIENT_STREAM_ROLE_ABSTRACT;
+    }
+    else if (!strcmp (name, "filter")) {
+        return MATE_MIXER_CLIENT_STREAM_ROLE_FILTER;
+    }
+
+    return MATE_MIXER_CLIENT_STREAM_ROLE_NONE;
 }

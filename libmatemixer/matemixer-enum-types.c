@@ -94,16 +94,14 @@ mate_mixer_stream_flags_get_type (void)
             { MATE_MIXER_STREAM_INPUT, "MATE_MIXER_STREAM_INPUT", "input" },
             { MATE_MIXER_STREAM_OUTPUT, "MATE_MIXER_STREAM_OUTPUT", "output" },
             { MATE_MIXER_STREAM_CLIENT, "MATE_MIXER_STREAM_CLIENT", "client" },
-            { MATE_MIXER_STREAM_APPLICATION, "MATE_MIXER_STREAM_APPLICATION", "application" },
-            { MATE_MIXER_STREAM_EVENT, "MATE_MIXER_STREAM_EVENT", "event" },
             { MATE_MIXER_STREAM_HAS_MUTE, "MATE_MIXER_STREAM_HAS_MUTE", "has-mute" },
             { MATE_MIXER_STREAM_HAS_VOLUME, "MATE_MIXER_STREAM_HAS_VOLUME", "has-volume" },
             { MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME, "MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME", "has-decibel-volume" },
             { MATE_MIXER_STREAM_HAS_FLAT_VOLUME, "MATE_MIXER_STREAM_HAS_FLAT_VOLUME", "has-flat-volume" },
             { MATE_MIXER_STREAM_HAS_MONITOR, "MATE_MIXER_STREAM_HAS_MONITOR", "has-monitor" },
+            { MATE_MIXER_STREAM_CAN_SET_VOLUME, "MATE_MIXER_STREAM_CAN_SET_VOLUME", "can-set-volume" },
             { MATE_MIXER_STREAM_CAN_BALANCE, "MATE_MIXER_STREAM_CAN_BALANCE", "can-balance" },
             { MATE_MIXER_STREAM_CAN_FADE, "MATE_MIXER_STREAM_CAN_FADE", "can-fade" },
-            { MATE_MIXER_STREAM_CAN_SET_VOLUME, "MATE_MIXER_STREAM_CAN_SET_VOLUME", "can-set-volume" },
             { MATE_MIXER_STREAM_CAN_SUSPEND, "MATE_MIXER_STREAM_CAN_SUSPEND", "can-suspend" },
             { 0, NULL, NULL }
         };
@@ -121,14 +119,61 @@ mate_mixer_stream_state_get_type (void)
 
     if (etype == 0) {
         static const GEnumValue values[] = {
-            { MATE_MIXER_STREAM_UNKNOWN_STATE, "MATE_MIXER_STREAM_UNKNOWN_STATE", "unknown-state" },
-            { MATE_MIXER_STREAM_RUNNING, "MATE_MIXER_STREAM_RUNNING", "running" },
-            { MATE_MIXER_STREAM_IDLE, "MATE_MIXER_STREAM_IDLE", "idle" },
-            { MATE_MIXER_STREAM_SUSPENDED, "MATE_MIXER_STREAM_SUSPENDED", "suspended" },
+            { MATE_MIXER_STREAM_STATE_UNKNOWN, "MATE_MIXER_STREAM_STATE_UNKNOWN", "unknown" },
+            { MATE_MIXER_STREAM_STATE_RUNNING, "MATE_MIXER_STREAM_STATE_RUNNING", "running" },
+            { MATE_MIXER_STREAM_STATE_IDLE, "MATE_MIXER_STREAM_STATE_IDLE", "idle" },
+            { MATE_MIXER_STREAM_STATE_SUSPENDED, "MATE_MIXER_STREAM_STATE_SUSPENDED", "suspended" },
             { 0, NULL, NULL }
         };
         etype = g_enum_register_static (
             g_intern_static_string ("MateMixerStreamState"),
+            values);
+    }
+    return etype;
+}
+
+GType
+mate_mixer_client_stream_flags_get_type (void)
+{
+    static GType etype = 0;
+
+    if (etype == 0) {
+        static const GFlagsValue values[] = {
+            { MATE_MIXER_CLIENT_STREAM_NO_FLAGS, "MATE_MIXER_CLIENT_STREAM_NO_FLAGS", "no-flags" },
+            { MATE_MIXER_CLIENT_STREAM_APPLICATION, "MATE_MIXER_CLIENT_STREAM_APPLICATION", "application" },
+            { MATE_MIXER_CLIENT_STREAM_CACHED, "MATE_MIXER_CLIENT_STREAM_CACHED", "cached" },
+            { 0, NULL, NULL }
+        };
+        etype = g_flags_register_static (
+            g_intern_static_string ("MateMixerClientStreamFlags"),
+            values);
+    }
+    return etype;
+}
+
+GType
+mate_mixer_client_stream_role_get_type (void)
+{
+    static GType etype = 0;
+
+    if (etype == 0) {
+        static const GEnumValue values[] = {
+            { MATE_MIXER_CLIENT_STREAM_ROLE_NONE, "MATE_MIXER_CLIENT_STREAM_ROLE_NONE", "none" },
+            { MATE_MIXER_CLIENT_STREAM_ROLE_VIDEO, "MATE_MIXER_CLIENT_STREAM_ROLE_VIDEO", "video" },
+            { MATE_MIXER_CLIENT_STREAM_ROLE_MUSIC, "MATE_MIXER_CLIENT_STREAM_ROLE_MUSIC", "music" },
+            { MATE_MIXER_CLIENT_STREAM_ROLE_GAME, "MATE_MIXER_CLIENT_STREAM_ROLE_GAME", "game" },
+            { MATE_MIXER_CLIENT_STREAM_ROLE_EVENT, "MATE_MIXER_CLIENT_STREAM_ROLE_EVENT", "event" },
+            { MATE_MIXER_CLIENT_STREAM_ROLE_PHONE, "MATE_MIXER_CLIENT_STREAM_ROLE_PHONE", "phone" },
+            { MATE_MIXER_CLIENT_STREAM_ROLE_ANIMATION, "MATE_MIXER_CLIENT_STREAM_ROLE_ANIMATION", "animation" },
+            { MATE_MIXER_CLIENT_STREAM_ROLE_PRODUCTION, "MATE_MIXER_CLIENT_STREAM_ROLE_PRODUCTION", "production" },
+            { MATE_MIXER_CLIENT_STREAM_ROLE_A11Y, "MATE_MIXER_CLIENT_STREAM_ROLE_A11Y", "a11y" },
+            { MATE_MIXER_CLIENT_STREAM_ROLE_TEST, "MATE_MIXER_CLIENT_STREAM_ROLE_TEST", "test" },
+            { MATE_MIXER_CLIENT_STREAM_ROLE_ABSTRACT, "MATE_MIXER_CLIENT_STREAM_ROLE_ABSTRACT", "abstract" },
+            { MATE_MIXER_CLIENT_STREAM_ROLE_FILTER, "MATE_MIXER_CLIENT_STREAM_ROLE_FILTER", "filter" },
+            { 0, NULL, NULL }
+        };
+        etype = g_enum_register_static (
+            g_intern_static_string ("MateMixerClientStreamRole"),
             values);
     }
     return etype;
@@ -141,7 +186,7 @@ mate_mixer_channel_position_get_type (void)
 
     if (etype == 0) {
         static const GEnumValue values[] = {
-            { MATE_MIXER_CHANNEL_UNKNOWN_POSITION, "MATE_MIXER_CHANNEL_UNKNOWN_POSITION", "unknown-position" },
+            { MATE_MIXER_CHANNEL_UNKNOWN, "MATE_MIXER_CHANNEL_UNKNOWN", "unknown" },
             { MATE_MIXER_CHANNEL_MONO, "MATE_MIXER_CHANNEL_MONO", "mono" },
             { MATE_MIXER_CHANNEL_FRONT_LEFT, "MATE_MIXER_CHANNEL_FRONT_LEFT", "front-left" },
             { MATE_MIXER_CHANNEL_FRONT_RIGHT, "MATE_MIXER_CHANNEL_FRONT_RIGHT", "front-right" },
@@ -149,9 +194,9 @@ mate_mixer_channel_position_get_type (void)
             { MATE_MIXER_CHANNEL_LFE, "MATE_MIXER_CHANNEL_LFE", "lfe" },
             { MATE_MIXER_CHANNEL_BACK_LEFT, "MATE_MIXER_CHANNEL_BACK_LEFT", "back-left" },
             { MATE_MIXER_CHANNEL_BACK_RIGHT, "MATE_MIXER_CHANNEL_BACK_RIGHT", "back-right" },
-            { MATE_MIXER_CHANNEL_FRONT_LEFT_CENTER, "MATE_MIXER_CHANNEL_FRONT_LEFT_CENTER", "front-left-center" },
-            { MATE_MIXER_CHANNEL_FRONT_RIGHT_CENTER, "MATE_MIXER_CHANNEL_FRONT_RIGHT_CENTER", "front-right-center" },
-            { MATE_MIXER_CHANNEL_BACK_CENTER, "MATE_MIXER_CHANNEL_BACK_CENTER", "back-center" },
+            { MATE_MIXER_CHANNEL_BACK_CENTER, "MATE_MIXER_STREAM_BACK_CENTER", "back-center" },
+            { MATE_MIXER_CHANNEL_FRONT_LEFT_CENTER, "MATE_MIXER_STREAM_FRONT_LEFT_CENTER", "front-left-center" },
+            { MATE_MIXER_CHANNEL_FRONT_RIGHT_CENTER, "MATE_MIXER_STREAM_FRONT_RIGHT_CENTER", "front-right-center" },
             { MATE_MIXER_CHANNEL_SIDE_LEFT, "MATE_MIXER_CHANNEL_SIDE_LEFT", "side-left" },
             { MATE_MIXER_CHANNEL_SIDE_RIGHT, "MATE_MIXER_CHANNEL_SIDE_RIGHT", "side-right" },
             { MATE_MIXER_CHANNEL_TOP_FRONT_LEFT, "MATE_MIXER_CHANNEL_TOP_FRONT_LEFT", "top-front-left" },

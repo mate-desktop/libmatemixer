@@ -26,6 +26,7 @@
 
 #include "pulse-connection.h"
 #include "pulse-client-stream.h"
+#include "pulse-helpers.h"
 #include "pulse-monitor.h"
 #include "pulse-stream.h"
 #include "pulse-source.h"
@@ -36,14 +37,18 @@ static void pulse_source_output_init       (PulseSourceOutput      *output);
 
 G_DEFINE_TYPE (PulseSourceOutput, pulse_source_output, PULSE_TYPE_CLIENT_STREAM);
 
-static gboolean      source_output_set_mute       (MateMixerStream       *stream,
-                                                   gboolean               mute);
-static gboolean      source_output_set_volume     (MateMixerStream       *stream,
-                                                   pa_cvolume            *volume);
-static gboolean      source_output_set_parent     (MateMixerClientStream *stream,
-                                                   MateMixerStream       *parent);
-static gboolean      source_output_remove         (MateMixerClientStream *stream);
-static PulseMonitor *source_output_create_monitor (MateMixerStream       *stream);
+static void          pulse_source_output_reload         (PulseStream       *pstream);
+
+static gboolean      pulse_source_output_set_mute       (PulseStream       *pstream,
+                                                         gboolean           mute);
+static gboolean      pulse_source_output_set_volume     (PulseStream       *pstream,
+                                                         pa_cvolume        *cvolume);
+
+static gboolean      pulse_source_output_set_parent     (PulseClientStream *pclient,
+                                                         PulseStream       *parent);
+static gboolean      pulse_source_output_remove         (PulseClientStream *pclient);
+
+static PulseMonitor *pulse_source_output_create_monitor (PulseStream       *pstream);
 
 static void
 pulse_source_output_class_init (PulseSourceOutputClass *klass)
@@ -53,14 +58,15 @@ pulse_source_output_class_init (PulseSourceOutputClass *klass)
 
     stream_class = PULSE_STREAM_CLASS (klass);
 
-    stream_class->set_mute       = source_output_set_mute;
-    stream_class->set_volume     = source_output_set_volume;
-    stream_class->create_monitor = source_output_create_monitor;
+    stream_class->reload         = pulse_source_output_reload;
+    stream_class->set_mute       = pulse_source_output_set_mute;
+    stream_class->set_volume     = pulse_source_output_set_volume;
+    stream_class->create_monitor = pulse_source_output_create_monitor;
 
     client_class = PULSE_CLIENT_STREAM_CLASS (klass);
 
-    client_class->set_parent = source_output_set_parent;
-    client_class->remove     = source_output_remove;
+    client_class->set_parent     = pulse_source_output_set_parent;
+    client_class->remove         = pulse_source_output_remove;
 }
 
 static void
@@ -91,21 +97,24 @@ pulse_source_output_new (PulseConnection             *connection,
 }
 
 gboolean
-pulse_source_output_update (PulseStream                 *stream,
+pulse_source_output_update (PulseStream                 *pstream,
                             const pa_source_output_info *info,
                             PulseStream                 *parent)
 {
     MateMixerStreamFlags flags = MATE_MIXER_STREAM_INPUT |
                                  MATE_MIXER_STREAM_CLIENT;
-    gchar *name;
+    PulseClientStream   *pclient;
+    const gchar         *prop;
+    const gchar         *description = NULL;
+    gchar               *name;
 
-    const gchar *prop;
-    const gchar *description = NULL;
+    g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (pstream), FALSE);
+    g_return_val_if_fail (info != NULL, FALSE);
 
-    g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (stream), FALSE);
+    pclient = PULSE_CLIENT_STREAM (pstream);
 
     /* Let all the information update before emitting notify signals */
-    g_object_freeze_notify (G_OBJECT (stream));
+    g_object_freeze_notify (G_OBJECT (pstream));
 
     /* Many other mixer applications query the Pulse client list and use the
      * client name here, but we use the name only as an identifier, so let's avoid
@@ -113,159 +122,168 @@ pulse_source_output_update (PulseStream                 *stream,
      * Also make sure to make the name unique by including the Pulse index. */
     name = g_strdup_printf ("pulse-stream-client-input-%lu", (gulong) info->index);
 
-    pulse_stream_update_name (stream, name);
+    pulse_stream_update_name (pstream, name);
     g_free (name);
 
     prop = pa_proplist_gets (info->proplist, PA_PROP_APPLICATION_NAME);
     if (prop != NULL)
-        pulse_client_stream_update_app_name (PULSE_CLIENT_STREAM (stream), prop);
+        pulse_client_stream_update_app_name (pclient, prop);
 
     prop = pa_proplist_gets (info->proplist, PA_PROP_APPLICATION_ID);
     if (prop != NULL)
-        pulse_client_stream_update_app_id (PULSE_CLIENT_STREAM (stream), prop);
+        pulse_client_stream_update_app_id (pclient, prop);
 
     prop = pa_proplist_gets (info->proplist, PA_PROP_APPLICATION_VERSION);
     if (prop != NULL)
-        pulse_client_stream_update_app_version (PULSE_CLIENT_STREAM (stream), prop);
+        pulse_client_stream_update_app_version (pclient, prop);
 
     prop = pa_proplist_gets (info->proplist, PA_PROP_APPLICATION_ICON_NAME);
     if (prop != NULL)
-        pulse_client_stream_update_app_icon (PULSE_CLIENT_STREAM (stream), prop);
+        pulse_client_stream_update_app_icon (pclient, prop);
 
     prop = pa_proplist_gets (info->proplist, PA_PROP_MEDIA_ROLE);
+    if (prop != NULL) {
+        MateMixerClientStreamRole role = pulse_convert_media_role_name (prop);
 
-    if (prop != NULL && !strcmp (prop, "event")) {
-        /* The event description seems to provide much better readable
-         * description for event streams */
-        prop = pa_proplist_gets (info->proplist, PA_PROP_EVENT_DESCRIPTION);
+        if (role == MATE_MIXER_CLIENT_STREAM_ROLE_EVENT) {
+            /* The event description seems to provide much better readable
+             * description for event streams */
+            prop = pa_proplist_gets (info->proplist, PA_PROP_EVENT_DESCRIPTION);
 
-        if (G_LIKELY (prop != NULL))
-            description = prop;
+            if (G_LIKELY (prop != NULL))
+                description = prop;
+        }
+        pulse_client_stream_update_role (pclient, role);
+    } else
+        pulse_client_stream_update_role (pclient, MATE_MIXER_CLIENT_STREAM_ROLE_NONE);
 
-        flags |= MATE_MIXER_STREAM_EVENT;
-    }
     if (description == NULL)
         description = info->name;
 
-    pulse_stream_update_description (stream, description);
+    pulse_stream_update_description (pstream, description);
 
     if (info->client != PA_INVALID_INDEX)
-        flags |= MATE_MIXER_STREAM_APPLICATION;
+        pulse_client_stream_update_flags (pclient, MATE_MIXER_CLIENT_STREAM_APPLICATION);
+    else
+        pulse_client_stream_update_flags (pclient, MATE_MIXER_CLIENT_STREAM_NO_FLAGS);
 
-    if (pa_channel_map_can_balance (&info->channel_map))
-        flags |= MATE_MIXER_STREAM_CAN_BALANCE;
-    if (pa_channel_map_can_fade (&info->channel_map))
-        flags |= MATE_MIXER_STREAM_CAN_FADE;
+    if (G_LIKELY (parent != NULL)) {
+        pulse_client_stream_update_parent (pclient, MATE_MIXER_STREAM (parent));
+        flags |= MATE_MIXER_STREAM_HAS_MONITOR;
+    } else
+        pulse_client_stream_update_parent (pclient, NULL);
 
 #if PA_CHECK_VERSION(1, 0, 0)
     if (info->has_volume) {
         flags |= MATE_MIXER_STREAM_HAS_VOLUME;
+
         if (info->volume_writable)
             flags |= MATE_MIXER_STREAM_CAN_SET_VOLUME;
     }
+
     flags |= MATE_MIXER_STREAM_HAS_MUTE;
 
-    pulse_stream_update_flags (stream, flags);
-    pulse_stream_update_mute (stream, info->mute ? TRUE : FALSE);
+    /* Flags needed before volume */
+    pulse_stream_update_flags (pstream, flags);
+    pulse_stream_update_channel_map (pstream, &info->channel_map);
+    pulse_stream_update_mute (pstream, info->mute ? TRUE : FALSE);
 
     if (info->has_volume)
-        pulse_stream_update_volume (stream, &info->volume, &info->channel_map, 0);
+        pulse_stream_update_volume (pstream, &info->volume, 0);
     else
-        pulse_stream_update_volume (stream, NULL, &info->channel_map, 0);
+        pulse_stream_update_volume (pstream, NULL, 0);
 #else
-    pulse_stream_update_flags (stream, flags);
-    pulse_stream_update_volume (stream, NULL, &info->channel_map, 0);
-#endif
+    /* Flags needed before volume */
+    pulse_stream_update_flags (pstream, flags);
 
-    if (G_LIKELY (parent != NULL))
-        pulse_client_stream_update_parent (PULSE_CLIENT_STREAM (stream),
-                                           MATE_MIXER_STREAM (parent));
-    else
-        pulse_client_stream_update_parent (PULSE_CLIENT_STREAM (stream), NULL);
+    pulse_stream_update_channel_map (pstream, &info->channel_map);
+    pulse_stream_update_volume (pstream, NULL, 0);
+#endif
 
     // XXX needs to fix monitor if parent changes
 
-    g_object_thaw_notify (G_OBJECT (stream));
+    g_object_thaw_notify (G_OBJECT (pstream));
     return TRUE;
 }
 
-static gboolean
-source_output_set_mute (MateMixerStream *stream, gboolean mute)
+static void
+pulse_source_output_reload (PulseStream *pstream)
 {
-    PulseStream *pulse;
+    g_return_if_fail (PULSE_IS_SOURCE_OUTPUT (pstream));
 
-    g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (stream), FALSE);
+    pulse_connection_load_source_output_info (pulse_stream_get_connection (pstream),
+                                              pulse_stream_get_index (pstream));
+}
 
-    pulse = PULSE_STREAM (stream);
+static gboolean
+pulse_source_output_set_mute (PulseStream *pstream, gboolean mute)
+{
+    g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (pstream), FALSE);
 
-    return pulse_connection_set_source_output_mute (pulse_stream_get_connection (pulse),
-                                                    pulse_stream_get_index (pulse),
+    return pulse_connection_set_source_output_mute (pulse_stream_get_connection (pstream),
+                                                    pulse_stream_get_index (pstream),
                                                     mute);
 }
 
 static gboolean
-source_output_set_volume (MateMixerStream *stream, pa_cvolume *volume)
+pulse_source_output_set_volume (PulseStream *pstream, pa_cvolume *cvolume)
 {
-    PulseStream *pulse;
+    g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (pstream), FALSE);
+    g_return_val_if_fail (cvolume != NULL, FALSE);
 
-    g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (stream), FALSE);
-    g_return_val_if_fail (volume != NULL, FALSE);
-
-    pulse = PULSE_STREAM (stream);
-
-    return pulse_connection_set_source_output_volume (pulse_stream_get_connection (pulse),
-                                                      pulse_stream_get_index (pulse),
-                                                      volume);
+    return pulse_connection_set_source_output_volume (pulse_stream_get_connection (pstream),
+                                                      pulse_stream_get_index (pstream),
+                                                      cvolume);
 }
 
 static gboolean
-source_output_set_parent (MateMixerClientStream *stream, MateMixerStream *parent)
+pulse_source_output_set_parent (PulseClientStream *pclient, PulseStream *parent)
 {
-    PulseStream *pulse;
+    PulseStream *pstream;
 
-    g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (stream), FALSE);
+    g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (pclient), FALSE);
 
-    if (G_UNLIKELY (!PULSE_IS_SOURCE (parent))) {
+    if (!PULSE_IS_SOURCE (parent)) {
         g_warning ("Could not change stream parent to %s: not a parent input stream",
-                   mate_mixer_stream_get_name (parent));
+                   mate_mixer_stream_get_name (MATE_MIXER_STREAM (parent)));
         return FALSE;
     }
 
-    pulse = PULSE_STREAM (stream);
+    pstream = PULSE_STREAM (pclient);
 
-    return pulse_connection_move_sink_input (pulse_stream_get_connection (pulse),
-                                             pulse_stream_get_index (pulse),
-                                             pulse_stream_get_index (PULSE_STREAM (parent)));
+    return pulse_connection_move_sink_input (pulse_stream_get_connection (pstream),
+                                             pulse_stream_get_index (pstream),
+                                             pulse_stream_get_index (parent));
 }
 
 static gboolean
-source_output_remove (MateMixerClientStream *stream)
+pulse_source_output_remove (PulseClientStream *pclient)
 {
-    PulseStream *pulse;
+    PulseStream *pstream;
 
-    g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (stream), FALSE);
+    g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (pclient), FALSE);
 
-    pulse = PULSE_STREAM (stream);
+    pstream = PULSE_STREAM (pclient);
 
-    return pulse_connection_kill_source_output (pulse_stream_get_connection (pulse),
-                                                pulse_stream_get_index (pulse));
+    return pulse_connection_kill_source_output (pulse_stream_get_connection (pstream),
+                                                pulse_stream_get_index (pstream));
 }
 
 static PulseMonitor *
-source_output_create_monitor (MateMixerStream *stream)
+pulse_source_output_create_monitor (PulseStream *pstream)
 {
     MateMixerStream *parent;
 
-    g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (stream), NULL);
+    g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (pstream), NULL);
 
-    parent = mate_mixer_client_stream_get_parent (MATE_MIXER_CLIENT_STREAM (stream));
+    parent = mate_mixer_client_stream_get_parent (MATE_MIXER_CLIENT_STREAM (pstream));
     if (G_UNLIKELY (parent == NULL)) {
-        g_debug ("Not creating monitor for client stream %s as it is not available",
-                 mate_mixer_stream_get_name (stream));
+        g_debug ("Not creating monitor for client stream %s: not available",
+                 mate_mixer_stream_get_name (MATE_MIXER_STREAM (pstream)));
         return NULL;
     }
 
-    return pulse_connection_create_monitor (pulse_stream_get_connection (PULSE_STREAM (stream)),
+    return pulse_connection_create_monitor (pulse_stream_get_connection (pstream),
                                             pulse_stream_get_index (PULSE_STREAM (parent)),
                                             PA_INVALID_INDEX);
 }

@@ -25,11 +25,11 @@
 
 enum {
     DEVICE_ADDED,
-    DEVICE_CHANGED,
     DEVICE_REMOVED,
     STREAM_ADDED,
-    STREAM_CHANGED,
     STREAM_REMOVED,
+    CACHED_STREAM_ADDED,
+    CACHED_STREAM_REMOVED,
     N_SIGNALS
 };
 
@@ -77,18 +77,6 @@ mate_mixer_backend_default_init (MateMixerBackendInterface *iface)
                       1,
                       G_TYPE_STRING);
 
-    signals[DEVICE_CHANGED] =
-        g_signal_new ("device-changed",
-                      G_TYPE_FROM_INTERFACE (iface),
-                      G_SIGNAL_RUN_LAST,
-                      G_STRUCT_OFFSET (MateMixerBackendInterface, device_changed),
-                      NULL,
-                      NULL,
-                      g_cclosure_marshal_VOID__STRING,
-                      G_TYPE_NONE,
-                      1,
-                      G_TYPE_STRING);
-
     signals[DEVICE_REMOVED] =
         g_signal_new ("device-removed",
                       G_TYPE_FROM_INTERFACE (iface),
@@ -113,11 +101,11 @@ mate_mixer_backend_default_init (MateMixerBackendInterface *iface)
                       1,
                       G_TYPE_STRING);
 
-    signals[STREAM_CHANGED] =
-        g_signal_new ("stream-changed",
+    signals[STREAM_REMOVED] =
+        g_signal_new ("stream-removed",
                       G_TYPE_FROM_INTERFACE (iface),
                       G_SIGNAL_RUN_LAST,
-                      G_STRUCT_OFFSET (MateMixerBackendInterface, stream_changed),
+                      G_STRUCT_OFFSET (MateMixerBackendInterface, stream_removed),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__STRING,
@@ -125,11 +113,23 @@ mate_mixer_backend_default_init (MateMixerBackendInterface *iface)
                       1,
                       G_TYPE_STRING);
 
-    signals[STREAM_REMOVED] =
-        g_signal_new ("stream-removed",
+    signals[CACHED_STREAM_ADDED] =
+        g_signal_new ("cached-stream-added",
                       G_TYPE_FROM_INTERFACE (iface),
                       G_SIGNAL_RUN_LAST,
-                      G_STRUCT_OFFSET (MateMixerBackendInterface, stream_removed),
+                      G_STRUCT_OFFSET (MateMixerBackendInterface, cached_stream_added),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__STRING,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_STRING);
+
+    signals[CACHED_STREAM_REMOVED] =
+        g_signal_new ("cached-stream-removed",
+                      G_TYPE_FROM_INTERFACE (iface),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (MateMixerBackendInterface, cached_stream_removed),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__STRING,
@@ -156,6 +156,7 @@ mate_mixer_backend_open (MateMixerBackend *backend)
 {
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), FALSE);
 
+    /* Implementation required */
     return MATE_MIXER_BACKEND_GET_INTERFACE (backend)->open (backend);
 }
 
@@ -177,6 +178,7 @@ mate_mixer_backend_get_state (MateMixerBackend *backend)
 {
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), MATE_MIXER_STATE_UNKNOWN);
 
+    /* Implementation required */
     return MATE_MIXER_BACKEND_GET_INTERFACE (backend)->get_state (backend);
 }
 
@@ -206,6 +208,21 @@ mate_mixer_backend_list_streams (MateMixerBackend *backend)
 
     if (iface->list_streams)
         return iface->list_streams (backend);
+
+    return NULL;
+}
+
+GList *
+mate_mixer_backend_list_cached_streams (MateMixerBackend *backend)
+{
+    MateMixerBackendInterface *iface;
+
+    g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), NULL);
+
+    iface = MATE_MIXER_BACKEND_GET_INTERFACE (backend);
+
+    if (iface->list_cached_streams)
+        return iface->list_cached_streams (backend);
 
     return NULL;
 }

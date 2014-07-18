@@ -21,6 +21,8 @@
 #include <glib.h>
 #include <glib-object.h>
 
+#include "matemixer-enums.h"
+
 G_BEGIN_DECLS
 
 typedef struct {
@@ -63,6 +65,7 @@ struct _MateMixerBackendModuleClass
 GType                       mate_mixer_backend_module_get_type (void) G_GNUC_CONST;
 
 MateMixerBackendModule *    mate_mixer_backend_module_new      (const gchar            *path);
+
 const MateMixerBackendInfo *mate_mixer_backend_module_get_info (MateMixerBackendModule *module);
 const gchar *               mate_mixer_backend_module_get_path (MateMixerBackendModule *module);
 

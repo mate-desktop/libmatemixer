@@ -22,6 +22,7 @@
 #include <glib-object.h>
 
 #include <libmatemixer/matemixer-device.h>
+#include <libmatemixer/matemixer-port.h>
 #include <libmatemixer/matemixer-stream.h>
 
 #include <pulse/pulseaudio.h>
@@ -60,51 +61,56 @@ struct _PulseStreamClass
 {
     GObjectClass parent_class;
 
-    gboolean      (*set_mute)        (MateMixerStream *stream,
-                                      gboolean         mute);
-    gboolean      (*set_volume)      (MateMixerStream *stream,
-                                      pa_cvolume      *volume);
+    /*< private >*/
+    /* Virtual table */
+    void          (*reload)          (PulseStream   *stream);
 
-    gboolean      (*set_active_port) (MateMixerStream *stream,
-                                      const gchar     *port_name);
+    gboolean      (*set_mute)        (PulseStream   *stream,
+                                      gboolean       mute);
+    gboolean      (*set_volume)      (PulseStream   *stream,
+                                      pa_cvolume    *volume);
 
-    gboolean      (*suspend)         (MateMixerStream *stream);
-    gboolean      (*resume)          (MateMixerStream *stream);
+    gboolean      (*set_active_port) (PulseStream   *stream,
+                                      MateMixerPort *port);
 
-    PulseMonitor *(*create_monitor)  (MateMixerStream *stream);
+    gboolean      (*suspend)         (PulseStream   *stream);
+    gboolean      (*resume)          (PulseStream   *stream);
+
+    PulseMonitor *(*create_monitor)  (PulseStream   *stream);
 };
 
-GType            pulse_stream_get_type               (void) G_GNUC_CONST;
+GType                 pulse_stream_get_type           (void) G_GNUC_CONST;
 
-guint32          pulse_stream_get_index              (PulseStream           *stream);
-PulseConnection *pulse_stream_get_connection         (PulseStream           *stream);
-PulseMonitor *   pulse_stream_get_monitor            (PulseStream           *stream);
+guint32               pulse_stream_get_index          (PulseStream          *pstream);
+PulseConnection *     pulse_stream_get_connection     (PulseStream          *pstream);
+PulseMonitor *        pulse_stream_get_monitor        (PulseStream          *pstream);
+GHashTable *          pulse_stream_get_ports          (PulseStream          *pstream);
 
-gboolean         pulse_stream_update_name            (PulseStream           *stream,
-                                                      const gchar           *name);
-gboolean         pulse_stream_update_description     (PulseStream           *stream,
-                                                      const gchar           *description);
-gboolean         pulse_stream_update_device          (PulseStream           *stream,
-                                                      MateMixerDevice       *device);
-gboolean         pulse_stream_update_flags           (PulseStream           *stream,
-                                                      MateMixerStreamFlags   flags);
-gboolean         pulse_stream_update_state           (PulseStream           *stream,
-                                                      MateMixerStreamState   state);
-gboolean         pulse_stream_update_mute            (PulseStream           *stream,
-                                                      gboolean               mute);
+const pa_cvolume *    pulse_stream_get_cvolume        (PulseStream          *pstream);
+const pa_channel_map *pulse_stream_get_channel_map    (PulseStream          *pstream);
 
-gboolean         pulse_stream_update_volume          (PulseStream           *stream,
-                                                      const pa_cvolume      *volume,
-                                                      const pa_channel_map  *map,
-                                                      pa_volume_t            base_volume);
+gboolean              pulse_stream_update_name        (PulseStream          *pstream,
+                                                       const gchar          *name);
+gboolean              pulse_stream_update_description (PulseStream          *pstream,
+                                                       const gchar          *description);
+gboolean              pulse_stream_update_device      (PulseStream          *pstream,
+                                                       MateMixerDevice      *device);
+gboolean              pulse_stream_update_flags       (PulseStream          *pstream,
+                                                       MateMixerStreamFlags  flags);
+gboolean              pulse_stream_update_state       (PulseStream          *pstream,
+                                                       MateMixerStreamState  state);
 
-gboolean         pulse_stream_update_channel_map     (PulseStream           *stream,
-                                                      const pa_channel_map  *map);
+gboolean              pulse_stream_update_channel_map (PulseStream          *pstream,
+                                                       const pa_channel_map *map);
+gboolean              pulse_stream_update_volume      (PulseStream          *pstream,
+                                                       const pa_cvolume     *volume,
+                                                       pa_volume_t           base_volume);
 
-gboolean         pulse_stream_update_ports           (PulseStream           *stream,
-                                                      GList                 *ports);
-gboolean         pulse_stream_update_active_port     (PulseStream           *stream,
-                                                      const gchar           *port_name);
+gboolean              pulse_stream_update_mute        (PulseStream          *pstream,
+                                                       gboolean              mute);
+
+gboolean              pulse_stream_update_active_port (PulseStream          *pstream,
+                                                       MateMixerPort        *port);
 
 G_END_DECLS
 

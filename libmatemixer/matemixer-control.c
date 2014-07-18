@@ -31,6 +31,7 @@
 
 /**
  * SECTION:matemixer-control
+ * @short_description:The main class for interfacing with the library
  * @include: libmatemixer/matemixer.h
  */
 
@@ -38,6 +39,7 @@ struct _MateMixerControlPrivate
 {
     GList                  *devices;
     GList                  *streams;
+    GList                  *cached_streams;
     gboolean                backend_chosen;
     MateMixerState          state;
     MateMixerBackend       *backend;
@@ -63,74 +65,76 @@ static GParamSpec *properties[N_PROPERTIES] = { NULL, };
 
 enum {
     DEVICE_ADDED,
-    DEVICE_CHANGED,
     DEVICE_REMOVED,
     STREAM_ADDED,
-    STREAM_CHANGED,
     STREAM_REMOVED,
+    CACHED_STREAM_ADDED,
+    CACHED_STREAM_REMOVED,
     N_SIGNALS
 };
 
 static guint signals[N_SIGNALS] = { 0, };
 
-static void mate_mixer_control_class_init (MateMixerControlClass *klass);
+static void mate_mixer_control_class_init   (MateMixerControlClass *klass);
 
-static void mate_mixer_control_get_property (GObject      *object,
-                                             guint         param_id,
-                                             GValue       *value,
-                                             GParamSpec   *pspec);
-static void mate_mixer_control_set_property (GObject      *object,
-                                             guint         param_id,
-                                             const GValue *value,
-                                             GParamSpec   *pspec);
+static void mate_mixer_control_get_property (GObject               *object,
+                                             guint                  param_id,
+                                             GValue                *value,
+                                             GParamSpec            *pspec);
+static void mate_mixer_control_set_property (GObject               *object,
+                                             guint                  param_id,
+                                             const GValue          *value,
+                                             GParamSpec            *pspec);
 
-static void mate_mixer_control_init     (MateMixerControl *control);
-static void mate_mixer_control_dispose  (GObject          *object);
-static void mate_mixer_control_finalize (GObject          *object);
+static void mate_mixer_control_init         (MateMixerControl      *control);
+static void mate_mixer_control_dispose      (GObject               *object);
+static void mate_mixer_control_finalize     (GObject               *object);
 
 G_DEFINE_TYPE (MateMixerControl, mate_mixer_control, G_TYPE_OBJECT);
 
-static void     control_backend_state_cb          (MateMixerBackend *backend,
-                                                   GParamSpec       *pspec,
-                                                   MateMixerControl *control);
+static void     on_backend_state_notify          (MateMixerBackend *backend,
+                                                  GParamSpec       *pspec,
+                                                  MateMixerControl *control);
 
-static void     control_backend_device_added_cb   (MateMixerBackend *backend,
-                                                   const gchar      *name,
-                                                   MateMixerControl *control);
-static void     control_backend_device_changed_cb (MateMixerBackend *backend,
-                                                   const gchar      *name,
-                                                   MateMixerControl *control);
-static void     control_backend_device_removed_cb (MateMixerBackend *backend,
-                                                   const gchar      *name,
-                                                   MateMixerControl *control);
+static void     on_backend_device_added          (MateMixerBackend *backend,
+                                                  const gchar      *name,
+                                                  MateMixerControl *control);
+static void     on_backend_device_removed        (MateMixerBackend *backend,
+                                                  const gchar      *name,
+                                                  MateMixerControl *control);
 
-static void     control_backend_stream_added_cb   (MateMixerBackend *backend,
-                                                   const gchar      *name,
-                                                   MateMixerControl *control);
-static void     control_backend_stream_changed_cb (MateMixerBackend *backend,
-                                                   const gchar      *name,
-                                                   MateMixerControl *control);
-static void     control_backend_stream_removed_cb (MateMixerBackend *backend,
-                                                   const gchar      *name,
-                                                   MateMixerControl *control);
+static void     on_backend_stream_added          (MateMixerBackend *backend,
+                                                  const gchar      *name,
+                                                  MateMixerControl *control);
+static void     on_backend_stream_removed        (MateMixerBackend *backend,
+                                                  const gchar      *name,
+                                                  MateMixerControl *control);
 
-static void     control_backend_default_input_cb  (MateMixerBackend *backend,
-                                                   GParamSpec       *pspec,
-                                                   MateMixerControl *control);
-static void     control_backend_default_output_cb (MateMixerBackend *backend,
-                                                   GParamSpec       *pspec,
-                                                   MateMixerControl *control);
+static void     on_backend_cached_stream_added   (MateMixerBackend *backend,
+                                                  const gchar      *name,
+                                                  MateMixerControl *control);
+static void     on_backend_cached_stream_removed (MateMixerBackend *backend,
+                                                  const gchar      *name,
+                                                  MateMixerControl *control);
 
-static gboolean control_try_next_backend          (MateMixerControl *control);
+static void     on_backend_default_input_notify  (MateMixerBackend *backend,
+                                                  GParamSpec       *pspec,
+                                                  MateMixerControl *control);
+static void     on_backend_default_output_notify (MateMixerBackend *backend,
+                                                  GParamSpec       *pspec,
+                                                  MateMixerControl *control);
 
-static void     control_change_state              (MateMixerControl *control,
-                                                   MateMixerState    state);
+static gboolean try_next_backend                 (MateMixerControl *control);
 
-static void     control_close                     (MateMixerControl *control);
+static void     change_state                     (MateMixerControl *control,
+                                                  MateMixerState    state);
 
-static void     control_free_backend              (MateMixerControl *control);
-static void     control_free_devices              (MateMixerControl *control);
-static void     control_free_streams              (MateMixerControl *control);
+static void     close_control                    (MateMixerControl *control);
+
+static void     free_backend                     (MateMixerControl *control);
+static void     free_devices                     (MateMixerControl *control);
+static void     free_streams                     (MateMixerControl *control);
+static void     free_cached_streams              (MateMixerControl *control);
 
 static void
 mate_mixer_control_class_init (MateMixerControlClass *klass)
@@ -219,14 +223,14 @@ mate_mixer_control_class_init (MateMixerControlClass *klass)
                              "Default input",
                              "Default input stream",
                              MATE_MIXER_TYPE_STREAM,
-                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     properties[PROP_DEFAULT_OUTPUT] =
         g_param_spec_object ("default-output",
                              "Default output",
                              "Default output stream",
                              MATE_MIXER_TYPE_STREAM,
-                             G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
+                             G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
@@ -242,26 +246,6 @@ mate_mixer_control_class_init (MateMixerControlClass *klass)
                       G_TYPE_FROM_CLASS (object_class),
                       G_SIGNAL_RUN_LAST,
                       G_STRUCT_OFFSET (MateMixerControlClass, device_added),
-                      NULL,
-                      NULL,
-                      g_cclosure_marshal_VOID__STRING,
-                      G_TYPE_NONE,
-                      1,
-                      G_TYPE_STRING);
-
-    /**
-     * MateMixerControl::device-changed:
-     * @control: a #MateMixerControl
-     * @name: name of the changed device
-     *
-     * The signal is emitted each time a change occurs on one of the known
-     * devices.
-     */
-    signals[DEVICE_CHANGED] =
-        g_signal_new ("device-changed",
-                      G_TYPE_FROM_CLASS (object_class),
-                      G_SIGNAL_RUN_LAST,
-                      G_STRUCT_OFFSET (MateMixerControlClass, device_changed),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__STRING,
@@ -293,7 +277,7 @@ mate_mixer_control_class_init (MateMixerControlClass *klass)
      * @control: a #MateMixerControl
      * @name: name of the added stream
      *
-     * The signal is emitted each time a stream is added to the system.
+     * The signal is emitted each time a stream is created.
      */
     signals[STREAM_ADDED] =
         g_signal_new ("stream-added",
@@ -308,18 +292,36 @@ mate_mixer_control_class_init (MateMixerControlClass *klass)
                       G_TYPE_STRING);
 
     /**
-     * MateMixerControl::stream-changed:
+     * MateMixerControl::stream-removed:
      * @control: a #MateMixerControl
-     * @name: name of the changed stream
+     * @name: name of the removed stream
      *
-     * The signal is emitted each time a change occurs on one of the known
-     * streams.
+     * The signal is emitted each time a stream is removed.
      */
-    signals[STREAM_CHANGED] =
-        g_signal_new ("stream-changed",
+    signals[STREAM_REMOVED] =
+        g_signal_new ("stream-removed",
                       G_TYPE_FROM_CLASS (object_class),
                       G_SIGNAL_RUN_LAST,
-                      G_STRUCT_OFFSET (MateMixerControlClass, stream_changed),
+                      G_STRUCT_OFFSET (MateMixerControlClass, stream_removed),
+                      NULL,
+                      NULL,
+                      g_cclosure_marshal_VOID__STRING,
+                      G_TYPE_NONE,
+                      1,
+                      G_TYPE_STRING);
+
+    /**
+     * MateMixerControl::cached-stream-added:
+     * @control: a #MateMixerControl
+     * @name: name of the added cached stream
+     *
+     * The signal is emitted each time a cached stream is created.
+     */
+    signals[CACHED_STREAM_ADDED] =
+        g_signal_new ("cached-stream-added",
+                      G_TYPE_FROM_CLASS (object_class),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (MateMixerControlClass, cached_stream_added),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__STRING,
@@ -332,13 +334,13 @@ mate_mixer_control_class_init (MateMixerControlClass *klass)
      * @control: a #MateMixerControl
      * @name: name of the removed stream
      *
-     * The signal is emitted each time a stream is removed from the system.
+     * The signal is emitted each time a stream is removed.
      */
-    signals[STREAM_REMOVED] =
-        g_signal_new ("stream-removed",
+    signals[CACHED_STREAM_REMOVED] =
+        g_signal_new ("cached-stream-removed",
                       G_TYPE_FROM_CLASS (object_class),
                       G_SIGNAL_RUN_LAST,
-                      G_STRUCT_OFFSET (MateMixerControlClass, stream_removed),
+                      G_STRUCT_OFFSET (MateMixerControlClass, cached_stream_removed),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__STRING,
@@ -416,6 +418,12 @@ mate_mixer_control_set_property (GObject      *object,
     case PROP_SERVER_ADDRESS:
         mate_mixer_control_set_server_address (control, g_value_get_string (value));
         break;
+    case PROP_DEFAULT_INPUT:
+        mate_mixer_control_set_default_input_stream (control, g_value_get_object (value));
+        break;
+    case PROP_DEFAULT_OUTPUT:
+        mate_mixer_control_set_default_output_stream (control, g_value_get_object (value));
+        break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
         break;
@@ -433,7 +441,7 @@ mate_mixer_control_init (MateMixerControl *control)
 static void
 mate_mixer_control_dispose (GObject *object)
 {
-    control_close (MATE_MIXER_CONTROL (object));
+    close_control (MATE_MIXER_CONTROL (object));
 
     G_OBJECT_CLASS (mate_mixer_control_parent_class)->dispose (object);
 }
@@ -465,10 +473,11 @@ mate_mixer_control_finalize (GObject *object)
 MateMixerControl *
 mate_mixer_control_new (void)
 {
-    if (!mate_mixer_is_initialized ()) {
+    if (mate_mixer_is_initialized () == FALSE) {
         g_critical ("The library has not been initialized");
         return NULL;
     }
+
     return g_object_new (MATE_MIXER_TYPE_CONTROL, NULL);
 }
 
@@ -504,7 +513,8 @@ mate_mixer_control_set_backend_type (MateMixerControl     *control,
         return FALSE;
 
     modules = mate_mixer_get_modules ();
-    while (modules) {
+
+    while (modules != NULL) {
         module = MATE_MIXER_BACKEND_MODULE (modules->data);
         info   = mate_mixer_backend_module_get_info (module);
 
@@ -540,11 +550,13 @@ mate_mixer_control_set_app_name (MateMixerControl *control, const gchar *app_nam
         control->priv->state == MATE_MIXER_STATE_READY)
         return FALSE;
 
-    g_free (control->priv->backend_data.app_name);
+    if (g_strcmp0 (control->priv->backend_data.app_name, app_name) != 0) {
+        g_free (control->priv->backend_data.app_name);
 
-    control->priv->backend_data.app_name = g_strdup (app_name);
+        control->priv->backend_data.app_name = g_strdup (app_name);
 
-    g_object_notify_by_pspec (G_OBJECT (control), properties[PROP_APP_NAME]);
+        g_object_notify_by_pspec (G_OBJECT (control), properties[PROP_APP_NAME]);
+    }
     return TRUE;
 }
 
@@ -571,11 +583,13 @@ mate_mixer_control_set_app_id (MateMixerControl *control, const gchar *app_id)
         control->priv->state == MATE_MIXER_STATE_READY)
         return FALSE;
 
-    g_free (control->priv->backend_data.app_id);
+    if (g_strcmp0 (control->priv->backend_data.app_id, app_id) != 0) {
+        g_free (control->priv->backend_data.app_id);
 
-    control->priv->backend_data.app_id = g_strdup (app_id);
+        control->priv->backend_data.app_id = g_strdup (app_id);
 
-    g_object_notify_by_pspec (G_OBJECT (control), properties[PROP_APP_ID]);
+        g_object_notify_by_pspec (G_OBJECT (control), properties[PROP_APP_ID]);
+    }
     return TRUE;
 }
 
@@ -602,11 +616,13 @@ mate_mixer_control_set_app_version (MateMixerControl *control, const gchar *app_
         control->priv->state == MATE_MIXER_STATE_READY)
         return FALSE;
 
-    g_free (control->priv->backend_data.app_version);
+    if (g_strcmp0 (control->priv->backend_data.app_version, app_version) != 0) {
+        g_free (control->priv->backend_data.app_version);
 
-    control->priv->backend_data.app_version = g_strdup (app_version);
+        control->priv->backend_data.app_version = g_strdup (app_version);
 
-    g_object_notify_by_pspec (G_OBJECT (control), properties[PROP_APP_VERSION]);
+        g_object_notify_by_pspec (G_OBJECT (control), properties[PROP_APP_VERSION]);
+    }
     return TRUE;
 }
 
@@ -633,11 +649,13 @@ mate_mixer_control_set_app_icon (MateMixerControl *control, const gchar *app_ico
         control->priv->state == MATE_MIXER_STATE_READY)
         return FALSE;
 
-    g_free (control->priv->backend_data.app_icon);
+    if (g_strcmp0 (control->priv->backend_data.app_icon, app_icon) != 0) {
+        g_free (control->priv->backend_data.app_icon);
 
-    control->priv->backend_data.app_icon = g_strdup (app_icon);
+        control->priv->backend_data.app_icon = g_strdup (app_icon);
 
-    g_object_notify_by_pspec (G_OBJECT (control), properties[PROP_APP_ICON]);
+        g_object_notify_by_pspec (G_OBJECT (control), properties[PROP_APP_ICON]);
+    }
     return TRUE;
 }
 
@@ -665,11 +683,13 @@ mate_mixer_control_set_server_address (MateMixerControl *control, const gchar *a
         control->priv->state == MATE_MIXER_STATE_READY)
         return FALSE;
 
-    g_free (control->priv->backend_data.server_address);
+    if (g_strcmp0 (control->priv->backend_data.server_address, address) != 0) {
+        g_free (control->priv->backend_data.server_address);
 
-    control->priv->backend_data.server_address = g_strdup (address);
+        control->priv->backend_data.server_address = g_strdup (address);
 
-    g_object_notify_by_pspec (G_OBJECT (control), properties[PROP_SERVER_ADDRESS]);
+        g_object_notify_by_pspec (G_OBJECT (control), properties[PROP_SERVER_ADDRESS]);
+    }
     return TRUE;
 }
 
@@ -718,7 +738,7 @@ mate_mixer_control_open (MateMixerControl *control)
     modules = mate_mixer_get_modules ();
 
     if (control->priv->backend_type != MATE_MIXER_BACKEND_UNKNOWN) {
-        while (modules) {
+        while (modules != NULL) {
             const MateMixerBackendInfo *info;
 
             module = MATE_MIXER_BACKEND_MODULE (modules->data);
@@ -736,7 +756,7 @@ mate_mixer_control_open (MateMixerControl *control)
     }
     if (module == NULL) {
         /* Most likely the selected backend is not installed */
-        control_change_state (control, MATE_MIXER_STATE_FAILED);
+        change_state (control, MATE_MIXER_STATE_FAILED);
         return FALSE;
     }
 
@@ -750,19 +770,19 @@ mate_mixer_control_open (MateMixerControl *control)
 
     /* This transitional state is always present, it will change to MATE_MIXER_STATE_READY
      * or MATE_MIXER_STATE_FAILED either instantly or asynchronously */
-    control_change_state (control, MATE_MIXER_STATE_CONNECTING);
+    change_state (control, MATE_MIXER_STATE_CONNECTING);
 
     /* The backend initialization might fail in case it is known right now that
      * the backend is unusable */
-    if (!mate_mixer_backend_open (control->priv->backend)) {
+    if (mate_mixer_backend_open (control->priv->backend) == FALSE) {
         if (control->priv->backend_type == MATE_MIXER_BACKEND_UNKNOWN) {
             /* User didn't request a specific backend, so try another one */
-            return control_try_next_backend (control);
+            return try_next_backend (control);
         }
 
         /* User requested a specific backend and it failed */
-        control_close (control);
-        control_change_state (control, MATE_MIXER_STATE_FAILED);
+        close_control (control);
+        change_state (control, MATE_MIXER_STATE_FAILED);
         return FALSE;
     }
 
@@ -773,17 +793,20 @@ mate_mixer_control_open (MateMixerControl *control)
         /* This would be a backend bug */
         g_warn_if_reached ();
 
-        control_close (control);
-        control_change_state (control, MATE_MIXER_STATE_FAILED);
+        if (control->priv->backend_type == MATE_MIXER_BACKEND_UNKNOWN)
+            return try_next_backend (control);
+
+        close_control (control);
+        change_state (control, MATE_MIXER_STATE_FAILED);
         return FALSE;
     }
 
-    g_signal_connect (control->priv->backend,
+    g_signal_connect (G_OBJECT (control->priv->backend),
                       "notify::state",
-                      G_CALLBACK (control_backend_state_cb),
+                      G_CALLBACK (on_backend_state_notify),
                       control);
 
-    control_change_state (control, state);
+    change_state (control, state);
     return TRUE;
 }
 
@@ -799,8 +822,8 @@ mate_mixer_control_close (MateMixerControl *control)
 {
     g_return_if_fail (MATE_MIXER_IS_CONTROL (control));
 
-    control_close (control);
-    control_change_state (control, MATE_MIXER_STATE_IDLE);
+    close_control (control);
+    change_state (control, MATE_MIXER_STATE_IDLE);
 }
 
 /**
@@ -837,10 +860,10 @@ mate_mixer_control_get_device (MateMixerControl *control, const gchar *name)
     g_return_val_if_fail (name != NULL, NULL);
 
     list = mate_mixer_control_list_devices (control);
-    while (list) {
+    while (list != NULL) {
         MateMixerDevice *device = MATE_MIXER_DEVICE (list->data);
 
-        if (!strcmp (name, mate_mixer_device_get_name (device)))
+        if (strcmp (name, mate_mixer_device_get_name (device)) == 0)
             return device;
 
         list = list->next;
@@ -866,10 +889,36 @@ mate_mixer_control_get_stream (MateMixerControl *control, const gchar *name)
     g_return_val_if_fail (name != NULL, NULL);
 
     list = mate_mixer_control_list_streams (control);
+    while (list != NULL) {
+        MateMixerStream *stream = MATE_MIXER_STREAM (list->data);
+
+        if (strcmp (name, mate_mixer_stream_get_name (stream)) == 0)
+            return stream;
+
+        list = list->next;
+    }
+    return NULL;
+}
+
+/**
+ * mate_mixer_control_get_cached_stream:
+ * @control: a #MateMixerControl
+ * @name: a stream name
+ *
+ */
+MateMixerStream *
+mate_mixer_control_get_cached_stream (MateMixerControl *control, const gchar *name)
+{
+    const GList *list;
+
+    g_return_val_if_fail (MATE_MIXER_IS_CONTROL (control), NULL);
+    g_return_val_if_fail (name != NULL, NULL);
+
+    list = mate_mixer_control_list_cached_streams (control);
     while (list) {
         MateMixerStream *stream = MATE_MIXER_STREAM (list->data);
 
-        if (!strcmp (name, mate_mixer_stream_get_name (stream)))
+        if (strcmp (name, mate_mixer_stream_get_name (stream)) == 0)
             return stream;
 
         list = list->next;
@@ -935,6 +984,28 @@ mate_mixer_control_list_streams (MateMixerControl *control)
             mate_mixer_backend_list_streams (MATE_MIXER_BACKEND (control->priv->backend));
 
     return (const GList *) control->priv->streams;
+}
+
+/**
+ * mate_mixer_control_list_cached_streams:
+ * @control: a #MateMixerControl
+ *
+ */
+const GList *
+mate_mixer_control_list_cached_streams (MateMixerControl *control)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_CONTROL (control), NULL);
+
+    if (control->priv->state != MATE_MIXER_STATE_READY)
+        return NULL;
+
+    /* This list is cached here and invalidated when the backend notifies us
+     * about a change */
+    if (control->priv->cached_streams == NULL)
+        control->priv->cached_streams =
+            mate_mixer_backend_list_cached_streams (MATE_MIXER_BACKEND (control->priv->backend));
+
+    return (const GList *) control->priv->cached_streams;
 }
 
 /**
@@ -1057,7 +1128,7 @@ mate_mixer_control_get_backend_name (MateMixerControl *control)
 {
     g_return_val_if_fail (MATE_MIXER_IS_CONTROL (control), NULL);
 
-    if (!control->priv->backend_chosen)
+    if (control->priv->backend_chosen == FALSE)
         return NULL;
 
     return mate_mixer_backend_module_get_info (control->priv->module)->name;
@@ -1077,16 +1148,16 @@ mate_mixer_control_get_backend_type (MateMixerControl *control)
 {
     g_return_val_if_fail (MATE_MIXER_IS_CONTROL (control), MATE_MIXER_BACKEND_UNKNOWN);
 
-    if (!control->priv->backend_chosen)
+    if (control->priv->backend_chosen == FALSE)
         return MATE_MIXER_BACKEND_UNKNOWN;
 
     return mate_mixer_backend_module_get_info (control->priv->module)->backend_type;
 }
 
 static void
-control_backend_state_cb (MateMixerBackend *backend,
-                          GParamSpec       *pspec,
-                          MateMixerControl *control)
+on_backend_state_notify (MateMixerBackend *backend,
+                         GParamSpec       *pspec,
+                         MateMixerControl *control)
 {
     MateMixerState state = mate_mixer_backend_get_state (backend);
 
@@ -1095,19 +1166,20 @@ control_backend_state_cb (MateMixerBackend *backend,
         g_debug ("Backend %s changed state to CONNECTING",
                  mate_mixer_backend_module_get_info (control->priv->module)->name);
 
-        if (control->priv->backend_chosen) {
+        if (control->priv->backend_chosen == TRUE) {
             /* Invalidate cached data when reconnecting */
-            control_free_devices (control);
-            control_free_devices (control);
+            free_devices (control);
+            free_streams (control);
+            free_cached_streams (control);
         }
-        control_change_state (control, state);
+        change_state (control, state);
         break;
 
     case MATE_MIXER_STATE_READY:
         g_debug ("Backend %s changed state to READY",
                  mate_mixer_backend_module_get_info (control->priv->module)->name);
 
-        control_change_state (control, state);
+        change_state (control, state);
         break;
 
     case MATE_MIXER_STATE_FAILED:
@@ -1116,11 +1188,11 @@ control_backend_state_cb (MateMixerBackend *backend,
 
         if (control->priv->backend_type == MATE_MIXER_BACKEND_UNKNOWN) {
             /* User didn't request a specific backend, so try another one */
-            control_try_next_backend (control);
+            try_next_backend (control);
         } else {
             /* User requested a specific backend and it failed */
-            control_close (control);
-            control_change_state (control, state);
+            close_control (control);
+            change_state (control, state);
         }
         break;
 
@@ -1130,11 +1202,11 @@ control_backend_state_cb (MateMixerBackend *backend,
 }
 
 static void
-control_backend_device_added_cb (MateMixerBackend *backend,
-                                 const gchar      *name,
-                                 MateMixerControl *control)
+on_backend_device_added (MateMixerBackend *backend,
+                         const gchar      *name,
+                         MateMixerControl *control)
 {
-    control_free_devices (control);
+    free_devices (control);
 
     g_signal_emit (G_OBJECT (control),
                    signals[DEVICE_ADDED],
@@ -1143,22 +1215,11 @@ control_backend_device_added_cb (MateMixerBackend *backend,
 }
 
 static void
-control_backend_device_changed_cb (MateMixerBackend *backend,
-                                   const gchar      *name,
-                                   MateMixerControl *control)
+on_backend_device_removed (MateMixerBackend *backend,
+                           const gchar      *name,
+                           MateMixerControl *control)
 {
-    g_signal_emit (G_OBJECT (control),
-                   signals[DEVICE_CHANGED],
-                   0,
-                   name);
-}
-
-static void
-control_backend_device_removed_cb (MateMixerBackend *backend,
-                                   const gchar      *name,
-                                   MateMixerControl *control)
-{
-    control_free_devices (control);
+    free_devices (control);
 
     g_signal_emit (G_OBJECT (control),
                    signals[DEVICE_REMOVED],
@@ -1167,11 +1228,11 @@ control_backend_device_removed_cb (MateMixerBackend *backend,
 }
 
 static void
-control_backend_stream_added_cb (MateMixerBackend *backend,
-                                 const gchar      *name,
-                                 MateMixerControl *control)
+on_backend_stream_added (MateMixerBackend *backend,
+                         const gchar      *name,
+                         MateMixerControl *control)
 {
-    control_free_streams (control);
+    free_streams (control);
 
     g_signal_emit (G_OBJECT (control),
                    signals[STREAM_ADDED],
@@ -1180,22 +1241,11 @@ control_backend_stream_added_cb (MateMixerBackend *backend,
 }
 
 static void
-control_backend_stream_changed_cb (MateMixerBackend *backend,
-                                   const gchar      *name,
-                                   MateMixerControl *control)
+on_backend_stream_removed (MateMixerBackend *backend,
+                           const gchar      *name,
+                           MateMixerControl *control)
 {
-    g_signal_emit (G_OBJECT (control),
-                   signals[STREAM_CHANGED],
-                   0,
-                   name);
-}
-
-static void
-control_backend_stream_removed_cb (MateMixerBackend *backend,
-                                   const gchar      *name,
-                                   MateMixerControl *control)
-{
-    control_free_streams (control);
+    free_streams (control);
 
     g_signal_emit (G_OBJECT (control),
                    signals[STREAM_REMOVED],
@@ -1204,46 +1254,71 @@ control_backend_stream_removed_cb (MateMixerBackend *backend,
 }
 
 static void
-control_backend_default_input_cb (MateMixerBackend *backend,
-                                  GParamSpec       *pspec,
+on_backend_cached_stream_added (MateMixerBackend *backend,
+                                const gchar      *name,
+                                MateMixerControl *control)
+{
+    free_cached_streams (control);
+
+    g_signal_emit (G_OBJECT (control),
+                   signals[CACHED_STREAM_ADDED],
+                   0,
+                   name);
+}
+
+static void
+on_backend_cached_stream_removed (MateMixerBackend *backend,
+                                  const gchar      *name,
                                   MateMixerControl *control)
+{
+    free_cached_streams (control);
+
+    g_signal_emit (G_OBJECT (control),
+                   signals[CACHED_STREAM_REMOVED],
+                   0,
+                   name);
+}
+
+static void
+on_backend_default_input_notify (MateMixerBackend *backend,
+                                 GParamSpec       *pspec,
+                                 MateMixerControl *control)
 {
     g_object_notify_by_pspec (G_OBJECT (control), properties[PROP_DEFAULT_INPUT]);
 }
 
 static void
-control_backend_default_output_cb (MateMixerBackend *backend,
-                                   GParamSpec       *pspec,
-                                   MateMixerControl *control)
+on_backend_default_output_notify (MateMixerBackend *backend,
+                                  GParamSpec       *pspec,
+                                  MateMixerControl *control)
 {
     g_object_notify_by_pspec (G_OBJECT (control), properties[PROP_DEFAULT_OUTPUT]);
 }
 
 static gboolean
-control_try_next_backend (MateMixerControl *control)
+try_next_backend (MateMixerControl *control)
 {
     const GList            *modules;
     MateMixerBackendModule *module = NULL;
     MateMixerState          state;
 
     modules = mate_mixer_get_modules ();
-    while (modules) {
+
+    while (modules != NULL) {
         if (control->priv->module == modules->data) {
             /* Found the last tested backend, try to use the next one with a lower
              * priority unless we have reached the end of the list */
-            if (modules->next)
+            if (modules->next != NULL)
                 module = MATE_MIXER_BACKEND_MODULE (modules->next->data);
             break;
         }
         modules = modules->next;
     }
-    control_close (control);
+    close_control (control);
 
     if (module == NULL) {
-        /* This shouldn't happen under normal circumstances as the lowest
-         * priority module is the "Null" module which never fails to initialize,
-         * but in a broken installation this module could be missing */
-        control_change_state (control, MATE_MIXER_STATE_FAILED);
+        /* We have tried all the modules and all of them failed */
+        change_state (control, MATE_MIXER_STATE_FAILED);
         return FALSE;
     }
 
@@ -1253,8 +1328,10 @@ control_try_next_backend (MateMixerControl *control)
 
     mate_mixer_backend_set_data (control->priv->backend, &control->priv->backend_data);
 
-    if (!mate_mixer_backend_open (control->priv->backend))
-        return control_try_next_backend (control);
+    /* Try to open this backend and in case of failure keep trying until we find
+     * one that works or reach the end of the list */
+    if (mate_mixer_backend_open (control->priv->backend) == FALSE)
+        return try_next_backend (control);
 
     state = mate_mixer_backend_get_state (control->priv->backend);
 
@@ -1263,64 +1340,63 @@ control_try_next_backend (MateMixerControl *control)
         /* This would be a backend bug */
         g_warn_if_reached ();
 
-        control_close (control);
-        return control_try_next_backend (control);
+        return try_next_backend (control);
     }
 
-    g_signal_connect (control->priv->backend,
+    g_signal_connect (G_OBJECT (control->priv->backend),
                       "notify::state",
-                      G_CALLBACK (control_backend_state_cb),
+                      G_CALLBACK (on_backend_state_notify),
                       control);
 
-    control_change_state (control, state);
+    change_state (control, state);
     return TRUE;
 }
 
 static void
-control_change_state (MateMixerControl *control, MateMixerState state)
+change_state (MateMixerControl *control, MateMixerState state)
 {
     if (control->priv->state == state)
         return;
 
     control->priv->state = state;
 
-    if (state == MATE_MIXER_STATE_READY && !control->priv->backend_chosen) {
+    if (state == MATE_MIXER_STATE_READY && control->priv->backend_chosen == FALSE) {
         /* It is safe to connect to the backend signals after reaching the READY
          * state, because the app is not allowed to query any data before that state;
          * therefore we won't end up in an inconsistent state by caching a list and
          * then missing a notification about a change in the list */
-        g_signal_connect (control->priv->backend,
+        g_signal_connect (G_OBJECT (control->priv->backend),
                           "device-added",
-                          G_CALLBACK (control_backend_device_added_cb),
+                          G_CALLBACK (on_backend_device_added),
                           control);
-        g_signal_connect (control->priv->backend,
-                          "device-changed",
-                          G_CALLBACK (control_backend_device_changed_cb),
-                          control);
-        g_signal_connect (control->priv->backend,
+        g_signal_connect (G_OBJECT (control->priv->backend),
                           "device-removed",
-                          G_CALLBACK (control_backend_device_removed_cb),
+                          G_CALLBACK (on_backend_device_removed),
                           control);
-        g_signal_connect (control->priv->backend,
+        g_signal_connect (G_OBJECT (control->priv->backend),
                           "stream-added",
-                          G_CALLBACK (control_backend_stream_added_cb),
+                          G_CALLBACK (on_backend_stream_added),
                           control);
-        g_signal_connect (control->priv->backend,
-                          "stream-changed",
-                          G_CALLBACK (control_backend_stream_changed_cb),
-                          control);
-        g_signal_connect (control->priv->backend,
+        g_signal_connect (G_OBJECT (control->priv->backend),
                           "stream-removed",
-                          G_CALLBACK (control_backend_stream_removed_cb),
+                          G_CALLBACK (on_backend_stream_removed),
+                          control);
+        g_signal_connect (G_OBJECT (control->priv->backend),
+                          "cached-stream-added",
+                          G_CALLBACK (on_backend_cached_stream_added),
+                          control);
+        g_signal_connect (G_OBJECT (control->priv->backend),
+                          "cached-stream-removed",
+                          G_CALLBACK (on_backend_cached_stream_removed),
                           control);
 
-        g_signal_connect (control->priv->backend,
+        g_signal_connect (G_OBJECT (control->priv->backend),
                           "notify::default-input",
-                          G_CALLBACK (control_backend_default_input_cb),
+                          G_CALLBACK (on_backend_default_input_notify),
                           control);
-        g_signal_connect (control->priv->backend,
+        g_signal_connect (G_OBJECT (control->priv->backend),
                           "notify::default-output",
-                          G_CALLBACK (control_backend_default_output_cb),
+                          G_CALLBACK (on_backend_default_output_notify),
                           control);
 
         control->priv->backend_chosen = TRUE;
@@ -1330,20 +1406,26 @@ control_change_state (MateMixerControl *control, MateMixerState state)
 }
 
 static void
-control_close (MateMixerControl *control)
+close_control (MateMixerControl *control)
 {
-    control_free_backend (control);
-    control_free_devices (control);
-    control_free_streams (control);
+    free_backend (control);
+    free_devices (control);
+    free_streams (control);
+    free_cached_streams (control);
 
     g_clear_object (&control->priv->module);
+
+    control->priv->backend_chosen = FALSE;
 }
 
 static void
-control_free_backend (MateMixerControl *control)
+free_backend (MateMixerControl *control)
 {
     if (control->priv->backend == NULL)
         return;
+
+    g_signal_handlers_disconnect_by_data (G_OBJECT (control->priv->backend),
+                                          control);
 
     mate_mixer_backend_close (control->priv->backend);
 
@@ -1351,7 +1433,7 @@ control_free_backend (MateMixerControl *control)
 }
 
 static void
-control_free_devices (MateMixerControl *control)
+free_devices (MateMixerControl *control)
 {
     if (control->priv->devices == NULL)
         return;
@@ -1362,7 +1444,7 @@ control_free_devices (MateMixerControl *control)
 }
 
 static void
-control_free_streams (MateMixerControl *control)
+free_streams (MateMixerControl *control)
 {
     if (control->priv->streams == NULL)
         return;
@@ -1370,4 +1452,15 @@ control_free_streams (MateMixerControl *control)
     g_list_free_full (control->priv->streams, g_object_unref);
 
     control->priv->streams = NULL;
+}
+
+static void
+free_cached_streams (MateMixerControl *control)
+{
+    if (control->priv->cached_streams == NULL)
+        return;
+
+    g_list_free_full (control->priv->cached_streams, g_object_unref);
+
+    control->priv->cached_streams = NULL;
 }

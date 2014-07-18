@@ -32,9 +32,11 @@ libmatemixer_la_SOURCES =                                       \
         matemixer-control.c                                     \
         matemixer-device.c                                      \
         matemixer-device-profile.c                              \
+        matemixer-device-profile-private.h                      \
         matemixer-enum-types.c                                  \
         matemixer-enum-types.h                                  \
         matemixer-port.c                                        \
+        matemixer-port-private.h                                \
         matemixer-stream.c
 
 libmatemixer_la_LIBADD = $(GLIB_LIBS)

@@ -62,7 +62,7 @@ PulseStream *pulse_source_output_new        (PulseConnection             *connec
                                              const pa_source_output_info *info,
                                              PulseStream                 *parent);
 
-gboolean     pulse_source_output_update     (PulseStream                 *stream,
+gboolean     pulse_source_output_update     (PulseStream                 *pstream,
                                              const pa_source_output_info *info,
                                              PulseStream                 *parent);
 

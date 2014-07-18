@@ -19,11 +19,13 @@
 #include <glib-object.h>
 
 #include "matemixer-client-stream.h"
+#include "matemixer-enums.h"
+#include "matemixer-enum-types.h"
 #include "matemixer-stream.h"
 
 /**
  * SECTION:matemixer-client-stream
- * @short_description: An interface providing extra functionality for client streams
+ * @short_description: Interface providing extra functionality for client streams
  * @see_also: #MateMixerStream
  * @include: libmatemixer/matemixer.h
  *
@@ -38,6 +40,24 @@ G_DEFINE_INTERFACE (MateMixerClientStream, mate_mixer_client_stream, G_TYPE_OBJE
 static void
 mate_mixer_client_stream_default_init (MateMixerClientStreamInterface *iface)
 {
+    g_object_interface_install_property (iface,
+                                         g_param_spec_flags ("client-flags",
+                                                             "Client flags",
+                                                             "Capability flags of the client stream",
+                                                             MATE_MIXER_TYPE_CLIENT_STREAM_FLAGS,
+                                                             MATE_MIXER_CLIENT_STREAM_NO_FLAGS,
+                                                             G_PARAM_READABLE |
+                                                             G_PARAM_STATIC_STRINGS));
+
+    g_object_interface_install_property (iface,
+                                         g_param_spec_enum ("role",
+                                                            "Role",
+                                                            "Role of the client stream",
+                                                            MATE_MIXER_TYPE_CLIENT_STREAM_ROLE,
+                                                            MATE_MIXER_CLIENT_STREAM_ROLE_NONE,
+                                                            G_PARAM_READABLE |
+                                                            G_PARAM_STATIC_STRINGS));
+
     g_object_interface_install_property (iface,
                                          g_param_spec_object ("parent",
                                                               "Parent",
@@ -80,12 +100,52 @@ mate_mixer_client_stream_default_init (MateMixerClientStreamInterface *iface)
 }
 
 /**
+ * mate_mixer_client_stream_get_flags:
+ * @client: a #MateMixerClientStream
+ *
+ */
+MateMixerClientStreamFlags
+mate_mixer_client_stream_get_flags (MateMixerClientStream *client)
+{
+    MateMixerClientStreamInterface *iface;
+
+    g_return_val_if_fail (MATE_MIXER_IS_CLIENT_STREAM (client), MATE_MIXER_CLIENT_STREAM_NO_FLAGS);
+
+    iface = MATE_MIXER_CLIENT_STREAM_GET_INTERFACE (client);
+
+    if (iface->get_flags)
+        return iface->get_flags (client);
+
+    return MATE_MIXER_CLIENT_STREAM_NO_FLAGS;
+}
+
+/**
+ * mate_mixer_client_stream_get_role:
+ * @client: a #MateMixerClientStream
+ *
+ */
+MateMixerClientStreamRole
+mate_mixer_client_stream_get_role (MateMixerClientStream *client)
+{
+    MateMixerClientStreamInterface *iface;
+
+    g_return_val_if_fail (MATE_MIXER_IS_CLIENT_STREAM (client), MATE_MIXER_CLIENT_STREAM_ROLE_NONE);
+
+    iface = MATE_MIXER_CLIENT_STREAM_GET_INTERFACE (client);
+
+    if (iface->get_role)
+        return iface->get_role (client);
+
+    return MATE_MIXER_CLIENT_STREAM_ROLE_NONE;
+}
+
+/**
  * mate_mixer_client_stream_get_parent:
  * @client: a #MateMixerClientStream
  *
  * Gets the parent stream of the client stream.
  *
- * Returns: a #MateMixerStream or %NULL on failure.
+ * Returns: a #MateMixerStream or %NULL if the parent stream is not known.
  */
 MateMixerStream *
 mate_mixer_client_stream_get_parent (MateMixerClientStream *client)

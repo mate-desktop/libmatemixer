@@ -68,21 +68,29 @@ struct _MateMixerControlClass
     GObjectClass parent_class;
 
     /*< private >*/
-    void (*device_added)        (MateMixerControl *control,
-                                 const gchar      *name);
-    void (*device_changed)      (MateMixerControl *control,
-                                 const gchar      *name);
-    void (*device_removed)      (MateMixerControl *control,
-                                 const gchar      *name);
-    void (*stream_added)        (MateMixerControl *control,
-                                 const gchar      *name);
-    void (*stream_changed)      (MateMixerControl *control,
-                                 const gchar      *name);
-    void (*stream_removed)      (MateMixerControl *control,
-                                 const gchar      *name);
+    /* Signals */
+    void (*device_added)            (MateMixerControl *control,
+                                     const gchar      *name);
+    void (*device_changed)          (MateMixerControl *control,
+                                     const gchar      *name);
+    void (*device_removed)          (MateMixerControl *control,
+                                     const gchar      *name);
+    void (*stream_added)            (MateMixerControl *control,
+                                     const gchar      *name);
+    void (*stream_changed)          (MateMixerControl *control,
+                                     const gchar      *name);
+    void (*stream_removed)          (MateMixerControl *control,
+                                     const gchar      *name);
+    void (*cached_stream_added)     (MateMixerControl *control,
+                                     const gchar      *name);
+    void (*cached_stream_changed)   (MateMixerControl *control,
+                                     const gchar      *name);
+    void (*cached_stream_removed)   (MateMixerControl *control,
+                                     const gchar      *name);
 };
 
 GType                 mate_mixer_control_get_type                  (void) G_GNUC_CONST;
+
 MateMixerControl *    mate_mixer_control_new                       (void);
 
 gboolean              mate_mixer_control_set_backend_type          (MateMixerControl     *control,
@@ -97,6 +105,7 @@ gboolean              mate_mixer_control_set_app_icon              (MateMixerCon
                                                                     const gchar          *app_icon);
 gboolean              mate_mixer_control_set_server_address        (MateMixerControl     *control,
                                                                     const gchar          *address);
+
 gboolean              mate_mixer_control_open                      (MateMixerControl     *control);
 void                  mate_mixer_control_close                     (MateMixerControl     *control);
 
@@ -106,9 +115,12 @@ MateMixerDevice *     mate_mixer_control_get_device                (MateMixerCon
                                                                     const gchar          *name);
 MateMixerStream *     mate_mixer_control_get_stream                (MateMixerControl     *control,
                                                                     const gchar          *name);
+MateMixerStream *     mate_mixer_control_get_cached_stream         (MateMixerControl     *control,
+                                                                    const gchar          *name);
 
 const GList *         mate_mixer_control_list_devices              (MateMixerControl     *control);
 const GList *         mate_mixer_control_list_streams              (MateMixerControl     *control);
+const GList *         mate_mixer_control_list_cached_streams       (MateMixerControl     *control);
 
 MateMixerStream  *    mate_mixer_control_get_default_input_stream  (MateMixerControl     *control);
 gboolean              mate_mixer_control_set_default_input_stream  (MateMixerControl     *control,

@@ -55,7 +55,9 @@ EXTRA_HFILES=
 IGNORE_HFILES=                                          \
         matemixer-backend.h                             \
         matemixer-backend-module.h                      \
+        matemixer-device-profile-private.h              \
         matemixer-enum-types.h                          \
+        matemixer-port-private.h                        \
         matemixer-private.h
 
 # Images to copy into HTML directory.

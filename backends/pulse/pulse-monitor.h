@@ -63,20 +63,17 @@ GType         pulse_monitor_get_type     (void) G_GNUC_CONST;
 
 PulseMonitor *pulse_monitor_new          (pa_context   *context,
                                           pa_proplist  *proplist,
+                                          const gchar  *name,
                                           guint32       index_source,
                                           guint32       index_sink_input);
 
-gboolean      pulse_monitor_enable       (PulseMonitor *monitor);
-void          pulse_monitor_disable      (PulseMonitor *monitor);
-gboolean      pulse_monitor_is_enabled   (PulseMonitor *monitor);
+gboolean      pulse_monitor_get_enabled  (PulseMonitor *monitor);
+gboolean      pulse_monitor_set_enabled  (PulseMonitor *monitor,
+                                          gboolean      enabled);
 
 const gchar * pulse_monitor_get_name     (PulseMonitor *monitor);
 gboolean      pulse_monitor_set_name     (PulseMonitor *monitor,
                                           const gchar  *name);
-
-gboolean      pulse_monitor_update_index (PulseMonitor *monitor,
-                                          guint32       index_source,
-                                          guint32       index_sink_input);
 
 G_END_DECLS
 

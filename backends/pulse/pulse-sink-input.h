@@ -61,7 +61,7 @@ PulseStream *pulse_sink_input_new        (PulseConnection          *connection,
                                           const pa_sink_input_info *info,
                                           PulseStream              *parent);
 
-gboolean     pulse_sink_input_update     (PulseStream              *stream,
+gboolean     pulse_sink_input_update     (PulseStream              *pstream,
                                           const pa_sink_input_info *info,
                                           PulseStream              *parent);
 

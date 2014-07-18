@@ -15,13 +15,13 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MATEMIXER_NULL_BACKEND_H
-#define MATEMIXER_NULL_BACKEND_H
+#ifndef NULL_BACKEND_H
+#define NULL_BACKEND_H
 
 #include <glib.h>
 #include <glib-object.h>
 
-#include <libmatemixer/matemixer-backend.h>
+#include <libmatemixer/matemixer-backend-module.h>
 
 #define NULL_TYPE_BACKEND                       \
         (null_backend_get_type ())
@@ -55,4 +55,4 @@ GType                       null_backend_get_type   (void) G_GNUC_CONST;
 void                        backend_module_init     (GTypeModule *module);
 const MateMixerBackendInfo *backend_module_get_info (void);
 
-#endif /* MATEMIXER_NULL_H */
+#endif /* NULL_BACKEND_H */

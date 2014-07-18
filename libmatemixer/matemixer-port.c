@@ -21,6 +21,7 @@
 #include "matemixer-enums.h"
 #include "matemixer-enum-types.h"
 #include "matemixer-port.h"
+#include "matemixer-port-private.h"
 
 /**
  * SECTION:matemixer-port
@@ -32,7 +33,7 @@ struct _MateMixerPortPrivate
     gchar              *name;
     gchar              *description;
     gchar              *icon;
-    gulong              priority;
+    guint               priority;
     MateMixerPortFlags  flags;
 };
 
@@ -102,15 +103,15 @@ mate_mixer_port_class_init (MateMixerPortClass *klass)
                              G_PARAM_STATIC_STRINGS);
 
     properties[PROP_PRIORITY] =
-        g_param_spec_ulong ("priority",
-                            "Priority",
-                            "Priority of the port",
-                            0,
-                            G_MAXULONG,
-                            0,
-                            G_PARAM_CONSTRUCT_ONLY |
-                            G_PARAM_READWRITE |
-                            G_PARAM_STATIC_STRINGS);
+        g_param_spec_uint ("priority",
+                           "Priority",
+                           "Priority of the port",
+                           0,
+                           G_MAXUINT,
+                           0,
+                           G_PARAM_CONSTRUCT_ONLY |
+                           G_PARAM_READWRITE |
+                           G_PARAM_STATIC_STRINGS);
 
     properties[PROP_FLAGS] =
         g_param_spec_flags ("flags",
@@ -148,7 +149,7 @@ mate_mixer_port_get_property (GObject    *object,
         g_value_set_string (value, port->priv->icon);
         break;
     case PROP_PRIORITY:
-        g_value_set_ulong (value, port->priv->priority);
+        g_value_set_uint (value, port->priv->priority);
         break;
     case PROP_FLAGS:
         g_value_set_flags (value, port->priv->flags);
@@ -183,7 +184,7 @@ mate_mixer_port_set_property (GObject      *object,
         port->priv->icon = g_strdup (g_value_get_string (value));
         break;
     case PROP_PRIORITY:
-        port->priv->priority = g_value_get_ulong (value);
+        port->priv->priority = g_value_get_uint (value);
         break;
     case PROP_FLAGS:
         port->priv->flags = g_value_get_flags (value);
@@ -216,12 +217,72 @@ mate_mixer_port_finalize (GObject *object)
     G_OBJECT_CLASS (mate_mixer_port_parent_class)->finalize (object);
 }
 
+/**
+ * mate_mixer_port_get_name:
+ * @port: a #MateMixerPort
+ */
+const gchar *
+mate_mixer_port_get_name (MateMixerPort *port)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_PORT (port), NULL);
+
+    return port->priv->name;
+}
+
+/**
+ * mate_mixer_port_get_description:
+ * @port: a #MateMixerPort
+ */
+const gchar *
+mate_mixer_port_get_description (MateMixerPort *port)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_PORT (port), NULL);
+
+    return port->priv->description;
+}
+
+/**
+ * mate_mixer_port_get_icon:
+ * @port: a #MateMixerPort
+ */
+const gchar *
+mate_mixer_port_get_icon (MateMixerPort *port)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_PORT (port), NULL);
+
+    return port->priv->icon;
+}
+
+/**
+ * mate_mixer_port_get_priority:
+ * @port: a #MateMixerPort
+ */
+guint
+mate_mixer_port_get_priority (MateMixerPort *port)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_PORT (port), 0);
+
+    return port->priv->priority;
+}
+
+/**
+ * mate_mixer_port_get_flags:
+ * @port: a #MateMixerPort
+ */
+MateMixerPortFlags
+mate_mixer_port_get_flags (MateMixerPort *port)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_PORT (port), MATE_MIXER_PORT_NO_FLAGS);
+
+    return port->priv->flags;
+}
+
 MateMixerPort *
-mate_mixer_port_new (const gchar        *name,
-                     const gchar        *description,
-                     const gchar        *icon,
-                     gulong              priority,
-                     MateMixerPortFlags  flags)
+_mate_mixer_port_new (const gchar       *name,
+                      const gchar       *description,
+                      const gchar       *icon,
+                      guint              priority,
+                      MateMixerPortFlags flags)
 {
     return g_object_new (MATE_MIXER_TYPE_PORT,
                          "name", name,
@@ -232,42 +293,66 @@ mate_mixer_port_new (const gchar        *name,
                          NULL);
 }
 
-const gchar *
-mate_mixer_port_get_name (MateMixerPort *port)
+gboolean
+_mate_mixer_port_update_description (MateMixerPort *port, const gchar *description)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_PORT (port), NULL);
+    g_return_val_if_fail (MATE_MIXER_IS_PORT (port), FALSE);
 
-    return port->priv->name;
+    if (g_strcmp0 (port->priv->description, description) != 0) {
+        g_free (port->priv->description);
+
+        port->priv->description = g_strdup (description);
+
+        g_object_notify_by_pspec (G_OBJECT (port), properties[PROP_DESCRIPTION]);
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
-const gchar *
-mate_mixer_port_get_description (MateMixerPort *port)
+gboolean
+_mate_mixer_port_update_icon (MateMixerPort *port, const gchar *icon)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_PORT (port), NULL);
+    g_return_val_if_fail (MATE_MIXER_IS_PORT (port), FALSE);
 
-    return port->priv->description;
+    if (g_strcmp0 (port->priv->icon, icon) != 0) {
+        g_free (port->priv->icon);
+
+        port->priv->icon = g_strdup (icon);
+
+        g_object_notify_by_pspec (G_OBJECT (port), properties[PROP_ICON]);
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
-const gchar *
-mate_mixer_port_get_icon (MateMixerPort *port)
+gboolean
+_mate_mixer_port_update_priority (MateMixerPort *port, guint priority)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_PORT (port), NULL);
+    g_return_val_if_fail (MATE_MIXER_IS_PORT (port), FALSE);
 
-    return port->priv->icon;
+    if (port->priv->priority != priority) {
+        port->priv->priority = priority;
+
+        g_object_notify_by_pspec (G_OBJECT (port), properties[PROP_PRIORITY]);
+        return TRUE;
+    }
+
+    return FALSE;
 }
 
-gulong
-mate_mixer_port_get_priority (MateMixerPort *port)
+gboolean
+_mate_mixer_port_update_flags (MateMixerPort *port, MateMixerPortFlags flags)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_PORT (port), 0);
+    g_return_val_if_fail (MATE_MIXER_IS_PORT (port), FALSE);
 
-    return port->priv->priority;
-}
+    if (port->priv->flags != flags) {
+        port->priv->flags = flags;
 
-MateMixerPortFlags
-mate_mixer_port_get_flags (MateMixerPort *port)
-{
-    g_return_val_if_fail (MATE_MIXER_IS_PORT (port), MATE_MIXER_PORT_NO_FLAGS);
+        g_object_notify_by_pspec (G_OBJECT (port), properties[PROP_FLAGS]);
+        return TRUE;
+    }
 
-    return port->priv->flags;
+    return FALSE;
 }

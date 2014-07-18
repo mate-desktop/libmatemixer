@@ -53,19 +53,13 @@ struct _MateMixerDeviceProfileClass
     GObjectClass parent_class;
 };
 
-GType                   mate_mixer_device_profile_get_type               (void) G_GNUC_CONST;
+GType        mate_mixer_device_profile_get_type               (void) G_GNUC_CONST;
 
-MateMixerDeviceProfile *mate_mixer_device_profile_new                    (const gchar            *name,
-                                                                          const gchar            *description,
-                                                                          guint                   priority,
-                                                                          guint                   input_streams,
-                                                                          guint                   output_streams);
-
-const gchar *           mate_mixer_device_profile_get_name               (MateMixerDeviceProfile *profile);
-const gchar *           mate_mixer_device_profile_get_description        (MateMixerDeviceProfile *profile);
-guint                   mate_mixer_device_profile_get_priority           (MateMixerDeviceProfile *profile);
-guint                   mate_mixer_device_profile_get_num_input_streams  (MateMixerDeviceProfile *profile);
-guint                   mate_mixer_device_profile_get_num_output_streams (MateMixerDeviceProfile *profile);
+const gchar *mate_mixer_device_profile_get_name               (MateMixerDeviceProfile *profile);
+const gchar *mate_mixer_device_profile_get_description        (MateMixerDeviceProfile *profile);
+guint        mate_mixer_device_profile_get_priority           (MateMixerDeviceProfile *profile);
+guint        mate_mixer_device_profile_get_num_input_streams  (MateMixerDeviceProfile *profile);
+guint        mate_mixer_device_profile_get_num_output_streams (MateMixerDeviceProfile *profile);
 
 G_END_DECLS
 
