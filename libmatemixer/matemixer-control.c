@@ -750,14 +750,14 @@ mate_mixer_control_open (MateMixerControl *control)
             module = NULL;
             modules = modules->next;
         }
+        if (module == NULL) {
+            /* The selected backend is not available */
+            change_state (control, MATE_MIXER_STATE_FAILED);
+            return FALSE;
+        }
     } else {
         /* The highest priority module is on the top of the list */
         module = MATE_MIXER_BACKEND_MODULE (modules->data);
-    }
-    if (module == NULL) {
-        /* Most likely the selected backend is not installed */
-        change_state (control, MATE_MIXER_STATE_FAILED);
-        return FALSE;
     }
 
     if (info == NULL)
@@ -767,6 +767,8 @@ mate_mixer_control_open (MateMixerControl *control)
     control->priv->backend = g_object_new (info->g_type, NULL);
 
     mate_mixer_backend_set_data (control->priv->backend, &control->priv->backend_data);
+
+    g_debug ("Trying to open backend %s", info->name);
 
     /* This transitional state is always present, it will change to MATE_MIXER_STATE_READY
      * or MATE_MIXER_STATE_FAILED either instantly or asynchronously */
@@ -1298,9 +1300,10 @@ on_backend_default_output_notify (MateMixerBackend *backend,
 static gboolean
 try_next_backend (MateMixerControl *control)
 {
-    const GList            *modules;
-    MateMixerBackendModule *module = NULL;
-    MateMixerState          state;
+    MateMixerBackendModule     *module = NULL;
+    MateMixerState              state;
+    const GList                *modules;
+    const MateMixerBackendInfo *info = NULL;
 
     modules = mate_mixer_get_modules ();
 
@@ -1322,11 +1325,14 @@ try_next_backend (MateMixerControl *control)
         return FALSE;
     }
 
+    info = mate_mixer_backend_module_get_info (module);
+
     control->priv->module  = g_object_ref (module);
-    control->priv->backend =
-        g_object_new (mate_mixer_backend_module_get_info (module)->g_type, NULL);
+    control->priv->backend = g_object_new (info->g_type, NULL);
 
     mate_mixer_backend_set_data (control->priv->backend, &control->priv->backend_data);
+
+    g_debug ("Trying to open backend %s", info->name);
 
     /* Try to open this backend and in case of failure keep trying until we find
      * one that works or reach the end of the list */
