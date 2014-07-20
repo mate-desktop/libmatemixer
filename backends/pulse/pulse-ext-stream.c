@@ -30,8 +30,6 @@
 #include "pulse-client-stream.h"
 #include "pulse-ext-stream.h"
 #include "pulse-helpers.h"
-#include "pulse-sink.h"
-#include "pulse-source.h"
 #include "pulse-stream.h"
 
 static void pulse_ext_stream_class_init (PulseExtStreamClass *klass);
@@ -242,7 +240,6 @@ pulse_ext_stream_set_volume (PulseStream *pstream, pa_cvolume *cvolume)
 static gboolean
 pulse_ext_stream_set_parent (PulseClientStream *pclient, PulseStream *parent)
 {
-    MateMixerStreamFlags       flags;
     PulseStream               *pstream;
     const pa_channel_map      *map;
     const pa_cvolume          *cvolume;
@@ -250,19 +247,6 @@ pulse_ext_stream_set_parent (PulseClientStream *pclient, PulseStream *parent)
 
     g_return_val_if_fail (PULSE_IS_EXT_STREAM (pclient), FALSE);
     g_return_val_if_fail (PULSE_IS_STREAM (parent), FALSE);
-
-    flags = mate_mixer_stream_get_flags (MATE_MIXER_STREAM (pclient));
-
-    /* Validate the parent stream */
-    if (flags & MATE_MIXER_STREAM_INPUT && !PULSE_IS_SOURCE (parent)) {
-        g_warning ("Could not change stream parent to %s: not a parent input stream",
-                   mate_mixer_stream_get_name (MATE_MIXER_STREAM (parent)));
-        return FALSE;
-    } else if (!PULSE_IS_SINK (parent)) {
-        g_warning ("Could not change stream parent to %s: not a parent output stream",
-                   mate_mixer_stream_get_name (MATE_MIXER_STREAM (parent)));
-        return FALSE;
-    }
 
     pstream = PULSE_STREAM (pclient);
 

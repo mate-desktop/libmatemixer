@@ -26,6 +26,8 @@
 #include <pulse/pulseaudio.h>
 
 #include "pulse-client-stream.h"
+#include "pulse-sink.h"
+#include "pulse-source.h"
 #include "pulse-stream.h"
 
 struct _PulseClientStreamPrivate
@@ -335,6 +337,7 @@ pulse_client_stream_get_parent (MateMixerClientStream *client)
 static gboolean
 pulse_client_stream_set_parent (MateMixerClientStream *client, MateMixerStream *parent)
 {
+    MateMixerStreamFlags    flags;
     PulseClientStream      *pclient;
     PulseClientStreamClass *klass;
 
@@ -347,6 +350,20 @@ pulse_client_stream_set_parent (MateMixerClientStream *client, MateMixerStream *
     if (pclient->priv->parent == parent)
         return TRUE;
 
+    flags = mate_mixer_stream_get_flags (MATE_MIXER_STREAM (pclient));
+
+    /* Validate the parent stream */
+    if (flags & MATE_MIXER_STREAM_INPUT && !PULSE_IS_SOURCE (parent)) {
+        g_warning ("Could not change stream parent to %s: not a parent input stream",
+                   mate_mixer_stream_get_name (MATE_MIXER_STREAM (parent)));
+        return FALSE;
+    } else if (flags & MATE_MIXER_STREAM_OUTPUT && !PULSE_IS_SINK (parent)) {
+        g_warning ("Could not change stream parent to %s: not a parent output stream",
+                   mate_mixer_stream_get_name (MATE_MIXER_STREAM (parent)));
+        return FALSE;
+    }
+
+    /* Set the parent */
     if (klass->set_parent (pclient, PULSE_STREAM (parent)) == FALSE)
         return FALSE;
 

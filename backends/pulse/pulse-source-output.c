@@ -243,12 +243,6 @@ pulse_source_output_set_parent (PulseClientStream *pclient, PulseStream *parent)
 
     g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (pclient), FALSE);
 
-    if (!PULSE_IS_SOURCE (parent)) {
-        g_warning ("Could not change stream parent to %s: not a parent input stream",
-                   mate_mixer_stream_get_name (MATE_MIXER_STREAM (parent)));
-        return FALSE;
-    }
-
     pstream = PULSE_STREAM (pclient);
 
     return pulse_connection_move_sink_input (pulse_stream_get_connection (pstream),
