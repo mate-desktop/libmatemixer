@@ -187,16 +187,10 @@ pulse_ext_stream_set_mute (PulseStream *pstream, gboolean mute)
     info.mute = mute;
 
     map = pulse_stream_get_channel_map (pstream);
-    if (map != NULL)
-        info.channel_map = *map;
-    else
-        pa_channel_map_init (&info.channel_map);
+    info.channel_map = *map;
 
     cvolume = pulse_stream_get_cvolume (pstream);
-    if (cvolume != NULL)
-        info.volume = *cvolume;
-    else
-        pa_cvolume_init (&info.volume);
+    info.volume = *cvolume;
 
     parent = mate_mixer_client_stream_get_parent (MATE_MIXER_CLIENT_STREAM (pstream));
     if (parent != NULL)
@@ -221,10 +215,7 @@ pulse_ext_stream_set_volume (PulseStream *pstream, pa_cvolume *cvolume)
     info.mute = mate_mixer_stream_get_mute (MATE_MIXER_STREAM (pstream));
 
     map = pulse_stream_get_channel_map (pstream);
-    if (map != NULL)
-        info.channel_map = *map;
-    else
-        pa_channel_map_init (&info.channel_map);
+    info.channel_map = *map;
 
     parent = mate_mixer_client_stream_get_parent (MATE_MIXER_CLIENT_STREAM (pstream));
     if (parent != NULL)
@@ -254,16 +245,10 @@ pulse_ext_stream_set_parent (PulseClientStream *pclient, PulseStream *parent)
     info.mute = mate_mixer_stream_get_mute (MATE_MIXER_STREAM (pstream));
 
     map = pulse_stream_get_channel_map (pstream);
-    if (map != NULL)
-        info.channel_map = *map;
-    else
-        pa_channel_map_init (&info.channel_map);
+    info.channel_map = *map;
 
     cvolume = pulse_stream_get_cvolume (pstream);
-    if (cvolume != NULL)
-        info.volume = *cvolume;
-    else
-        pa_cvolume_init (&info.volume);
+    info.volume = *cvolume;
 
     info.device = mate_mixer_stream_get_name (MATE_MIXER_STREAM (parent));
 
