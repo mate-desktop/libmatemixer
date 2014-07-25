@@ -337,7 +337,7 @@ mate_mixer_stream_control_get_balance (MateMixerStreamControl *ctl)
                   "balance", &balance,
                   NULL);
 
-    return 0.0f;
+    return balance;
 }
 
 gboolean
