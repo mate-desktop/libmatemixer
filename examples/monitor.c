@@ -89,7 +89,7 @@ create_role_string (MateMixerClientStreamRole role)
 }
 
 static gchar *
-create_volume_bar (MateMixerStream *stream, double *percent)
+create_volume_bar (MateMixerStreamControl *ctl, double *percent)
 {
     GString *string;
     gint64   volume;
@@ -100,9 +100,9 @@ create_volume_bar (MateMixerStream *stream, double *percent)
     int      length = 30;
     int      stars;
 
-    volume     = mate_mixer_stream_get_volume (stream);
-    volume_min = mate_mixer_stream_get_min_volume (stream);
-    volume_max = mate_mixer_stream_get_normal_volume (stream);
+    volume     = mate_mixer_stream_control_get_volume (ctl);
+    volume_min = mate_mixer_stream_control_get_min_volume (ctl);
+    volume_max = mate_mixer_stream_control_get_normal_volume (ctl);
 
     string = g_string_new ("[");
 
@@ -192,24 +192,21 @@ print_streams (void)
     streams = mate_mixer_control_list_streams (control);
 
     while (streams) {
-        MateMixerStream       *stream = MATE_MIXER_STREAM (streams->data);
-        MateMixerClientStream *client = NULL;
-        gchar                 *volume_bar;
-        gdouble                volume;
+        MateMixerStream        *stream = MATE_MIXER_STREAM (streams->data);
+        MateMixerStreamControl *ctl;
+        MateMixerClientStream  *client = NULL;
+        gchar                  *volume_bar;
+        gdouble                 volume;
 
         if (mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_CLIENT) {
             /* The application-specific details are accessible through the client
              * interface, which all client streams implement */
             client = MATE_MIXER_CLIENT_STREAM (stream);
-
-            /* Ignore event streams */
-            if (mate_mixer_client_stream_get_role (client) == MATE_MIXER_CLIENT_STREAM_ROLE_EVENT) {
-                streams = streams->next;
-                continue;
-            }
         }
 
-        volume_bar = create_volume_bar (stream, &volume);
+        ctl = mate_mixer_stream_get_default_control (stream);
+
+        volume_bar = create_volume_bar (ctl, &volume);
 
         g_print ("Stream %s\n"
                  "       |-| Description : %s\n"
@@ -222,10 +219,10 @@ print_streams (void)
                  mate_mixer_stream_get_description (stream),
                  volume_bar,
                  volume,
-                 mate_mixer_stream_get_mute (stream) ? "Yes" : "No",
-                 mate_mixer_stream_get_num_channels (stream),
-                 mate_mixer_stream_get_balance (stream),
-                 mate_mixer_stream_get_fade (stream));
+                 mate_mixer_stream_control_get_mute (ctl) ? "Yes" : "No",
+                 mate_mixer_stream_control_get_num_channels (ctl),
+                 mate_mixer_stream_control_get_balance (ctl),
+                 mate_mixer_stream_control_get_fade (ctl));
 
         if (client != NULL) {
             MateMixerClientStreamFlags client_flags;
@@ -275,17 +272,20 @@ print_cached_streams (void)
 
     while (streams) {
         MateMixerStream           *stream = MATE_MIXER_STREAM (streams->data);
+        MateMixerStreamControl    *ctl;
         MateMixerClientStream     *client;
         MateMixerClientStreamFlags client_flags;
         MateMixerClientStreamRole  client_role;
         gchar                     *volume_bar;
         gdouble                    volume;
 
-        client = MATE_MIXER_CLIENT_STREAM (stream);
+        ctl = mate_mixer_stream_get_default_control (stream);
+
+        client       = MATE_MIXER_CLIENT_STREAM (stream);
         client_flags = mate_mixer_client_stream_get_flags (client);
         client_role  = mate_mixer_client_stream_get_role (client);
 
-        volume_bar = create_volume_bar (stream, &volume);
+        volume_bar = create_volume_bar (ctl, &volume);
 
         g_print ("Cached stream %s\n"
                  "       |-| Role        : %s\n"
@@ -298,10 +298,10 @@ print_cached_streams (void)
                  create_role_string (client_role),
                  volume_bar,
                  volume,
-                 mate_mixer_stream_get_mute (stream) ? "Yes" : "No",
-                 mate_mixer_stream_get_num_channels (stream),
-                 mate_mixer_stream_get_balance (stream),
-                 mate_mixer_stream_get_fade (stream));
+                 mate_mixer_stream_control_get_mute (ctl) ? "Yes" : "No",
+                 mate_mixer_stream_control_get_num_channels (ctl),
+                 mate_mixer_stream_control_get_balance (ctl),
+                 mate_mixer_stream_control_get_fade (ctl));
 
         if (client_flags & MATE_MIXER_CLIENT_STREAM_APPLICATION) {
             gchar *app = create_app_string (mate_mixer_client_stream_get_app_name (client),
@@ -394,7 +394,7 @@ int main (int argc, char *argv[])
     GError         *error = NULL;
 
     GOptionEntry    entries[] = {
-        { "backend", 'b', 0, G_OPTION_ARG_STRING, &backend, "Sound system to use (pulseaudio, null)", NULL },
+        { "backend", 'b', 0, G_OPTION_ARG_STRING, &backend, "Sound system to use (pulseaudio, oss, oss4, null)", NULL },
         { "server",  's', 0, G_OPTION_ARG_STRING, &server,  "Sound server address", NULL },
         { NULL }
     };
@@ -427,6 +427,10 @@ int main (int argc, char *argv[])
     if (backend) {
         if (!strcmp (backend, "pulseaudio"))
             mate_mixer_control_set_backend_type (control, MATE_MIXER_BACKEND_PULSEAUDIO);
+        else if (!strcmp (backend, "oss"))
+            mate_mixer_control_set_backend_type (control, MATE_MIXER_BACKEND_OSS);
+        else if (!strcmp (backend, "oss4"))
+            mate_mixer_control_set_backend_type (control, MATE_MIXER_BACKEND_OSS4);
         else if (!strcmp (backend, "null"))
             mate_mixer_control_set_backend_type (control, MATE_MIXER_BACKEND_NULL);
         else

@@ -67,6 +67,7 @@ PKG_CHECK_MODULES(GLIB, [
         glib-2.0 >= $GLIB_REQUIRED_VERSION
         gobject-2.0 >= $GLIB_REQUIRED_VERSION
         gmodule-2.0 >= $GLIB_REQUIRED_VERSION
+        gio-2.0 >= $GLIB_REQUIRED_VERSION
 ])
 
 GTK_DOC_CHECK([1.10], [--flavour no-tmpl])
@@ -131,6 +132,7 @@ if test "x$enable_oss" != "xno"; then
   if test "x$ac_cv_header_soundcard_h" = "xyes" -o \
           "x$ac_cv_header_sys_soundcard_h" = "xyes" -o \
           "x$ac_cv_header_machine_soundcard_h" = "xyes"; then
+    AC_CHECK_LIB([ossaudio], [_oss_ioctl], [OSS_LIBS="-lossaudio"])
     have_oss=yes
   else
     have_oss=no
@@ -151,6 +153,7 @@ AM_CONDITIONAL(HAVE_OSS, test "x$have_oss" = "xyes")
 
 AC_SUBST(HAVE_OSS)
 AC_SUBST(OSS_CFLAGS)
+AC_SUBST(OSS_LIBS)
 
 # =======================================================================
 # Compiler warnings

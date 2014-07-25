@@ -176,10 +176,15 @@ mate_mixer_backend_close (MateMixerBackend *backend)
 MateMixerState
 mate_mixer_backend_get_state (MateMixerBackend *backend)
 {
+    MateMixerState state = MATE_MIXER_STATE_UNKNOWN;
+
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), MATE_MIXER_STATE_UNKNOWN);
 
-    /* Implementation required */
-    return MATE_MIXER_BACKEND_GET_INTERFACE (backend)->get_state (backend);
+    g_object_get (G_OBJECT (backend),
+                  "state", &state,
+                  NULL);
+
+    return state;
 }
 
 GList *
@@ -230,16 +235,18 @@ mate_mixer_backend_list_cached_streams (MateMixerBackend *backend)
 MateMixerStream *
 mate_mixer_backend_get_default_input_stream (MateMixerBackend *backend)
 {
-    MateMixerBackendInterface *iface;
+    MateMixerStream *stream = NULL;
 
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), NULL);
 
-    iface = MATE_MIXER_BACKEND_GET_INTERFACE (backend);
+    g_object_get (G_OBJECT (stream),
+                  "default-input", &stream,
+                  NULL);
 
-    if (iface->get_default_input_stream)
-        return iface->get_default_input_stream (backend);
+    if (stream != NULL)
+        g_object_unref (stream);
 
-    return NULL;
+    return stream;
 }
 
 gboolean
@@ -261,16 +268,18 @@ mate_mixer_backend_set_default_input_stream (MateMixerBackend *backend,
 MateMixerStream *
 mate_mixer_backend_get_default_output_stream (MateMixerBackend *backend)
 {
-    MateMixerBackendInterface *iface;
+    MateMixerStream *stream = NULL;
 
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), NULL);
 
-    iface = MATE_MIXER_BACKEND_GET_INTERFACE (backend);
+    g_object_get (G_OBJECT (stream),
+                  "default-output", &stream,
+                  NULL);
 
-    if (iface->get_default_output_stream)
-        return iface->get_default_output_stream (backend);
+    if (stream != NULL)
+        g_object_unref (stream);
 
-    return NULL;
+    return stream;
 }
 
 gboolean

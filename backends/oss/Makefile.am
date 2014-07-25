@@ -11,11 +11,19 @@ libmatemixer_oss_la_CFLAGS =                                    \
         $(OSS_CFLAGS)
 
 libmatemixer_oss_la_SOURCES =                                   \
+        oss-common.h                                            \
         oss-backend.c                                           \
-        oss-backend.h
+        oss-backend.h                                           \
+        oss-device.c                                            \
+        oss-device.h                                            \
+        oss-stream.c                                            \
+        oss-stream.h                                            \
+        oss-stream-control.c                                    \
+        oss-stream-control.h
 
 libmatemixer_oss_la_LIBADD =                                    \
-        $(GLIB_LIBS)
+        $(GLIB_LIBS)                                            \
+        $(OSS_LIBS)
 
 libmatemixer_oss_la_LDFLAGS =                                   \
         -avoid-version                                          \

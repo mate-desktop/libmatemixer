@@ -17,6 +17,7 @@ libmatemixer_include_HEADERS =                                  \
         matemixer-enums.h                                       \
         matemixer-port.h                                        \
         matemixer-stream.h                                      \
+        matemixer-stream-control.h                              \
         matemixer-version.h
 
 libmatemixer_la_CFLAGS = $(GLIB_CFLAGS)
@@ -37,7 +38,8 @@ libmatemixer_la_SOURCES =                                       \
         matemixer-enum-types.h                                  \
         matemixer-port.c                                        \
         matemixer-port-private.h                                \
-        matemixer-stream.c
+        matemixer-stream.c                                      \
+        matemixer-stream-control.c
 
 libmatemixer_la_LIBADD = $(GLIB_LIBS)
 

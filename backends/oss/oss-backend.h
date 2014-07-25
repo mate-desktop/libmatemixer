@@ -36,12 +36,16 @@
 #define OSS_BACKEND_GET_CLASS(o)                \
         (G_TYPE_INSTANCE_GET_CLASS ((o), OSS_TYPE_BACKEND, OssBackendClass))
 
-typedef struct _OssBackend       OssBackend;
-typedef struct _OssBackendClass  OssBackendClass;
+typedef struct _OssBackend         OssBackend;
+typedef struct _OssBackendClass    OssBackendClass;
+typedef struct _OssBackendPrivate  OssBackendPrivate;
 
 struct _OssBackend
 {
     GObject parent;
+
+    /*< private >*/
+    OssBackendPrivate *priv;
 };
 
 struct _OssBackendClass
