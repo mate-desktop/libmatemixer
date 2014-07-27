@@ -155,6 +155,40 @@ AC_SUBST(HAVE_OSS)
 AC_SUBST(OSS_CFLAGS)
 AC_SUBST(OSS_LIBS)
 
+# -----------------------------------------------------------------------
+# OSS4
+# -----------------------------------------------------------------------
+AC_ARG_ENABLE([oss4],
+              AS_HELP_STRING([--enable-oss4],
+                             [Enable OSS4 backend module @<:@default=no@:>@]),
+              enable_oss4=$enableval, enable_oss4=no)
+
+if test "x$enable_oss4" != "xno"; then
+  AC_CHECK_HEADERS([soundcard.h sys/soundcard.h machine/soundcard.h])
+  if test "x$ac_cv_header_soundcard_h" = "xyes" -o \
+          "x$ac_cv_header_sys_soundcard_h" = "xyes" -o \
+          "x$ac_cv_header_machine_soundcard_h" = "xyes"; then
+    have_oss4=yes
+  else
+    have_oss4=no
+  fi
+
+  if test "x$enable_oss4" = "xyes" -a "x$have_oss4" = "xno"; then
+    AC_MSG_ERROR([OSS4 support explicitly requested but dependencies not found])
+  fi
+
+  if test "x$have_oss4" = "xyes" ; then
+    AC_DEFINE(HAVE_OSS4, [], [Define if we have OSS support])
+  fi
+else
+  have_oss4=no
+fi
+
+AM_CONDITIONAL(HAVE_OSS4, test "x$have_oss4" = "xyes")
+
+AC_SUBST(HAVE_OSS4)
+AC_SUBST(OSS4_CFLAGS)
+
 # =======================================================================
 # Compiler warnings
 # =======================================================================
@@ -207,6 +241,7 @@ libmatemixer/Makefile
 backends/Makefile
 backends/null/Makefile
 backends/oss/Makefile
+backends/oss4/Makefile
 backends/pulse/Makefile
 data/Makefile
 data/libmatemixer.pc
@@ -232,5 +267,6 @@ echo "
         Build Null module:           $have_null
         Build PulseAudio module:     $have_pulseaudio
         Build OSS module:            $have_oss
+        Build OSS4 module:           $have_oss4
 
 "

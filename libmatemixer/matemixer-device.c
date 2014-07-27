@@ -38,7 +38,8 @@ mate_mixer_device_default_init (MateMixerDeviceInterface *iface)
                                                               "Name",
                                                               "Name of the device",
                                                               NULL,
-                                                              G_PARAM_READABLE |
+                                                              G_PARAM_READWRITE |
+                                                              G_PARAM_CONSTRUCT_ONLY |
                                                               G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
@@ -46,7 +47,8 @@ mate_mixer_device_default_init (MateMixerDeviceInterface *iface)
                                                               "Description",
                                                               "Description of the device",
                                                               NULL,
-                                                              G_PARAM_READABLE |
+                                                              G_PARAM_READWRITE |
+                                                              G_PARAM_CONSTRUCT_ONLY |
                                                               G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
@@ -54,7 +56,8 @@ mate_mixer_device_default_init (MateMixerDeviceInterface *iface)
                                                               "Icon",
                                                               "Name of the sound device icon",
                                                               NULL,
-                                                              G_PARAM_READABLE |
+                                                              G_PARAM_READWRITE |
+                                                              G_PARAM_CONSTRUCT_ONLY |
                                                               G_PARAM_STATIC_STRINGS));
 
     g_object_interface_install_property (iface,
