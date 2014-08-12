@@ -15,24 +15,17 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef OSS4_COMMON_H
-#define OSS4_COMMON_H
+#ifndef MATEMIXER_SWITCH_PRIVATE_H
+#define MATEMIXER_SWITCH_PRIVATE_H
 
-#include "config.h"
+#include <glib.h>
+#include "matemixer-types.h"
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/ioctl.h>
-#include <fcntl.h>
+G_BEGIN_DECLS
 
-#ifdef HAVE_SYS_SOUNDCARD_H
-#  include <sys/soundcard.h>
-#elif HAVE_SOUNDCARD_H
-#  include <soundcard.h>
-#elif HAVE_MACHINE_SOUNDCARD_H
-#  include <machine/soundcard.h>
-#else
-#  error "No OSS4 header file present"
-#endif
+void _mate_mixer_switch_set_active_option (MateMixerSwitch       *sw,
+                                           MateMixerSwitchOption *option);
 
-#endif /* OSS4_COMMON_H */
+G_END_DECLS
+
+#endif /* MATEMIXER_SWITCH_PRIVATE_H */

@@ -46,6 +46,9 @@ GType mate_mixer_stream_state_get_type (void) G_GNUC_CONST;
 #define MATE_MIXER_TYPE_STREAM_CONTROL_FLAGS (mate_mixer_stream_control_flags_get_type ())
 GType mate_mixer_stream_control_flags_get_type (void) G_GNUC_CONST;
 
+#define MATE_MIXER_TYPE_STREAM_CONTROL_ROLE (mate_mixer_stream_control_role_get_type ())
+GType mate_mixer_stream_control_role_get_type (void);
+
 #define MATE_MIXER_TYPE_CLIENT_STREAM_FLAGS (mate_mixer_client_stream_flags_get_type ())
 GType mate_mixer_client_stream_flags_get_type (void) G_GNUC_CONST;
 

@@ -22,28 +22,39 @@
 #include <glib-object.h>
 
 #include <libmatemixer/matemixer-enums.h>
-#include <libmatemixer/matemixer-stream.h>
+#include <libmatemixer/matemixer-types.h>
 
 G_BEGIN_DECLS
 
-#define MATE_MIXER_TYPE_CLIENT_STREAM                  \
+#define MATE_MIXER_TYPE_CLIENT_STREAM           \
         (mate_mixer_client_stream_get_type ())
-#define MATE_MIXER_CLIENT_STREAM(o)                    \
+#define MATE_MIXER_CLIENT_STREAM(o)             \
         (G_TYPE_CHECK_INSTANCE_CAST ((o), MATE_MIXER_TYPE_CLIENT_STREAM, MateMixerClientStream))
-#define MATE_MIXER_IS_CLIENT_STREAM(o)                 \
+#define MATE_MIXER_IS_CLIENT_STREAM(o)          \
         (G_TYPE_CHECK_INSTANCE_TYPE ((o), MATE_MIXER_TYPE_CLIENT_STREAM))
-#define MATE_MIXER_CLIENT_STREAM_GET_INTERFACE(o)      \
-        (G_TYPE_INSTANCE_GET_INTERFACE ((o), MATE_MIXER_TYPE_CLIENT_STREAM, MateMixerClientStreamInterface))
+#define MATE_MIXER_CLIENT_STREAM_CLASS(k)       \
+        (G_TYPE_CHECK_CLASS_CAST ((k), MATE_MIXER_TYPE_CLIENT_STREAM, MateMixerClientStreamClass))
+#define MATE_MIXER_IS_CLIENT_STREAM_CLASS(k)    \
+        (G_TYPE_CHECK_CLASS_TYPE ((k), MATE_MIXER_TYPE_CLIENT_STREAM))
+#define MATE_MIXER_CLIENT_STREAM_GET_CLASS(o)   \
+        (G_TYPE_INSTANCE_GET_CLASS ((o), MATE_MIXER_TYPE_CLIENT_STREAM, MateMixerClientStreamClass))
 
-typedef struct _MateMixerClientStream           MateMixerClientStream; /* dummy object */
-typedef struct _MateMixerClientStreamInterface  MateMixerClientStreamInterface;
+typedef struct _MateMixerClientStreamClass    MateMixerClientStreamClass;
+typedef struct _MateMixerClientStreamPrivate  MateMixerClientStreamPrivate;
 
-struct _MateMixerClientStreamInterface
+struct _MateMixerClientStream
+{
+    GObject *parent;
+
+    /*< private >*/
+    MateMixerClientStreamPrivate *priv;
+};
+
+struct _MateMixerClientStreamClass
 {
     GTypeInterface parent_iface;
 
     /*< private >*/
-    /* Virtual table */
     MateMixerClientStreamFlags (*get_flags)       (MateMixerClientStream *client);
     MateMixerClientStreamRole  (*get_role)        (MateMixerClientStream *client);
 

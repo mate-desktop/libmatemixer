@@ -20,6 +20,7 @@
 
 #include <glib.h>
 #include <glib-object.h>
+#include <libmatemixer/matemixer.h>
 
 G_BEGIN_DECLS
 
@@ -42,7 +43,7 @@ typedef struct _OssStreamControlPrivate  OssStreamControlPrivate;
 
 struct _OssStreamControl
 {
-    GObject parent;
+    MateMixerStreamControl parent;
 
     /*< private >*/
     OssStreamControlPrivate *priv;
@@ -50,24 +51,19 @@ struct _OssStreamControl
 
 struct _OssStreamControlClass
 {
-    GObjectClass parent;
+    MateMixerStreamControlClass parent;
 };
 
-GType             oss_stream_control_get_type    (void) G_GNUC_CONST;
+GType             oss_stream_control_get_type (void) G_GNUC_CONST;
 
-OssStreamControl *oss_stream_control_new         (gint         fd,
-                                                  gint         dev_number,
-                                                  const gchar *name,
-                                                  const gchar *description,
-                                                  gboolean     stereo);
+OssStreamControl *oss_stream_control_new      (const gchar               *name,
+                                               const gchar               *label,
+                                               MateMixerStreamControlRole role,
+                                               gint                       fd,
+                                               gint                       devnum,
+                                               gboolean                   stereo);
 
-gboolean          oss_stream_control_update      (OssStreamControl *octl);
-
-gboolean          oss_stream_control_set_port    (OssStreamControl *octl,
-                                                  MateMixerPort    *port);
-
-gboolean          oss_stream_control_set_role    (OssStreamControl *octl,
-                                                  MateMixerStreamControlRole role);
+gboolean          oss_stream_control_update   (OssStreamControl          *control);
 
 G_END_DECLS
 

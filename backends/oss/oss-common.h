@@ -24,6 +24,7 @@
 #include <sys/stat.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #ifdef HAVE_SYS_SOUNDCARD_H
 #  include <sys/soundcard.h>

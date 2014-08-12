@@ -21,6 +21,7 @@
 #include <glib.h>
 #include <glib-object.h>
 
+#include <libmatemixer/matemixer-backend.h>
 #include <libmatemixer/matemixer-backend-module.h>
 
 #define OSS_TYPE_BACKEND                        \
@@ -42,7 +43,7 @@ typedef struct _OssBackendPrivate  OssBackendPrivate;
 
 struct _OssBackend
 {
-    GObject parent;
+    MateMixerBackend parent;
 
     /*< private >*/
     OssBackendPrivate *priv;
@@ -50,7 +51,7 @@ struct _OssBackend
 
 struct _OssBackendClass
 {
-    GObjectClass parent_class;
+    MateMixerBackendClass parent_class;
 };
 
 GType                       oss_backend_get_type   (void) G_GNUC_CONST;

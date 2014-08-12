@@ -21,16 +21,9 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include "matemixer-enums.h"
+#include <libmatemixer/matemixer-enums.h>
 
 G_BEGIN_DECLS
-
-typedef struct {
-    gchar                *name;
-    guint                 priority;
-    GType                 g_type;
-    MateMixerBackendType  backend_type;
-} MateMixerBackendInfo;
 
 #define MATE_MIXER_TYPE_BACKEND_MODULE          \
         (mate_mixer_backend_module_get_type ())
@@ -45,6 +38,7 @@ typedef struct {
 #define MATE_MIXER_BACKEND_MODULE_GET_CLASS(o)  \
         (G_TYPE_INSTANCE_GET_CLASS ((o), MATE_MIXER_TYPE_BACKEND_MODULE, MateMixerBackendModuleClass))
 
+typedef struct _MateMixerBackendInfo           MateMixerBackendInfo;
 typedef struct _MateMixerBackendModule         MateMixerBackendModule;
 typedef struct _MateMixerBackendModuleClass    MateMixerBackendModuleClass;
 typedef struct _MateMixerBackendModulePrivate  MateMixerBackendModulePrivate;
@@ -60,6 +54,14 @@ struct _MateMixerBackendModule
 struct _MateMixerBackendModuleClass
 {
     GTypeModuleClass parent_class;
+};
+
+struct _MateMixerBackendInfo
+{
+    gchar                *name;
+    guint                 priority;
+    GType                 g_type;
+    MateMixerBackendType  backend_type;
 };
 
 GType                       mate_mixer_backend_module_get_type (void) G_GNUC_CONST;

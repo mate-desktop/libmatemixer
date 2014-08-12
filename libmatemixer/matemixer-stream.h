@@ -21,18 +21,10 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include <libmatemixer/matemixer-device.h>
 #include <libmatemixer/matemixer-enums.h>
-#include <libmatemixer/matemixer-port.h>
-#include <libmatemixer/matemixer-stream-control.h>
+#include <libmatemixer/matemixer-types.h>
 
 G_BEGIN_DECLS
-
-#ifdef INFINITY
-#define MATE_MIXER_INFINITY INFINITY
-#else
-#define MATE_MIXER_INFINITY G_MAXDOUBLE
-#endif
 
 #define MATE_MIXER_TYPE_STREAM                  \
         (mate_mixer_stream_get_type ())
@@ -40,69 +32,66 @@ G_BEGIN_DECLS
         (G_TYPE_CHECK_INSTANCE_CAST ((o), MATE_MIXER_TYPE_STREAM, MateMixerStream))
 #define MATE_MIXER_IS_STREAM(o)                 \
         (G_TYPE_CHECK_INSTANCE_TYPE ((o), MATE_MIXER_TYPE_STREAM))
-#define MATE_MIXER_STREAM_GET_INTERFACE(o)      \
-        (G_TYPE_INSTANCE_GET_INTERFACE ((o), MATE_MIXER_TYPE_STREAM, MateMixerStreamInterface))
+#define MATE_MIXER_STREAM_CLASS(k)              \
+        (G_TYPE_CHECK_CLASS_CAST ((k), MATE_MIXER_TYPE_STREAM, MateMixerStreamClass))
+#define MATE_MIXER_IS_STREAM_CLASS(k)           \
+        (G_TYPE_CHECK_CLASS_TYPE ((k), MATE_MIXER_TYPE_STREAM))
+#define MATE_MIXER_STREAM_GET_CLASS(o)          \
+        (G_TYPE_INSTANCE_GET_CLASS ((o), MATE_MIXER_TYPE_STREAM, MateMixerStreamClass))
 
-typedef struct _MateMixerStream           MateMixerStream; /* dummy object */
-typedef struct _MateMixerStreamInterface  MateMixerStreamInterface;
+typedef struct _MateMixerStreamClass    MateMixerStreamClass;
+typedef struct _MateMixerStreamPrivate  MateMixerStreamPrivate;
 
-struct _MateMixerStreamInterface
+struct _MateMixerStream
 {
-    GTypeInterface parent_iface;
+    GObject object;
 
     /*< private >*/
-    const gchar *           (*get_name)            (MateMixerStream *stream);
-    const gchar *           (*get_description)     (MateMixerStream *stream);
+    MateMixerStreamPrivate *priv;
+};
 
+struct _MateMixerStreamClass
+{
+    GObjectClass parent_class;
+
+    /*< private >*/
     MateMixerStreamControl *(*get_control)         (MateMixerStream *stream,
                                                     const gchar     *name);
+
     MateMixerStreamControl *(*get_default_control) (MateMixerStream *stream);
 
-    MateMixerPort *         (*get_port)            (MateMixerStream *stream,
+    MateMixerSwitch        *(*get_switch)          (MateMixerStream *stream,
                                                     const gchar     *name);
 
-    gboolean                (*set_active_port)     (MateMixerStream *stream,
-                                                    MateMixerPort   *port);
-
-    const GList *           (*list_controls)       (MateMixerStream *stream);
-    const GList *           (*list_ports)          (MateMixerStream *stream);
+    GList                  *(*list_controls)       (MateMixerStream *stream);
+    GList                  *(*list_switches)       (MateMixerStream *stream);
 
     gboolean                (*suspend)             (MateMixerStream *stream);
     gboolean                (*resume)              (MateMixerStream *stream);
 
-    gboolean                (*monitor_set_enabled) (MateMixerStream *stream,
-                                                    gboolean         enabled);
-
-    const gchar *           (*monitor_get_name)    (MateMixerStream *stream);
-    gboolean                (*monitor_set_name)    (MateMixerStream *stream,
-                                                    const gchar     *name);
+    gboolean                (*monitor_start)       (MateMixerStream *stream);
+    gboolean                (*monitor_stop)        (MateMixerStream *stream);
 
     /* Signals */
-    void                    (*monitor_value)       (MateMixerStream *stream,
-                                                    gdouble          value);
+    void (*monitor_value) (MateMixerStream *stream, gdouble value);
 };
 
 GType                   mate_mixer_stream_get_type            (void) G_GNUC_CONST;
 
 const gchar *           mate_mixer_stream_get_name            (MateMixerStream *stream);
-const gchar *           mate_mixer_stream_get_description     (MateMixerStream *stream);
 MateMixerDevice *       mate_mixer_stream_get_device          (MateMixerStream *stream);
 MateMixerStreamFlags    mate_mixer_stream_get_flags           (MateMixerStream *stream);
 MateMixerStreamState    mate_mixer_stream_get_state           (MateMixerStream *stream);
 
 MateMixerStreamControl *mate_mixer_stream_get_control         (MateMixerStream *stream,
                                                                const gchar     *name);
-MateMixerStreamControl *mate_mixer_stream_get_default_control (MateMixerStream *stream);
-
-MateMixerPort *         mate_mixer_stream_get_port            (MateMixerStream *stream,
+MateMixerSwitch *       mate_mixer_stream_get_switch          (MateMixerStream *stream,
                                                                const gchar     *name);
 
-MateMixerPort *         mate_mixer_stream_get_active_port     (MateMixerStream *stream);
-gboolean                mate_mixer_stream_set_active_port     (MateMixerStream *stream,
-                                                               MateMixerPort   *port);
+MateMixerStreamControl *mate_mixer_stream_get_default_control (MateMixerStream *stream);
 
 const GList *           mate_mixer_stream_list_controls       (MateMixerStream *stream);
-const GList *           mate_mixer_stream_list_ports          (MateMixerStream *stream);
+const GList *           mate_mixer_stream_list_switches       (MateMixerStream *stream);
 
 gboolean                mate_mixer_stream_suspend             (MateMixerStream *stream);
 gboolean                mate_mixer_stream_resume              (MateMixerStream *stream);
@@ -110,10 +99,6 @@ gboolean                mate_mixer_stream_resume              (MateMixerStream *
 gboolean                mate_mixer_stream_monitor_get_enabled (MateMixerStream *stream);
 gboolean                mate_mixer_stream_monitor_set_enabled (MateMixerStream *stream,
                                                                gboolean         enabled);
-
-const gchar *           mate_mixer_stream_monitor_get_name    (MateMixerStream *stream);
-gboolean                mate_mixer_stream_monitor_set_name    (MateMixerStream *stream,
-                                                               const gchar     *name);
 
 G_END_DECLS
 

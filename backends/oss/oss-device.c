@@ -22,12 +22,8 @@
 #include <glib/gstdio.h>
 #include <glib-object.h>
 
-#include <libmatemixer/matemixer-device.h>
-#include <libmatemixer/matemixer-enums.h>
-#include <libmatemixer/matemixer-port.h>
-#include <libmatemixer/matemixer-port-private.h>
-#include <libmatemixer/matemixer-stream.h>
-#include <libmatemixer/matemixer-stream-control.h>
+#include <libmatemixer/matemixer.h>
+#include <libmatemixer/matemixer-private.h>
 
 #include "oss-common.h"
 #include "oss-device.h"
@@ -36,199 +32,99 @@
 
 #define OSS_DEVICE_ICON "audio-card"
 
+typedef enum
+{
+    OSS_DEV_ANY,
+    OSS_DEV_INPUT,
+    OSS_DEV_OUTPUT
+} OssDevType;
+
 typedef struct
 {
     gchar                     *name;
-    gchar                     *description;
+    gchar                     *label;
     MateMixerStreamControlRole role;
-    MateMixerStreamFlags       flags;
-} OssDeviceName;
+    OssDevType                 type;
+} OssDev;
 
-static const OssDeviceName const oss_devices[] = {
-    { "vol",     N_("Volume"),     MATE_MIXER_STREAM_CONTROL_ROLE_MASTER,  MATE_MIXER_STREAM_OUTPUT },
-    { "bass",    N_("Bass"),       MATE_MIXER_STREAM_CONTROL_ROLE_BASS,    MATE_MIXER_STREAM_OUTPUT },
-    { "treble",  N_("Treble"),     MATE_MIXER_STREAM_CONTROL_ROLE_TREBLE,  MATE_MIXER_STREAM_OUTPUT },
-    { "synth",   N_("Synth"),      MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN, MATE_MIXER_STREAM_INPUT },
-    { "pcm",     N_("PCM"),        MATE_MIXER_STREAM_CONTROL_ROLE_PCM,     MATE_MIXER_STREAM_OUTPUT },
-    { "speaker", N_("Speaker"),    MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER, MATE_MIXER_STREAM_OUTPUT },
-    { "line",    N_("Line-in"),    MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    MATE_MIXER_STREAM_INPUT },
-    { "mic",     N_("Microphone"), MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    MATE_MIXER_STREAM_INPUT },
-    { "cd",      N_("CD"),         MATE_MIXER_STREAM_CONTROL_ROLE_CD,      MATE_MIXER_STREAM_INPUT },
+static const OssDev oss_devices[] = {
+    { "vol",     N_("Volume"),     MATE_MIXER_STREAM_CONTROL_ROLE_MASTER,  OSS_DEV_OUTPUT },
+    { "bass",    N_("Bass"),       MATE_MIXER_STREAM_CONTROL_ROLE_BASS,    OSS_DEV_OUTPUT },
+    { "treble",  N_("Treble"),     MATE_MIXER_STREAM_CONTROL_ROLE_TREBLE,  OSS_DEV_OUTPUT },
+    { "synth",   N_("Synth"),      MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN, OSS_DEV_INPUT },
+    { "pcm",     N_("PCM"),        MATE_MIXER_STREAM_CONTROL_ROLE_PCM,     OSS_DEV_OUTPUT },
+    /* OSS manual says this should be the beeper, but Linux OSS seems to assign it to
+     * regular volume control */
+    { "speaker", N_("Speaker"),    MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER, OSS_DEV_OUTPUT },
+    { "line",    N_("Line-in"),    MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    OSS_DEV_INPUT },
+    { "mic",     N_("Microphone"), MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    OSS_DEV_INPUT },
+    { "cd",      N_("CD"),         MATE_MIXER_STREAM_CONTROL_ROLE_CD,      OSS_DEV_INPUT },
     /* Recording monitor */
-    { "mix",     N_("Mixer"),      MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN, MATE_MIXER_STREAM_OUTPUT },
-    { "pcm2",    N_("PCM-2"),      MATE_MIXER_STREAM_CONTROL_ROLE_PCM,     MATE_MIXER_STREAM_OUTPUT },
+    { "mix",     N_("Mixer"),      MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN, OSS_DEV_OUTPUT },
+    { "pcm2",    N_("PCM-2"),      MATE_MIXER_STREAM_CONTROL_ROLE_PCM,     OSS_DEV_OUTPUT },
     /* Recording level (master input) */
-    { "rec",     N_("Record"),     MATE_MIXER_STREAM_CONTROL_ROLE_MASTER,  MATE_MIXER_STREAM_INPUT },
-    { "igain",   N_("In-gain"),    MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN, MATE_MIXER_STREAM_INPUT },
-    { "ogain",   N_("Out-gain"),   MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN, MATE_MIXER_STREAM_OUTPUT },
-    { "line1",   N_("Line-1"),     MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    MATE_MIXER_STREAM_INPUT },
-    { "line2",   N_("Line-2"),     MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    MATE_MIXER_STREAM_INPUT },
-    { "line3",   N_("Line-3"),     MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    MATE_MIXER_STREAM_INPUT },
-    { "dig1",    N_("Digital-1"),  MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    MATE_MIXER_STREAM_NO_FLAGS },
-    { "dig2",    N_("Digital-2"),  MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    MATE_MIXER_STREAM_NO_FLAGS },
-    { "dig3",    N_("Digital-3"),  MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    MATE_MIXER_STREAM_NO_FLAGS },
-    { "phin",    N_("Phone-in"),   MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    MATE_MIXER_STREAM_INPUT },
-    { "phout",   N_("Phone-out"),  MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    MATE_MIXER_STREAM_OUTPUT },
-    { "video",   N_("Video"),      MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    MATE_MIXER_STREAM_INPUT },
-    { "radio",   N_("Radio"),      MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    MATE_MIXER_STREAM_INPUT },
-    { "monitor", N_("Monitor"),    MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN, MATE_MIXER_STREAM_OUTPUT },
-    { "depth",   N_("3D-depth"),   MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN, MATE_MIXER_STREAM_OUTPUT },
-    { "center",  N_("3D-center"),  MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN, MATE_MIXER_STREAM_OUTPUT },
-    { "midi",    N_("MIDI"),       MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN, MATE_MIXER_STREAM_INPUT }
+    { "rec",     N_("Record"),     MATE_MIXER_STREAM_CONTROL_ROLE_MASTER,  OSS_DEV_INPUT },
+    { "igain",   N_("In-gain"),    MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN, OSS_DEV_INPUT },
+    { "ogain",   N_("Out-gain"),   MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN, OSS_DEV_OUTPUT },
+    { "line1",   N_("Line-1"),     MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    OSS_DEV_INPUT },
+    { "line2",   N_("Line-2"),     MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    OSS_DEV_INPUT },
+    { "line3",   N_("Line-3"),     MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    OSS_DEV_INPUT },
+    { "dig1",    N_("Digital-1"),  MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    OSS_DEV_ANY },
+    { "dig2",    N_("Digital-2"),  MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    OSS_DEV_ANY },
+    { "dig3",    N_("Digital-3"),  MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    OSS_DEV_ANY },
+    { "phin",    N_("Phone-in"),   MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    OSS_DEV_INPUT },
+    { "phout",   N_("Phone-out"),  MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    OSS_DEV_OUTPUT },
+    { "video",   N_("Video"),      MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    OSS_DEV_INPUT },
+    { "radio",   N_("Radio"),      MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    OSS_DEV_INPUT },
+    { "monitor", N_("Monitor"),    MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN, OSS_DEV_OUTPUT },
+    { "depth",   N_("3D-depth"),   MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN, OSS_DEV_OUTPUT },
+    { "center",  N_("3D-center"),  MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN, OSS_DEV_OUTPUT },
+    { "midi",    N_("MIDI"),       MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN, OSS_DEV_INPUT }
 };
+
+#define OSS_N_DEVICES MIN (G_N_ELEMENTS (oss_devices), SOUND_MIXER_NRDEVICES)
 
 struct _OssDevicePrivate
 {
-    gint             fd;
-    gchar           *path;
-    gchar           *name;
-    gchar           *description;
-    MateMixerStream *input;
-    MateMixerStream *output;
+    gint       fd;
+    gchar     *path;
+    gint       devmask;
+    gint       stereodevs;
+    gint       recmask;
+    gint       recsrc;
+    OssStream *input;
+    OssStream *output;
 };
-
-enum {
-    PROP_0,
-    PROP_NAME,
-    PROP_DESCRIPTION,
-    PROP_ICON,
-    PROP_ACTIVE_PROFILE,
-    PROP_PATH,
-    PROP_FD
-};
-
-static void mate_mixer_device_interface_init (MateMixerDeviceInterface *iface);
 
 static void oss_device_class_init   (OssDeviceClass *klass);
-
-static void oss_device_get_property (GObject        *object,
-                                     guint           param_id,
-                                     GValue         *value,
-                                     GParamSpec     *pspec);
-static void oss_device_set_property (GObject        *object,
-                                     guint           param_id,
-                                     const GValue   *value,
-                                     GParamSpec     *pspec);
-
 static void oss_device_init         (OssDevice      *device);
+static void oss_device_dispose      (GObject        *object);
 static void oss_device_finalize     (GObject        *object);
 
-G_DEFINE_TYPE_WITH_CODE (OssDevice, oss_device, G_TYPE_OBJECT,
-                         G_IMPLEMENT_INTERFACE (MATE_MIXER_TYPE_DEVICE,
-                                                mate_mixer_device_interface_init))
+G_DEFINE_TYPE (OssDevice, oss_device, MATE_MIXER_TYPE_DEVICE)
 
-static const gchar *oss_device_get_name        (MateMixerDevice *device);
-static const gchar *oss_device_get_description (MateMixerDevice *device);
-static const gchar *oss_device_get_icon        (MateMixerDevice *device);
+static GList *  oss_device_list_streams    (MateMixerDevice  *device);
 
-static gboolean     read_mixer_devices         (OssDevice       *device);
+static gboolean read_mixer_devices         (OssDevice        *device);
 
-static void
-mate_mixer_device_interface_init (MateMixerDeviceInterface *iface)
-{
-    iface->get_name        = oss_device_get_name;
-    iface->get_description = oss_device_get_description;
-    iface->get_icon        = oss_device_get_icon;
-}
+static gboolean set_stream_default_control (OssStream        *stream,
+                                            OssStreamControl *control,
+                                            gboolean          force);
 
 static void
 oss_device_class_init (OssDeviceClass *klass)
 {
-    GObjectClass *object_class;
+    GObjectClass         *object_class;
+    MateMixerDeviceClass *device_class;
 
     object_class = G_OBJECT_CLASS (klass);
-    object_class->finalize     = oss_device_finalize;
-    object_class->get_property = oss_device_get_property;
-    object_class->set_property = oss_device_set_property;
+    object_class->dispose  = oss_device_dispose;
+    object_class->finalize = oss_device_finalize;
 
-    g_object_class_install_property (object_class,
-                                     PROP_PATH,
-                                     g_param_spec_string ("path",
-                                                          "Path",
-                                                          "Path to the device",
-                                                          NULL,
-                                                          G_PARAM_CONSTRUCT_ONLY |
-                                                          G_PARAM_READWRITE |
-                                                          G_PARAM_STATIC_STRINGS));
-
-    g_object_class_install_property (object_class,
-                                     PROP_FD,
-                                     g_param_spec_int ("fd",
-                                                       "File descriptor",
-                                                       "File descriptor of the device",
-                                                       G_MININT,
-                                                       G_MAXINT,
-                                                       -1,
-                                                       G_PARAM_CONSTRUCT_ONLY |
-                                                       G_PARAM_READWRITE |
-                                                       G_PARAM_STATIC_STRINGS));
-
-    g_object_class_override_property (object_class, PROP_NAME, "name");
-    g_object_class_override_property (object_class, PROP_DESCRIPTION, "description");
-    g_object_class_override_property (object_class, PROP_ICON, "icon");
-    g_object_class_override_property (object_class, PROP_ACTIVE_PROFILE, "active-profile");
+    device_class = MATE_MIXER_DEVICE_CLASS (klass);
+    device_class->list_streams = oss_device_list_streams;
 
     g_type_class_add_private (object_class, sizeof (OssDevicePrivate));
-}
-
-static void
-oss_device_get_property (GObject    *object,
-                         guint       param_id,
-                         GValue     *value,
-                         GParamSpec *pspec)
-{
-    OssDevice *device;
-
-    device = OSS_DEVICE (object);
-
-    switch (param_id) {
-    case PROP_NAME:
-        g_value_set_string (value, device->priv->name);
-        break;
-    case PROP_DESCRIPTION:
-        g_value_set_string (value, device->priv->description);
-        break;
-    case PROP_ICON:
-        g_value_set_string (value, OSS_DEVICE_ICON);
-        break;
-    case PROP_ACTIVE_PROFILE:
-        /* Not supported */
-        g_value_set_object (value, NULL);
-        break;
-    case PROP_PATH:
-        g_value_set_string (value, device->priv->path);
-        break;
-    case PROP_FD:
-        g_value_set_int (value, device->priv->fd);
-        break;
-    default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
-        break;
-    }
-}
-
-static void
-oss_device_set_property (GObject      *object,
-                         guint         param_id,
-                         const GValue *value,
-                         GParamSpec   *pspec)
-{
-    OssDevice *device;
-
-    device = OSS_DEVICE (object);
-
-    switch (param_id) {
-    case PROP_PATH:
-        /* Construct-only string */
-        device->priv->path = g_strdup (g_value_get_string (value));
-        break;
-    case PROP_FD:
-        device->priv->fd = dup (g_value_get_int (value));
-        break;
-    default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
-        break;
-    }
 }
 
 static void
@@ -240,256 +136,105 @@ oss_device_init (OssDevice *device)
 }
 
 static void
-oss_device_finalize (GObject *object)
+oss_device_dispose (GObject *object)
 {
     OssDevice *device;
 
     device = OSS_DEVICE (object);
 
-    g_free (device->priv->name);
-    g_free (device->priv->description);
+    g_clear_object (&device->priv->input);
+    g_clear_object (&device->priv->output);
 
-    if (device->priv->fd != -1)
-        g_close (device->priv->fd, NULL);
+    G_OBJECT_CLASS (oss_device_parent_class)->dispose (object);
+}
+
+static void
+oss_device_finalize (GObject *object)
+{
+    OssDevice *device = OSS_DEVICE (object);
+
+    close (device->priv->fd);
 
     G_OBJECT_CLASS (oss_device_parent_class)->finalize (object);
 }
 
 OssDevice *
-oss_device_new (const gchar *path, gint fd)
+oss_device_new (const gchar *name, const gchar *label, const gchar *path, gint fd)
 {
     OssDevice *device;
-    gchar     *basename;
+    gchar     *stream_name;
 
-    g_return_val_if_fail (path != NULL, NULL);
+    g_return_val_if_fail (name  != NULL, NULL);
+    g_return_val_if_fail (label != NULL, NULL);
+    g_return_val_if_fail (path  != NULL, NULL);
 
     device = g_object_new (OSS_TYPE_DEVICE,
-                           "path", path,
-                           "fd", fd,
+                           "name", name,
+                           "label", label,
+                           "icon", OSS_DEVICE_ICON,
                            NULL);
 
-    basename = g_path_get_basename (path);
+    device->priv->fd   = dup (fd);
+    device->priv->path = g_strdup (path);
 
-    device->priv->name = g_strdup_printf ("oss-%s", basename);
-    g_free (basename);
+    stream_name = g_strdup_printf ("oss-input-%s", name);
+    device->priv->input = oss_stream_new (stream_name,
+                                          MATE_MIXER_DEVICE (device),
+                                          MATE_MIXER_STREAM_INPUT);
+    g_free (stream_name);
+
+    stream_name = g_strdup_printf ("oss-output-%s", name);
+    device->priv->output = oss_stream_new (stream_name,
+                                           MATE_MIXER_DEVICE (device),
+                                           MATE_MIXER_STREAM_OUTPUT);
+    g_free (stream_name);
 
     return device;
 }
 
 gboolean
-oss_device_read (OssDevice *device)
+oss_device_open (OssDevice *device)
 {
-    gchar                  *name;
-    gchar                  *basename;
-    MateMixerStreamControl *ctl;
+    gint ret;
 
     g_return_val_if_fail (OSS_IS_DEVICE (device), FALSE);
 
-    // XXX avoid calling this function repeatedly
-
-    g_debug ("Querying device %s (%s)",
+    g_debug ("Opening device %s (%s)",
              device->priv->path,
-             device->priv->description);
+             mate_mixer_device_get_label (MATE_MIXER_DEVICE (device)));
 
-    basename = g_path_get_basename (device->priv->path);
-
-    name = g_strdup_printf ("oss-input-%s", basename);
-    device->priv->input = MATE_MIXER_STREAM (oss_stream_new (name,
-                                                             device->priv->description,
-                                                             MATE_MIXER_STREAM_INPUT));
-    g_free (name);
-
-    name = g_strdup_printf ("oss-output-%s", basename);
-    device->priv->output = MATE_MIXER_STREAM (oss_stream_new (name,
-                                                              device->priv->description,
-                                                              MATE_MIXER_STREAM_OUTPUT |
-                                                              MATE_MIXER_STREAM_PORTS_FIXED));
-    g_free (name);
-
-    if (read_mixer_devices (device) == FALSE)
-        return FALSE;
-
-    // XXX prefer active ports as default if there is no default
-
-    ctl = mate_mixer_stream_get_default_control (device->priv->input);
-    if (ctl == NULL) {
-        const GList *list = mate_mixer_stream_list_controls (device->priv->input);
-
-        if (list != NULL) {
-            ctl = MATE_MIXER_STREAM_CONTROL (list->data);
-            oss_stream_set_default_control (OSS_STREAM (device->priv->input),
-                                            OSS_STREAM_CONTROL (ctl));
-        } else
-            g_clear_object (&device->priv->input);
-    }
-
-    if (ctl != NULL)
-        g_debug ("Default input stream control is %s",
-                 mate_mixer_stream_control_get_description (ctl));
-
-    ctl = mate_mixer_stream_get_default_control (device->priv->output);
-    if (ctl == NULL) {
-        const GList *list = mate_mixer_stream_list_controls (device->priv->output);
-
-        if (list != NULL) {
-            ctl = MATE_MIXER_STREAM_CONTROL (list->data);
-            oss_stream_set_default_control (OSS_STREAM (device->priv->output),
-                                            OSS_STREAM_CONTROL (ctl));
-        } else
-            g_clear_object (&device->priv->output);
-    }
-
-    if (ctl != NULL)
-        g_debug ("Default output stream control is %s",
-                 mate_mixer_stream_control_get_description (ctl));
-
-    return TRUE;
-}
-
-const gchar *
-oss_device_get_path (OssDevice *odevice)
-{
-    g_return_val_if_fail (OSS_IS_DEVICE (odevice), FALSE);
-
-    return odevice->priv->path;
-}
-
-MateMixerStream *
-oss_device_get_input_stream (OssDevice *odevice)
-{
-    g_return_val_if_fail (OSS_IS_DEVICE (odevice), FALSE);
-
-    return odevice->priv->input;
-}
-
-MateMixerStream *
-oss_device_get_output_stream (OssDevice *odevice)
-{
-    g_return_val_if_fail (OSS_IS_DEVICE (odevice), FALSE);
-
-    return odevice->priv->output;
-}
-
-gboolean
-oss_device_set_description (OssDevice *odevice, const gchar *description)
-{
-    g_return_val_if_fail (OSS_IS_DEVICE (odevice), FALSE);
-
-    if (g_strcmp0 (odevice->priv->description, description) != 0) {
-        g_free (odevice->priv->description);
-
-        odevice->priv->description = g_strdup (description);
-
-        g_object_notify (G_OBJECT (odevice), "description");
-        return TRUE;
-    }
-    return FALSE;
-}
-
-static gboolean
-read_mixer_devices (OssDevice *device)
-{
-    gint              devmask,
-                      stereomask,
-                      recmask;
-    gint              ret;
-    gint              i;
-    OssStreamControl *ctl;
-
-    ret = ioctl (device->priv->fd, MIXER_READ (SOUND_MIXER_DEVMASK), &devmask);
-    if (ret < 0)
+    /* Read the essential information about the device, these values are not
+     * expected to change and will not be queried */
+    ret = ioctl (device->priv->fd,
+                 MIXER_READ (SOUND_MIXER_DEVMASK),
+                 &device->priv->devmask);
+    if (ret != 0)
         goto fail;
-    ret = ioctl (device->priv->fd, MIXER_READ (SOUND_MIXER_STEREODEVS), &stereomask);
-    if (ret < 0)
-        goto fail;
-    ret = ioctl (device->priv->fd, MIXER_READ (SOUND_MIXER_RECMASK), &recmask);
+
+    ret = ioctl (device->priv->fd,
+                 MIXER_READ (SOUND_MIXER_STEREODEVS),
+                 &device->priv->stereodevs);
     if (ret < 0)
         goto fail;
 
-    for (i = 0; i < MIN (G_N_ELEMENTS (oss_devices), SOUND_MIXER_NRDEVICES); i++) {
-        gboolean       stereo;
-        gboolean       input = FALSE;
-        MateMixerPort *port = NULL;
+    ret = ioctl (device->priv->fd,
+                 MIXER_READ (SOUND_MIXER_RECMASK),
+                 &device->priv->recmask);
+    if (ret < 0)
+        goto fail;
 
-        /* Skip unavailable controls */
-        if ((devmask & (1 << i)) == 0)
-            continue;
+    /* The recording source mask may change at any time, here we just read
+     * the initial value */
+    ret = ioctl (device->priv->fd,
+                 MIXER_READ (SOUND_MIXER_RECSRC),
+                 &device->priv->recsrc);
+    if (ret < 0)
+        goto fail;
 
-        if ((stereomask & (1 << i)) > 0)
-            stereo = TRUE;
-        else
-            stereo = FALSE;
+    /* NOTE: Linux also supports SOUND_MIXER_OUTSRC and SOUND_MIXER_OUTMASK which
+     * inform about/enable input->output, we could potentially create toggles
+     * for these, but these constants are not defined on any BSD. */
 
-        if (oss_devices[i].flags == MATE_MIXER_STREAM_NO_FLAGS) {
-            if ((recmask & (1 << i)) > 0)
-                input = TRUE;
-        }
-        if (oss_devices[i].flags == MATE_MIXER_STREAM_INPUT) {
-            if ((recmask & (1 << i)) == 0) {
-                g_debug ("Skipping non-input device %s", oss_devices[i].name);
-                continue;
-            }
-            input = TRUE;
-        }
-
-        ctl = oss_stream_control_new (device->priv->fd,
-                                      i,
-                                      oss_devices[i].name,
-                                      oss_devices[i].description,
-                                      stereo);
-
-        if (oss_devices[i].role == MATE_MIXER_STREAM_CONTROL_ROLE_PORT)
-            port = _mate_mixer_port_new (oss_devices[i].name,
-                                         oss_devices[i].description,
-                                         NULL,
-                                         0,
-                                         0);
-
-        if (input == TRUE) {
-            oss_stream_add_control (OSS_STREAM (device->priv->input), ctl);
-
-            if (i == SOUND_MIXER_RECLEV || i == SOUND_MIXER_IGAIN) {
-                if (i == SOUND_MIXER_RECLEV) {
-                    oss_stream_set_default_control (OSS_STREAM (device->priv->input), ctl);
-                } else {
-                    MateMixerStreamControl *defctl;
-
-                    defctl = mate_mixer_stream_get_default_control (device->priv->input);
-                    if (defctl == NULL)
-                        oss_stream_set_default_control (OSS_STREAM (device->priv->input), ctl);
-                }
-            }
-
-            if (port != NULL)
-                oss_stream_add_port (OSS_STREAM (device->priv->input), port);
-        } else {
-            oss_stream_add_control (OSS_STREAM (device->priv->output), ctl);
-
-            if (i == SOUND_MIXER_VOLUME) {
-                oss_stream_set_default_control (OSS_STREAM (device->priv->output), ctl);
-            }
-            else if (i == SOUND_MIXER_PCM) {
-                MateMixerStreamControl *defctl;
-
-                defctl = mate_mixer_stream_get_default_control (device->priv->output);
-                if (defctl == NULL)
-                    oss_stream_set_default_control (OSS_STREAM (device->priv->output), ctl);
-            }
-
-            if (port != NULL)
-                oss_stream_add_port (OSS_STREAM (device->priv->output), port);
-        }
-
-        if (port != NULL)
-            oss_stream_control_set_port (ctl, port);
-
-        oss_stream_control_set_role (ctl, oss_devices[i].role);
-
-        g_debug ("Added control %s",
-                 mate_mixer_stream_control_get_description (MATE_MIXER_STREAM_CONTROL (ctl)));
-
-        oss_stream_control_update (ctl);
-    }
     return TRUE;
 
 fail:
@@ -500,26 +245,160 @@ fail:
     return FALSE;
 }
 
-static const gchar *
-oss_device_get_name (MateMixerDevice *device)
+gboolean
+oss_device_load (OssDevice *device)
 {
-    g_return_val_if_fail (OSS_IS_DEVICE (device), NULL);
+    MateMixerStreamControl *control;
 
-    return OSS_DEVICE (device)->priv->name;
+    g_return_val_if_fail (OSS_IS_DEVICE (device), FALSE);
+
+    read_mixer_devices (device);
+
+    control = mate_mixer_stream_get_default_control (MATE_MIXER_STREAM (device->priv->input));
+    if (control == NULL) {
+        // XXX pick something
+    }
+
+    if (control != NULL)
+        g_debug ("Default input stream control is %s",
+                 mate_mixer_stream_control_get_label (control));
+
+    control = mate_mixer_stream_get_default_control (MATE_MIXER_STREAM (device->priv->output));
+    if (control == NULL) {
+        // XXX pick something
+    }
+
+    if (control != NULL)
+        g_debug ("Default output stream control is %s",
+                 mate_mixer_stream_control_get_label (control));
+
+    return TRUE;
 }
 
-static const gchar *
-oss_device_get_description (MateMixerDevice *device)
+gint
+oss_device_get_fd (OssDevice *device)
 {
-    g_return_val_if_fail (OSS_IS_DEVICE (device), NULL);
+    g_return_val_if_fail (OSS_IS_DEVICE (device), -1);
 
-    return OSS_DEVICE (device)->priv->description;
+    return device->priv->fd;
 }
 
-static const gchar *
-oss_device_get_icon (MateMixerDevice *device)
+const gchar *
+oss_device_get_path (OssDevice *device)
 {
     g_return_val_if_fail (OSS_IS_DEVICE (device), NULL);
 
-    return OSS_DEVICE_ICON;
+    return device->priv->path;
+}
+
+OssStream *
+oss_device_get_input_stream (OssDevice *device)
+{
+    g_return_val_if_fail (OSS_IS_DEVICE (device), NULL);
+
+    return device->priv->input;
+}
+
+OssStream *
+oss_device_get_output_stream (OssDevice *device)
+{
+    g_return_val_if_fail (OSS_IS_DEVICE (device), NULL);
+
+    return device->priv->output;
+}
+
+static GList *
+oss_device_list_streams (MateMixerDevice *mmd)
+{
+    OssDevice *device;
+    GList     *list = NULL;
+
+    g_return_val_if_fail (OSS_IS_DEVICE (mmd), NULL);
+
+    device = OSS_DEVICE (mmd);
+
+    if (device->priv->output != NULL)
+        list = g_list_prepend (list, g_object_ref (device->priv->output));
+    if (device->priv->input != NULL)
+        list = g_list_prepend (list, g_object_ref (device->priv->input));
+
+    return list;
+}
+
+#define OSS_MASK_HAS_DEVICE(mask,i) ((gboolean) (((mask) & (1 << (i))) > 0))
+
+static gboolean
+read_mixer_devices (OssDevice *device)
+{
+    gint i;
+
+    for (i = 0; i < OSS_N_DEVICES; i++) {
+        OssStreamControl *control;
+        gboolean          input = FALSE;
+
+        /* Skip unavailable controls */
+        if (OSS_MASK_HAS_DEVICE (device->priv->devmask, i) == FALSE)
+            continue;
+
+        if (oss_devices[i].type == OSS_DEV_ANY) {
+            input = OSS_MASK_HAS_DEVICE (device->priv->recmask, i);
+        }
+        else if (oss_devices[i].type == OSS_DEV_INPUT) {
+            input = TRUE;
+        }
+
+        control = oss_stream_control_new (oss_devices[i].name,
+                                          oss_devices[i].label,
+                                          oss_devices[i].role,
+                                          device->priv->fd,
+                                          i,
+                                          OSS_MASK_HAS_DEVICE (device->priv->stereodevs, i));
+
+        if (input == TRUE) {
+            oss_stream_add_control (OSS_STREAM (device->priv->input), control);
+
+            if (i == SOUND_MIXER_RECLEV || i == SOUND_MIXER_IGAIN) {
+                if (i == SOUND_MIXER_RECLEV)
+                    set_stream_default_control (OSS_STREAM (device->priv->input),
+                                                control,
+                                                TRUE);
+                else
+                    set_stream_default_control (OSS_STREAM (device->priv->input),
+                                                control,
+                                                FALSE);
+            }
+        } else {
+            oss_stream_add_control (OSS_STREAM (device->priv->output), control);
+
+            if (i == SOUND_MIXER_VOLUME || i == SOUND_MIXER_PCM) {
+                if (i == SOUND_MIXER_VOLUME)
+                    set_stream_default_control (OSS_STREAM (device->priv->output),
+                                                control,
+                                                TRUE);
+                else
+                    set_stream_default_control (OSS_STREAM (device->priv->output),
+                                                control,
+                                                FALSE);
+            }
+        }
+
+        g_debug ("Added control %s",
+                 mate_mixer_stream_control_get_label (MATE_MIXER_STREAM_CONTROL (control)));
+
+        oss_stream_control_update (control);
+    }
+    return TRUE;
+}
+
+static gboolean
+set_stream_default_control (OssStream *stream, OssStreamControl *control, gboolean force)
+{
+    MateMixerStreamControl *current;
+
+    current = mate_mixer_stream_get_default_control (MATE_MIXER_STREAM (stream));
+    if (current == NULL || force == TRUE) {
+        oss_stream_set_default_control (stream, OSS_STREAM_CONTROL (control));
+        return TRUE;
+    }
+    return FALSE;
 }

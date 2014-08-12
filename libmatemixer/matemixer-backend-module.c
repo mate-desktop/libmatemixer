@@ -22,16 +22,19 @@
 #include "matemixer-backend.h"
 #include "matemixer-backend-module.h"
 
+/* Initialize backend */
+typedef void (*BackendInit) (GTypeModule *type_module);
+
+/* Return information about backend */
+typedef const MateMixerBackendInfo *(*BackendGetInfo) (void);
+
 struct _MateMixerBackendModulePrivate
 {
-    GModule  *gmodule;
-    gchar    *path;
-    gboolean  loaded;
-
-    void (*init)   (GTypeModule *type_module);
-    void (*deinit) (void);
-
-    const MateMixerBackendInfo *(*get_info) (void);
+    GModule       *gmodule;
+    gchar         *path;
+    gboolean       loaded;
+    BackendInit    init;
+    BackendGetInfo get_info;
 };
 
 enum {
@@ -102,6 +105,7 @@ mate_mixer_backend_module_get_property (GObject    *object,
     case PROP_PATH:
         g_value_set_string (value, module->priv->path);
         break;
+
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
         break;
@@ -122,7 +126,10 @@ mate_mixer_backend_module_set_property (GObject      *object,
     case PROP_PATH:
         /* Construct-only string */
         module->priv->path = g_strdup (g_value_get_string (value));
+
+        g_type_module_set_name (G_TYPE_MODULE (object), module->priv->path);
         break;
+
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
         break;
@@ -157,8 +164,11 @@ mate_mixer_backend_module_dispose (GObject *object)
 static void
 mate_mixer_backend_module_finalize (GObject *object)
 {
-    /* This is in fact never called */
-    g_free (MATE_MIXER_BACKEND_MODULE (object)->priv->path);
+    MateMixerBackendModule *module;
+
+    module = MATE_MIXER_BACKEND_MODULE (object);
+
+    g_free (module->priv->path);
 
     G_OBJECT_CLASS (mate_mixer_backend_module_parent_class)->finalize (object);
 }
@@ -174,17 +184,11 @@ mate_mixer_backend_module_finalize (GObject *object)
 MateMixerBackendModule *
 mate_mixer_backend_module_new (const gchar *path)
 {
-    MateMixerBackendModule *module;
-
     g_return_val_if_fail (path != NULL, NULL);
 
-    module = g_object_new (MATE_MIXER_TYPE_BACKEND_MODULE,
-                           "path", path,
-                           NULL);
-
-    g_type_module_set_name (G_TYPE_MODULE (module), path);
-
-    return module;
+    return g_object_new (MATE_MIXER_TYPE_BACKEND_MODULE,
+                         "path", path,
+                         NULL);
 }
 
 /**
@@ -227,76 +231,57 @@ backend_module_load (GTypeModule *type_module)
 
     module = MATE_MIXER_BACKEND_MODULE (type_module);
 
-    if (module->priv->loaded == FALSE) {
-        module->priv->gmodule = g_module_open (module->priv->path,
-                                               G_MODULE_BIND_LAZY |
-                                               G_MODULE_BIND_LOCAL);
-        if (module->priv->gmodule == NULL) {
-            g_warning ("Failed to load backend module %s: %s",
-                       module->priv->path,
-                       g_module_error ());
+    if (module->priv->loaded == TRUE)
+        return TRUE;
 
-            return FALSE;
-        }
+    module->priv->gmodule = g_module_open (module->priv->path,
+                                           G_MODULE_BIND_LAZY | G_MODULE_BIND_LOCAL);
+    if (module->priv->gmodule == NULL) {
+        g_warning ("Failed to load backend module %s: %s",
+                   module->priv->path,
+                   g_module_error ());
 
-        /* Validate library symbols that each backend module must provide */
-        if (g_module_symbol (module->priv->gmodule,
-                             "backend_module_init",
-                             (gpointer *) &module->priv->init) == FALSE ||
-            g_module_symbol (module->priv->gmodule,
-                             "backend_module_get_info",
-                             (gpointer *) &module->priv->get_info) == FALSE) {
-            g_warning ("Failed to load backend module %s: %s",
-                       module->priv->path,
-                       g_module_error ());
-
-            g_module_close (module->priv->gmodule);
-            return FALSE;
-        }
-
-        /* Optional backend function */
-        g_module_symbol (module->priv->gmodule,
-                         "backend_module_deinit",
-                         (gpointer *) &module->priv->deinit);
-
-        module->priv->init (type_module);
-        module->priv->loaded = TRUE;
-
-        /* Make sure get_info() returns something, so we can avoid checking it
-         * in other parts of the library */
-        if (G_UNLIKELY (module->priv->get_info () == NULL)) {
-            g_critical ("Backend module %s does not provide module information",
-                        module->priv->path);
-
-            /* Close the module but keep the loaded flag to avoid unreffing
-             * this instance as the GType has most likely been registered */
-            g_module_close (module->priv->gmodule);
-            return FALSE;
-        }
-
-        /* It is not possible to unref this instance, so let's avoid unloading
-         * the module and just let the backend module (de)initialize when
-         * (de)init functions are called repeatedly */
-        g_module_make_resident (module->priv->gmodule);
-
-        g_debug ("Loaded backend module %s", module->priv->path);
-    } else {
-        /* This function was called before, so avoid loading and initialize only */
-        module->priv->init (type_module);
+        return FALSE;
     }
 
+    /* Validate library symbols that each backend module must provide */
+    if (g_module_symbol (module->priv->gmodule,
+                         "backend_module_init",
+                         (gpointer *) &module->priv->init) == FALSE ||
+        g_module_symbol (module->priv->gmodule,
+                         "backend_module_get_info",
+                         (gpointer *) &module->priv->get_info) == FALSE) {
+        g_warning ("Failed to load backend module %s: %s",
+                   module->priv->path,
+                   g_module_error ());
+
+        g_module_close (module->priv->gmodule);
+        return FALSE;
+    }
+
+    module->priv->init (type_module);
+    module->priv->loaded = TRUE;
+
+    /* Make sure get_info() returns something, so we can avoid checking it
+     * in other parts of the library */
+    if (G_UNLIKELY (module->priv->get_info () == NULL)) {
+        g_critical ("Backend module %s does not provide module information",
+                    module->priv->path);
+
+        /* Close the module but keep the loaded flag to avoid unreffing
+         * this instance as the GType has most likely been registered */
+        g_module_close (module->priv->gmodule);
+        return FALSE;
+    }
+
+    /* It is not possible to unref this instance, so keep the module alive */
+    g_module_make_resident (module->priv->gmodule);
+
+    g_debug ("Loaded backend module %s", module->priv->path);
     return TRUE;
 }
 
 static void
 backend_module_unload (GTypeModule *type_module)
 {
-    MateMixerBackendModule *module;
-
-    module = MATE_MIXER_BACKEND_MODULE (type_module);
-
-    /* Only deinitialize the backend module, do not modify the loaded flag
-     * as the module remains loaded */
-    if (module->priv->deinit)
-        module->priv->deinit ();
 }

@@ -135,7 +135,7 @@ mate_mixer_stream_control_flags_get_type (void)
             { MATE_MIXER_STREAM_CONTROL_NO_FLAGS, "MATE_MIXER_STREAM_CONTROL_NO_FLAGS", "no-flags" },
             { MATE_MIXER_STREAM_CONTROL_HAS_MUTE, "MATE_MIXER_STREAM_CONTROL_HAS_MUTE", "has-mute" },
             { MATE_MIXER_STREAM_CONTROL_HAS_VOLUME, "MATE_MIXER_STREAM_CONTROL_HAS_VOLUME", "has-volume" },
-            { MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL_VOLUME, "MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL_VOLUME", "has-decibel-volume" },
+            { MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL, "MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL", "has-decibel" },
             { MATE_MIXER_STREAM_CONTROL_HAS_FLAT_VOLUME, "MATE_MIXER_STREAM_CONTROL_HAS_FLAT_VOLUME", "has-flat-volume" },
             { MATE_MIXER_STREAM_CONTROL_CAN_SET_VOLUME, "MATE_MIXER_STREAM_CONTROL_CAN_SET_VOLUME", "can-set-volume" },
             { MATE_MIXER_STREAM_CONTROL_CAN_BALANCE, "MATE_MIXER_STREAM_CONTROL_CAN_BALANCE", "can-balance" },
@@ -144,6 +144,30 @@ mate_mixer_stream_control_flags_get_type (void)
         };
         etype = g_flags_register_static (
             g_intern_static_string ("MateMixerStreamControlFlags"),
+            values);
+    }
+    return etype;
+}
+
+GType
+mate_mixer_stream_control_role_get_type (void)
+{
+    static GType etype = 0;
+
+    if (etype == 0) {
+        static const GEnumValue values[] = {
+            { MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN, "MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN", "unknown" },
+            { MATE_MIXER_STREAM_CONTROL_ROLE_MASTER, "MATE_MIXER_STREAM_CONTROL_ROLE_MASTER", "master" },
+            { MATE_MIXER_STREAM_CONTROL_ROLE_PORT, "MATE_MIXER_STREAM_CONTROL_ROLE_PORT", "port" },
+            { MATE_MIXER_STREAM_CONTROL_ROLE_PCM, "MATE_MIXER_STREAM_CONTROL_ROLE_PCM", "pcm" },
+            { MATE_MIXER_STREAM_CONTROL_ROLE_BASS, "MATE_MIXER_STREAM_CONTROL_ROLE_BASS", "bass" },
+            { MATE_MIXER_STREAM_CONTROL_ROLE_TREBLE, "MATE_MIXER_STREAM_CONTROL_ROLE_TREBLE", "treble" },
+            { MATE_MIXER_STREAM_CONTROL_ROLE_CD, "MATE_MIXER_STREAM_CONTROL_ROLE_CD", "cd" },
+            { MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER, "MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER", "speaker" },
+            { 0, NULL, NULL }
+        };
+        etype = g_enum_register_static (
+            g_intern_static_string ("MateMixerStreamControlRole"),
             values);
     }
     return etype;
