@@ -20,6 +20,7 @@
 
 #include <glib.h>
 #include <glib-object.h>
+#include <libmatemixer/matemixer-types.h>
 
 G_BEGIN_DECLS
 
@@ -36,7 +37,6 @@ G_BEGIN_DECLS
 #define MATE_MIXER_DEVICE_PROFILE_GET_CLASS(o)         \
         (G_TYPE_INSTANCE_GET_CLASS ((o), MATE_MIXER_TYPE_DEVICE_PROFILE, MateMixerDeviceProfileClass))
 
-typedef struct _MateMixerDeviceProfile         MateMixerDeviceProfile;
 typedef struct _MateMixerDeviceProfileClass    MateMixerDeviceProfileClass;
 typedef struct _MateMixerDeviceProfilePrivate  MateMixerDeviceProfilePrivate;
 
@@ -56,8 +56,9 @@ struct _MateMixerDeviceProfileClass
 GType        mate_mixer_device_profile_get_type               (void) G_GNUC_CONST;
 
 const gchar *mate_mixer_device_profile_get_name               (MateMixerDeviceProfile *profile);
-const gchar *mate_mixer_device_profile_get_description        (MateMixerDeviceProfile *profile);
+const gchar *mate_mixer_device_profile_get_label              (MateMixerDeviceProfile *profile);
 guint        mate_mixer_device_profile_get_priority           (MateMixerDeviceProfile *profile);
+
 guint        mate_mixer_device_profile_get_num_input_streams  (MateMixerDeviceProfile *profile);
 guint        mate_mixer_device_profile_get_num_output_streams (MateMixerDeviceProfile *profile);
 

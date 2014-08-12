@@ -94,14 +94,7 @@ mate_mixer_stream_flags_get_type (void)
             { MATE_MIXER_STREAM_INPUT, "MATE_MIXER_STREAM_INPUT", "input" },
             { MATE_MIXER_STREAM_OUTPUT, "MATE_MIXER_STREAM_OUTPUT", "output" },
             { MATE_MIXER_STREAM_CLIENT, "MATE_MIXER_STREAM_CLIENT", "client" },
-            { MATE_MIXER_STREAM_HAS_MUTE, "MATE_MIXER_STREAM_HAS_MUTE", "has-mute" },
-            { MATE_MIXER_STREAM_HAS_VOLUME, "MATE_MIXER_STREAM_HAS_VOLUME", "has-volume" },
-            { MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME, "MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME", "has-decibel-volume" },
-            { MATE_MIXER_STREAM_HAS_FLAT_VOLUME, "MATE_MIXER_STREAM_HAS_FLAT_VOLUME", "has-flat-volume" },
             { MATE_MIXER_STREAM_HAS_MONITOR, "MATE_MIXER_STREAM_HAS_MONITOR", "has-monitor" },
-            { MATE_MIXER_STREAM_CAN_SET_VOLUME, "MATE_MIXER_STREAM_CAN_SET_VOLUME", "can-set-volume" },
-            { MATE_MIXER_STREAM_CAN_BALANCE, "MATE_MIXER_STREAM_CAN_BALANCE", "can-balance" },
-            { MATE_MIXER_STREAM_CAN_FADE, "MATE_MIXER_STREAM_CAN_FADE", "can-fade" },
             { MATE_MIXER_STREAM_CAN_SUSPEND, "MATE_MIXER_STREAM_CAN_SUSPEND", "can-suspend" },
             { 0, NULL, NULL }
         };
@@ -127,6 +120,54 @@ mate_mixer_stream_state_get_type (void)
         };
         etype = g_enum_register_static (
             g_intern_static_string ("MateMixerStreamState"),
+            values);
+    }
+    return etype;
+}
+
+GType
+mate_mixer_stream_control_flags_get_type (void)
+{
+    static GType etype = 0;
+
+    if (etype == 0) {
+        static const GFlagsValue values[] = {
+            { MATE_MIXER_STREAM_CONTROL_NO_FLAGS, "MATE_MIXER_STREAM_CONTROL_NO_FLAGS", "no-flags" },
+            { MATE_MIXER_STREAM_CONTROL_HAS_MUTE, "MATE_MIXER_STREAM_CONTROL_HAS_MUTE", "has-mute" },
+            { MATE_MIXER_STREAM_CONTROL_HAS_VOLUME, "MATE_MIXER_STREAM_CONTROL_HAS_VOLUME", "has-volume" },
+            { MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL, "MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL", "has-decibel" },
+            { MATE_MIXER_STREAM_CONTROL_HAS_FLAT_VOLUME, "MATE_MIXER_STREAM_CONTROL_HAS_FLAT_VOLUME", "has-flat-volume" },
+            { MATE_MIXER_STREAM_CONTROL_CAN_SET_VOLUME, "MATE_MIXER_STREAM_CONTROL_CAN_SET_VOLUME", "can-set-volume" },
+            { MATE_MIXER_STREAM_CONTROL_CAN_BALANCE, "MATE_MIXER_STREAM_CONTROL_CAN_BALANCE", "can-balance" },
+            { MATE_MIXER_STREAM_CONTROL_CAN_FADE, "MATE_MIXER_STREAM_CONTROL_CAN_FADE", "can-fade" },
+            { 0, NULL, NULL }
+        };
+        etype = g_flags_register_static (
+            g_intern_static_string ("MateMixerStreamControlFlags"),
+            values);
+    }
+    return etype;
+}
+
+GType
+mate_mixer_stream_control_role_get_type (void)
+{
+    static GType etype = 0;
+
+    if (etype == 0) {
+        static const GEnumValue values[] = {
+            { MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN, "MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN", "unknown" },
+            { MATE_MIXER_STREAM_CONTROL_ROLE_MASTER, "MATE_MIXER_STREAM_CONTROL_ROLE_MASTER", "master" },
+            { MATE_MIXER_STREAM_CONTROL_ROLE_PORT, "MATE_MIXER_STREAM_CONTROL_ROLE_PORT", "port" },
+            { MATE_MIXER_STREAM_CONTROL_ROLE_PCM, "MATE_MIXER_STREAM_CONTROL_ROLE_PCM", "pcm" },
+            { MATE_MIXER_STREAM_CONTROL_ROLE_BASS, "MATE_MIXER_STREAM_CONTROL_ROLE_BASS", "bass" },
+            { MATE_MIXER_STREAM_CONTROL_ROLE_TREBLE, "MATE_MIXER_STREAM_CONTROL_ROLE_TREBLE", "treble" },
+            { MATE_MIXER_STREAM_CONTROL_ROLE_CD, "MATE_MIXER_STREAM_CONTROL_ROLE_CD", "cd" },
+            { MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER, "MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER", "speaker" },
+            { 0, NULL, NULL }
+        };
+        etype = g_enum_register_static (
+            g_intern_static_string ("MateMixerStreamControlRole"),
             values);
     }
     return etype;

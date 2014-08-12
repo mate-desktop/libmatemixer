@@ -21,8 +21,7 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include <libmatemixer/matemixer-device-profile.h>
-#include <libmatemixer/matemixer-port.h>
+#include "matemixer-types.h"
 
 G_BEGIN_DECLS
 
@@ -32,48 +31,72 @@ G_BEGIN_DECLS
         (G_TYPE_CHECK_INSTANCE_CAST ((o), MATE_MIXER_TYPE_DEVICE, MateMixerDevice))
 #define MATE_MIXER_IS_DEVICE(o)                 \
         (G_TYPE_CHECK_INSTANCE_TYPE ((o), MATE_MIXER_TYPE_DEVICE))
-#define MATE_MIXER_DEVICE_GET_INTERFACE(o)      \
-        (G_TYPE_INSTANCE_GET_INTERFACE ((o), MATE_MIXER_TYPE_DEVICE, MateMixerDeviceInterface))
+#define MATE_MIXER_DEVICE_CLASS(k)              \
+        (G_TYPE_CHECK_CLASS_CAST ((k), MATE_MIXER_TYPE_DEVICE, MateMixerDeviceClass))
+#define MATE_MIXER_IS_DEVICE_CLASS(k)           \
+        (G_TYPE_CHECK_CLASS_TYPE ((k), MATE_MIXER_TYPE_DEVICE))
+#define MATE_MIXER_DEVICE_GET_CLASS(o)          \
+        (G_TYPE_INSTANCE_GET_CLASS ((o), MATE_MIXER_TYPE_DEVICE, MateMixerDeviceClass))
 
-typedef struct _MateMixerDevice           MateMixerDevice; /* dummy object */
-typedef struct _MateMixerDeviceInterface  MateMixerDeviceInterface;
+typedef struct _MateMixerDeviceClass    MateMixerDeviceClass;
+typedef struct _MateMixerDevicePrivate  MateMixerDevicePrivate;
 
-struct _MateMixerDeviceInterface
+struct _MateMixerDevice
 {
-    GTypeInterface parent_iface;
+    GObject object;
 
     /*< private >*/
-    /* Virtual table */
-    const gchar            *(*get_name)           (MateMixerDevice        *device);
-    const gchar            *(*get_description)    (MateMixerDevice        *device);
-    const gchar            *(*get_icon)           (MateMixerDevice        *device);
+    MateMixerDevicePrivate *priv;
+};
 
-    MateMixerPort          *(*get_port)           (MateMixerDevice        *device,
+struct _MateMixerDeviceClass
+{
+    GObjectClass parent_class;
+
+    /*< private >*/
+
+    MateMixerStream        *(*get_stream)         (MateMixerDevice        *device,
+                                                   const gchar            *name);
+    MateMixerSwitch        *(*get_switch)         (MateMixerDevice        *device,
                                                    const gchar            *name);
     MateMixerDeviceProfile *(*get_profile)        (MateMixerDevice        *device,
                                                    const gchar            *name);
 
-    const GList            *(*list_streams)       (MateMixerDevice        *device);
-    const GList            *(*list_ports)         (MateMixerDevice        *device);
-    const GList            *(*list_profiles)      (MateMixerDevice        *device);
+    GList                  *(*list_streams)       (MateMixerDevice        *device);
+    GList                  *(*list_switches)      (MateMixerDevice        *device);
+    GList                  *(*list_profiles)      (MateMixerDevice        *device);
 
-    MateMixerDeviceProfile *(*get_active_profile) (MateMixerDevice        *device);
     gboolean                (*set_active_profile) (MateMixerDevice        *device,
                                                    MateMixerDeviceProfile *profile);
+
+    /* Signals */
+    void (*stream_added)       (MateMixerDevice *device,
+                                const gchar     *name);
+    void (*stream_removed)     (MateMixerDevice *device,
+                                const gchar     *name);
+    void (*switch_added)       (MateMixerDevice *device,
+                                const gchar     *name);
+    void (*switch_removed)     (MateMixerDevice *device,
+                                const gchar     *name);
 };
 
 GType                   mate_mixer_device_get_type           (void) G_GNUC_CONST;
 
 const gchar *           mate_mixer_device_get_name           (MateMixerDevice        *device);
-const gchar *           mate_mixer_device_get_description    (MateMixerDevice        *device);
+const gchar *           mate_mixer_device_get_label          (MateMixerDevice        *device);
 const gchar *           mate_mixer_device_get_icon           (MateMixerDevice        *device);
 
-MateMixerPort *         mate_mixer_device_get_port           (MateMixerDevice        *device,
+MateMixerStream *       mate_mixer_device_get_stream         (MateMixerDevice        *device,
                                                               const gchar            *name);
+
+MateMixerSwitch *       mate_mixer_device_get_switch         (MateMixerDevice        *device,
+                                                              const gchar            *name);
+
 MateMixerDeviceProfile *mate_mixer_device_get_profile        (MateMixerDevice        *device,
                                                               const gchar            *name);
 
-const GList *           mate_mixer_device_list_ports         (MateMixerDevice        *device);
+const GList *           mate_mixer_device_list_streams       (MateMixerDevice        *device);
+const GList *           mate_mixer_device_list_switches      (MateMixerDevice        *device);
 const GList *           mate_mixer_device_list_profiles      (MateMixerDevice        *device);
 
 MateMixerDeviceProfile *mate_mixer_device_get_active_profile (MateMixerDevice        *device);

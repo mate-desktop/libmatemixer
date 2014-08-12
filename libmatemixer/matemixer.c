@@ -54,6 +54,10 @@ mate_mixer_init (void)
     if (initialized == TRUE)
         return TRUE;
 
+#if !GLIB_CHECK_VERSION (2, 36, 0)
+    g_type_init ();
+#endif
+
     load_modules ();
 
     if (modules != NULL) {
@@ -96,33 +100,25 @@ mate_mixer_is_initialized (void)
     return initialized;
 }
 
-/**
- * mate_mixer_deinit:
- *
- * Deinitializes the library. You should call this function when you are done
- * using the library.
- */
-void
-mate_mixer_deinit (void)
-{
-    GList *list;
-
-    if (initialized == FALSE)
-        return;
-
-    list = modules;
-    while (list != NULL) {
-        g_type_module_unuse (G_TYPE_MODULE (list->data));
-        list = list->next;
-    }
-    initialized = FALSE;
-}
-
-/* Internal function: return a list of loaded backend modules */
+/* Return a list of loaded backend modules */
 const GList *
-mate_mixer_get_modules (void)
+_mate_mixer_get_modules (void)
 {
     return (const GList *) modules;
+}
+
+guint32
+_mate_mixer_create_channel_mask (MateMixerChannelPosition *positions, guint n)
+{
+    guint32 mask = 0;
+    guint   i = 0;
+
+    for (i = 0; i < n; i++) {
+        if (positions[i] > MATE_MIXER_CHANNEL_UNKNOWN &&
+            positions[i] < MATE_MIXER_CHANNEL_MAX)
+            mask |= 1 << positions[i];
+    }
+    return mask;
 }
 
 static void
@@ -150,7 +146,8 @@ load_modules (void)
                     continue;
 
                 file = g_build_filename (LIBMATEMIXER_BACKEND_DIR, name, NULL);
-                modules = g_list_prepend (modules, mate_mixer_backend_module_new (file));
+                modules = g_list_prepend (modules,
+                                          mate_mixer_backend_module_new (file));
                 g_free (file);
             }
 

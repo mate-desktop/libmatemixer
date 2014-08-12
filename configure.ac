@@ -61,7 +61,7 @@ LT_INIT
 # =======================================================================
 PKG_PROG_PKG_CONFIG
 
-GLIB_REQUIRED_VERSION=2.36.0
+GLIB_REQUIRED_VERSION=2.32.0
 
 PKG_CHECK_MODULES(GLIB, [
         glib-2.0 >= $GLIB_REQUIRED_VERSION
@@ -118,6 +118,75 @@ AC_SUBST(HAVE_PULSEAUDIO)
 AC_SUBST(PULSEAUDIO_CFLAGS)
 AC_SUBST(PULSEAUDIO_LIBS)
 
+# -----------------------------------------------------------------------
+# ALSA
+# -----------------------------------------------------------------------
+ALSA_REQUIRED_VERSION=1.0.0
+
+AC_ARG_ENABLE([alsa],
+              AS_HELP_STRING([--enable-alsa],
+                             [Enable ALSA backend module @<:@default=auto@:>@]),
+              enable_alsa=$enableval, enable_alsa=auto)
+
+if test "x$enable_alsa" != "xno"; then
+  PKG_CHECK_MODULES(ALSA, [
+        alsa >= $ALSA_REQUIRED_VERSION
+        gthread-2.0 >= $GLIB_REQUIRED_VERSION
+        ],
+        have_alsa=yes,
+        have_alsa=no)
+
+  if test "x$enable_alsa" = "xyes" -a "x$have_alsa" = "xno"; then
+    AC_MSG_ERROR([ALSA support explicitly requested but dependencies not found])
+  fi
+
+  if test "x$have_alsa" = "xyes" ; then
+    AC_DEFINE(HAVE_ALSA, [], [Define if we have ALSA support])
+  fi
+fi
+
+AM_CONDITIONAL(HAVE_ALSA, test "x$have_alsa" = "xyes")
+
+AC_SUBST(HAVE_ALSA)
+AC_SUBST(ALSA_CFLAGS)
+AC_SUBST(ALSA_LIBS)
+
+# -----------------------------------------------------------------------
+# OSS
+# -----------------------------------------------------------------------
+AC_ARG_ENABLE([oss],
+              AS_HELP_STRING([--enable-oss],
+                             [Enable OSS backend module @<:@default=no@:>@]),
+              enable_oss=$enableval, enable_oss=no)
+
+if test "x$enable_oss" != "xno"; then
+  AC_CHECK_HEADERS([soundcard.h sys/soundcard.h machine/soundcard.h])
+  if test "x$ac_cv_header_soundcard_h" = "xyes" -o \
+          "x$ac_cv_header_sys_soundcard_h" = "xyes" -o \
+          "x$ac_cv_header_machine_soundcard_h" = "xyes"; then
+    AC_CHECK_LIB([ossaudio], [_oss_ioctl], [OSS_LIBS="-lossaudio"])
+    have_oss=yes
+  else
+    have_oss=no
+  fi
+
+  if test "x$enable_oss" = "xyes" -a "x$have_oss" = "xno"; then
+    AC_MSG_ERROR([OSS support explicitly requested but dependencies not found])
+  fi
+
+  if test "x$have_oss" = "xyes" ; then
+    AC_DEFINE(HAVE_OSS, [], [Define if we have OSS support])
+  fi
+else
+  have_oss=no
+fi
+
+AM_CONDITIONAL(HAVE_OSS, test "x$have_oss" = "xyes")
+
+AC_SUBST(HAVE_OSS)
+AC_SUBST(OSS_CFLAGS)
+AC_SUBST(OSS_LIBS)
+
 # =======================================================================
 # Compiler warnings
 # =======================================================================
@@ -170,6 +239,8 @@ libmatemixer/Makefile
 backends/Makefile
 backends/null/Makefile
 backends/pulse/Makefile
+backends/alsa/Makefile
+backends/oss/Makefile
 data/Makefile
 data/libmatemixer.pc
 docs/Makefile
@@ -193,5 +264,7 @@ echo "
 
         Build Null module:           $have_null
         Build PulseAudio module:     $have_pulseaudio
+        Build ALSA module:           $have_alsa
+        Build OSS module:            $have_oss
 
 "

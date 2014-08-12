@@ -24,20 +24,20 @@
 
 G_BEGIN_DECLS
 
-MateMixerDeviceProfile *_mate_mixer_device_profile_new                       (const gchar            *name,
-                                                                              const gchar            *description,
-                                                                              guint                   priority,
-                                                                              guint                   input_streams,
-                                                                              guint                   output_streams);
+MateMixerDeviceProfile *_mate_mixer_device_profile_new                    (const gchar            *name,
+                                                                           const gchar            *description,
+                                                                           guint                   priority,
+                                                                           guint                   input_streams,
+                                                                           guint                   output_streams);
 
-gboolean                _mate_mixer_device_profile_update_description        (MateMixerDeviceProfile *profile,
-                                                                              const gchar            *description);
-gboolean                _mate_mixer_device_profile_update_priority           (MateMixerDeviceProfile *profile,
-                                                                              guint                   priority);
-gboolean                _mate_mixer_device_profile_update_num_input_streams  (MateMixerDeviceProfile *profile,
-                                                                              guint                   num);
-gboolean                _mate_mixer_device_profile_update_num_output_streams (MateMixerDeviceProfile *profile,
-                                                                              guint                   num);
+gboolean                _mate_mixer_device_profile_set_label              (MateMixerDeviceProfile *profile,
+                                                                           const gchar            *label);
+gboolean                _mate_mixer_device_profile_set_priority           (MateMixerDeviceProfile *profile,
+                                                                           guint                   priority);
+gboolean                _mate_mixer_device_profile_set_num_input_streams  (MateMixerDeviceProfile *profile,
+                                                                           guint                   num);
+gboolean                _mate_mixer_device_profile_set_num_output_streams (MateMixerDeviceProfile *profile,
+                                                                           guint                   num);
 
 G_END_DECLS
 

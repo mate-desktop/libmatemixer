@@ -22,19 +22,21 @@
 #include <glib-object.h>
 
 #include <libmatemixer/matemixer-client-stream.h>
-#include <libmatemixer/matemixer-control.h>
+#include <libmatemixer/matemixer-context.h>
 #include <libmatemixer/matemixer-device.h>
 #include <libmatemixer/matemixer-device-profile.h>
 #include <libmatemixer/matemixer-enums.h>
-#include <libmatemixer/matemixer-port.h>
 #include <libmatemixer/matemixer-stream.h>
+#include <libmatemixer/matemixer-stream-control.h>
+#include <libmatemixer/matemixer-switch.h>
+#include <libmatemixer/matemixer-switch-option.h>
+#include <libmatemixer/matemixer-toggle.h>
 #include <libmatemixer/matemixer-version.h>
 
 G_BEGIN_DECLS
 
 gboolean mate_mixer_init           (void);
 gboolean mate_mixer_is_initialized (void);
-void     mate_mixer_deinit         (void);
 
 G_END_DECLS
 
