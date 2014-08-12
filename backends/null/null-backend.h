@@ -20,8 +20,8 @@
 
 #include <glib.h>
 #include <glib-object.h>
-
-#include <libmatemixer/matemixer-backend-module.h>
+#include <libmatemixer/matemixer.h>
+#include <libmatemixer/matemixer-private.h>
 
 #define NULL_TYPE_BACKEND                       \
         (null_backend_get_type ())
@@ -41,12 +41,12 @@ typedef struct _NullBackendClass  NullBackendClass;
 
 struct _NullBackend
 {
-    GObject parent;
+    MateMixerBackend parent;
 };
 
 struct _NullBackendClass
 {
-    GObjectClass parent_class;
+    MateMixerBackendClass parent_class;
 };
 
 GType                       null_backend_get_type   (void) G_GNUC_CONST;
