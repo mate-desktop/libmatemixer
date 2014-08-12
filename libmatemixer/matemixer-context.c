@@ -744,7 +744,7 @@ mate_mixer_context_open (MateMixerContext *context)
         }
         if (module == NULL) {
             /* The selected backend is not available */
-            change_state (control, MATE_MIXER_STATE_FAILED);
+            change_state (context, MATE_MIXER_STATE_FAILED);
             return FALSE;
         }
     } else {
@@ -1298,8 +1298,8 @@ try_next_backend (MateMixerContext *context)
 
     info = mate_mixer_backend_module_get_info (module);
 
-    control->priv->module  = g_object_ref (module);
-    control->priv->backend = g_object_new (info->g_type, NULL);
+    context->priv->module  = g_object_ref (module);
+    context->priv->backend = g_object_new (info->g_type, NULL);
 
     mate_mixer_backend_set_data (context->priv->backend, &context->priv->backend_data);
 
