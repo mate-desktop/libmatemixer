@@ -74,6 +74,9 @@ GTK_DOC_CHECK([1.10], [--flavour no-tmpl])
 # =======================================================================
 # Check for backend module support
 # =======================================================================
+# -----------------------------------------------------------------------
+# Null
+# -----------------------------------------------------------------------
 AC_ARG_ENABLE([null],
               AS_HELP_STRING([--enable-null],
                              [Enable Null backend module @<:@default=yes@:>@]),
@@ -89,6 +92,9 @@ fi
 AM_CONDITIONAL(HAVE_NULL, test "x$have_null" = "xyes")
 AC_SUBST(HAVE_NULL)
 
+# -----------------------------------------------------------------------
+# PulseAudio
+# -----------------------------------------------------------------------
 PA_REQUIRED_VERSION=0.9.23
 
 AC_ARG_ENABLE([pulseaudio],
@@ -110,6 +116,8 @@ if test "x$enable_pulseaudio" != "xno"; then
   if test "x$have_pulseaudio" = "xyes" ; then
     AC_DEFINE(HAVE_PULSEAUDIO, [], [Define if we have PulseAudio support])
   fi
+else
+  have_pulseaudio=no
 fi
 
 AM_CONDITIONAL(HAVE_PULSEAUDIO, test "x$have_pulseaudio" = "xyes")
@@ -143,6 +151,8 @@ if test "x$enable_alsa" != "xno"; then
   if test "x$have_alsa" = "xyes" ; then
     AC_DEFINE(HAVE_ALSA, [], [Define if we have ALSA support])
   fi
+else
+  have_alsa=no
 fi
 
 AM_CONDITIONAL(HAVE_ALSA, test "x$have_alsa" = "xyes")
