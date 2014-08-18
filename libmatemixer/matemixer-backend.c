@@ -20,16 +20,16 @@
 #include <glib-object.h>
 
 #include "matemixer-backend.h"
-#include "matemixer-backend-private.h"
+#include "matemixer-device.h"
 #include "matemixer-enums.h"
 #include "matemixer-enum-types.h"
 #include "matemixer-stream.h"
+#include "matemixer-stream-control.h"
+#include "matemixer-stored-control.h"
 
 struct _MateMixerBackendPrivate
 {
-    GList                *devices;
-    GList                *streams;
-    GList                *stored_streams;
+    GHashTable           *devices;
     MateMixerStream      *default_input;
     MateMixerStream      *default_output;
     MateMixerState        state;
@@ -51,8 +51,8 @@ enum {
     DEVICE_REMOVED,
     STREAM_ADDED,
     STREAM_REMOVED,
-    STORED_STREAM_ADDED,
-    STORED_STREAM_REMOVED,
+    STORED_CONTROL_ADDED,
+    STORED_CONTROL_REMOVED,
     N_SIGNALS
 };
 
@@ -72,22 +72,19 @@ static void mate_mixer_backend_set_property (GObject               *object,
                                              GParamSpec            *pspec);
 
 static void mate_mixer_backend_dispose      (GObject               *object);
+static void mate_mixer_backend_finalize     (GObject               *object);
 
 G_DEFINE_ABSTRACT_TYPE (MateMixerBackend, mate_mixer_backend, G_TYPE_OBJECT)
 
-static void device_added (MateMixerBackend *backend, const gchar *name);
-static void device_removed (MateMixerBackend *backend, const gchar *name);
+static void device_added          (MateMixerBackend *backend,
+                                   const gchar      *name);
+static void device_removed        (MateMixerBackend *backend,
+                                   const gchar      *name);
 
-static void device_stream_added   (MateMixerDevice *device,
-                                   const gchar     *name);
-static void device_stream_removed (MateMixerDevice *device,
-                                   const gchar     *name);
-
-static void free_devices        (MateMixerBackend *backend);
-static void free_streams        (MateMixerBackend *backend);
-static void free_stored_streams (MateMixerBackend *backend);
-static void stream_removed      (MateMixerBackend *backend,
-                                 const gchar      *name);
+static void device_stream_added   (MateMixerBackend *backend,
+                                   const gchar      *name);
+static void device_stream_removed (MateMixerBackend *backend,
+                                   const gchar      *name);
 
 static void
 mate_mixer_backend_class_init (MateMixerBackendClass *klass)
@@ -96,6 +93,7 @@ mate_mixer_backend_class_init (MateMixerBackendClass *klass)
 
     object_class = G_OBJECT_CLASS (klass);
     object_class->dispose      = mate_mixer_backend_dispose;
+    object_class->finalize     = mate_mixer_backend_finalize;
     object_class->get_property = mate_mixer_backend_get_property;
     object_class->set_property = mate_mixer_backend_set_property;
 
@@ -129,7 +127,7 @@ mate_mixer_backend_class_init (MateMixerBackendClass *klass)
     signals[DEVICE_ADDED] =
         g_signal_new ("device-added",
                       G_TYPE_FROM_CLASS (object_class),
-                      G_SIGNAL_RUN_LAST,
+                      G_SIGNAL_RUN_FIRST,
                       G_STRUCT_OFFSET (MateMixerBackendClass, device_added),
                       NULL,
                       NULL,
@@ -141,7 +139,7 @@ mate_mixer_backend_class_init (MateMixerBackendClass *klass)
     signals[DEVICE_REMOVED] =
         g_signal_new ("device-removed",
                       G_TYPE_FROM_CLASS (object_class),
-                      G_SIGNAL_RUN_LAST,
+                      G_SIGNAL_RUN_FIRST,
                       G_STRUCT_OFFSET (MateMixerBackendClass, device_removed),
                       NULL,
                       NULL,
@@ -153,7 +151,7 @@ mate_mixer_backend_class_init (MateMixerBackendClass *klass)
     signals[STREAM_ADDED] =
         g_signal_new ("stream-added",
                       G_TYPE_FROM_CLASS (object_class),
-                      G_SIGNAL_RUN_LAST,
+                      G_SIGNAL_RUN_FIRST,
                       G_STRUCT_OFFSET (MateMixerBackendClass, stream_added),
                       NULL,
                       NULL,
@@ -165,7 +163,7 @@ mate_mixer_backend_class_init (MateMixerBackendClass *klass)
     signals[STREAM_REMOVED] =
         g_signal_new ("stream-removed",
                       G_TYPE_FROM_CLASS (object_class),
-                      G_SIGNAL_RUN_LAST,
+                      G_SIGNAL_RUN_FIRST,
                       G_STRUCT_OFFSET (MateMixerBackendClass, stream_removed),
                       NULL,
                       NULL,
@@ -174,11 +172,11 @@ mate_mixer_backend_class_init (MateMixerBackendClass *klass)
                       1,
                       G_TYPE_STRING);
 
-    signals[STORED_STREAM_ADDED] =
-        g_signal_new ("stored-stream-added",
+    signals[STORED_CONTROL_ADDED] =
+        g_signal_new ("stored-control-added",
                       G_TYPE_FROM_CLASS (object_class),
-                      G_SIGNAL_RUN_LAST,
-                      G_STRUCT_OFFSET (MateMixerBackendClass, stored_stream_added),
+                      G_SIGNAL_RUN_FIRST,
+                      G_STRUCT_OFFSET (MateMixerBackendClass, stored_control_added),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__STRING,
@@ -186,11 +184,11 @@ mate_mixer_backend_class_init (MateMixerBackendClass *klass)
                       1,
                       G_TYPE_STRING);
 
-    signals[STORED_STREAM_REMOVED] =
-        g_signal_new ("stored-stream-removed",
+    signals[STORED_CONTROL_REMOVED] =
+        g_signal_new ("stored-control-removed",
                       G_TYPE_FROM_CLASS (object_class),
-                      G_SIGNAL_RUN_LAST,
-                      G_STRUCT_OFFSET (MateMixerBackendClass, stored_stream_removed),
+                      G_SIGNAL_RUN_FIRST,
+                      G_STRUCT_OFFSET (MateMixerBackendClass, stored_control_removed),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__STRING,
@@ -215,11 +213,9 @@ mate_mixer_backend_get_property (GObject    *object,
     case PROP_STATE:
         g_value_set_enum (value, backend->priv->state);
         break;
-
     case PROP_DEFAULT_INPUT_STREAM:
         g_value_set_object (value, backend->priv->default_input);
         break;
-
     case PROP_DEFAULT_OUTPUT_STREAM:
         g_value_set_object (value, backend->priv->default_output);
         break;
@@ -244,7 +240,6 @@ mate_mixer_backend_set_property (GObject      *object,
     case PROP_DEFAULT_INPUT_STREAM:
         mate_mixer_backend_set_default_input_stream (backend, g_value_get_object (value));
         break;
-
     case PROP_DEFAULT_OUTPUT_STREAM:
         mate_mixer_backend_set_default_output_stream (backend, g_value_get_object (value));
         break;
@@ -262,10 +257,11 @@ mate_mixer_backend_init (MateMixerBackend *backend)
                                                  MATE_MIXER_TYPE_BACKEND,
                                                  MateMixerBackendPrivate);
 
-    g_signal_connect (G_OBJECT (backend),
-                      "device-added",
-                      G_CALLBACK (free_devices),
-                      NULL);
+    backend->priv->devices = g_hash_table_new_full (g_str_hash,
+                                                    g_str_equal,
+                                                    g_free,
+                                                    g_object_unref);
+
     g_signal_connect (G_OBJECT (backend),
                       "device-added",
                       G_CALLBACK (device_added),
@@ -273,32 +269,8 @@ mate_mixer_backend_init (MateMixerBackend *backend)
 
     g_signal_connect (G_OBJECT (backend),
                       "device-removed",
-                      G_CALLBACK (free_devices),
-                      NULL);
-    g_signal_connect (G_OBJECT (backend),
-                      "device-removed",
                       G_CALLBACK (device_removed),
                       NULL);
-
-    g_signal_connect (G_OBJECT (backend),
-                      "stream-added",
-                      G_CALLBACK (free_streams),
-                      NULL);
-    g_signal_connect (G_OBJECT (backend),
-                      "stream-removed",
-                      G_CALLBACK (free_streams),
-                      NULL);
-
-    g_signal_connect (G_OBJECT (backend),
-                      "stored-stream-added",
-                      G_CALLBACK (free_stored_streams),
-                      NULL);
-    g_signal_connect (G_OBJECT (backend),
-                      "stored-stream-removed",
-                      G_CALLBACK (free_stored_streams),
-                      NULL);
-
-    // XXX also free when changing state
 }
 
 static void
@@ -308,18 +280,28 @@ mate_mixer_backend_dispose (GObject *object)
 
     backend = MATE_MIXER_BACKEND (object);
 
-    free_devices (backend);
-    free_streams (backend);
-    free_stored_streams (backend);
-
     g_clear_object (&backend->priv->default_input);
     g_clear_object (&backend->priv->default_output);
+
+    g_hash_table_remove_all (backend->priv->devices);
 
     G_OBJECT_CLASS (mate_mixer_backend_parent_class)->dispose (object);
 }
 
+static void
+mate_mixer_backend_finalize (GObject *object)
+{
+    MateMixerBackend *backend;
+
+    backend = MATE_MIXER_BACKEND (object);
+
+    g_hash_table_unref (backend->priv->devices);
+
+    G_OBJECT_CLASS (mate_mixer_backend_parent_class)->finalize (object);
+}
+
 void
-mate_mixer_backend_set_data (MateMixerBackend *backend, MateMixerBackendData *data)
+mate_mixer_backend_set_app_info (MateMixerBackend *backend, MateMixerAppInfo *info)
 {
     MateMixerBackendClass *klass;
 
@@ -327,8 +309,21 @@ mate_mixer_backend_set_data (MateMixerBackend *backend, MateMixerBackendData *da
 
     klass = MATE_MIXER_BACKEND_GET_CLASS (backend);
 
-    if (klass->set_data != NULL)
-        klass->set_data (backend, data);
+    if (klass->set_app_info != NULL)
+        klass->set_app_info (backend, info);
+}
+
+void
+mate_mixer_backend_set_server_address (MateMixerBackend *backend, const gchar *address)
+{
+    MateMixerBackendClass *klass;
+
+    g_return_if_fail (MATE_MIXER_IS_BACKEND (backend));
+
+    klass = MATE_MIXER_BACKEND_GET_CLASS (backend);
+
+    if (klass->set_server_address != NULL)
+        klass->set_server_address (backend, address);
 }
 
 gboolean
@@ -369,72 +364,117 @@ mate_mixer_backend_get_flags (MateMixerBackend *backend)
     return backend->priv->flags;
 }
 
+MateMixerDevice *
+mate_mixer_backend_get_device (MateMixerBackend *backend, const gchar *name)
+{
+    const GList *list;
+
+    g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), NULL);
+    g_return_val_if_fail (name != NULL, NULL);
+
+    list = mate_mixer_backend_list_devices (backend);
+    while (list != NULL) {
+        MateMixerDevice *device = MATE_MIXER_DEVICE (list->data);
+
+        if (strcmp (name, mate_mixer_device_get_name (device)) == 0)
+            return device;
+
+        list = list->next;
+    }
+    return NULL;
+}
+
+MateMixerStream *
+mate_mixer_backend_get_stream (MateMixerBackend *backend, const gchar *name)
+{
+    const GList *list;
+
+    g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), NULL);
+    g_return_val_if_fail (name != NULL, NULL);
+
+    list = mate_mixer_backend_list_streams (backend);
+    while (list != NULL) {
+        MateMixerStream *stream = MATE_MIXER_STREAM (list->data);
+
+        if (strcmp (name, mate_mixer_stream_get_name (stream)) == 0)
+            return stream;
+
+        list = list->next;
+    }
+    return NULL;
+}
+
+MateMixerStoredControl *
+mate_mixer_backend_get_stored_control (MateMixerBackend *backend, const gchar *name)
+{
+    const GList *list;
+
+    g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), NULL);
+    g_return_val_if_fail (name != NULL, NULL);
+
+    list = mate_mixer_backend_list_stored_controls (backend);
+    while (list != NULL) {
+        MateMixerStreamControl *control = MATE_MIXER_STREAM_CONTROL (list->data);
+
+        if (strcmp (name, mate_mixer_stream_control_get_name (control)) == 0)
+            return MATE_MIXER_STORED_CONTROL (control);
+
+        list = list->next;
+    }
+    return NULL;
+}
+
 const GList *
 mate_mixer_backend_list_devices (MateMixerBackend *backend)
 {
+    MateMixerBackendClass *klass;
+
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), NULL);
 
-    if (backend->priv->devices == NULL) {
-        MateMixerBackendClass *klass;
+    klass = MATE_MIXER_BACKEND_GET_CLASS (backend);
 
-        klass = MATE_MIXER_BACKEND_GET_CLASS (backend);
+    if G_LIKELY (klass->list_devices != NULL)
+        return klass->list_devices (backend);
 
-        if (klass->list_devices != NULL)
-            backend->priv->devices = klass->list_devices (backend);
-    }
-
-    return backend->priv->devices;
+    return NULL;
 }
 
 const GList *
 mate_mixer_backend_list_streams (MateMixerBackend *backend)
 {
+    MateMixerBackendClass *klass;
+
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), NULL);
 
-    if (backend->priv->streams == NULL) {
-        MateMixerBackendClass *klass;
+    klass = MATE_MIXER_BACKEND_GET_CLASS (backend);
 
-        klass = MATE_MIXER_BACKEND_GET_CLASS (backend);
+    if G_LIKELY (klass->list_streams != NULL)
+        return klass->list_streams (backend);
 
-        if (klass->list_streams != NULL)
-            backend->priv->streams = klass->list_streams (backend);
-    }
-
-    return backend->priv->streams;
+    return NULL;
 }
 
 const GList *
-mate_mixer_backend_list_stored_streams (MateMixerBackend *backend)
+mate_mixer_backend_list_stored_controls (MateMixerBackend *backend)
 {
+    MateMixerBackendClass *klass;
+
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), NULL);
 
-    if (backend->priv->stored_streams == NULL) {
-        MateMixerBackendClass *klass;
+    klass = MATE_MIXER_BACKEND_GET_CLASS (backend);
 
-        klass = MATE_MIXER_BACKEND_GET_CLASS (backend);
+    if (klass->list_stored_controls != NULL)
+        return klass->list_stored_controls (backend);
 
-        if (klass->list_stored_streams != NULL)
-            backend->priv->stored_streams = klass->list_stored_streams (backend);
-    }
-
-    return backend->priv->stored_streams;
+    return NULL;
 }
 
 MateMixerStream *
 mate_mixer_backend_get_default_input_stream (MateMixerBackend *backend)
 {
-    MateMixerStream *stream = NULL;
-
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), NULL);
 
-    g_object_get (G_OBJECT (backend),
-                  "default-input-stream", &stream,
-                  NULL);
-
-    if (stream != NULL)
-        g_object_unref (stream);
-
-    return stream;
+    return backend->priv->default_input;
 }
 
 gboolean
@@ -462,18 +502,9 @@ mate_mixer_backend_set_default_input_stream (MateMixerBackend *backend,
 MateMixerStream *
 mate_mixer_backend_get_default_output_stream (MateMixerBackend *backend)
 {
-    MateMixerStream *stream = NULL;
-
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), NULL);
 
-    g_object_get (G_OBJECT (backend),
-                  "default-output-stream", &stream,
-                  NULL);
-
-    if (stream != NULL)
-        g_object_unref (stream);
-
-    return stream;
+    return backend->priv->default_output;
 }
 
 gboolean
@@ -503,75 +534,75 @@ device_added (MateMixerBackend *backend, const gchar *name)
 {
     MateMixerDevice *device;
 
-    // device = mate_mixer_backend_get_device (backend, name);
+    device = mate_mixer_backend_get_device (backend, name);
+    if G_UNLIKELY (device == NULL) {
+        g_warn_if_reached ();
+        return;
+    }
 
-/*
-    g_signal_connect (G_OBJECT (device),
-                      "stream-added",
-                      G_CALLBACK (device_stream_added));
-                      */
+    /* Keep the device in a hash table as it won't be possible to retrieve
+     * it when the remove signal is received */
+    g_hash_table_insert (backend->priv->devices,
+                         g_strdup (name),
+                         g_object_ref (device));
+
+    /* Connect to the stream signals from devices so we can forward them on
+     * the backend */
+    g_signal_connect_swapped (G_OBJECT (device),
+                              "stream-added",
+                              G_CALLBACK (device_stream_added),
+                              backend);
+    g_signal_connect_swapped (G_OBJECT (device),
+                              "stream-removed",
+                              G_CALLBACK (device_stream_removed),
+                              backend);
 }
 
 static void
 device_removed (MateMixerBackend *backend, const gchar *name)
 {
+    MateMixerDevice *device;
+
+    device = g_hash_table_lookup (backend->priv->devices, name);
+    if G_UNLIKELY (device == NULL) {
+        g_warn_if_reached ();
+        return;
+    }
+
+    g_signal_handlers_disconnect_by_func (G_OBJECT (device),
+                                          G_CALLBACK (device_stream_added),
+                                          backend);
+    g_signal_handlers_disconnect_by_func (G_OBJECT (device),
+                                          G_CALLBACK (device_stream_removed),
+                                          backend);
+
+    g_hash_table_remove (backend->priv->devices, name);
 }
 
 static void
-device_stream_added (MateMixerDevice *device, const gchar *name)
+device_stream_added (MateMixerBackend *backend, const gchar *name)
 {
-    g_signal_emit (G_OBJECT (device),
+    g_signal_emit (G_OBJECT (backend),
                    signals[STREAM_ADDED],
                    0,
                    name);
 }
 
 static void
-device_stream_removed (MateMixerDevice *device, const gchar *name)
+device_stream_removed (MateMixerBackend *backend, const gchar *name)
 {
-    g_signal_emit (G_OBJECT (device),
+    g_signal_emit (G_OBJECT (backend),
                    signals[STREAM_REMOVED],
                    0,
                    name);
 }
 
-static void
-free_devices (MateMixerBackend *backend)
-{
-    if (backend->priv->devices == NULL)
-        return;
-
-    g_list_free_full (backend->priv->devices, g_object_unref);
-
-    backend->priv->devices = NULL;
-}
-
-static void
-free_streams (MateMixerBackend *backend)
-{
-    if (backend->priv->streams == NULL)
-        return;
-
-    g_list_free_full (backend->priv->streams, g_object_unref);
-
-    backend->priv->streams = NULL;
-}
-
-static void
-free_stored_streams (MateMixerBackend *backend)
-{
-    if (backend->priv->stored_streams == NULL)
-        return;
-
-    g_list_free_full (backend->priv->stored_streams, g_object_unref);
-
-    backend->priv->stored_streams = NULL;
-}
-
-/* Protected */
+/* Protected functions */
 void
 _mate_mixer_backend_set_state (MateMixerBackend *backend, MateMixerState state)
 {
+    g_return_if_fail (MATE_MIXER_IS_BACKEND (backend));
+
     if (backend->priv->state == state)
         return;
 
@@ -581,9 +612,19 @@ _mate_mixer_backend_set_state (MateMixerBackend *backend, MateMixerState state)
 }
 
 void
+_mate_mixer_backend_set_flags (MateMixerBackend *backend, MateMixerBackendFlags flags)
+{
+    g_return_if_fail (MATE_MIXER_IS_BACKEND (backend));
+
+    backend->priv->flags = flags;
+}
+
+void
 _mate_mixer_backend_set_default_input_stream (MateMixerBackend *backend,
                                               MateMixerStream  *stream)
 {
+    g_return_if_fail (MATE_MIXER_IS_BACKEND (backend));
+
     if (backend->priv->default_input == stream)
         return;
 
@@ -598,13 +639,16 @@ _mate_mixer_backend_set_default_input_stream (MateMixerBackend *backend,
     g_debug ("Default input stream changed to %s",
              (stream != NULL) ? mate_mixer_stream_get_name (stream) : "none");
 
-    g_object_notify_by_pspec (G_OBJECT (backend), properties[PROP_DEFAULT_INPUT_STREAM]);
+    g_object_notify_by_pspec (G_OBJECT (backend),
+                              properties[PROP_DEFAULT_INPUT_STREAM]);
 }
 
 void
 _mate_mixer_backend_set_default_output_stream (MateMixerBackend *backend,
                                                MateMixerStream  *stream)
 {
+    g_return_if_fail (MATE_MIXER_IS_BACKEND (backend));
+
     if (backend->priv->default_output == stream)
         return;
 
@@ -619,5 +663,6 @@ _mate_mixer_backend_set_default_output_stream (MateMixerBackend *backend,
     g_debug ("Default output stream changed to %s",
              (stream != NULL) ? mate_mixer_stream_get_name (stream) : "none");
 
-    g_object_notify_by_pspec (G_OBJECT (backend), properties[PROP_DEFAULT_OUTPUT_STREAM]);
+    g_object_notify_by_pspec (G_OBJECT (backend),
+                              properties[PROP_DEFAULT_OUTPUT_STREAM]);
 }

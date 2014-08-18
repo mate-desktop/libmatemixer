@@ -41,9 +41,6 @@ typedef struct {
     guint                    channels;
 } AlsaControlData;
 
-extern const MateMixerChannelPosition     alsa_channel_map_from[SND_MIXER_SCHN_LAST];
-extern const snd_mixer_selem_channel_id_t alsa_channel_map_to[MATE_MIXER_CHANNEL_MAX];
-
 #define ALSA_TYPE_STREAM_CONTROL                \
         (alsa_stream_control_get_type ())
 #define ALSA_STREAM_CONTROL(o)                  \
@@ -102,9 +99,6 @@ AlsaControlData *  alsa_stream_control_get_data        (AlsaStreamControl       
 
 void               alsa_stream_control_set_data        (AlsaStreamControl         *control,
                                                         AlsaControlData           *data);
-
-gboolean           alsa_stream_control_set_role        (AlsaStreamControl         *control,
-                                                        MateMixerStreamControlRole role);
 
 G_END_DECLS
 

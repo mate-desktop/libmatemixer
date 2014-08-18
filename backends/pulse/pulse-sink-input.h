@@ -23,9 +23,8 @@
 
 #include <pulse/pulseaudio.h>
 
-#include "pulse-client-stream.h"
-#include "pulse-connection.h"
-#include "pulse-stream.h"
+#include "pulse-stream-control.h"
+#include "pulse-types.h"
 
 G_BEGIN_DECLS
 
@@ -42,28 +41,25 @@ G_BEGIN_DECLS
 #define PULSE_SINK_INPUT_GET_CLASS(o)           \
         (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_TYPE_SINK_INPUT, PulseSinkInputClass))
 
-typedef struct _PulseSinkInput       PulseSinkInput;
 typedef struct _PulseSinkInputClass  PulseSinkInputClass;
 
 struct _PulseSinkInput
 {
-    PulseClientStream parent;
+    PulseStreamControl parent;
 };
 
 struct _PulseSinkInputClass
 {
-    PulseClientStreamClass parent_class;
+    PulseStreamControlClass parent_class;
 };
 
-GType        pulse_sink_input_get_type   (void) G_GNUC_CONST;
+GType           pulse_sink_input_get_type (void) G_GNUC_CONST;
 
-PulseStream *pulse_sink_input_new        (PulseConnection          *connection,
-                                          const pa_sink_input_info *info,
-                                          PulseStream              *parent);
+PulseSinkInput *pulse_sink_input_new      (PulseSink                *sink,
+                                           const pa_sink_input_info *info);
 
-gboolean     pulse_sink_input_update     (PulseStream              *pstream,
-                                          const pa_sink_input_info *info,
-                                          PulseStream              *parent);
+void            pulse_sink_input_update   (PulseSinkInput           *input,
+                                           const pa_sink_input_info *info);
 
 G_END_DECLS
 

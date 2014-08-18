@@ -22,6 +22,7 @@
 #include <glib-object.h>
 #include <libmatemixer/matemixer.h>
 
+#include "alsa-stream.h"
 #include "alsa-stream-control.h"
 
 G_BEGIN_DECLS
@@ -57,7 +58,8 @@ GType              alsa_stream_output_control_get_type (void) G_GNUC_CONST;
 
 AlsaStreamControl *alsa_stream_output_control_new      (const gchar               *name,
                                                         const gchar               *label,
-                                                        MateMixerStreamControlRole role);
+                                                        MateMixerStreamControlRole role,
+                                                        AlsaStream                *stream);
 
 G_END_DECLS
 

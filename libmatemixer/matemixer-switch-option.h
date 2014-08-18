@@ -20,6 +20,7 @@
 
 #include <glib.h>
 #include <glib-object.h>
+
 #include <libmatemixer/matemixer-types.h>
 
 G_BEGIN_DECLS
@@ -40,6 +41,12 @@ G_BEGIN_DECLS
 typedef struct _MateMixerSwitchOptionClass    MateMixerSwitchOptionClass;
 typedef struct _MateMixerSwitchOptionPrivate  MateMixerSwitchOptionPrivate;
 
+/**
+ * MateMixerSwitchOption:
+ *
+ * The #MateMixerSwitchOption structure contains only private data and should only
+ * be accessed using the provided API.
+ */
 struct _MateMixerSwitchOption
 {
     GObject parent;
@@ -48,6 +55,11 @@ struct _MateMixerSwitchOption
     MateMixerSwitchOptionPrivate *priv;
 };
 
+/**
+ * MateMixerSwitchOptionClass:
+ *
+ * The class structure of #MateMixerSwitchOption.
+ */
 struct _MateMixerSwitchOptionClass
 {
     GObjectClass parent_class;

@@ -34,26 +34,26 @@ GType mate_mixer_state_get_type (void) G_GNUC_CONST;
 #define MATE_MIXER_TYPE_BACKEND_TYPE (mate_mixer_backend_type_get_type ())
 GType mate_mixer_backend_type_get_type (void) G_GNUC_CONST;
 
-#define MATE_MIXER_TYPE_PORT_FLAGS (mate_mixer_port_flags_get_type ())
-GType mate_mixer_port_flags_get_type (void) G_GNUC_CONST;
+#define MATE_MIXER_TYPE_BACKEND_FLAGS (mate_mixer_backend_flags_get_type ())
+GType mate_mixer_backend_flags_get_type (void) G_GNUC_CONST;
 
-#define MATE_MIXER_TYPE_STREAM_FLAGS (mate_mixer_stream_flags_get_type ())
-GType mate_mixer_stream_flags_get_type (void) G_GNUC_CONST;
-
-#define MATE_MIXER_TYPE_STREAM_STATE (mate_mixer_stream_state_get_type ())
-GType mate_mixer_stream_state_get_type (void) G_GNUC_CONST;
+#define MATE_MIXER_TYPE_DIRECTION (mate_mixer_direction_get_type ())
+GType mate_mixer_direction_get_type (void) G_GNUC_CONST;
 
 #define MATE_MIXER_TYPE_STREAM_CONTROL_FLAGS (mate_mixer_stream_control_flags_get_type ())
 GType mate_mixer_stream_control_flags_get_type (void) G_GNUC_CONST;
 
 #define MATE_MIXER_TYPE_STREAM_CONTROL_ROLE (mate_mixer_stream_control_role_get_type ())
-GType mate_mixer_stream_control_role_get_type (void);
+GType mate_mixer_stream_control_role_get_type (void) G_GNUC_CONST;
 
-#define MATE_MIXER_TYPE_CLIENT_STREAM_FLAGS (mate_mixer_client_stream_flags_get_type ())
-GType mate_mixer_client_stream_flags_get_type (void) G_GNUC_CONST;
+#define MATE_MIXER_TYPE_STREAM_CONTROL_MEDIA_ROLE (mate_mixer_stream_control_media_role_get_type ())
+GType mate_mixer_stream_control_media_role_get_type (void) G_GNUC_CONST;
 
-#define MATE_MIXER_TYPE_CLIENT_STREAM_ROLE (mate_mixer_client_stream_role_get_type ())
-GType mate_mixer_client_stream_role_get_type (void) G_GNUC_CONST;
+#define MATE_MIXER_TYPE_SWITCH_FLAGS (mate_mixer_switch_flags_get_type ())
+GType mate_mixer_switch_flags_get_type (void) G_GNUC_CONST;
+
+#define MATE_MIXER_TYPE_SWITCH_ROLE (mate_mixer_switch_role_get_type ())
+GType mate_mixer_switch_role_get_type (void) G_GNUC_CONST;
 
 #define MATE_MIXER_TYPE_CHANNEL_POSITION (mate_mixer_channel_position_get_type ())
 GType mate_mixer_channel_position_get_type (void) G_GNUC_CONST;

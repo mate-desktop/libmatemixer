@@ -20,7 +20,7 @@
 
 #include <glib.h>
 
-#include "matemixer-switch-option.h"
+#include "matemixer-types.h"
 
 G_BEGIN_DECLS
 

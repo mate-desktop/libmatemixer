@@ -20,12 +20,15 @@
 
 #include <glib.h>
 
+#include "matemixer-enums.h"
+
+#include "matemixer-app-info-private.h"
+#include "matemixer-backend.h"
 #include "matemixer-backend-module.h"
-#include "matemixer-backend-private.h"
-#include "matemixer-device-profile-private.h"
+#include "matemixer-stream-private.h"
 #include "matemixer-stream-control-private.h"
-#include "matemixer-switch-option-private.h"
 #include "matemixer-switch-private.h"
+#include "matemixer-switch-option-private.h"
 
 G_BEGIN_DECLS
 
@@ -103,7 +106,9 @@ G_BEGIN_DECLS
 #define MATE_MIXER_CHANNEL_MASK_HAS_FRONT(m)        ((m) & MATE_MIXER_CHANNEL_MASK_FRONT)
 #define MATE_MIXER_CHANNEL_MASK_HAS_BACK(m)         ((m) & MATE_MIXER_CHANNEL_MASK_BACK)
 
-const GList *_mate_mixer_get_modules         (void);
+G_GNUC_INTERNAL
+const GList *_mate_mixer_list_modules        (void);
+
 guint32      _mate_mixer_create_channel_mask (MateMixerChannelPosition *positions, guint n);
 
 G_END_DECLS

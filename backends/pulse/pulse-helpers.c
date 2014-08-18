@@ -29,6 +29,7 @@ typedef struct {
     pa_channel_position_t    pa_position;
 } PositionMap;
 
+// XXX optimize
 static PositionMap const position_map[] = {
     { MATE_MIXER_CHANNEL_UNKNOWN,            PA_CHANNEL_POSITION_INVALID },
     { MATE_MIXER_CHANNEL_MONO,               PA_CHANNEL_POSITION_MONO },
@@ -76,42 +77,42 @@ pulse_convert_position_to_pulse (MateMixerChannelPosition position)
     return PA_CHANNEL_POSITION_INVALID;
 }
 
-MateMixerClientStreamRole
+MateMixerStreamControlMediaRole
 pulse_convert_media_role_name (const gchar *name)
 {
     if (!strcmp (name, "video")) {
-        return MATE_MIXER_CLIENT_STREAM_ROLE_VIDEO;
+        return MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_VIDEO;
     }
     else if (!strcmp (name, "music")) {
-        return MATE_MIXER_CLIENT_STREAM_ROLE_MUSIC;
+        return MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_MUSIC;
     }
     else if (!strcmp (name, "game")) {
-        return MATE_MIXER_CLIENT_STREAM_ROLE_GAME;
+        return MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_GAME;
     }
     else if (!strcmp (name, "event")) {
-        return MATE_MIXER_CLIENT_STREAM_ROLE_EVENT;
+        return MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_EVENT;
     }
     else if (!strcmp (name, "phone")) {
-        return MATE_MIXER_CLIENT_STREAM_ROLE_PHONE;
+        return MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_PHONE;
     }
     else if (!strcmp (name, "animation")) {
-        return MATE_MIXER_CLIENT_STREAM_ROLE_ANIMATION;
+        return MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_ANIMATION;
     }
     else if (!strcmp (name, "production")) {
-        return MATE_MIXER_CLIENT_STREAM_ROLE_PRODUCTION;
+        return MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_PRODUCTION;
     }
     else if (!strcmp (name, "a11y")) {
-        return MATE_MIXER_CLIENT_STREAM_ROLE_A11Y;
+        return MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_A11Y;
     }
     else if (!strcmp (name, "test")) {
-        return MATE_MIXER_CLIENT_STREAM_ROLE_TEST;
+        return MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_TEST;
     }
     else if (!strcmp (name, "abstract")) {
-        return MATE_MIXER_CLIENT_STREAM_ROLE_ABSTRACT;
+        return MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_ABSTRACT;
     }
     else if (!strcmp (name, "filter")) {
-        return MATE_MIXER_CLIENT_STREAM_ROLE_FILTER;
+        return MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_FILTER;
     }
 
-    return MATE_MIXER_CLIENT_STREAM_ROLE_NONE;
+    return MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_UNKNOWN;
 }

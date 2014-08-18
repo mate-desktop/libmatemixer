@@ -21,8 +21,8 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include <libmatemixer/matemixer-enums.h>
-#include <libmatemixer/matemixer-types.h>
+#include "matemixer-enums.h"
+#include "matemixer-types.h"
 
 G_BEGIN_DECLS
 
@@ -41,7 +41,6 @@ G_BEGIN_DECLS
 
 typedef struct _MateMixerBackend         MateMixerBackend;
 typedef struct _MateMixerBackendClass    MateMixerBackendClass;
-typedef struct _MateMixerBackendData     MateMixerBackendData;
 typedef struct _MateMixerBackendPrivate  MateMixerBackendPrivate;
 
 struct _MateMixerBackend
@@ -57,67 +56,81 @@ struct _MateMixerBackendClass
     GObjectClass parent_class;
 
     /*< private >*/
-    void      (*set_data)                  (MateMixerBackend     *backend,
-                                            MateMixerBackendData *data);
+    void         (*set_app_info)              (MateMixerBackend *backend,
+                                               MateMixerAppInfo *info);
+    void         (*set_server_address)        (MateMixerBackend *backend,
+                                               const gchar      *address);
 
-    gboolean  (*open)                      (MateMixerBackend     *backend);
-    void      (*close)                     (MateMixerBackend     *backend);
+    gboolean     (*open)                      (MateMixerBackend *backend);
+    void         (*close)                     (MateMixerBackend *backend);
 
-    GList    *(*list_devices)              (MateMixerBackend     *backend);
-    GList    *(*list_streams)              (MateMixerBackend     *backend);
-    GList    *(*list_stored_streams)       (MateMixerBackend     *backend);
+    const GList *(*list_devices)              (MateMixerBackend *backend);
+    const GList *(*list_streams)              (MateMixerBackend *backend);
+    const GList *(*list_stored_controls)      (MateMixerBackend *backend);
 
-    gboolean  (*set_default_input_stream)  (MateMixerBackend     *backend,
-                                            MateMixerStream      *stream);
-    gboolean  (*set_default_output_stream) (MateMixerBackend     *backend,
-                                            MateMixerStream      *stream);
+    gboolean     (*set_default_input_stream)  (MateMixerBackend *backend,
+                                               MateMixerStream  *stream);
+    gboolean     (*set_default_output_stream) (MateMixerBackend *backend,
+                                               MateMixerStream  *stream);
 
     /* Signals */
-    void      (*device_added)              (MateMixerBackend     *backend,
-                                            const gchar          *name);
-    void      (*device_removed)            (MateMixerBackend     *backend,
-                                            const gchar          *name);
-    void      (*stream_added)              (MateMixerBackend     *backend,
-                                            const gchar          *name);
-    void      (*stream_removed)            (MateMixerBackend     *backend,
-                                            const gchar          *name);
-    void      (*stored_stream_added)       (MateMixerBackend     *backend,
-                                            const gchar          *name);
-    void      (*stored_stream_removed)     (MateMixerBackend     *backend,
-                                            const gchar          *name);
+    void         (*device_added)              (MateMixerBackend *backend,
+                                               const gchar      *name);
+    void         (*device_removed)            (MateMixerBackend *backend,
+                                               const gchar      *name);
+    void         (*stream_added)              (MateMixerBackend *backend,
+                                               const gchar      *name);
+    void         (*stream_removed)            (MateMixerBackend *backend,
+                                               const gchar      *name);
+    void         (*stored_control_added)      (MateMixerBackend *backend,
+                                               const gchar      *name);
+    void         (*stored_control_removed)    (MateMixerBackend *backend,
+                                               const gchar      *name);
 };
 
-struct _MateMixerBackendData
-{
-    gchar *app_name;
-    gchar *app_id;
-    gchar *app_version;
-    gchar *app_icon;
-    gchar *server_address;
-};
+GType                   mate_mixer_backend_get_type                  (void) G_GNUC_CONST;
 
-GType                 mate_mixer_backend_get_type                  (void) G_GNUC_CONST;
+void                    mate_mixer_backend_set_app_info              (MateMixerBackend     *backend,
+                                                                      MateMixerAppInfo     *info);
+void                    mate_mixer_backend_set_server_address        (MateMixerBackend     *backend,
+                                                                      const gchar          *address);
 
-void                  mate_mixer_backend_set_data                  (MateMixerBackend     *backend,
-                                                                    MateMixerBackendData *data);
+gboolean                mate_mixer_backend_open                      (MateMixerBackend     *backend);
+void                    mate_mixer_backend_close                     (MateMixerBackend     *backend);
 
-gboolean              mate_mixer_backend_open                      (MateMixerBackend     *backend);
-void                  mate_mixer_backend_close                     (MateMixerBackend     *backend);
+MateMixerState          mate_mixer_backend_get_state                 (MateMixerBackend     *backend);
+MateMixerBackendFlags   mate_mixer_backend_get_flags                 (MateMixerBackend     *backend);
 
-MateMixerState        mate_mixer_backend_get_state                 (MateMixerBackend     *backend);
-MateMixerBackendFlags mate_mixer_backend_get_flags                 (MateMixerBackend     *backend);
+MateMixerDevice *       mate_mixer_backend_get_device                (MateMixerBackend     *backend,
+                                                                      const gchar          *name);
+MateMixerStream *       mate_mixer_backend_get_stream                (MateMixerBackend     *backend,
+                                                                      const gchar          *name);
+MateMixerStoredControl *mate_mixer_backend_get_stored_control        (MateMixerBackend     *backend,
+                                                                      const gchar          *name);
 
-const GList *         mate_mixer_backend_list_devices              (MateMixerBackend     *backend);
-const GList *         mate_mixer_backend_list_streams              (MateMixerBackend     *backend);
-const GList *         mate_mixer_backend_list_stored_streams       (MateMixerBackend     *backend);
+const GList *           mate_mixer_backend_list_devices              (MateMixerBackend     *backend);
+const GList *           mate_mixer_backend_list_streams              (MateMixerBackend     *backend);
+const GList *           mate_mixer_backend_list_stored_controls      (MateMixerBackend     *backend);
 
-MateMixerStream *     mate_mixer_backend_get_default_input_stream  (MateMixerBackend     *backend);
-gboolean              mate_mixer_backend_set_default_input_stream  (MateMixerBackend     *backend,
-                                                                    MateMixerStream      *stream);
+MateMixerStream *       mate_mixer_backend_get_default_input_stream  (MateMixerBackend     *backend);
+gboolean                mate_mixer_backend_set_default_input_stream  (MateMixerBackend     *backend,
+                                                                      MateMixerStream      *stream);
 
-MateMixerStream *     mate_mixer_backend_get_default_output_stream (MateMixerBackend     *backend);
-gboolean              mate_mixer_backend_set_default_output_stream (MateMixerBackend     *backend,
-                                                                    MateMixerStream      *stream);
+MateMixerStream *       mate_mixer_backend_get_default_output_stream (MateMixerBackend     *backend);
+gboolean                mate_mixer_backend_set_default_output_stream (MateMixerBackend     *backend,
+                                                                      MateMixerStream      *stream);
+
+/* Protected functions */
+void                   _mate_mixer_backend_set_state                 (MateMixerBackend     *backend,
+                                                                      MateMixerState        state);
+void                   _mate_mixer_backend_set_flags                 (MateMixerBackend     *backend,
+                                                                      MateMixerBackendFlags flags);
+
+void                   _mate_mixer_backend_set_default_input_stream  (MateMixerBackend     *backend,
+                                                                      MateMixerStream      *stream);
+
+void                   _mate_mixer_backend_set_default_output_stream (MateMixerBackend     *backend,
+                                                                      MateMixerStream      *stream);
 
 G_END_DECLS
 

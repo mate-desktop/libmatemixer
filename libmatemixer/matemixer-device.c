@@ -20,7 +20,6 @@
 #include <glib-object.h>
 
 #include "matemixer-device.h"
-#include "matemixer-device-profile.h"
 #include "matemixer-stream.h"
 #include "matemixer-switch.h"
 
@@ -32,13 +31,9 @@
 
 struct _MateMixerDevicePrivate
 {
-    gchar                  *name;
-    gchar                  *label;
-    gchar                  *icon;
-    GList                  *streams;
-    GList                  *switches;
-    GList                  *profiles;
-    MateMixerDeviceProfile *profile;
+    gchar *name;
+    gchar *label;
+    gchar *icon;
 };
 
 enum {
@@ -46,7 +41,6 @@ enum {
     PROP_NAME,
     PROP_LABEL,
     PROP_ICON,
-    PROP_ACTIVE_PROFILE,
     N_PROPERTIES
 };
 
@@ -74,17 +68,14 @@ static void mate_mixer_device_set_property (GObject              *object,
                                             GParamSpec           *pspec);
 
 static void mate_mixer_device_init         (MateMixerDevice      *device);
-static void mate_mixer_device_dispose      (GObject              *object);
 static void mate_mixer_device_finalize     (GObject              *object);
 
 G_DEFINE_ABSTRACT_TYPE (MateMixerDevice, mate_mixer_device, G_TYPE_OBJECT)
 
-static MateMixerStream *       mate_mixer_device_real_get_stream  (MateMixerDevice *device,
-                                                                   const gchar     *name);
-static MateMixerSwitch *       mate_mixer_device_real_get_switch  (MateMixerDevice *device,
-                                                                   const gchar     *name);
-static MateMixerDeviceProfile *mate_mixer_device_real_get_profile (MateMixerDevice *device,
-                                                                   const gchar     *name);
+static MateMixerStream *mate_mixer_device_real_get_stream  (MateMixerDevice *device,
+                                                            const gchar     *name);
+static MateMixerSwitch *mate_mixer_device_real_get_switch  (MateMixerDevice *device,
+                                                            const gchar     *name);
 
 static void
 mate_mixer_device_class_init (MateMixerDeviceClass *klass)
@@ -93,10 +84,8 @@ mate_mixer_device_class_init (MateMixerDeviceClass *klass)
 
     klass->get_stream  = mate_mixer_device_real_get_stream;
     klass->get_switch  = mate_mixer_device_real_get_switch;
-    klass->get_profile = mate_mixer_device_real_get_profile;
 
     object_class = G_OBJECT_CLASS (klass);
-    object_class->dispose      = mate_mixer_device_dispose;
     object_class->finalize     = mate_mixer_device_finalize;
     object_class->get_property = mate_mixer_device_get_property;
     object_class->set_property = mate_mixer_device_set_property;
@@ -126,14 +115,6 @@ mate_mixer_device_class_init (MateMixerDeviceClass *klass)
                              NULL,
                              G_PARAM_READWRITE |
                              G_PARAM_CONSTRUCT_ONLY |
-                             G_PARAM_STATIC_STRINGS);
-
-    properties[PROP_ACTIVE_PROFILE] =
-        g_param_spec_object ("active-profile",
-                             "Active profile",
-                             "The currently active profile of the device",
-                             MATE_MIXER_TYPE_DEVICE_PROFILE,
-                             G_PARAM_READABLE |
                              G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_properties (object_class, N_PROPERTIES, properties);
@@ -209,10 +190,6 @@ mate_mixer_device_get_property (GObject    *object,
     case PROP_ICON:
         g_value_set_string (value, device->priv->icon);
         break;
-    case PROP_ACTIVE_PROFILE:
-        g_value_set_object (value, device->priv->profile);
-        break;
-
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
         break;
@@ -258,31 +235,6 @@ mate_mixer_device_init (MateMixerDevice *device)
 }
 
 static void
-mate_mixer_device_dispose (GObject *object)
-{
-    MateMixerDevice *device;
-
-    device = MATE_MIXER_DEVICE (object);
-
-    if (device->priv->streams != NULL) {
-        g_list_free_full (device->priv->streams, g_object_unref);
-        device->priv->streams = NULL;
-    }
-    if (device->priv->switches != NULL) {
-        g_list_free_full (device->priv->switches, g_object_unref);
-        device->priv->switches = NULL;
-    }
-    if (device->priv->profiles != NULL) {
-        g_list_free_full (device->priv->profiles, g_object_unref);
-        device->priv->profiles = NULL;
-    }
-
-    g_clear_object (&device->priv->profile);
-
-    G_OBJECT_CLASS (mate_mixer_device_parent_class)->dispose (object);
-}
-
-static void
 mate_mixer_device_finalize (GObject *object)
 {
     MateMixerDevice *device;
@@ -309,7 +261,7 @@ mate_mixer_device_get_name (MateMixerDevice *device)
 }
 
 /**
- * mate_mixer_device_get_description:
+ * mate_mixer_device_get_label:
  * @device: a #MateMixerDevice
  */
 const gchar *
@@ -333,20 +285,9 @@ mate_mixer_device_get_icon (MateMixerDevice *device)
 }
 
 /**
- * mate_mixer_device_get_profile:
- * @device: a #MateMixerDevice
- * @name: a profile name
- */
-MateMixerDeviceProfile *
-mate_mixer_device_get_profile (MateMixerDevice *device, const gchar *name)
-{
-    return MATE_MIXER_DEVICE_GET_CLASS (device)->get_profile (device, name);
-}
-
-/**
  * mate_mixer_device_get_stream:
  * @device: a #MateMixerDevice
- * @name: a profile name
+ * @name: a stream name
  */
 MateMixerStream *
 mate_mixer_device_get_stream (MateMixerDevice *device, const gchar *name)
@@ -357,7 +298,7 @@ mate_mixer_device_get_stream (MateMixerDevice *device, const gchar *name)
 /**
  * mate_mixer_device_get_switch:
  * @device: a #MateMixerDevice
- * @name: a profile name
+ * @name: a switch name
  */
 MateMixerSwitch *
 mate_mixer_device_get_switch (MateMixerDevice *device, const gchar *name)
@@ -372,16 +313,16 @@ mate_mixer_device_get_switch (MateMixerDevice *device, const gchar *name)
 const GList *
 mate_mixer_device_list_streams (MateMixerDevice *device)
 {
+    MateMixerDeviceClass *klass;
+
     g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), NULL);
 
-    if (device->priv->streams == NULL) {
-        MateMixerDeviceClass *klass = MATE_MIXER_DEVICE_GET_CLASS (device);
+    klass = MATE_MIXER_DEVICE_GET_CLASS (device);
 
-        if (klass->list_streams != NULL)
-            device->priv->streams = klass->list_streams (device);
-    }
+    if G_LIKELY (klass->list_streams != NULL)
+        return klass->list_streams (device);
 
-    return (const GList *) device->priv->streams;
+    return NULL;
 }
 
 /**
@@ -391,77 +332,16 @@ mate_mixer_device_list_streams (MateMixerDevice *device)
 const GList *
 mate_mixer_device_list_switches (MateMixerDevice *device)
 {
+    MateMixerDeviceClass *klass;
+
     g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), NULL);
 
-    if (device->priv->switches == NULL) {
-        MateMixerDeviceClass *klass = MATE_MIXER_DEVICE_GET_CLASS (device);
+    klass = MATE_MIXER_DEVICE_GET_CLASS (device);
 
-        if (klass->list_switches != NULL)
-            device->priv->switches = klass->list_switches (device);
-    }
+    if G_LIKELY (klass->list_switches != NULL)
+        return klass->list_switches (device);
 
-    return (const GList *) device->priv->switches;
-}
-
-/**
- * mate_mixer_device_list_profiles:
- * @device: a #MateMixerDevice
- */
-const GList *
-mate_mixer_device_list_profiles (MateMixerDevice *device)
-{
-    g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), NULL);
-
-    if (device->priv->profiles == NULL) {
-        MateMixerDeviceClass *klass = MATE_MIXER_DEVICE_GET_CLASS (device);
-
-        if (klass->list_profiles != NULL)
-            device->priv->profiles = klass->list_profiles (device);
-    }
-
-    return (const GList *) device->priv->profiles;
-}
-
-/**
- * mate_mixer_device_get_active_profile:
- * @device: a #MateMixerDevice
- */
-MateMixerDeviceProfile *
-mate_mixer_device_get_active_profile (MateMixerDevice *device)
-{
-    g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), NULL);
-
-    return device->priv->profile;
-}
-
-/**
- * mate_mixer_device_set_active_profile:
- * @device: a #MateMixerDevice
- * @profile: a #MateMixerDeviceProfile
- */
-gboolean
-mate_mixer_device_set_active_profile (MateMixerDevice        *device,
-                                      MateMixerDeviceProfile *profile)
-{
-    g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), FALSE);
-    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_PROFILE (profile), FALSE);
-
-    if (profile != device->priv->profile) {
-        MateMixerDeviceClass *klass;
-
-        klass = MATE_MIXER_DEVICE_GET_CLASS (device);
-
-        if (klass->set_active_profile == NULL ||
-            klass->set_active_profile (device, profile) == FALSE)
-            return FALSE;
-
-        if (G_LIKELY (device->priv->profile != NULL))
-            g_object_unref (device->priv->profile);
-
-        device->priv->profile = g_object_ref (profile);
-    }
-
-    return TRUE;
+    return NULL;
 }
 
 static MateMixerStream *
@@ -498,26 +378,6 @@ mate_mixer_device_real_get_switch (MateMixerDevice *device, const gchar *name)
 
         if (strcmp (name, mate_mixer_switch_get_name (swtch)) == 0)
             return swtch;
-
-        list = list->next;
-    }
-    return NULL;
-}
-
-static MateMixerDeviceProfile *
-mate_mixer_device_real_get_profile (MateMixerDevice *device, const gchar *name)
-{
-    const GList *list;
-
-    g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), NULL);
-    g_return_val_if_fail (name != NULL, NULL);
-
-    list = mate_mixer_device_list_profiles (device);
-    while (list != NULL) {
-        MateMixerDeviceProfile *profile = MATE_MIXER_DEVICE_PROFILE (list->data);
-
-        if (strcmp (name, mate_mixer_device_profile_get_name (profile)) == 0)
-            return profile;
 
         list = list->next;
     }

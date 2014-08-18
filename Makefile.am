@@ -5,9 +5,10 @@ SUBDIRS =                               \
         backends                        \
         data                            \
         docs                            \
-        examples
+        examples                        \
+        po
 
-EXTRA_DIST = autogen.sh
+EXTRA_DIST = build-aux/config.rpath autogen.sh
 
 MAINTAINERCLEANFILES =                  \
     $(srcdir)/aclocal.m4                \

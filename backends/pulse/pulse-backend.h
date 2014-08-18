@@ -20,8 +20,10 @@
 
 #include <glib.h>
 #include <glib-object.h>
+#include <libmatemixer/matemixer.h>
+#include <libmatemixer/matemixer-private.h>
 
-#include <libmatemixer/matemixer-backend-module.h>
+#include "pulse-types.h"
 
 #define PULSE_TYPE_BACKEND                      \
         (pulse_backend_get_type ())
@@ -36,13 +38,12 @@
 #define PULSE_BACKEND_GET_CLASS(o)              \
         (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_TYPE_BACKEND, PulseBackendClass))
 
-typedef struct _PulseBackend         PulseBackend;
 typedef struct _PulseBackendClass    PulseBackendClass;
 typedef struct _PulseBackendPrivate  PulseBackendPrivate;
 
 struct _PulseBackend
 {
-    GObject parent;
+    MateMixerBackend parent;
 
     /*< private >*/
     PulseBackendPrivate *priv;
@@ -50,7 +51,7 @@ struct _PulseBackend
 
 struct _PulseBackendClass
 {
-    GObjectClass parent_class;
+    MateMixerBackendClass parent_class;
 };
 
 GType                       pulse_backend_get_type  (void) G_GNUC_CONST;

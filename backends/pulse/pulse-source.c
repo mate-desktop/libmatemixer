@@ -16,253 +16,238 @@
  */
 
 #include <glib.h>
+#include <glib/gi18n.h>
 #include <glib-object.h>
-
-#include <libmatemixer/matemixer-port.h>
-#include <libmatemixer/matemixer-port-private.h>
-#include <libmatemixer/matemixer-stream.h>
+#include <libmatemixer/matemixer.h>
+#include <libmatemixer/matemixer-private.h>
 
 #include <pulse/pulseaudio.h>
 
 #include "pulse-connection.h"
 #include "pulse-device.h"
 #include "pulse-monitor.h"
+#include "pulse-port.h"
+#include "pulse-port-switch.h"
 #include "pulse-stream.h"
 #include "pulse-source.h"
+#include "pulse-source-control.h"
+#include "pulse-source-output.h"
+#include "pulse-source-switch.h"
+
+struct _PulseSourcePrivate
+{
+    GHashTable         *outputs;
+    PulsePortSwitch    *pswitch;
+    PulseSourceControl *control;
+};
 
 static void pulse_source_class_init (PulseSourceClass *klass);
 static void pulse_source_init       (PulseSource      *source);
+static void pulse_source_dispose    (GObject          *object);
+static void pulse_source_finalize   (GObject          *object);
 
 G_DEFINE_TYPE (PulseSource, pulse_source, PULSE_TYPE_STREAM);
 
-static void          pulse_source_reload          (PulseStream          *pstream);
-
-static gboolean      pulse_source_set_mute        (PulseStream          *pstream,
-                                                   gboolean              mute);
-static gboolean      pulse_source_set_volume      (PulseStream          *pstream,
-                                                   pa_cvolume           *cvolume);
-static gboolean      pulse_source_set_active_port (PulseStream          *pstream,
-                                                   MateMixerPort        *port);
-
-static PulseMonitor *pulse_source_create_monitor  (PulseStream          *pstream);
-
-static void          update_ports                 (PulseStream          *pstream,
-                                                   pa_source_port_info **ports,
-                                                   pa_source_port_info  *active);
+static const GList *pulse_source_list_controls (MateMixerStream *mms);
+static const GList *pulse_source_list_switches (MateMixerStream *mms);
 
 static void
 pulse_source_class_init (PulseSourceClass *klass)
 {
-    PulseStreamClass *stream_class;
+    GObjectClass         *object_class;
+    MateMixerStreamClass *stream_class;
 
-    stream_class = PULSE_STREAM_CLASS (klass);
+    object_class = G_OBJECT_CLASS (klass);
+    object_class->dispose  = pulse_source_dispose;
+    object_class->finalize = pulse_source_finalize;
 
-    stream_class->reload          = pulse_source_reload;
-    stream_class->set_mute        = pulse_source_set_mute;
-    stream_class->set_volume      = pulse_source_set_volume;
-    stream_class->set_active_port = pulse_source_set_active_port;
-    stream_class->create_monitor  = pulse_source_create_monitor;
+    stream_class = MATE_MIXER_STREAM_CLASS (klass);
+    stream_class->list_controls = pulse_source_list_controls;
+    stream_class->list_switches = pulse_source_list_switches;
+
+    g_type_class_add_private (klass, sizeof (PulseSourcePrivate));
 }
 
 static void
 pulse_source_init (PulseSource *source)
 {
+    source->priv = G_TYPE_INSTANCE_GET_PRIVATE (source,
+                                                PULSE_TYPE_SOURCE,
+                                                PulseSourcePrivate);
+
+    source->priv->outputs = g_hash_table_new_full (g_direct_hash,
+                                                   g_direct_equal,
+                                                   NULL,
+                                                   g_object_unref);
 }
 
-PulseStream *
+static void
+pulse_source_dispose (GObject *object)
+{
+    PulseSource *source;
+
+    source = PULSE_SOURCE (object);
+
+    g_clear_object (&source->priv->control);
+    g_clear_object (&source->priv->pswitch);
+
+    g_hash_table_remove_all (source->priv->outputs);
+
+    G_OBJECT_CLASS (pulse_source_parent_class)->dispose (object);
+}
+
+static void
+pulse_source_finalize (GObject *object)
+{
+    PulseSource *source;
+
+    source = PULSE_SOURCE (object);
+
+    g_hash_table_unref (source->priv->outputs);
+
+    G_OBJECT_CLASS (pulse_source_parent_class)->finalize (object);
+}
+
+PulseSource *
 pulse_source_new (PulseConnection      *connection,
                   const pa_source_info *info,
                   PulseDevice          *device)
 {
-    PulseStream *stream;
+    PulseSource *source;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), NULL);
     g_return_val_if_fail (info != NULL, NULL);
 
-    /* Consider the sink index as unchanging parameter */
-    stream = g_object_new (PULSE_TYPE_SOURCE,
+    source = g_object_new (PULSE_TYPE_SOURCE,
+                           "name", info->name,
+                           "label", info->description,
+                           "device", device,
+                           "direction", MATE_MIXER_DIRECTION_INPUT,
                            "connection", connection,
                            "index", info->index,
                            NULL);
 
-    /* Other data may change at any time, so let's make a use of our update function */
-    pulse_source_update (stream, info, device);
+    source->priv->control = pulse_source_control_new (source, info);
 
-    return stream;
-}
+    if (info->n_ports > 0) {
+        pa_source_port_info **ports = info->ports;
 
-gboolean
-pulse_source_update (PulseStream          *pstream,
-                     const pa_source_info *info,
-                     PulseDevice          *device)
-{
-    MateMixerStreamFlags flags = MATE_MIXER_STREAM_INPUT |
-                                 MATE_MIXER_STREAM_HAS_MUTE |
-                                 MATE_MIXER_STREAM_HAS_MONITOR |
-                                 MATE_MIXER_STREAM_HAS_VOLUME |
-                                 MATE_MIXER_STREAM_CAN_SET_VOLUME |
-                                 MATE_MIXER_STREAM_CAN_SUSPEND;
+        /* Create the port switch */
+        source->priv->pswitch = pulse_source_switch_new ("port", _("Port"), source);
 
-    g_return_val_if_fail (PULSE_IS_SOURCE (pstream), FALSE);
-    g_return_val_if_fail (info != NULL, FALSE);
+        while (*ports != NULL) {
+            pa_source_port_info *p = *ports++;
+            PulsePort           *port;
+            const gchar         *icon = NULL;
 
-    /* Let all the information update before emitting notify signals */
-    g_object_freeze_notify (G_OBJECT (pstream));
-
-    pulse_stream_update_name (pstream, info->name);
-    pulse_stream_update_description (pstream, info->description);
-    pulse_stream_update_mute (pstream, info->mute ? TRUE : FALSE);
-
-    /* Stream state */
-    switch (info->state) {
-    case PA_SOURCE_RUNNING:
-        pulse_stream_update_state (pstream, MATE_MIXER_STREAM_STATE_RUNNING);
-        break;
-    case PA_SOURCE_IDLE:
-        pulse_stream_update_state (pstream, MATE_MIXER_STREAM_STATE_IDLE);
-        break;
-    case PA_SOURCE_SUSPENDED:
-        pulse_stream_update_state (pstream, MATE_MIXER_STREAM_STATE_SUSPENDED);
-        break;
-    default:
-        pulse_stream_update_state (pstream, MATE_MIXER_STREAM_STATE_UNKNOWN);
-        break;
-    }
-
-    /* Build the flag list */
-    if (info->flags & PA_SINK_DECIBEL_VOLUME)
-        flags |= MATE_MIXER_STREAM_HAS_DECIBEL_VOLUME;
-    if (info->flags & PA_SINK_FLAT_VOLUME)
-        flags |= MATE_MIXER_STREAM_HAS_FLAT_VOLUME;
-
-    /* Flags must be updated before volume */
-    pulse_stream_update_flags (pstream, flags);
-
-    pulse_stream_update_channel_map (pstream, &info->channel_map);
-    pulse_stream_update_volume (pstream, &info->volume, info->base_volume);
-
-    pulse_stream_update_device (pstream, MATE_MIXER_DEVICE (device));
-
-    /* Ports must be updated after device */
-    if (info->ports != NULL) {
-        update_ports (pstream, info->ports, info->active_port);
-    }
-
-    g_object_thaw_notify (G_OBJECT (pstream));
-    return TRUE;
-}
-
-static void
-pulse_source_reload (PulseStream *pstream)
-{
-    g_return_if_fail (PULSE_IS_SOURCE (pstream));
-
-    pulse_connection_load_source_info (pulse_stream_get_connection (pstream),
-                                       pulse_stream_get_index (pstream));
-}
-
-static gboolean
-pulse_source_set_mute (PulseStream *pstream, gboolean mute)
-{
-    g_return_val_if_fail (PULSE_IS_SOURCE (pstream), FALSE);
-
-    return pulse_connection_set_source_mute (pulse_stream_get_connection (pstream),
-                                             pulse_stream_get_index (pstream),
-                                             mute);
-}
-
-static gboolean
-pulse_source_set_volume (PulseStream *pstream, pa_cvolume *cvolume)
-{
-    g_return_val_if_fail (PULSE_IS_SOURCE (pstream), FALSE);
-    g_return_val_if_fail (cvolume != NULL, FALSE);
-
-    return pulse_connection_set_source_volume (pulse_stream_get_connection (pstream),
-                                               pulse_stream_get_index (pstream),
-                                               cvolume);
-}
-
-static gboolean
-pulse_source_set_active_port (PulseStream *pstream, MateMixerPort *port)
-{
-    g_return_val_if_fail (PULSE_IS_SOURCE (pstream), FALSE);
-    g_return_val_if_fail (MATE_MIXER_IS_PORT (port), FALSE);
-
-    return pulse_connection_set_source_port (pulse_stream_get_connection (pstream),
-                                             pulse_stream_get_index (pstream),
-                                             mate_mixer_port_get_name (port));
-}
-
-static PulseMonitor *
-pulse_source_create_monitor (PulseStream *pstream)
-{
-    g_return_val_if_fail (PULSE_IS_SOURCE (pstream), NULL);
-
-    return pulse_connection_create_monitor (pulse_stream_get_connection (pstream),
-                                            pulse_stream_get_index (pstream),
-                                            PA_INVALID_INDEX);
-}
-
-static void
-update_ports (PulseStream          *pstream,
-              pa_source_port_info **ports,
-              pa_source_port_info  *active)
-{
-    MateMixerPort   *port;
-    MateMixerDevice *device;
-    GHashTable      *hash;
-
-    hash = pulse_stream_get_ports (pstream);
-
-    while (*ports != NULL) {
-        MateMixerPortFlags   flags = MATE_MIXER_PORT_NO_FLAGS;
-        pa_source_port_info *info  = *ports;
-        const gchar         *icon  = NULL;
-
-        device = mate_mixer_stream_get_device (MATE_MIXER_STREAM (pstream));
-        if (device != NULL) {
-            port = mate_mixer_device_get_port (device, info->name);
-
-            if (port != NULL) {
-                flags = mate_mixer_port_get_flags (port);
-                icon  = mate_mixer_port_get_icon (port);
+            /* A port may include an icon but in PulseAudio sink and source ports
+             * the property is not included, for this reason ports are also read from
+             * devices where the icons may be present */
+            if (device != NULL) {
+                port = pulse_device_get_port (PULSE_DEVICE (device), p->name);
+                if (port != NULL)
+                    icon = mate_mixer_switch_option_get_icon (MATE_MIXER_SWITCH_OPTION (port));
             }
+
+            port = pulse_port_new (p->name,
+                                   p->description,
+                                   icon,
+                                   p->priority);
+
+            pulse_port_switch_add_port (source->priv->pswitch, port);
+
+            if (p == info->active_port)
+                pulse_port_switch_set_active_port (source->priv->pswitch, port);
         }
 
-#if PA_CHECK_VERSION(2, 0, 0)
-        if (info->available == PA_PORT_AVAILABLE_YES)
-            flags |= MATE_MIXER_PORT_AVAILABLE;
-        else
-            flags &= ~MATE_MIXER_PORT_AVAILABLE;
-#endif
-
-        port = g_hash_table_lookup (hash, info->name);
-
-        if (port != NULL) {
-            /* Update existing port */
-            _mate_mixer_port_update_description (port, info->description);
-            _mate_mixer_port_update_icon (port, icon);
-            _mate_mixer_port_update_priority (port, info->priority);
-            _mate_mixer_port_update_flags (port, flags);
-        } else {
-            /* Add previously unknown port to the hash table */
-            port = _mate_mixer_port_new (info->name,
-                                         info->description,
-                                         icon,
-                                         info->priority,
-                                         flags);
-
-            g_hash_table_insert (hash, g_strdup (info->name), port);
-        }
-
-        ports++;
+        g_debug ("Created port list for source %s", info->name);
     }
 
-    /* Active port */
-    if (G_LIKELY (active != NULL))
-        port = g_hash_table_lookup (hash, active->name);
-    else
-        port = NULL;
+    pulse_source_update (source, info);
 
-    pulse_stream_update_active_port (pstream, port);
+    _mate_mixer_stream_set_default_control (MATE_MIXER_STREAM (source),
+                                            MATE_MIXER_STREAM_CONTROL (source->priv->control));
+    return source;
+}
+
+void
+pulse_source_add_output (PulseSource *source, const pa_source_output_info *info)
+{
+    PulseSourceOutput *output;
+
+    /* This function is used for both creating and refreshing source outputs */
+    output = g_hash_table_lookup (source->priv->outputs, GINT_TO_POINTER (info->index));
+    if (output == NULL) {
+        const gchar *name;
+
+        output = pulse_source_output_new (source, info);
+        g_hash_table_insert (source->priv->outputs,
+                             GINT_TO_POINTER (info->index),
+                             output);
+
+        name = mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (output));
+        g_signal_emit_by_name (G_OBJECT (source),
+                               "control-added",
+                               name);
+    } else
+        pulse_source_output_update (output, info);
+}
+
+void
+pulse_source_remove_output (PulseSource *source, guint32 index)
+{
+    PulseSourceOutput *output;
+    const gchar       *name;
+
+    output = g_hash_table_lookup (source->priv->outputs, GINT_TO_POINTER (index));
+    if G_UNLIKELY (output == NULL)
+        return;
+
+    name = mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (output));
+
+    g_hash_table_remove (source->priv->outputs, GINT_TO_POINTER (index));
+    g_signal_emit_by_name (G_OBJECT (source),
+                           "control-removed",
+                           name);
+}
+
+void
+pulse_source_update (PulseSource          *source,
+                     const pa_source_info *info)
+{
+    g_return_if_fail (PULSE_IS_SOURCE (source));
+    g_return_if_fail (info != NULL);
+
+    /* The switch doesn't allow being unset, PulseAudio should always include
+     * the active port name if the are any ports available */
+    if (info->active_port != NULL)
+        pulse_port_switch_set_active_port_by_name (source->priv->pswitch,
+                                                   info->active_port->name);
+}
+
+static const GList *
+pulse_source_list_controls (MateMixerStream *mms)
+{
+    GList *list;
+
+    g_return_val_if_fail (PULSE_IS_SOURCE (mms), NULL);
+
+    // XXX
+    list = g_hash_table_get_values (PULSE_SOURCE (mms)->priv->outputs);
+    if (list != NULL)
+        g_list_foreach (list, (GFunc) g_object_ref, NULL);
+
+    return g_list_prepend (list, g_object_ref (PULSE_SOURCE (mms)->priv->control));
+}
+
+static const GList *
+pulse_source_list_switches (MateMixerStream *mms)
+{
+    g_return_val_if_fail (PULSE_IS_SOURCE (mms), NULL);
+
+    // XXX
+    if (PULSE_SOURCE (mms)->priv->pswitch != NULL)
+        return g_list_prepend (NULL, PULSE_SOURCE (mms)->priv->pswitch);
+
+    return NULL;
 }

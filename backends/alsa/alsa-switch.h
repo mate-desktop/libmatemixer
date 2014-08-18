@@ -56,9 +56,10 @@ struct _AlsaSwitchClass
 
 GType       alsa_switch_get_type (void) G_GNUC_CONST;
 
-AlsaSwitch *alsa_switch_new      (const gchar *name,
-                                  const gchar *label,
-                                  GList       *options);
+AlsaSwitch *alsa_switch_new      (const gchar        *name,
+                                  const gchar        *label,
+                                  MateMixerSwitchRole role,
+                                  GList              *options);
 
 G_END_DECLS
 

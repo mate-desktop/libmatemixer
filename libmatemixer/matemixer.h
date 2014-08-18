@@ -21,11 +21,14 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include <libmatemixer/matemixer-client-stream.h>
+#include <libmatemixer/matemixer-types.h>
+
+#include <libmatemixer/matemixer-app-info.h>
 #include <libmatemixer/matemixer-context.h>
 #include <libmatemixer/matemixer-device.h>
-#include <libmatemixer/matemixer-device-profile.h>
 #include <libmatemixer/matemixer-enums.h>
+#include <libmatemixer/matemixer-enum-types.h>
+#include <libmatemixer/matemixer-stored-control.h>
 #include <libmatemixer/matemixer-stream.h>
 #include <libmatemixer/matemixer-stream-control.h>
 #include <libmatemixer/matemixer-switch.h>

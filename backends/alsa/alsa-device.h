@@ -20,6 +20,7 @@
 
 #include <glib.h>
 #include <glib-object.h>
+#include <libmatemixer/matemixer.h>
 
 #include "alsa-stream.h"
 
@@ -64,6 +65,9 @@ AlsaDevice *alsa_device_new               (const gchar *name,
                                            const gchar *label);
 
 gboolean    alsa_device_open              (AlsaDevice  *device);
+gboolean    alsa_device_is_open           (AlsaDevice  *device);
+void        alsa_device_close             (AlsaDevice  *device);
+
 void        alsa_device_load              (AlsaDevice  *device);
 
 AlsaStream *alsa_device_get_input_stream  (AlsaDevice  *device);

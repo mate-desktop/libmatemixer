@@ -32,7 +32,7 @@
 #include "oss-stream.h"
 
 #define BACKEND_NAME      "OSS"
-#define BACKEND_PRIORITY  9
+#define BACKEND_PRIORITY  10
 
 #if !defined(__linux__) && !defined(__NetBSD__) && !defined(__OpenBSD__)
     /* At least on systems based on FreeBSD we will need to read device names
@@ -47,7 +47,9 @@ struct _OssBackendPrivate
 {
     gchar      *default_device;
     GSource    *timeout_source;
-    GHashTable *devices;
+    GList      *streams;
+    GList      *devices;
+    GHashTable *devices_paths;
 };
 
 static void oss_backend_class_init     (OssBackendClass *klass);
@@ -61,36 +63,49 @@ static void oss_backend_finalize       (GObject         *object);
 G_DEFINE_DYNAMIC_TYPE (OssBackend, oss_backend, MATE_MIXER_TYPE_BACKEND)
 #pragma clang diagnostic pop
 
-static gboolean oss_backend_open             (MateMixerBackend *backend);
-static void     oss_backend_close            (MateMixerBackend *backend);
-static GList *  oss_backend_list_devices     (MateMixerBackend *backend);
-static GList *  oss_backend_list_streams     (MateMixerBackend *backend);
+static gboolean     oss_backend_open             (MateMixerBackend *backend);
+static void         oss_backend_close            (MateMixerBackend *backend);
+static const GList *oss_backend_list_devices     (MateMixerBackend *backend);
+static const GList *oss_backend_list_streams     (MateMixerBackend *backend);
 
-static gboolean read_devices                 (OssBackend       *oss);
+static gboolean     read_devices                 (OssBackend       *oss);
 
-static gboolean read_device                  (OssBackend       *oss,
-                                              const gchar      *path,
-                                              gboolean         *added);
+static gboolean     read_device                  (OssBackend       *oss,
+                                                  const gchar      *path,
+                                                  gboolean         *added);
 
-static gchar *  read_device_label            (OssBackend       *oss,
-                                              const gchar      *path,
-                                              gint              fd);
+static gchar *      read_device_label            (OssBackend       *oss,
+                                                  const gchar      *path,
+                                                  gint              fd);
 
-static gchar *  read_device_label_sndstat    (OssBackend       *oss,
-                                              const gchar      *sndstat,
-                                              const gchar      *path,
-                                              guint             index) G_GNUC_UNUSED;
+static gchar *      read_device_label_sndstat    (OssBackend       *oss,
+                                                  const gchar      *sndstat,
+                                                  const gchar      *path,
+                                                  guint             index) G_GNUC_UNUSED;
 
-static void     add_device                   (OssBackend       *oss,
-                                              OssDevice        *device);
-static void     remove_device                (OssBackend       *oss,
-                                              OssDevice        *device);
+static void         add_device                   (OssBackend       *oss,
+                                                  OssDevice        *device);
+static void         remove_device                (OssBackend       *oss,
+                                                  OssDevice        *device);
 
-static void     remove_stream                (OssBackend       *oss,
-                                              const gchar      *name);
+static void         remove_device_by_path        (OssBackend       *oss,
+                                                  const gchar      *path);
 
-static void     select_default_input_stream  (OssBackend       *oss);
-static void     select_default_output_stream (OssBackend       *oss);
+static void         remove_device_by_list_item   (OssBackend       *oss,
+                                                  GList            *item);
+
+static void         remove_stream                (OssBackend       *oss,
+                                                  const gchar      *name);
+
+static void         select_default_input_stream  (OssBackend       *oss);
+static void         select_default_output_stream (OssBackend       *oss);
+
+static void         free_stream_list             (OssBackend       *oss);
+
+static gint         compare_devices              (gconstpointer     a,
+                                                  gconstpointer     b);
+static gint         compare_device_path          (gconstpointer     a,
+                                                  gconstpointer     b);
 
 static MateMixerBackendInfo info;
 
@@ -142,10 +157,10 @@ oss_backend_init (OssBackend *oss)
                                              OSS_TYPE_BACKEND,
                                              OssBackendPrivate);
 
-    oss->priv->devices = g_hash_table_new_full (g_str_hash,
-                                                g_str_equal,
-                                                g_free,
-                                                g_object_unref);
+    oss->priv->devices_paths = g_hash_table_new_full (g_str_hash,
+                                                      g_str_equal,
+                                                      g_free,
+                                                      NULL);
 }
 
 static void
@@ -170,7 +185,7 @@ oss_backend_finalize (GObject *object)
 
     oss = OSS_BACKEND (object);
 
-    g_hash_table_destroy (oss->priv->devices);
+    g_hash_table_unref (oss->priv->devices_paths);
 
     G_OBJECT_CLASS (oss_backend_parent_class)->finalize (object);
 }
@@ -212,63 +227,65 @@ oss_backend_close (MateMixerBackend *backend)
     oss = OSS_BACKEND (backend);
 
     g_source_destroy (oss->priv->timeout_source);
-    g_hash_table_remove_all (oss->priv->devices);
 
-    g_free (oss->priv->default_device);
-    oss->priv->default_device = NULL;
+    if (oss->priv->devices != NULL) {
+        g_list_free_full (oss->priv->devices, g_object_unref);
+        oss->priv->devices = NULL;
+    }
+    if (oss->priv->default_device != NULL) {
+        g_free (oss->priv->default_device);
+        oss->priv->default_device = NULL;
+    }
+
+    free_stream_list (oss);
+
+    g_hash_table_remove_all (oss->priv->devices_paths);
 
     _mate_mixer_backend_set_state (backend, MATE_MIXER_STATE_IDLE);
 }
 
-static GList *
+static const GList *
 oss_backend_list_devices (MateMixerBackend *backend)
 {
-    GList *list;
-
     g_return_val_if_fail (OSS_IS_BACKEND (backend), NULL);
 
-    /* Convert the hash table to a linked list, this list is expected to be
-     * cached in the main library */
-    list = g_hash_table_get_values (OSS_BACKEND (backend)->priv->devices);
-    if (list != NULL)
-        g_list_foreach (list, (GFunc) g_object_ref, NULL);
-
-    return list;
+    return OSS_BACKEND (backend)->priv->devices;
 }
 
-static GList *
+static const GList *
 oss_backend_list_streams (MateMixerBackend *backend)
 {
-    OssBackend    *oss;
-    GHashTableIter iter;
-    gpointer       value;
-    GList         *list = NULL;
+    OssBackend *oss;
 
     g_return_val_if_fail (OSS_IS_BACKEND (backend), NULL);
 
     oss = OSS_BACKEND (backend);
 
-    /* We don't keep a list or hash table of all streams here, instead walk
-     * through the list of devices and create the list manually, each device
-     * has at most one input and one output stream */
-    g_hash_table_iter_init (&iter, oss->priv->devices);
+    if (oss->priv->streams == NULL) {
+        GList *list;
 
-    while (g_hash_table_iter_next (&iter, NULL, &value)) {
-        OssDevice *device = OSS_DEVICE (value);
-        OssStream *stream;
+        /* Walk through the list of devices and create the stream list, each
+         * device has at most one input and one output stream */
+        list = oss->priv->devices;
 
-        stream = oss_device_get_output_stream (device);
-        if (stream != NULL)
-            list = g_list_prepend (list, stream);
-        stream = oss_device_get_input_stream (device);
-        if (stream != NULL)
-            list = g_list_prepend (list, stream);
+        while (list != NULL) {
+            OssDevice *device = OSS_DEVICE (list->data);
+            OssStream *stream;
+
+            stream = oss_device_get_input_stream (device);
+            if (stream != NULL) {
+                oss->priv->streams =
+                    g_list_append (oss->priv->streams, g_object_ref (stream));
+            }
+            stream = oss_device_get_output_stream (device);
+            if (stream != NULL) {
+                oss->priv->streams =
+                    g_list_append (oss->priv->streams, g_object_ref (stream));
+            }
+            list = list->next;
+        }
     }
-
-    if (list != NULL)
-        g_list_foreach (list, (GFunc) g_object_ref, NULL);
-
-    return list;
+    return oss->priv->streams;
 }
 
 static gboolean
@@ -278,8 +295,10 @@ read_devices (OssBackend *oss)
     gboolean added = FALSE;
 
     for (i = 0; i < OSS_MAX_DEVICES; i++) {
-        gboolean added_current;
-        gchar   *path = g_strdup_printf ("/dev/mixer%i", i);
+        gchar   *path;
+        gboolean added_current = FALSE;
+
+        path = g_strdup_printf ("/dev/mixer%i", i);
 
         /* On recent FreeBSD both /dev/mixer and /dev/mixer0 point to the same
          * mixer device, on NetBSD and OpenBSD /dev/mixer is a symlink to one
@@ -289,7 +308,7 @@ read_devices (OssBackend *oss)
         if (read_device (oss, path, &added_current) == FALSE && i == 0)
             read_device (oss, "/dev/mixer", &added_current);
 
-        if (added_current)
+        if (added_current == TRUE)
             added = TRUE;
 
         g_free (path);
@@ -312,16 +331,12 @@ read_device (OssBackend *oss, const gchar *path, gboolean *added)
     gchar     *bname;
     gchar     *label;
 
-    device = g_hash_table_lookup (oss->priv->devices, path);
-    *added = FALSE;
-
     fd = g_open (path, O_RDWR, 0);
     if (fd == -1) {
         if (errno != ENOENT && errno != ENXIO)
             g_debug ("%s: %s", path, g_strerror (errno));
 
-        if (device != NULL)
-            remove_device (oss, device);
+        remove_device_by_path (oss, path);
         return FALSE;
     }
 
@@ -329,7 +344,7 @@ read_device (OssBackend *oss, const gchar *path, gboolean *added)
      * still tested to be absolutely sure that the device is removed it case
      * it has disappeared, but normally the device's polling facility should
      * handle this by itself */
-    if (device != NULL) {
+    if (g_hash_table_contains (oss->priv->devices_paths, path) == TRUE) {
         close (fd);
         return TRUE;
     }
@@ -345,8 +360,9 @@ read_device (OssBackend *oss, const gchar *path, gboolean *added)
 
     if ((*added = oss_device_open (device)) == TRUE)
         add_device (oss, device);
+    else
+        g_object_unref (device);
 
-    g_object_unref (device);
     return *added;
 }
 
@@ -445,44 +461,104 @@ read_device_label_sndstat (OssBackend  *oss,
 static void
 add_device (OssBackend *oss, OssDevice *device)
 {
-    const gchar *name;
+    oss->priv->devices =
+        g_list_insert_sorted_with_data (oss->priv->devices,
+                                        device,
+                                        (GCompareDataFunc) compare_devices,
+                                        NULL);
 
-    name = mate_mixer_device_get_name (MATE_MIXER_DEVICE (device));
+    /* Keep track of added device paths */
+    g_hash_table_add (oss->priv->devices_paths,
+                      g_strdup (oss_device_get_path (device)));
 
-    g_hash_table_insert (oss->priv->devices,
-                         g_strdup (oss_device_get_path (device)),
-                         g_object_ref (device));
-
-    // XXX make device emit it when closed
+    g_signal_connect_swapped (G_OBJECT (device),
+                              "closed",
+                              G_CALLBACK (remove_device),
+                              oss);
     g_signal_connect_swapped (G_OBJECT (device),
                               "stream-removed",
                               G_CALLBACK (remove_stream),
                               oss);
 
-    g_signal_emit_by_name (G_OBJECT (oss), "device-added", name);
+    g_signal_connect_swapped (G_OBJECT (device),
+                              "closed",
+                              G_CALLBACK (free_stream_list),
+                              oss);
+    g_signal_connect_swapped (G_OBJECT (device),
+                              "stream-added",
+                              G_CALLBACK (free_stream_list),
+                              oss);
+    g_signal_connect_swapped (G_OBJECT (device),
+                              "stream-removed",
+                              G_CALLBACK (free_stream_list),
+                              oss);
 
+    g_signal_emit_by_name (G_OBJECT (oss),
+                           "device-added",
+                           mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)));
+
+    /* Load the device elements after emitting device-added, because the load
+     * function will most likely emit stream-added on the device and backend */
     oss_device_load (device);
 }
 
 static void
 remove_device (OssBackend *oss, OssDevice *device)
 {
-    const gchar *name;
+    GList *item;
+
+    item = g_list_find (oss->priv->devices, device);
+    if (item != NULL)
+        remove_device_by_list_item (oss, item);
+}
+
+static void
+remove_device_by_path (OssBackend *oss, const gchar *path)
+{
+    GList *item;
+
+    item = g_list_find_custom (oss->priv->devices, path, compare_device_path);
+    if (item != NULL)
+        remove_device_by_list_item (oss, item);
+}
+
+static void
+remove_device_by_list_item (OssBackend *oss, GList *item)
+{
+    OssDevice   *device;
     const gchar *path;
 
-    path = oss_device_get_path (device);
-    name = mate_mixer_device_get_name (MATE_MIXER_DEVICE (device));
+    device = OSS_DEVICE (item->data);
+
+    g_signal_handlers_disconnect_by_func (G_OBJECT (device),
+                                          G_CALLBACK (remove_device),
+                                          oss);
+
+    if (oss_device_is_open (device) == TRUE)
+        oss_device_close (device);
 
     g_signal_handlers_disconnect_by_func (G_OBJECT (device),
                                           G_CALLBACK (remove_stream),
                                           oss);
 
-    // XXX close the device and make it remove streams
-    g_hash_table_remove (oss->priv->devices, path);
+    oss->priv->devices = g_list_delete_link (oss->priv->devices, item);
+
+    path = oss_device_get_path (device);
+    g_hash_table_remove (oss->priv->devices_paths, path);
+
+    if (g_strcmp0 (oss->priv->default_device, path) == 0) {
+        g_free (oss->priv->default_device);
+        oss->priv->default_device = NULL;
+    }
+
+    /* The list may and may not have been invalidate by device signals */
+    free_stream_list (oss);
 
     g_signal_emit_by_name (G_OBJECT (oss),
                            "device-removed",
-                           name);
+                           mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)));
+
+    g_object_unref (device);
 }
 
 static void
@@ -492,7 +568,6 @@ remove_stream (OssBackend *oss, const gchar *name)
 
     stream = mate_mixer_backend_get_default_input_stream (MATE_MIXER_BACKEND (oss));
 
-    // XXX see if the change happens after stream is removed or before
     if (stream != NULL && strcmp (mate_mixer_stream_get_name (stream), name) == 0)
         select_default_input_stream (oss);
 
@@ -502,16 +577,31 @@ remove_stream (OssBackend *oss, const gchar *name)
         select_default_output_stream (oss);
 }
 
+static OssDevice *
+get_default_device (OssBackend *oss)
+{
+    GList *item;
+
+    if (oss->priv->default_device == NULL)
+        return NULL;
+
+    item = g_list_find_custom (oss->priv->devices,
+                               oss->priv->default_device,
+                               compare_device_path);
+    if G_LIKELY (item != NULL)
+        return OSS_DEVICE (item->data);
+
+    return NULL;
+}
+
 static void
 select_default_input_stream (OssBackend *oss)
 {
-    OssDevice *device = NULL;
+    OssDevice *device;
     OssStream *stream;
-    gint       i;
+    GList     *list;
 
-    /* Always prefer stream in the "default" device */
-    if (oss->priv->default_device != NULL)
-        device = g_hash_table_lookup (oss->priv->devices, oss->priv->default_device);
+    device = get_default_device (oss);
     if (device != NULL) {
         stream = oss_device_get_input_stream (device);
         if (stream != NULL) {
@@ -521,23 +611,17 @@ select_default_input_stream (OssBackend *oss)
         }
     }
 
-    for (i = 0; i < OSS_MAX_DEVICES; i++) {
-        gchar *path = g_strdup_printf ("/dev/mixer%i", i);
+    list = oss->priv->devices;
+    while (list != NULL) {
+        device = OSS_DEVICE (list->data);
+        stream = oss_device_get_input_stream (device);
 
-        device = g_hash_table_lookup (oss->priv->devices, path);
-        if (device == NULL && i == 0)
-            device = g_hash_table_lookup (oss->priv->devices, "/dev/mixer");
-
-        if (device != NULL) {
-            stream = oss_device_get_input_stream (device);
-            if (stream != NULL) {
-                _mate_mixer_backend_set_default_input_stream (MATE_MIXER_BACKEND (oss),
-                                                              MATE_MIXER_STREAM (stream));
-                g_free (path);
-                return;
-            }
+        if (stream != NULL) {
+            _mate_mixer_backend_set_default_input_stream (MATE_MIXER_BACKEND (oss),
+                                                          MATE_MIXER_STREAM (stream));
+            return;
         }
-        g_free (path);
+        list = list->next;
     }
 
     /* In the worst case unset the default stream */
@@ -547,13 +631,11 @@ select_default_input_stream (OssBackend *oss)
 static void
 select_default_output_stream (OssBackend *oss)
 {
-    OssDevice *device = NULL;
+    OssDevice *device;
     OssStream *stream;
-    gint       i;
+    GList     *list;
 
-    /* Always prefer stream in the "default" device */
-    if (oss->priv->default_device != NULL)
-        device = g_hash_table_lookup (oss->priv->devices, oss->priv->default_device);
+    device = get_default_device (oss);
     if (device != NULL) {
         stream = oss_device_get_output_stream (device);
         if (stream != NULL) {
@@ -563,25 +645,48 @@ select_default_output_stream (OssBackend *oss)
         }
     }
 
-    for (i = 0; i < OSS_MAX_DEVICES; i++) {
-        gchar *path = g_strdup_printf ("/dev/mixer%i", i);
+    list = oss->priv->devices;
+    while (list != NULL) {
+        device = OSS_DEVICE (list->data);
+        stream = oss_device_get_output_stream (device);
 
-        device = g_hash_table_lookup (oss->priv->devices, path);
-        if (device == NULL && i == 0)
-            device = g_hash_table_lookup (oss->priv->devices, "/dev/mixer");
-
-        if (device != NULL) {
-            stream = oss_device_get_output_stream (device);
-            if (stream != NULL) {
-                _mate_mixer_backend_set_default_output_stream (MATE_MIXER_BACKEND (oss),
-                                                               MATE_MIXER_STREAM (stream));
-                g_free (path);
-                return;
-            }
+        if (stream != NULL) {
+            _mate_mixer_backend_set_default_output_stream (MATE_MIXER_BACKEND (oss),
+                                                           MATE_MIXER_STREAM (stream));
+            return;
         }
-        g_free (path);
+        list = list->next;
     }
 
     /* In the worst case unset the default stream */
     _mate_mixer_backend_set_default_output_stream (MATE_MIXER_BACKEND (oss), NULL);
+}
+
+static void
+free_stream_list (OssBackend *oss)
+{
+    if (oss->priv->streams == NULL)
+        return;
+
+    g_list_free_full (oss->priv->streams, g_object_unref);
+
+    oss->priv->streams = NULL;
+}
+
+static gint
+compare_devices (gconstpointer a, gconstpointer b)
+{
+    MateMixerDevice *d1 = MATE_MIXER_DEVICE (a);
+    MateMixerDevice *d2 = MATE_MIXER_DEVICE (b);
+
+    return strcmp (mate_mixer_device_get_name (d1), mate_mixer_device_get_name (d2));
+}
+
+static gint
+compare_device_path (gconstpointer a, gconstpointer b)
+{
+    OssDevice   *device = OSS_DEVICE (a);
+    const gchar *path   = (const gchar *) b;
+
+    return strcmp (oss_device_get_path (device), path);
 }

@@ -19,17 +19,16 @@
 #define PULSE_HELPERS_H
 
 #include <glib.h>
-
-#include <libmatemixer/matemixer-enums.h>
+#include <libmatemixer/matemixer.h>
 
 #include <pulse/pulseaudio.h>
 
 G_BEGIN_DECLS
 
-MateMixerChannelPosition  pulse_convert_position_from_pulse (pa_channel_position_t    position);
-pa_channel_position_t     pulse_convert_position_to_pulse   (MateMixerChannelPosition position);
+MateMixerChannelPosition        pulse_convert_position_from_pulse (pa_channel_position_t    position);
+pa_channel_position_t           pulse_convert_position_to_pulse   (MateMixerChannelPosition position);
 
-MateMixerClientStreamRole pulse_convert_media_role_name     (const gchar             *name);
+MateMixerStreamControlMediaRole pulse_convert_media_role_name     (const gchar             *name);
 
 G_END_DECLS
 

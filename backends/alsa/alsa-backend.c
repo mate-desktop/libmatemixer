@@ -27,12 +27,22 @@
 #include "alsa-stream.h"
 
 #define BACKEND_NAME      "ALSA"
-#define BACKEND_PRIORITY  9
+#define BACKEND_PRIORITY  20
+
+#define ALSA_DEVICE_GET_ID(d)                                               \
+        (g_object_get_data (G_OBJECT (d), "__matemixer_alsa_device_id"))
+
+#define ALSA_DEVICE_SET_ID(d,id)                                            \
+        (g_object_set_data_full (G_OBJECT (d),                              \
+                                 "__matemixer_alsa_device_id",              \
+                                 g_strdup (id),                             \
+                                 g_free))
 
 struct _AlsaBackendPrivate
 {
     GSource    *timeout_source;
-    GHashTable *devices;
+    GList      *streams;
+    GList      *devices;
     GHashTable *devices_ids;
 };
 
@@ -47,26 +57,38 @@ static void alsa_backend_finalize       (GObject          *object);
 G_DEFINE_DYNAMIC_TYPE (AlsaBackend, alsa_backend, MATE_MIXER_TYPE_BACKEND)
 #pragma clang diagnostic pop
 
-static gboolean alsa_backend_open            (MateMixerBackend *backend);
-static void     alsa_backend_close           (MateMixerBackend *backend);
-static GList *  alsa_backend_list_devices    (MateMixerBackend *backend);
-static GList *  alsa_backend_list_streams    (MateMixerBackend *backend);
+static gboolean     alsa_backend_open            (MateMixerBackend *backend);
+static void         alsa_backend_close           (MateMixerBackend *backend);
+static const GList *alsa_backend_list_devices    (MateMixerBackend *backend);
+static const GList *alsa_backend_list_streams    (MateMixerBackend *backend);
 
-static gboolean read_devices                 (AlsaBackend      *alsa);
+static gboolean     read_devices                 (AlsaBackend      *alsa);
 
-static gboolean read_device                  (AlsaBackend      *alsa,
-                                              const gchar      *card);
+static gboolean     read_device                  (AlsaBackend      *alsa,
+                                                  const gchar      *card);
 
-static void     add_device                   (AlsaBackend      *alsa,
-                                              AlsaDevice       *device);
+static void         add_device                   (AlsaBackend      *alsa,
+                                                  AlsaDevice       *device);
 
-static void     remove_device                (AlsaBackend      *alsa,
-                                              AlsaDevice       *device);
-static void     remove_stream                (AlsaBackend      *alsa,
-                                              const gchar      *name);
+static void         remove_device                (AlsaBackend      *alsa,
+                                                  AlsaDevice       *device);
+static void         remove_device_by_name        (AlsaBackend      *alsa,
+                                                  const gchar      *name);
+static void         remove_device_by_list_item   (AlsaBackend      *alsa,
+                                                  GList            *item);
 
-static void     select_default_input_stream  (AlsaBackend      *alsa);
-static void     select_default_output_stream (AlsaBackend      *alsa);
+static void         remove_stream                (AlsaBackend      *alsa,
+                                                  const gchar      *name);
+
+static void         select_default_input_stream  (AlsaBackend      *alsa);
+static void         select_default_output_stream (AlsaBackend      *alsa);
+
+static void         free_stream_list             (AlsaBackend      *alsa);
+
+static gint         compare_devices              (gconstpointer     a,
+                                                  gconstpointer     b);
+static gint         compare_device_name          (gconstpointer     a,
+                                                  gconstpointer     b);
 
 static MateMixerBackendInfo info;
 
@@ -118,11 +140,6 @@ alsa_backend_init (AlsaBackend *alsa)
                                              ALSA_TYPE_BACKEND,
                                              AlsaBackendPrivate);
 
-    alsa->priv->devices = g_hash_table_new_full (g_str_hash,
-                                                 g_str_equal,
-                                                 g_free,
-                                                 g_object_unref);
-
     alsa->priv->devices_ids = g_hash_table_new_full (g_str_hash,
                                                      g_str_equal,
                                                      g_free,
@@ -151,7 +168,6 @@ alsa_backend_finalize (GObject *object)
 
     alsa = ALSA_BACKEND (object);
 
-    g_hash_table_unref (alsa->priv->devices);
     g_hash_table_unref (alsa->priv->devices_ids);
 
     G_OBJECT_CLASS (alsa_backend_parent_class)->finalize (object);
@@ -166,9 +182,8 @@ alsa_backend_open (MateMixerBackend *backend)
 
     alsa = ALSA_BACKEND (backend);
 
-    /* Poll ALSA for changes every 500 milliseconds, this actually only
-     * discovers added or changed sound cards, sound card related events
-     * are handled by AlsaDevices */
+    /* Poll ALSA for changes every second, this only discovers added or removed
+     * sound cards, sound card related events are handled by AlsaDevices */
     alsa->priv->timeout_source = g_timeout_source_new_seconds (1);
     g_source_set_callback (alsa->priv->timeout_source,
                            (GSourceFunc) read_devices,
@@ -197,61 +212,60 @@ alsa_backend_close (MateMixerBackend *backend)
 
     g_source_destroy (alsa->priv->timeout_source);
 
-    g_hash_table_remove_all (alsa->priv->devices);
+    if (alsa->priv->devices != NULL) {
+        g_list_free_full (alsa->priv->devices, g_object_unref);
+        alsa->priv->devices = NULL;
+    }
+
+    free_stream_list (alsa);
+
     g_hash_table_remove_all (alsa->priv->devices_ids);
 
     _mate_mixer_backend_set_state (backend, MATE_MIXER_STATE_IDLE);
 }
 
-static GList *
+static const GList *
 alsa_backend_list_devices (MateMixerBackend *backend)
 {
-    GList *list;
-
     g_return_val_if_fail (ALSA_IS_BACKEND (backend), NULL);
 
-    /* Convert the hash table to a linked list, this list is expected to be
-     * cached in the main library */
-    list = g_hash_table_get_values (ALSA_BACKEND (backend)->priv->devices);
-    if (list != NULL)
-        g_list_foreach (list, (GFunc) g_object_ref, NULL);
-
-    return list;
+    return ALSA_BACKEND (backend)->priv->devices;
 }
 
-static GList *
+static const GList *
 alsa_backend_list_streams (MateMixerBackend *backend)
 {
-    AlsaBackend   *alsa;
-    GHashTableIter iter;
-    gpointer       value;
-    GList         *list = NULL;
+    AlsaBackend *alsa;
 
     g_return_val_if_fail (ALSA_IS_BACKEND (backend), NULL);
 
     alsa = ALSA_BACKEND (backend);
 
-    /* We don't keep a list or hash table of all streams here, instead walk
-     * through the list of devices and create the list manually, each device
-     * has at most one input and one output stream */
-    g_hash_table_iter_init (&iter, alsa->priv->devices);
+    if (alsa->priv->streams == NULL) {
+        GList *list;
 
-    while (g_hash_table_iter_next (&iter, NULL, &value)) {
-        AlsaDevice *device = ALSA_DEVICE (value);
-        AlsaStream *stream;
+        /* Walk through the list of devices and create the stream list, each
+         * device has at most one input and one output stream */
+        list = alsa->priv->devices;
 
-        stream = alsa_device_get_output_stream (device);
-        if (stream != NULL)
-            list = g_list_prepend (list, stream);
-        stream = alsa_device_get_input_stream (device);
-        if (stream != NULL)
-            list = g_list_prepend (list, stream);
+        while (list != NULL) {
+            AlsaDevice *device = ALSA_DEVICE (list->data);
+            AlsaStream *stream;
+
+            stream = alsa_device_get_input_stream (device);
+            if (stream != NULL) {
+                alsa->priv->streams =
+                    g_list_append (alsa->priv->streams, g_object_ref (stream));
+            }
+            stream = alsa_device_get_output_stream (device);
+            if (stream != NULL) {
+                alsa->priv->streams =
+                    g_list_append (alsa->priv->streams, g_object_ref (stream));
+            }
+            list = list->next;
+        }
     }
-
-    if (list != NULL)
-        g_list_foreach (list, (GFunc) g_object_ref, NULL);
-
-    return list;
+    return alsa->priv->streams;
 }
 
 static gboolean
@@ -260,12 +274,12 @@ read_devices (AlsaBackend *alsa)
     gint     num;
     gint     ret;
     gchar    card[16];
-    gboolean changed = FALSE;
+    gboolean added = FALSE;
 
     /* Read the default device first, it will be either one of the hardware cards
      * that will be queried later, or a software mixer */
     if (read_device (alsa, "default") == TRUE)
-        changed = TRUE;
+        added = TRUE;
 
     for (num = -1;;) {
         /* Read number of the next sound card */
@@ -277,12 +291,12 @@ read_devices (AlsaBackend *alsa)
         g_snprintf (card, sizeof (card), "hw:%d", num);
 
         if (read_device (alsa, card) == TRUE)
-            changed = TRUE;
+            added = TRUE;
     }
 
     /* If any card has been added, make sure we have the most suitable default
      * input and output streams */
-    if (changed == TRUE) {
+    if (added == TRUE) {
         select_default_input_stream (alsa);
         select_default_output_stream (alsa);
     }
@@ -300,15 +314,13 @@ read_device (AlsaBackend *alsa, const gchar *card)
 
     /* The device may be already known, remove it if it's known and fails
      * to be read, this happens for example when PulseAudio is killed */
-    device = g_hash_table_lookup (alsa->priv->devices, card);
-
     ret = snd_ctl_open (&ctl, card, 0);
     if (ret < 0) {
         g_warning ("Failed to open ALSA control for %s: %s",
                    card,
                    snd_strerror (ret));
-        if (device != NULL)
-            remove_device (alsa, device);
+
+        remove_device_by_name (alsa, card);
         return FALSE;
     }
 
@@ -317,9 +329,8 @@ read_device (AlsaBackend *alsa, const gchar *card)
     ret = snd_ctl_card_info (ctl, info);
     if (ret < 0) {
         g_warning ("Failed to read card info: %s", snd_strerror (ret));
-        if (device != NULL)
-            remove_device (alsa, device);
 
+        remove_device_by_name (alsa, card);
         snd_ctl_close (ctl);
         return FALSE;
     }
@@ -342,11 +353,7 @@ read_device (AlsaBackend *alsa, const gchar *card)
         return FALSE;
     }
 
-    g_object_set_data_full (G_OBJECT (device),
-                            "__matemixer_alsa_device_id",
-                            g_strdup (id),
-                            g_free);
-
+    ALSA_DEVICE_SET_ID (device, id);
     add_device (alsa, device);
 
     snd_ctl_close (ctl);
@@ -356,19 +363,13 @@ read_device (AlsaBackend *alsa, const gchar *card)
 static void
 add_device (AlsaBackend *alsa, AlsaDevice *device)
 {
-    const gchar *name;
+    alsa->priv->devices = g_list_insert_sorted_with_data (alsa->priv->devices,
+                                                          device,
+                                                          (GCompareDataFunc) compare_devices,
+                                                          NULL);
 
-    name = mate_mixer_device_get_name (MATE_MIXER_DEVICE (device));
-
-    g_hash_table_insert (alsa->priv->devices,
-                         g_strdup (name),
-                         g_object_ref (device));
-
-    /* Remember the device identifier, use a single string copy as we only free
-     * the hash table key */
-    g_hash_table_add (alsa->priv->devices_ids,
-                      g_strdup (g_object_get_data (G_OBJECT (device),
-                                                   "__matemixer_alsa_device_id")));
+    /* Keep track of device identifiers */
+    g_hash_table_add (alsa->priv->devices_ids, g_strdup (ALSA_DEVICE_GET_ID (device)));
 
     g_signal_connect_swapped (G_OBJECT (device),
                               "closed",
@@ -379,7 +380,22 @@ add_device (AlsaBackend *alsa, AlsaDevice *device)
                               G_CALLBACK (remove_stream),
                               alsa);
 
-    g_signal_emit_by_name (G_OBJECT (alsa), "device-added", name);
+    g_signal_connect_swapped (G_OBJECT (device),
+                              "closed",
+                              G_CALLBACK (free_stream_list),
+                              alsa);
+    g_signal_connect_swapped (G_OBJECT (device),
+                              "stream-added",
+                              G_CALLBACK (free_stream_list),
+                              alsa);
+    g_signal_connect_swapped (G_OBJECT (device),
+                              "stream-removed",
+                              G_CALLBACK (free_stream_list),
+                              alsa);
+
+    g_signal_emit_by_name (G_OBJECT (alsa),
+                           "device-added",
+                           mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)));
 
     /* Load the device elements after emitting device-added, because the load
      * function will most likely emit stream-added on the device and backend */
@@ -389,27 +405,48 @@ add_device (AlsaBackend *alsa, AlsaDevice *device)
 static void
 remove_device (AlsaBackend *alsa, AlsaDevice *device)
 {
-    const gchar *name;
+    GList *item;
 
-    name = mate_mixer_device_get_name (MATE_MIXER_DEVICE (device));
+    item = g_list_find (alsa->priv->devices, device);
+    if (item != NULL)
+        remove_device_by_list_item (alsa, item);
+}
 
-    g_signal_handlers_disconnect_by_func (G_OBJECT (device),
-                                          G_CALLBACK (remove_device),
-                                          alsa);
-    g_signal_handlers_disconnect_by_func (G_OBJECT (device),
-                                          G_CALLBACK (remove_stream),
-                                          alsa);
+static void
+remove_device_by_name (AlsaBackend *alsa, const gchar *name)
+{
+    GList *item;
 
-    /* Remove the device */
+    item = g_list_find_custom (alsa->priv->devices, name, compare_device_name);
+    if (item != NULL)
+        remove_device_by_list_item (alsa, item);
+}
+
+static void
+remove_device_by_list_item (AlsaBackend *alsa, GList *item)
+{
+    AlsaDevice *device;
+
+    device = ALSA_DEVICE (item->data);
+
+    g_signal_handlers_disconnect_by_data (G_OBJECT (device), alsa);
+
+    if (alsa_device_is_open (device) == TRUE)
+        alsa_device_close (device);
+
+    alsa->priv->devices = g_list_delete_link (alsa->priv->devices, item);
+
     g_hash_table_remove (alsa->priv->devices_ids,
-                         g_object_get_data (G_OBJECT (device),
-                                            "__matemixer_alsa_device_id"));
+                         ALSA_DEVICE_GET_ID (device));
 
-    // XXX close the device and make it remove streams
-    g_hash_table_remove (alsa->priv->devices, name);
+    /* The list may and may not have been invalidate by device signals */
+    free_stream_list (alsa);
+
     g_signal_emit_by_name (G_OBJECT (alsa),
                            "device-removed",
-                           name);
+                           mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)));
+
+    g_object_unref (device);
 }
 
 static void
@@ -419,7 +456,6 @@ remove_stream (AlsaBackend *alsa, const gchar *name)
 
     stream = mate_mixer_backend_get_default_input_stream (MATE_MIXER_BACKEND (alsa));
 
-    // XXX see if the change happens after stream is removed or before
     if (stream != NULL && strcmp (mate_mixer_stream_get_name (stream), name) == 0)
         select_default_input_stream (alsa);
 
@@ -432,36 +468,19 @@ remove_stream (AlsaBackend *alsa, const gchar *name)
 static void
 select_default_input_stream (AlsaBackend *alsa)
 {
-    AlsaDevice *device;
-    AlsaStream *stream;
-    gchar       card[16];
-    gint        num;
+    GList *list;
 
-    /* Always prefer stream in the "default" device */
-    device = g_hash_table_lookup (alsa->priv->devices, "default");
-    if (device != NULL) {
-        stream = alsa_device_get_input_stream (device);
+    list = alsa->priv->devices;
+    while (list != NULL) {
+        AlsaDevice *device = ALSA_DEVICE (list->data);
+        AlsaStream *stream = alsa_device_get_input_stream (device);
+
         if (stream != NULL) {
             _mate_mixer_backend_set_default_input_stream (MATE_MIXER_BACKEND (alsa),
                                                           MATE_MIXER_STREAM (stream));
             return;
         }
-    }
-
-    /* If there is no input stream in the default device, search the cards in
-     * the correct order */
-    for (num = 0;; num++) {
-        g_snprintf (card, sizeof (card), "hw:%d", num);
-
-        device = g_hash_table_lookup (alsa->priv->devices, card);
-        if (device == NULL)
-            break;
-        stream = alsa_device_get_input_stream (device);
-        if (stream != NULL) {
-            _mate_mixer_backend_set_default_input_stream (MATE_MIXER_BACKEND (alsa),
-                                                          MATE_MIXER_STREAM (stream));
-            return;
-        }
+        list = list->next;
     }
 
     /* In the worst case unset the default stream */
@@ -471,38 +490,50 @@ select_default_input_stream (AlsaBackend *alsa)
 static void
 select_default_output_stream (AlsaBackend *alsa)
 {
-    AlsaDevice *device;
-    AlsaStream *stream;
-    gchar       card[16];
-    gint        num;
+    GList *list;
 
-    /* Always prefer stream in the "default" device */
-    device = g_hash_table_lookup (alsa->priv->devices, "default");
-    if (device != NULL) {
-        stream = alsa_device_get_output_stream (device);
+    list = alsa->priv->devices;
+    while (list != NULL) {
+        AlsaDevice *device = ALSA_DEVICE (list->data);
+        AlsaStream *stream = alsa_device_get_output_stream (device);
+
         if (stream != NULL) {
             _mate_mixer_backend_set_default_output_stream (MATE_MIXER_BACKEND (alsa),
                                                            MATE_MIXER_STREAM (stream));
             return;
         }
-    }
-
-    /* If there is no input stream in the default device, search the cards in
-     * the correct order */
-    for (num = 0;; num++) {
-        g_snprintf (card, sizeof (card), "hw:%d", num);
-
-        device = g_hash_table_lookup (alsa->priv->devices, card);
-        if (device == NULL)
-            break;
-        stream = alsa_device_get_output_stream (device);
-        if (stream != NULL) {
-            _mate_mixer_backend_set_default_output_stream (MATE_MIXER_BACKEND (alsa),
-                                                           MATE_MIXER_STREAM (stream));
-            return;
-        }
+        list = list->next;
     }
 
     /* In the worst case unset the default stream */
     _mate_mixer_backend_set_default_output_stream (MATE_MIXER_BACKEND (alsa), NULL);
+}
+
+static void
+free_stream_list (AlsaBackend *alsa)
+{
+    if (alsa->priv->streams == NULL)
+        return;
+
+    g_list_free_full (alsa->priv->streams, g_object_unref);
+
+    alsa->priv->streams = NULL;
+}
+
+static gint
+compare_devices (gconstpointer a, gconstpointer b)
+{
+    MateMixerDevice *d1 = MATE_MIXER_DEVICE (a);
+    MateMixerDevice *d2 = MATE_MIXER_DEVICE (b);
+
+    return strcmp (mate_mixer_device_get_name (d1), mate_mixer_device_get_name (d2));
+}
+
+static gint
+compare_device_name (gconstpointer a, gconstpointer b)
+{
+    MateMixerDevice *device = MATE_MIXER_DEVICE (a);
+    const gchar     *name   = (const gchar *) b;
+
+    return strcmp (mate_mixer_device_get_name (device), name);
 }

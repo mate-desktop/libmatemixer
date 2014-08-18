@@ -19,9 +19,8 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include <libmatemixer/matemixer-backend.h>
-#include <libmatemixer/matemixer-backend-module.h>
-#include <libmatemixer/matemixer-stream.h>
+#include <libmatemixer/matemixer.h>
+#include <libmatemixer/matemixer-private.h>
 
 #include <pulse/pulseaudio.h>
 #include <pulse/ext-stream-restore.h>
@@ -38,72 +37,110 @@
 #include "pulse-source-output.h"
 
 #define BACKEND_NAME      "PulseAudio"
-#define BACKEND_PRIORITY  10
+#define BACKEND_PRIORITY  100
 
 struct _PulseBackendPrivate
 {
-    gchar           *app_name;
-    gchar           *app_id;
-    gchar           *app_version;
-    gchar           *app_icon;
-    gchar           *server_address;
-    gboolean         connected_once;
-    GSource         *connect_source;
-    MateMixerStream *default_sink;
-    MateMixerStream *default_source;
-    GHashTable      *devices;
-    GHashTable      *streams;
-    GHashTable      *ext_streams;
-    MateMixerState   state;
-    PulseConnection *connection;
+    guint             connect_tag;
+    gboolean          connected_once;
+    GHashTable       *devices;
+    GHashTable       *sinks;
+    GHashTable       *sources;
+    GHashTable       *sink_inputs;
+    GHashTable       *source_outputs;
+    GHashTable       *ext_streams;
+    GList            *devices_list;
+    GList            *streams_list;
+    GList            *ext_streams_list;
+    MateMixerAppInfo *app_info;
+    gchar            *server_address;
+    PulseConnection  *connection;
 };
 
-enum {
-    PROP_0,
-    PROP_STATE,
-    PROP_DEFAULT_INPUT,
-    PROP_DEFAULT_OUTPUT,
-    N_PROPERTIES
-};
+#define PULSE_CHANGE_STATE(p, s)        \
+    (_mate_mixer_backend_set_state (MATE_MIXER_BACKEND (p), (s)))
+#define PULSE_GET_DEFAULT_SINK(p)       \
+    (mate_mixer_backend_get_default_output_stream (MATE_MIXER_BACKEND (p)))
+#define PULSE_GET_DEFAULT_SOURCE(p)     \
+    (mate_mixer_backend_get_default_input_stream (MATE_MIXER_BACKEND (p)))
+#define PULSE_SET_DEFAULT_SINK(p, s)    \
+    (_mate_mixer_backend_set_default_output_stream (MATE_MIXER_BACKEND (p), MATE_MIXER_STREAM (s)))
+#define PULSE_SET_DEFAULT_SOURCE(p, s)  \
+    (_mate_mixer_backend_set_default_input_stream (MATE_MIXER_BACKEND (p), MATE_MIXER_STREAM (s)))
 
-static void mate_mixer_backend_interface_init (MateMixerBackendInterface *iface);
+#define PULSE_GET_PENDING_SINK(p)                                       \
+        (g_object_get_data (G_OBJECT (p),                               \
+                            "__matemixer_pulse_pending_sink"))          \
+
+#define PULSE_SET_PENDING_SINK(p,name)                                  \
+        (g_object_set_data_full (G_OBJECT (p),                          \
+                                 "__matemixer_pulse_pending_sink",      \
+                                 g_strdup (name),                       \
+                                 g_free))
+
+#define PULSE_SET_PENDING_SINK_NULL(p)                                  \
+        (g_object_set_data (G_OBJECT (p),                               \
+                            "__matemixer_pulse_pending_sink",           \
+                            NULL))
+
+#define PULSE_GET_PENDING_SOURCE(p)                                     \
+        (g_object_get_data (G_OBJECT (p),                               \
+                            "__matemixer_pulse_pending_source"))        \
+
+#define PULSE_SET_PENDING_SOURCE(p,name)                                \
+        (g_object_set_data_full (G_OBJECT (p),                          \
+                                 "__matemixer_pulse_pending_source",    \
+                                 g_strdup (name),                       \
+                                 g_free))
+
+#define PULSE_SET_PENDING_SOURCE_NULL(p)                                \
+        (g_object_set_data (G_OBJECT (p),                               \
+                            "__matemixer_pulse_pending_source",         \
+                            NULL))
+
+#define PULSE_GET_HANGING(o)                                            \
+        ((gboolean) g_object_get_data (G_OBJECT (o),                    \
+                                       "__matemixer_pulse_hanging"))
+
+#define PULSE_SET_HANGING(o)                                            \
+        (g_object_set_data (G_OBJECT (o),                               \
+                            "__matemixer_pulse_hanging",                \
+                            GUINT_TO_POINTER (1)))
+
+#define PULSE_UNSET_HANGING(o)                                          \
+        (g_object_steal_data (G_OBJECT (o),                             \
+                              "__matemixer_pulse_hanging"))
 
 static void pulse_backend_class_init     (PulseBackendClass *klass);
 static void pulse_backend_class_finalize (PulseBackendClass *klass);
-
-static void pulse_backend_get_property   (GObject           *object,
-                                          guint              param_id,
-                                          GValue            *value,
-                                          GParamSpec        *pspec);
 
 static void pulse_backend_init           (PulseBackend      *pulse);
 static void pulse_backend_dispose        (GObject           *object);
 static void pulse_backend_finalize       (GObject           *object);
 
-G_DEFINE_DYNAMIC_TYPE_EXTENDED (PulseBackend, pulse_backend,
-                                G_TYPE_OBJECT, 0,
-                                G_IMPLEMENT_INTERFACE_DYNAMIC (MATE_MIXER_TYPE_BACKEND,
-                                                               mate_mixer_backend_interface_init))
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-function"
+G_DEFINE_DYNAMIC_TYPE (PulseBackend, pulse_backend, MATE_MIXER_TYPE_BACKEND)
+#pragma clang diagnostic pop
 
-static gboolean         pulse_backend_open                      (MateMixerBackend          *backend);
-static void             pulse_backend_close                     (MateMixerBackend          *backend);
+static gboolean         pulse_backend_open                      (MateMixerBackend *backend);
+static void             pulse_backend_close                     (MateMixerBackend *backend);
 
-static MateMixerState   pulse_backend_get_state                 (MateMixerBackend          *backend);
+static void             pulse_backend_set_app_info              (MateMixerBackend *backend,
+                                                                 MateMixerAppInfo *info);
 
-static void             pulse_backend_set_data                  (MateMixerBackend          *backend,
-                                                                const MateMixerBackendData *data);
+static void             pulse_backend_set_server_address        (MateMixerBackend *backend,
+                                                                 const gchar      *address);
 
-static GList *          pulse_backend_list_devices              (MateMixerBackend          *backend);
-static GList *          pulse_backend_list_streams              (MateMixerBackend          *backend);
-static GList *          pulse_backend_list_cached_streams       (MateMixerBackend          *backend);
+static const GList *    pulse_backend_list_devices              (MateMixerBackend *backend);
+static const GList *    pulse_backend_list_streams              (MateMixerBackend *backend);
+static const GList *    pulse_backend_list_stored_controls      (MateMixerBackend *backend);
 
-static MateMixerStream *pulse_backend_get_default_input_stream  (MateMixerBackend          *backend);
-static gboolean         pulse_backend_set_default_input_stream  (MateMixerBackend          *backend,
-                                                                 MateMixerStream           *stream);
+static gboolean         pulse_backend_set_default_input_stream  (MateMixerBackend *backend,
+                                                                 MateMixerStream  *stream);
 
-static MateMixerStream *pulse_backend_get_default_output_stream (MateMixerBackend          *backend);
-static gboolean         pulse_backend_set_default_output_stream (MateMixerBackend          *backend,
-                                                                 MateMixerStream           *stream);
+static gboolean         pulse_backend_set_default_output_stream (MateMixerBackend *backend,
+                                                                 MateMixerStream  *stream);
 
 static void             on_connection_state_notify          (PulseConnection                  *connection,
                                                              GParamSpec                       *pspec,
@@ -152,32 +189,16 @@ static void             on_connection_ext_stream_info       (PulseConnection    
                                                              PulseBackend                     *pulse);
 
 static gboolean         connect_source_reconnect            (PulseBackend                     *pulse);
-static void             connect_source_remove               (PulseBackend                     *pulse);
 
 static void             check_pending_sink                  (PulseBackend                     *pulse,
                                                              PulseStream                      *stream);
 static void             check_pending_source                (PulseBackend                     *pulse,
                                                              PulseStream                      *stream);
 
-static void             mark_hanging                        (PulseBackend                     *pulse);
-static void             mark_hanging_hash                   (GHashTable                       *hash);
+static void             free_list_devices                   (PulseBackend                     *pulse);
+static void             free_list_streams                   (PulseBackend                     *pulse);
+static void             free_list_ext_streams               (PulseBackend                     *pulse);
 
-static void             unmark_hanging                      (PulseBackend                     *pulse,
-                                                             GObject                          *object);
-
-static void             remove_hanging                      (PulseBackend                     *pulse);
-static void             remove_device                       (PulseBackend                     *pulse,
-                                                             PulseDevice                      *device);
-static void             remove_stream                       (PulseBackend                     *pulse,
-                                                             PulseStream                      *stream);
-
-static void             change_state                        (PulseBackend                     *backend,
-                                                             MateMixerState                    state);
-
-static gint             compare_devices                     (gconstpointer                     a,
-                                                             gconstpointer                     b);
-static gint             compare_streams                     (gconstpointer                     a,
-                                                             gconstpointer                     b);
 static gboolean         compare_stream_names                (gpointer                          key,
                                                              gpointer                          value,
                                                              gpointer                          user_data);
@@ -195,75 +216,39 @@ backend_module_init (GTypeModule *module)
     info.backend_type = MATE_MIXER_BACKEND_PULSEAUDIO;
 }
 
-const MateMixerBackendInfo *
-backend_module_get_info (void)
+const MateMixerBackendInfo *backend_module_get_info (void)
 {
     return &info;
 }
 
 static void
-mate_mixer_backend_interface_init (MateMixerBackendInterface *iface)
-{
-    iface->open                      = pulse_backend_open;
-    iface->close                     = pulse_backend_close;
-    iface->get_state                 = pulse_backend_get_state;
-    iface->set_data                  = pulse_backend_set_data;
-    iface->list_devices              = pulse_backend_list_devices;
-    iface->list_streams              = pulse_backend_list_streams;
-    iface->list_cached_streams       = pulse_backend_list_cached_streams;
-    iface->get_default_input_stream  = pulse_backend_get_default_input_stream;
-    iface->set_default_input_stream  = pulse_backend_set_default_input_stream;
-    iface->get_default_output_stream = pulse_backend_get_default_output_stream;
-    iface->set_default_output_stream = pulse_backend_set_default_output_stream;
-}
-
-static void
 pulse_backend_class_init (PulseBackendClass *klass)
 {
-    GObjectClass *object_class;
+    GObjectClass          *object_class;
+    MateMixerBackendClass *backend_class;
 
     object_class = G_OBJECT_CLASS (klass);
-    object_class->dispose      = pulse_backend_dispose;
-    object_class->finalize     = pulse_backend_finalize;
-    object_class->get_property = pulse_backend_get_property;
+    object_class->dispose  = pulse_backend_dispose;
+    object_class->finalize = pulse_backend_finalize;
 
-    g_object_class_override_property (object_class, PROP_STATE, "state");
-    g_object_class_override_property (object_class, PROP_DEFAULT_INPUT, "default-input");
-    g_object_class_override_property (object_class, PROP_DEFAULT_OUTPUT, "default-output");
+    backend_class = MATE_MIXER_BACKEND_CLASS (klass);
+    backend_class->set_app_info              = pulse_backend_set_app_info;
+    backend_class->set_server_address        = pulse_backend_set_server_address;
+    backend_class->open                      = pulse_backend_open;
+    backend_class->close                     = pulse_backend_close;
+    backend_class->list_devices              = pulse_backend_list_devices;
+    backend_class->list_streams              = pulse_backend_list_streams;
+    backend_class->list_stored_controls      = pulse_backend_list_stored_controls;
+    backend_class->set_default_input_stream  = pulse_backend_set_default_input_stream;
+    backend_class->set_default_output_stream = pulse_backend_set_default_output_stream;
 
     g_type_class_add_private (object_class, sizeof (PulseBackendPrivate));
 }
 
-/* Called in the code generated by G_DEFINE_DYNAMIC_TYPE_EXTENDED() */
+/* Called in the code generated by G_DEFINE_DYNAMIC_TYPE() */
 static void
 pulse_backend_class_finalize (PulseBackendClass *klass)
 {
-}
-
-static void
-pulse_backend_get_property (GObject    *object,
-                            guint       param_id,
-                            GValue     *value,
-                            GParamSpec *pspec)
-{
-    PulseBackend *pulse;
-
-    pulse = PULSE_BACKEND (object);
-
-    switch (param_id) {
-    case PROP_STATE:
-        g_value_set_enum (value, pulse->priv->state);
-        break;
-    case PROP_DEFAULT_INPUT:
-        g_value_set_object (value, pulse->priv->default_source);
-        break;
-    case PROP_DEFAULT_OUTPUT:
-        g_value_set_object (value, pulse->priv->default_sink);
-        break;
-    default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
-        break;
-    }
 }
 
 static void
@@ -279,22 +264,46 @@ pulse_backend_init (PulseBackend *pulse)
                                g_direct_equal,
                                NULL,
                                g_object_unref);
-    pulse->priv->streams =
-        g_hash_table_new_full (g_int64_hash,
-                               g_int64_equal,
-                               g_free,
+    pulse->priv->sinks =
+        g_hash_table_new_full (g_direct_hash,
+                               g_direct_equal,
+                               NULL,
                                g_object_unref);
+    pulse->priv->sources =
+        g_hash_table_new_full (g_direct_hash,
+                               g_direct_equal,
+                               NULL,
+                               g_object_unref);
+
     pulse->priv->ext_streams =
         g_hash_table_new_full (g_str_hash,
                                g_str_equal,
                                g_free,
+                               g_object_unref);
+
+    pulse->priv->sink_inputs =
+        g_hash_table_new_full (g_direct_hash,
+                               g_direct_equal,
+                               NULL,
+                               g_object_unref);
+    pulse->priv->source_outputs =
+        g_hash_table_new_full (g_direct_hash,
+                               g_direct_equal,
+                               NULL,
                                g_object_unref);
 }
 
 static void
 pulse_backend_dispose (GObject *object)
 {
-    pulse_backend_close (MATE_MIXER_BACKEND (object));
+    MateMixerBackend *backend;
+    MateMixerState    state;
+
+    backend = MATE_MIXER_BACKEND (object);
+
+    state = mate_mixer_backend_get_state (backend);
+    if (state != MATE_MIXER_STATE_IDLE)
+        pulse_backend_close (backend);
 
     G_OBJECT_CLASS (pulse_backend_parent_class)->dispose (object);
 }
@@ -306,18 +315,23 @@ pulse_backend_finalize (GObject *object)
 
     pulse = PULSE_BACKEND (object);
 
-    g_free (pulse->priv->app_name);
-    g_free (pulse->priv->app_id);
-    g_free (pulse->priv->app_version);
-    g_free (pulse->priv->app_icon);
-    g_free (pulse->priv->server_address);
+    if (pulse->priv->app_info != NULL)
+        _mate_mixer_app_info_free (pulse->priv->app_info);
 
-    g_hash_table_destroy (pulse->priv->devices);
-    g_hash_table_destroy (pulse->priv->streams);
-    g_hash_table_destroy (pulse->priv->ext_streams);
+    g_hash_table_unref (pulse->priv->devices);
+    g_hash_table_unref (pulse->priv->sinks);
+    g_hash_table_unref (pulse->priv->sources);
+    g_hash_table_unref (pulse->priv->ext_streams);
+    g_hash_table_unref (pulse->priv->sink_inputs);
+    g_hash_table_unref (pulse->priv->source_outputs);
 
     G_OBJECT_CLASS (pulse_backend_parent_class)->finalize (object);
 }
+
+#define PULSE_APP_NAME(p)    (mate_mixer_app_info_get_name (p->priv->app_info))
+#define PULSE_APP_ID(p)      (mate_mixer_app_info_get_id (p->priv->app_info))
+#define PULSE_APP_VERSION(p) (mate_mixer_app_info_get_version (p->priv->app_info))
+#define PULSE_APP_ICON(p)    (mate_mixer_app_info_get_icon (p->priv->app_info))
 
 static gboolean
 pulse_backend_open (MateMixerBackend *backend)
@@ -329,22 +343,22 @@ pulse_backend_open (MateMixerBackend *backend)
 
     pulse = PULSE_BACKEND (backend);
 
-    if (G_UNLIKELY (pulse->priv->connection != NULL)) {
+    if G_UNLIKELY (pulse->priv->connection != NULL) {
         g_warn_if_reached ();
         return TRUE;
     }
 
-    connection = pulse_connection_new (pulse->priv->app_name,
-                                       pulse->priv->app_id,
-                                       pulse->priv->app_version,
-                                       pulse->priv->app_icon,
+    connection = pulse_connection_new (PULSE_APP_NAME (pulse),
+                                       PULSE_APP_ID (pulse),
+                                       PULSE_APP_VERSION (pulse),
+                                       PULSE_APP_ICON (pulse),
                                        pulse->priv->server_address);
 
     /* No connection attempt is made during the construction of the connection,
      * but it sets up the PulseAudio structures, which might fail in an
      * unlikely case */
-    if (G_UNLIKELY (connection == NULL)) {
-        change_state (pulse, MATE_MIXER_STATE_FAILED);
+    if G_UNLIKELY (connection == NULL) {
+        PULSE_CHANGE_STATE (pulse, MATE_MIXER_STATE_FAILED);
         return FALSE;
     }
 
@@ -409,15 +423,20 @@ pulse_backend_open (MateMixerBackend *backend)
                       G_CALLBACK (on_connection_ext_stream_info),
                       pulse);
 
-    change_state (pulse, MATE_MIXER_STATE_CONNECTING);
+    PULSE_CHANGE_STATE (backend, MATE_MIXER_STATE_CONNECTING);
 
     /* Connect to the PulseAudio server, this might fail either instantly or
      * asynchronously, for example when remote connection timeouts */
     if (pulse_connection_connect (connection, FALSE) == FALSE) {
         g_object_unref (connection);
-        change_state (pulse, MATE_MIXER_STATE_FAILED);
+        PULSE_CHANGE_STATE (pulse, MATE_MIXER_STATE_FAILED);
         return FALSE;
     }
+
+    _mate_mixer_backend_set_flags (backend,
+                                   MATE_MIXER_BACKEND_HAS_APPLICATION_CONTROLS |
+                                   MATE_MIXER_BACKEND_CAN_SET_DEFAULT_INPUT_STREAM |
+                                   MATE_MIXER_BACKEND_CAN_SET_DEFAULT_OUTPUT_STREAM);
 
     pulse->priv->connection = connection;
     return TRUE;
@@ -432,7 +451,10 @@ pulse_backend_close (MateMixerBackend *backend)
 
     pulse = PULSE_BACKEND (backend);
 
-    connect_source_remove (pulse);
+    if (pulse->priv->connect_tag != 0) {
+        g_source_remove (pulse->priv->connect_tag);
+        pulse->priv->connect_tag = 0;
+    }
 
     if (pulse->priv->connection != NULL) {
         g_signal_handlers_disconnect_by_data (G_OBJECT (pulse->priv->connection),
@@ -441,109 +463,100 @@ pulse_backend_close (MateMixerBackend *backend)
         g_clear_object (&pulse->priv->connection);
     }
 
-    g_clear_object (&pulse->priv->default_sink);
-    g_clear_object (&pulse->priv->default_source);
-
     g_hash_table_remove_all (pulse->priv->devices);
-    g_hash_table_remove_all (pulse->priv->streams);
+    g_hash_table_remove_all (pulse->priv->sinks);
+    g_hash_table_remove_all (pulse->priv->sources);
     g_hash_table_remove_all (pulse->priv->ext_streams);
 
     pulse->priv->connected_once = FALSE;
 
-    change_state (pulse, MATE_MIXER_STATE_IDLE);
-}
-
-static MateMixerState
-pulse_backend_get_state (MateMixerBackend *backend)
-{
-    g_return_val_if_fail (PULSE_IS_BACKEND (backend), MATE_MIXER_STATE_UNKNOWN);
-
-    return PULSE_BACKEND (backend)->priv->state;
+    PULSE_CHANGE_STATE (pulse, MATE_MIXER_STATE_IDLE);
 }
 
 static void
-pulse_backend_set_data (MateMixerBackend *backend, const MateMixerBackendData *data)
+pulse_backend_set_app_info (MateMixerBackend *backend, MateMixerAppInfo *info)
 {
     PulseBackend *pulse;
 
     g_return_if_fail (PULSE_IS_BACKEND (backend));
-    g_return_if_fail (data != NULL);
+    g_return_if_fail (info != NULL);
 
     pulse = PULSE_BACKEND (backend);
 
-    g_free (pulse->priv->app_name);
-    g_free (pulse->priv->app_id);
-    g_free (pulse->priv->app_version);
-    g_free (pulse->priv->app_icon);
-    g_free (pulse->priv->server_address);
+    if (pulse->priv->app_info != NULL)
+        _mate_mixer_app_info_free (pulse->priv->app_info);
 
-    pulse->priv->app_name = g_strdup (data->app_name);
-    pulse->priv->app_id = g_strdup (data->app_id);
-    pulse->priv->app_version = g_strdup (data->app_version);
-    pulse->priv->app_icon = g_strdup (data->app_icon);
-    pulse->priv->server_address = g_strdup (data->server_address);
+    pulse->priv->app_info = _mate_mixer_app_info_copy (info);
 }
 
-static GList *
+static void
+pulse_backend_set_server_address (MateMixerBackend *backend, const gchar *address)
+{
+    g_return_if_fail (PULSE_IS_BACKEND (backend));
+
+    g_free (PULSE_BACKEND (backend)->priv->server_address);
+
+    PULSE_BACKEND (backend)->priv->server_address = g_strdup (address);
+}
+
+static const GList *
 pulse_backend_list_devices (MateMixerBackend *backend)
 {
-    GList *list;
+    PulseBackend *pulse;
 
     g_return_val_if_fail (PULSE_IS_BACKEND (backend), NULL);
 
-    /* Convert the hash table to a sorted linked list, this list is expected
-     * to be cached in the main library */
-    list = g_hash_table_get_values (PULSE_BACKEND (backend)->priv->devices);
-    if (list != NULL) {
-        g_list_foreach (list, (GFunc) g_object_ref, NULL);
+    pulse = PULSE_BACKEND (backend);
 
-        return g_list_sort (list, compare_devices);
+    if (pulse->priv->devices_list == NULL) {
+        pulse->priv->devices_list = g_hash_table_get_values (pulse->priv->devices);
+        if (pulse->priv->devices_list != NULL)
+            g_list_foreach (pulse->priv->devices_list, (GFunc) g_object_ref, NULL);
     }
-    return NULL;
+    return pulse->priv->devices_list;
 }
 
-static GList *
+static const GList *
 pulse_backend_list_streams (MateMixerBackend *backend)
 {
-    GList *list;
+    PulseBackend *pulse;
 
     g_return_val_if_fail (PULSE_IS_BACKEND (backend), NULL);
 
-    /* Convert the hash table to a sorted linked list, this list is expected
-     * to be cached in the main library */
-    list = g_hash_table_get_values (PULSE_BACKEND (backend)->priv->streams);
-    if (list != NULL) {
-        g_list_foreach (list, (GFunc) g_object_ref, NULL);
+    pulse = PULSE_BACKEND (backend);
 
-        return g_list_sort (list, compare_streams);
+    if (pulse->priv->streams_list == NULL) {
+        GList *sinks;
+        GList *sources;
+
+        sinks = g_hash_table_get_values (pulse->priv->sinks);
+        if (sinks != NULL)
+            g_list_foreach (sinks, (GFunc) g_object_ref, NULL);
+
+        sources = g_hash_table_get_values (pulse->priv->sources);
+        if (sources != NULL)
+            g_list_foreach (sources, (GFunc) g_object_ref, NULL);
+
+        pulse->priv->streams_list = g_list_concat (sinks, sources);
     }
-    return NULL;
+    return pulse->priv->streams_list;
 }
 
-static GList *
-pulse_backend_list_cached_streams (MateMixerBackend *backend)
+static const GList *
+pulse_backend_list_stored_controls (MateMixerBackend *backend)
 {
-    GList *list;
+    PulseBackend *pulse;
 
     g_return_val_if_fail (PULSE_IS_BACKEND (backend), NULL);
 
-    /* Convert the hash table to a sorted linked list, this list is expected
-     * to be cached in the main library */
-    list = g_hash_table_get_values (PULSE_BACKEND (backend)->priv->ext_streams);
-    if (list != NULL) {
-        g_list_foreach (list, (GFunc) g_object_ref, NULL);
+    pulse = PULSE_BACKEND (backend);
 
-        return g_list_sort (list, compare_streams);
+    if (pulse->priv->ext_streams_list == NULL) {
+        pulse->priv->ext_streams_list = g_hash_table_get_values (pulse->priv->ext_streams);
+        if (pulse->priv->ext_streams_list != NULL)
+            g_list_foreach (pulse->priv->ext_streams_list, (GFunc) g_object_ref, NULL);
     }
-    return NULL;
-}
-
-static MateMixerStream *
-pulse_backend_get_default_input_stream (MateMixerBackend *backend)
-{
-    g_return_val_if_fail (PULSE_IS_BACKEND (backend), NULL);
-
-    return PULSE_BACKEND (backend)->priv->default_source;
+    return pulse->priv->ext_streams_list;
 }
 
 static gboolean
@@ -562,27 +575,11 @@ pulse_backend_set_default_input_stream (MateMixerBackend *backend,
     if (pulse_connection_set_default_source (pulse->priv->connection, name) == FALSE)
         return FALSE;
 
-    if (pulse->priv->default_source != NULL)
-        g_object_unref (pulse->priv->default_source);
-
-    pulse->priv->default_source = g_object_ref (stream);
-
     /* We might be in the process of setting a default source for which the details
      * are not yet known, make sure the change does not happen */
-    g_object_set_data (G_OBJECT (pulse),
-                       "backend-pending-source",
-                       NULL);
-
-    g_object_notify (G_OBJECT (pulse), "default-input");
+    PULSE_SET_PENDING_SOURCE_NULL (pulse);
+    PULSE_SET_DEFAULT_SOURCE (pulse, stream);
     return TRUE;
-}
-
-static MateMixerStream *
-pulse_backend_get_default_output_stream (MateMixerBackend *backend)
-{
-    g_return_val_if_fail (PULSE_IS_BACKEND (backend), NULL);
-
-    return PULSE_BACKEND (backend)->priv->default_sink;
 }
 
 static gboolean
@@ -601,18 +598,10 @@ pulse_backend_set_default_output_stream (MateMixerBackend *backend,
     if (pulse_connection_set_default_sink (pulse->priv->connection, name) == FALSE)
         return FALSE;
 
-    if (pulse->priv->default_sink != NULL)
-        g_object_unref (pulse->priv->default_sink);
-
-    pulse->priv->default_sink = g_object_ref (stream);
-
     /* We might be in the process of setting a default sink for which the details
      * are not yet known, make sure the change does not happen */
-    g_object_set_data (G_OBJECT (pulse),
-                       "backend-pending-sink",
-                       NULL);
-
-    g_object_notify (G_OBJECT (pulse), "default-output");
+    PULSE_SET_PENDING_SINK_NULL (pulse);
+    PULSE_SET_DEFAULT_SINK (pulse, stream);
     return TRUE;
 }
 
@@ -633,41 +622,41 @@ on_connection_state_notify (PulseConnection *connection,
              * Stream callbacks will unmark available streams and remaining
              * unavailable streams will be removed when the CONNECTED state
              * is reached. */
-            mark_hanging (pulse);
-            change_state (pulse, MATE_MIXER_STATE_CONNECTING);
+            PULSE_CHANGE_STATE (pulse, MATE_MIXER_STATE_CONNECTING);
 
-            if (pulse->priv->connect_source == NULL &&
-                pulse_connection_connect (connection, TRUE) == FALSE) {
-                pulse->priv->connect_source = g_timeout_source_new (200);
+            if G_UNLIKELY (pulse->priv->connect_tag != 0)
+                break;
 
-                g_source_set_callback (pulse->priv->connect_source,
+            if (pulse_connection_connect (connection, TRUE) == FALSE) {
+                GSource *source;
+
+                source = g_timeout_source_new (200);
+                g_source_set_callback (source,
                                        (GSourceFunc) connect_source_reconnect,
                                        pulse,
-                                       (GDestroyNotify) connect_source_remove);
+                                       NULL);
+                pulse->priv->connect_tag =
+                    g_source_attach (source, g_main_context_get_thread_default ());
 
-                g_source_attach (pulse->priv->connect_source,
-                                 g_main_context_get_thread_default ());
+                g_source_unref (source);
             }
             break;
         }
 
         /* First connection attempt has failed */
-        change_state (pulse, MATE_MIXER_STATE_FAILED);
+        PULSE_CHANGE_STATE (pulse, MATE_MIXER_STATE_FAILED);
         break;
 
     case PULSE_CONNECTION_CONNECTING:
     case PULSE_CONNECTION_AUTHORIZING:
     case PULSE_CONNECTION_LOADING:
-        change_state (pulse, MATE_MIXER_STATE_CONNECTING);
+        PULSE_CHANGE_STATE (pulse, MATE_MIXER_STATE_CONNECTING);
         break;
 
     case PULSE_CONNECTION_CONNECTED:
-        if (pulse->priv->connected_once == TRUE)
-            remove_hanging (pulse);
-        else
-            pulse->priv->connected_once = TRUE;
+        pulse->priv->connected_once = TRUE;
 
-        change_state (pulse, MATE_MIXER_STATE_READY);
+        PULSE_CHANGE_STATE (pulse, MATE_MIXER_STATE_READY);
         break;
     }
 }
@@ -677,18 +666,17 @@ on_connection_server_info (PulseConnection      *connection,
                            const pa_server_info *info,
                            PulseBackend         *pulse)
 {
-    const gchar *name_source = NULL;
-    const gchar *name_sink = NULL;
+    MateMixerStream *stream;
+    const gchar     *name_source = NULL;
+    const gchar     *name_sink = NULL;
 
-    if (pulse->priv->default_source != NULL)
-        name_source = mate_mixer_stream_get_name (pulse->priv->default_source);
+    stream = PULSE_GET_DEFAULT_SOURCE (pulse);
+    if (stream != NULL)
+        name_source = mate_mixer_stream_get_name (stream);
 
     if (g_strcmp0 (name_source, info->default_source_name) != 0) {
-        if (pulse->priv->default_source != NULL)
-            g_clear_object (&pulse->priv->default_source);
-
         if (info->default_source_name != NULL) {
-            MateMixerStream *stream = g_hash_table_find (pulse->priv->streams,
+            MateMixerStream *stream = g_hash_table_find (pulse->priv->sources,
                                                          compare_stream_names,
                                                          (gpointer) info->default_source_name);
 
@@ -698,20 +686,14 @@ on_connection_server_info (PulseConnection      *connection,
              * When this happens, remember the name of the stream and wait for the
              * stream info callback. */
             if (stream != NULL) {
-                pulse->priv->default_source = g_object_ref (stream);
-                g_object_set_data (G_OBJECT (pulse),
-                                   "backend-pending-source",
-                                   NULL);
-
-                g_debug ("Default input stream changed to %s", info->default_source_name);
+                PULSE_SET_DEFAULT_SOURCE (pulse, stream);
+                PULSE_SET_PENDING_SOURCE_NULL (pulse);
             } else {
                 g_debug ("Default input stream changed to unknown stream %s",
                          info->default_source_name);
 
-                g_object_set_data_full (G_OBJECT (pulse),
-                                        "backend-pending-source",
-                                        g_strdup (info->default_source_name),
-                                        g_free);
+                PULSE_SET_PENDING_SOURCE (pulse, info->default_source_name);
+                PULSE_SET_DEFAULT_SOURCE (pulse, NULL);
 
                 /* In most cases (for example changing profile) the stream info
                  * arrives by itself, but do not rely on it and request it explicitely.
@@ -721,20 +703,16 @@ on_connection_server_info (PulseConnection      *connection,
                                                         info->default_source_name);
             }
         } else
-            g_debug ("Default input stream unset");
-
-        g_object_notify (G_OBJECT (pulse), "default-input");
+            PULSE_SET_DEFAULT_SOURCE (pulse, NULL);
     }
 
-    if (pulse->priv->default_sink != NULL)
-        name_sink = mate_mixer_stream_get_name (pulse->priv->default_sink);
+    stream = PULSE_GET_DEFAULT_SINK (pulse);
+    if (stream != NULL)
+        name_sink = mate_mixer_stream_get_name (stream);
 
     if (g_strcmp0 (name_sink, info->default_sink_name) != 0) {
-        if (pulse->priv->default_sink != NULL)
-            g_clear_object (&pulse->priv->default_sink);
-
         if (info->default_sink_name != NULL) {
-            MateMixerStream *stream = g_hash_table_find (pulse->priv->streams,
+            MateMixerStream *stream = g_hash_table_find (pulse->priv->sinks,
                                                          compare_stream_names,
                                                          (gpointer) info->default_sink_name);
 
@@ -744,21 +722,14 @@ on_connection_server_info (PulseConnection      *connection,
              * When this happens, remember the name of the stream and wait for the
              * stream info callback. */
             if (stream != NULL) {
-                pulse->priv->default_sink = g_object_ref (stream);
-                g_object_set_data (G_OBJECT (pulse),
-                                   "backend-pending-sink",
-                                   NULL);
-
-                g_debug ("Default output stream changed to %s", info->default_sink_name);
-
+                PULSE_SET_DEFAULT_SINK (pulse, stream);
+                PULSE_SET_PENDING_SINK_NULL (pulse);
             } else {
                 g_debug ("Default output stream changed to unknown stream %s",
                          info->default_sink_name);
 
-                g_object_set_data_full (G_OBJECT (pulse),
-                                        "backend-pending-sink",
-                                        g_strdup (info->default_sink_name),
-                                        g_free);
+                PULSE_SET_PENDING_SINK (pulse, info->default_sink_name);
+                PULSE_SET_DEFAULT_SINK (pulse, NULL);
 
                 /* In most cases (for example changing profile) the stream info
                  * arrives by itself, but do not rely on it and request it explicitely.
@@ -768,12 +739,10 @@ on_connection_server_info (PulseConnection      *connection,
                                                       info->default_sink_name);
             }
         } else
-            g_debug ("Default output stream unset");
-
-        g_object_notify (G_OBJECT (pulse), "default-output");
+            PULSE_SET_DEFAULT_SINK (pulse, NULL);
     }
 
-    if (pulse->priv->state != MATE_MIXER_STATE_READY)
+    if (mate_mixer_backend_get_state (MATE_MIXER_BACKEND (pulse)) != MATE_MIXER_STATE_READY)
         g_debug ("Sound server is %s version %s, running on %s",
                  info->server_name,
                  info->server_version,
@@ -790,21 +759,17 @@ on_connection_card_info (PulseConnection    *connection,
     device = g_hash_table_lookup (pulse->priv->devices, GUINT_TO_POINTER (info->index));
     if (device == NULL) {
         device = pulse_device_new (connection, info);
-        if (G_UNLIKELY (device == NULL))
-            return;
 
-        g_hash_table_insert (pulse->priv->devices, GUINT_TO_POINTER (info->index), device);
+        g_hash_table_insert (pulse->priv->devices,
+                             GUINT_TO_POINTER (info->index),
+                             device);
 
+        free_list_devices (pulse);
         g_signal_emit_by_name (G_OBJECT (pulse),
                                "device-added",
                                mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)));
-    } else {
+    } else
         pulse_device_update (device, info);
-
-        /* The object might be hanging if reconnecting is in progress, remove the
-         * hanging flag to prevent it from being removed when connected */
-        unmark_hanging (pulse, G_OBJECT (device));
-    }
 }
 
 static void
@@ -813,29 +778,22 @@ on_connection_card_removed (PulseConnection *connection,
                             PulseBackend    *pulse)
 {
     PulseDevice *device;
+    gchar       *name;
 
     device = g_hash_table_lookup (pulse->priv->devices, GUINT_TO_POINTER (index));
-    if (G_UNLIKELY (device == NULL))
+    if G_UNLIKELY (device == NULL)
         return;
 
-    remove_device (pulse, device);
-}
+    name = g_strdup (mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)));
 
-/* PulseAudio uses 32-bit integers as indices for sinks, sink inputs, sources and
- * source inputs, these indices are not unique among the different kinds of streams,
- * but we want to keep all of them in a single hash table. Allow this by using 64-bit
- * hash table keys, use the lower 32 bits for the PulseAudio index and some of the
- * higher bits to indicate what kind of stream it is. */
-enum {
-    HASH_BIT_SINK          = (1ULL << 63),
-    HASH_BIT_SINK_INPUT    = (1ULL << 62),
-    HASH_BIT_SOURCE        = (1ULL << 61),
-    HASH_BIT_SOURCE_OUTPUT = (1ULL << 60)
-};
-#define HASH_ID_SINK(idx)          (((idx) & 0xffffffff) | HASH_BIT_SINK)
-#define HASH_ID_SINK_INPUT(idx)    (((idx) & 0xffffffff) | HASH_BIT_SINK_INPUT)
-#define HASH_ID_SOURCE(idx)        (((idx) & 0xffffffff) | HASH_BIT_SOURCE)
-#define HASH_ID_SOURCE_OUTPUT(idx) (((idx) & 0xffffffff) | HASH_BIT_SOURCE_OUTPUT)
+    g_hash_table_remove (pulse->priv->devices, GUINT_TO_POINTER (index));
+
+    free_list_devices (pulse);
+    g_signal_emit_by_name (G_OBJECT (pulse),
+                           "device-removed",
+                           name);
+    g_free (name);
+}
 
 static void
 on_connection_sink_info (PulseConnection    *connection,
@@ -844,32 +802,36 @@ on_connection_sink_info (PulseConnection    *connection,
 {
     PulseDevice *device = NULL;
     PulseStream *stream;
-    gint64       index = HASH_ID_SINK (info->index);
 
     if (info->card != PA_INVALID_INDEX)
-        device = g_hash_table_lookup (pulse->priv->devices, GUINT_TO_POINTER (info->card));
+        device = g_hash_table_lookup (pulse->priv->devices,
+                                      GUINT_TO_POINTER (info->card));
 
-    stream = g_hash_table_lookup (pulse->priv->streams, &index);
+    stream = g_hash_table_lookup (pulse->priv->sinks, GUINT_TO_POINTER (info->index));
     if (stream == NULL) {
-        stream = pulse_sink_new (connection, info, device);
-        if (G_UNLIKELY (stream == NULL))
-            return;
+        stream = PULSE_STREAM (pulse_sink_new (connection, info, device));
 
-        g_hash_table_insert (pulse->priv->streams, g_memdup (&index, 8), stream);
+        free_list_streams (pulse);
+        g_hash_table_insert (pulse->priv->sinks,
+                             GUINT_TO_POINTER (info->index),
+                             stream);
 
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "stream-added",
-                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
+        if (device != NULL) {
+            pulse_device_add_stream (device, stream);
+        } else {
+            const gchar *name =
+                mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream));
 
+            /* Only emit when not a part of the device, otherwise emitted by
+             * the main library */
+            g_signal_emit_by_name (G_OBJECT (pulse),
+                                   "stream-added",
+                                   name);
+        }
         /* We might be waiting for this sink to set it as the default */
         check_pending_sink (pulse, stream);
-    } else {
-        pulse_sink_update (stream, info, device);
-
-        /* The object might be hanging if reconnecting is in progress, remove the
-         * hanging flag to prevent it from being removed when connected */
-        unmark_hanging (pulse, G_OBJECT (stream));
-    }
+    } else
+        pulse_sink_update (PULSE_SINK (stream), info);
 }
 
 static void
@@ -878,13 +840,38 @@ on_connection_sink_removed (PulseConnection *connection,
                             PulseBackend    *pulse)
 {
     PulseStream *stream;
-    gint64       index = HASH_ID_SINK (idx);
+    PulseDevice *device;
 
-    stream = g_hash_table_lookup (pulse->priv->streams, &index);
-    if (G_UNLIKELY (stream == NULL))
+    stream = g_hash_table_lookup (pulse->priv->sinks, GUINT_TO_POINTER (idx));
+    if G_UNLIKELY (stream == NULL)
         return;
 
-    remove_stream (pulse, stream);
+    g_object_ref (stream);
+
+    free_list_streams (pulse);
+    g_hash_table_remove (pulse->priv->sinks, GUINT_TO_POINTER (idx));
+
+    device = pulse_stream_get_device (stream);
+    if (device != NULL) {
+        pulse_device_remove_stream (device, stream);
+    } else {
+        g_signal_emit_by_name (G_OBJECT (pulse),
+                               "stream-removed",
+                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
+    }
+
+    /* The removed stream might be one of the default streams, this happens
+     * especially when switching profiles, after which PulseAudio removes the
+     * old streams and creates new ones with different names */
+    if (MATE_MIXER_STREAM (stream) == PULSE_GET_DEFAULT_SINK (pulse)) {
+        PULSE_SET_DEFAULT_SINK (pulse, NULL);
+
+        /* PulseAudio usually sends a server info update by itself when default
+         * stream changes, but there is at least one case when it does not - setting
+         * a card profile to off, so to be sure request an update explicitely */
+        pulse_connection_load_server_info (pulse->priv->connection);
+    }
+    g_object_unref (stream);
 }
 
 static void
@@ -892,40 +879,20 @@ on_connection_sink_input_info (PulseConnection          *connection,
                                const pa_sink_input_info *info,
                                PulseBackend             *pulse)
 {
-    PulseStream *stream;
-    PulseStream *parent = NULL;
-    gint64       index;
+    PulseSink *sink;
 
-    if (G_LIKELY (info->sink != PA_INVALID_INDEX)) {
-        index = HASH_ID_SINK (info->sink);
+    if G_UNLIKELY (info->sink == PA_INVALID_INDEX)
+        return;
 
-        parent = g_hash_table_lookup (pulse->priv->streams, &index);
-        if (G_UNLIKELY (parent == NULL))
-            g_debug ("Unknown parent %d of PulseAudio sink input %s",
-                     info->sink,
-                     info->name);
-    }
+    sink = g_hash_table_lookup (pulse->priv->sinks, GUINT_TO_POINTER (info->sink));
+    if G_UNLIKELY (sink == NULL)
+        return;
 
-    index = HASH_ID_SINK_INPUT (info->index);
+    pulse_sink_add_input (sink, info);
 
-    stream = g_hash_table_lookup (pulse->priv->streams, &index);
-    if (stream == NULL) {
-        stream = pulse_sink_input_new (connection, info, parent);
-        if (G_UNLIKELY (stream == NULL))
-            return;
-
-        g_hash_table_insert (pulse->priv->streams, g_memdup (&index, 8), stream);
-
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "stream-added",
-                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
-    } else {
-        pulse_sink_input_update (stream, info, parent);
-
-        /* The object might be hanging if reconnecting is in progress, remove the
-         * hanging flag to prevent it from being removed when connected */
-        unmark_hanging (pulse, G_OBJECT (stream));
-    }
+    g_hash_table_insert (pulse->priv->sink_inputs,
+                         GUINT_TO_POINTER (info->index),
+                         g_object_ref (sink));
 }
 
 static void
@@ -933,14 +900,13 @@ on_connection_sink_input_removed (PulseConnection *connection,
                                   guint            idx,
                                   PulseBackend    *pulse)
 {
-    PulseStream *stream;
-    gint64       index = HASH_ID_SINK_INPUT (idx);
+    PulseSink *sink;
 
-    stream = g_hash_table_lookup (pulse->priv->streams, &index);
-    if (G_UNLIKELY (stream == NULL))
+    sink = g_hash_table_lookup (pulse->priv->sink_inputs, GUINT_TO_POINTER (idx));
+    if G_UNLIKELY (sink == NULL)
         return;
 
-    remove_stream (pulse, stream);
+    pulse_sink_remove_input (sink, idx);
 }
 
 static void
@@ -950,36 +916,40 @@ on_connection_source_info (PulseConnection      *connection,
 {
     PulseDevice *device = NULL;
     PulseStream *stream;
-    gint64       index = HASH_ID_SOURCE (info->index);
 
     /* Skip monitor streams */
     if (info->monitor_of_sink != PA_INVALID_INDEX)
         return;
 
     if (info->card != PA_INVALID_INDEX)
-        device = g_hash_table_lookup (pulse->priv->devices, GUINT_TO_POINTER (info->card));
+        device = g_hash_table_lookup (pulse->priv->devices,
+                                      GUINT_TO_POINTER (info->card));
 
-    stream = g_hash_table_lookup (pulse->priv->streams, &index);
+    stream = g_hash_table_lookup (pulse->priv->sources, GUINT_TO_POINTER (info->index));
     if (stream == NULL) {
-        stream = pulse_source_new (connection, info, device);
-        if (G_UNLIKELY (stream == NULL))
-            return;
+        stream = PULSE_STREAM (pulse_source_new (connection, info, device));
 
-        g_hash_table_insert (pulse->priv->streams, g_memdup (&index, 8), stream);
+        free_list_streams (pulse);
+        g_hash_table_insert (pulse->priv->sources,
+                             GUINT_TO_POINTER (info->index),
+                             stream);
 
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "stream-added",
-                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
+        if (device != NULL) {
+            pulse_device_add_stream (device, stream);
+        } else {
+            const gchar *name =
+                mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream));
 
+            /* Only emit when not a part of the device, otherwise emitted by
+             * the main library */
+            g_signal_emit_by_name (G_OBJECT (pulse),
+                                   "stream-added",
+                                   name);
+        }
         /* We might be waiting for this source to set it as the default */
         check_pending_source (pulse, stream);
-    } else {
-        pulse_source_update (stream, info, device);
-
-        /* The object might be hanging if reconnecting is in progress, remove the
-         * hanging flag to prevent it from being removed when connected */
-        unmark_hanging (pulse, G_OBJECT (stream));
-    }
+    } else
+        pulse_source_update (PULSE_SOURCE (stream), info);
 }
 
 static void
@@ -987,14 +957,39 @@ on_connection_source_removed (PulseConnection *connection,
                               guint            idx,
                               PulseBackend    *pulse)
 {
+    PulseDevice *device;
     PulseStream *stream;
-    gint64       index = HASH_ID_SOURCE (idx);
 
-    stream = g_hash_table_lookup (pulse->priv->streams, &index);
-    if (G_UNLIKELY (stream == NULL))
+    stream = g_hash_table_lookup (pulse->priv->sources, GUINT_TO_POINTER (idx));
+    if G_UNLIKELY (stream == NULL)
         return;
 
-    remove_stream (pulse, stream);
+    g_object_ref (stream);
+
+    free_list_streams (pulse);
+    g_hash_table_remove (pulse->priv->sources, GUINT_TO_POINTER (idx));
+
+    device = pulse_stream_get_device (stream);
+    if (device != NULL) {
+        pulse_device_remove_stream (device, stream);
+    } else {
+        g_signal_emit_by_name (G_OBJECT (pulse),
+                               "stream-removed",
+                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
+    }
+
+    /* The removed stream might be one of the default streams, this happens
+     * especially when switching profiles, after which PulseAudio removes the
+     * old streams and creates new ones with different names */
+    if (MATE_MIXER_STREAM (stream) == PULSE_GET_DEFAULT_SOURCE (pulse)) {
+        PULSE_SET_DEFAULT_SOURCE (pulse, NULL);
+
+        /* PulseAudio usually sends a server info update by itself when default
+         * stream changes, but there is at least one case when it does not - setting
+         * a card profile to off, so to be sure request an update explicitely */
+        pulse_connection_load_server_info (pulse->priv->connection);
+    }
+    g_object_unref (stream);
 }
 
 static void
@@ -1002,39 +997,20 @@ on_connection_source_output_info (PulseConnection             *connection,
                                   const pa_source_output_info *info,
                                   PulseBackend                *pulse)
 {
-    PulseStream *stream;
-    PulseStream *parent = NULL;
-    gint64       index;
+    PulseSource *source;
 
-    if (G_LIKELY (info->source != PA_INVALID_INDEX)) {
-        index = HASH_ID_SOURCE (info->source);
+    if G_UNLIKELY (info->source == PA_INVALID_INDEX)
+        return;
 
-        /* Most likely a monitor source that we have skipped */
-        parent = g_hash_table_lookup (pulse->priv->streams, &index);
-        if (parent == NULL)
-            return;
-    }
+    source = g_hash_table_lookup (pulse->priv->sources, GUINT_TO_POINTER (info->source));
+    if G_UNLIKELY (source == NULL)
+        return;
 
-    index = HASH_ID_SOURCE_OUTPUT (info->index);
+    pulse_source_add_output (source, info);
 
-    stream = g_hash_table_lookup (pulse->priv->streams, &index);
-    if (stream == NULL) {
-        stream = pulse_source_output_new (connection, info, parent);
-        if (G_UNLIKELY (stream == NULL))
-            return;
-
-        g_hash_table_insert (pulse->priv->streams, g_memdup (&index, 8), stream);
-
-        g_signal_emit_by_name (G_OBJECT (pulse),
-                               "stream-added",
-                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
-    } else {
-        pulse_source_output_update (stream, info, parent);
-
-        /* The object might be hanging if reconnecting is in progress, remove the
-         * hanging flag to prevent it from being removed when connected */
-        unmark_hanging (pulse, G_OBJECT (stream));
-    }
+    g_hash_table_insert (pulse->priv->source_outputs,
+                         GUINT_TO_POINTER (info->index),
+                         g_object_ref (source));
 }
 
 static void
@@ -1042,14 +1018,13 @@ on_connection_source_output_removed (PulseConnection *connection,
                                      guint            idx,
                                      PulseBackend    *pulse)
 {
-    PulseStream *stream;
-    gint64       index = HASH_ID_SOURCE_OUTPUT (idx);
+    PulseSource *source;
 
-    stream = g_hash_table_lookup (pulse->priv->streams, &index);
-    if (G_UNLIKELY (stream == NULL))
+    source = g_hash_table_lookup (pulse->priv->source_outputs, GUINT_TO_POINTER (idx));
+    if G_UNLIKELY (source == NULL)
         return;
 
-    remove_stream (pulse, stream);
+    pulse_source_remove_output (source, idx);
 }
 
 static void
@@ -1057,63 +1032,75 @@ on_connection_ext_stream_info (PulseConnection                  *connection,
                                const pa_ext_stream_restore_info *info,
                                PulseBackend                     *pulse)
 {
-    PulseStream *stream;
-    PulseStream *parent = NULL;
+    PulseExtStream *ext;
+    PulseStream    *parent = NULL;
 
-    if (G_LIKELY (info->device != NULL))
-        parent = g_hash_table_find (pulse->priv->streams, compare_stream_names,
+    if (info->device != NULL) {
+        parent = g_hash_table_find (pulse->priv->sinks, compare_stream_names,
                                     (gpointer) info->device);
 
-    stream = g_hash_table_lookup (pulse->priv->ext_streams, info->name);
-    if (stream == NULL) {
-        stream = pulse_ext_stream_new (connection, info, parent);
-        if (G_UNLIKELY (stream == NULL))
-            return;
+        if (parent == NULL)
+            parent = g_hash_table_find (pulse->priv->sources, compare_stream_names,
+                                        (gpointer) info->device);
+    }
 
-        g_hash_table_insert (pulse->priv->ext_streams, g_strdup (info->name), stream);
+    ext = g_hash_table_lookup (pulse->priv->ext_streams, info->name);
+    if (ext == NULL) {
+        ext = pulse_ext_stream_new (connection, info, parent);
+
+        free_list_ext_streams (pulse);
+        g_hash_table_insert (pulse->priv->ext_streams,
+                             g_strdup (info->name),
+                             ext);
 
         g_signal_emit_by_name (G_OBJECT (pulse),
-                               "cached-stream-added",
-                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
+                               "stored-control-added",
+                               mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (ext)));
     } else {
-        pulse_ext_stream_update (stream, info, parent);
+        pulse_ext_stream_update (ext, info, parent);
 
         /* The object might be hanging if ext-streams are being loaded, remove
          * the hanging flag to prevent it from being removed */
-        unmark_hanging (pulse, G_OBJECT (stream));
+        PULSE_UNSET_HANGING (ext);
     }
 }
 
 static void
 on_connection_ext_stream_loading (PulseConnection *connection, PulseBackend *pulse)
 {
-    mark_hanging_hash (pulse->priv->ext_streams);
+    GHashTableIter iter;
+    gpointer       ext;
+
+    g_hash_table_iter_init (&iter, pulse->priv->ext_streams);
+
+    while (g_hash_table_iter_next (&iter, NULL, &ext) == TRUE)
+        PULSE_SET_HANGING (ext);
 }
 
 static void
 on_connection_ext_stream_loaded (PulseConnection *connection, PulseBackend *pulse)
 {
     GHashTableIter iter;
-    gpointer       value;
+    gpointer       name;
+    gpointer       ext;
 
     g_hash_table_iter_init (&iter, pulse->priv->ext_streams);
 
-    while (g_hash_table_iter_next (&iter, NULL, &value) == TRUE) {
-        guint hanging =
-            GPOINTER_TO_UINT (g_object_get_data (G_OBJECT (value), "backend-hanging"));
+    while (g_hash_table_iter_next (&iter, &name, &ext) == TRUE) {
+        if (PULSE_GET_HANGING (ext) == FALSE)
+            continue;
 
-        if (hanging == 1) {
-            gchar *name = g_strdup ((const gchar *) value);
+        free_list_ext_streams (pulse);
+        g_hash_table_remove (pulse->priv->ext_streams, (gconstpointer) name);
 
-            g_hash_table_remove (pulse->priv->ext_streams, (gconstpointer) name);
-            g_signal_emit_by_name (G_OBJECT (pulse),
-                                   "cached-stream-removed",
-                                   name);
-            g_free (name);
-        }
+        g_signal_emit_by_name (G_OBJECT (pulse),
+                               "stored-control-removed",
+                               name);
     }
+    g_debug ("Ext-streams refreshed");
 }
 
+// XXX rename
 static gboolean
 connect_source_reconnect (PulseBackend *pulse)
 {
@@ -1121,16 +1108,10 @@ connect_source_reconnect (PulseBackend *pulse)
      * and wait for the connection state notifications, otherwise this function
      * will be called again */
     if (pulse_connection_connect (pulse->priv->connection, TRUE) == TRUE) {
-        connect_source_remove (pulse);
-        return FALSE;
+        pulse->priv->connect_tag = 0;
+        return G_SOURCE_REMOVE;
     }
-    return TRUE;
-}
-
-static void
-connect_source_remove (PulseBackend *pulse)
-{
-    g_clear_pointer (&pulse->priv->connect_source, g_source_unref);
+    return G_SOURCE_CONTINUE;
 }
 
 static void
@@ -1141,7 +1122,7 @@ check_pending_sink (PulseBackend *pulse, PulseStream *stream)
 
     /* See if the currently added sream matches the default input stream
      * we are waiting for */
-    pending = g_object_get_data (G_OBJECT (pulse), "backend-pending-sink");
+    pending = PULSE_GET_PENDING_SINK (pulse);
     if (pending == NULL)
         return;
 
@@ -1149,14 +1130,10 @@ check_pending_sink (PulseBackend *pulse, PulseStream *stream)
     if (g_strcmp0 (pending, name) != 0)
         return;
 
-    pulse->priv->default_sink = g_object_ref (stream);
-    g_object_set_data (G_OBJECT (pulse),
-                       "backend-pending-sink",
-                       NULL);
+    g_debug ("Setting default output stream to pending stream %s", name);
 
-    g_debug ("Default output stream changed to pending stream %s", name);
-
-    g_object_notify (G_OBJECT (pulse), "default-output");
+    PULSE_SET_PENDING_SINK_NULL (pulse);
+    PULSE_SET_DEFAULT_SINK (pulse, stream);
 }
 
 static void
@@ -1167,7 +1144,7 @@ check_pending_source (PulseBackend *pulse, PulseStream *stream)
 
     /* See if the currently added sream matches the default input stream
      * we are waiting for */
-    pending = g_object_get_data (G_OBJECT (pulse), "backend-pending-source");
+    pending = PULSE_GET_PENDING_SOURCE (pulse);
     if (pending == NULL)
         return;
 
@@ -1175,160 +1152,43 @@ check_pending_source (PulseBackend *pulse, PulseStream *stream)
     if (g_strcmp0 (pending, name) != 0)
         return;
 
-    pulse->priv->default_source = g_object_ref (stream);
-    g_object_set_data (G_OBJECT (pulse),
-                       "backend-pending-source",
-                       NULL);
+    g_debug ("Setting default input stream to pending stream %s", name);
 
-    g_debug ("Default input stream changed to pending stream %s", name);
-
-    g_object_notify (G_OBJECT (pulse), "default-input");
+    PULSE_SET_PENDING_SOURCE_NULL (pulse);
+    PULSE_SET_DEFAULT_SOURCE (pulse, stream);
 }
 
 static void
-mark_hanging (PulseBackend *pulse)
+free_list_devices (PulseBackend *pulse)
 {
-    /* Mark devices and streams as hanging, ext-streams are handled separately */
-    mark_hanging_hash (pulse->priv->devices);
-    mark_hanging_hash (pulse->priv->streams);
-}
-
-static void
-mark_hanging_hash (GHashTable *hash)
-{
-    GHashTableIter iter;
-    gpointer       value;
-
-    g_hash_table_iter_init (&iter, hash);
-
-    while (g_hash_table_iter_next (&iter, NULL, &value) == TRUE)
-        g_object_set_data (G_OBJECT (value), "backend-hanging", GUINT_TO_POINTER (1));
-}
-
-static void
-unmark_hanging (PulseBackend *pulse, GObject *object)
-{
-    if (pulse->priv->connected_once == FALSE)
-        return;
-    if (pulse->priv->state == MATE_MIXER_STATE_READY)
+    if (pulse->priv->devices_list == NULL)
         return;
 
-    g_object_steal_data (object, "backend-hanging");
+    g_list_free_full (pulse->priv->devices_list, g_object_unref);
+
+    pulse->priv->devices_list = NULL;
 }
 
 static void
-remove_hanging (PulseBackend *pulse)
+free_list_streams (PulseBackend *pulse)
 {
-    GHashTableIter iter;
-    gpointer       value;
-
-    g_hash_table_iter_init (&iter, pulse->priv->devices);
-
-    while (g_hash_table_iter_next (&iter, NULL, &value) == TRUE) {
-        guint hanging =
-            GPOINTER_TO_UINT (g_object_get_data (G_OBJECT (value), "backend-hanging"));
-
-        if (hanging == 1)
-            remove_device (pulse, PULSE_DEVICE (value));
-    }
-
-    g_hash_table_iter_init (&iter, pulse->priv->streams);
-
-    while (g_hash_table_iter_next (&iter, NULL, &value) == TRUE) {
-        guint hanging =
-            GPOINTER_TO_UINT (g_object_get_data (G_OBJECT (value), "backend-hanging"));
-
-        if (hanging == 1)
-            remove_stream (pulse, PULSE_STREAM (value));
-    }
-}
-
-static void
-remove_device (PulseBackend *pulse, PulseDevice *device)
-{
-    gchar *name;
-
-    name = g_strdup (mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)));
-
-    g_hash_table_remove (pulse->priv->devices,
-                         GUINT_TO_POINTER (pulse_device_get_index (device)));
-
-    g_signal_emit_by_name (G_OBJECT (pulse), "device-removed", name);
-    g_free (name);
-}
-
-static void
-remove_stream (PulseBackend *pulse, PulseStream *stream)
-{
-    gchar   *name;
-    guint32  idx;
-    gint64   index;
-    gboolean reload = FALSE;
-
-    /* The removed stream might be one of the default streams, this happens
-     * especially when switching profiles, after which PulseAudio removes the
-     * old streams and creates new ones with different names */
-    if (MATE_MIXER_STREAM (stream) == pulse->priv->default_sink) {
-        g_clear_object (&pulse->priv->default_sink);
-
-        g_object_notify (G_OBJECT (pulse), "default-output");
-        reload = TRUE;
-    }
-    else if (MATE_MIXER_STREAM (stream) == pulse->priv->default_source) {
-        g_clear_object (&pulse->priv->default_source);
-
-        g_object_notify (G_OBJECT (pulse), "default-input");
-        reload = TRUE;
-    }
-
-    idx = pulse_stream_get_index (stream);
-
-    if (PULSE_IS_SINK (stream))
-        index = HASH_ID_SINK (idx);
-    else if (PULSE_IS_SINK_INPUT (stream))
-        index = HASH_ID_SINK_INPUT (idx);
-    else if (PULSE_IS_SOURCE (stream))
-        index = HASH_ID_SOURCE (idx);
-    else
-        index = HASH_ID_SOURCE_OUTPUT (idx);
-
-    name = g_strdup (mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
-
-    g_hash_table_remove (pulse->priv->streams, &index);
-
-    /* PulseAudio usually sends a server info update by itself when default
-     * stream changes, but there is at least one case when it does not - setting
-     * a card profile to off, so to be sure request an update explicitely */
-    if (reload == TRUE)
-        pulse_connection_load_server_info (pulse->priv->connection);
-
-    g_signal_emit_by_name (G_OBJECT (pulse), "stream-removed", name);
-    g_free (name);
-}
-
-static void
-change_state (PulseBackend *backend, MateMixerState state)
-{
-    if (backend->priv->state == state)
+    if (pulse->priv->streams_list == NULL)
         return;
 
-    backend->priv->state = state;
+    g_list_free_full (pulse->priv->streams_list, g_object_unref);
 
-    g_object_notify (G_OBJECT (backend), "state");
+    pulse->priv->streams_list = NULL;
 }
 
-static gint
-compare_devices (gconstpointer a, gconstpointer b)
+static void
+free_list_ext_streams (PulseBackend *pulse)
 {
-    return strcmp (mate_mixer_device_get_name (MATE_MIXER_DEVICE (a)),
-                   mate_mixer_device_get_name (MATE_MIXER_DEVICE (b)));
-}
+    if (pulse->priv->ext_streams_list == NULL)
+        return;
 
-static gint
-compare_streams (gconstpointer a, gconstpointer b)
-{
-    return strcmp (mate_mixer_stream_get_name (MATE_MIXER_STREAM (a)),
-                   mate_mixer_stream_get_name (MATE_MIXER_STREAM (b)));
+    g_list_free_full (pulse->priv->ext_streams_list, g_object_unref);
+
+    pulse->priv->ext_streams_list = NULL;
 }
 
 static gboolean
@@ -1336,5 +1196,5 @@ compare_stream_names (gpointer key, gpointer value, gpointer user_data)
 {
     MateMixerStream *stream = MATE_MIXER_STREAM (value);
 
-    return !strcmp (mate_mixer_stream_get_name (stream), (const gchar *) user_data);
+    return strcmp (mate_mixer_stream_get_name (stream), (const gchar *) user_data) == 0;
 }

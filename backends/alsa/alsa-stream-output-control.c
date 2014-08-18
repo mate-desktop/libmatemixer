@@ -22,6 +22,7 @@
 #include <libmatemixer/matemixer.h>
 #include <libmatemixer/matemixer-private.h>
 
+#include "alsa-constants.h"
 #include "alsa-element.h"
 #include "alsa-stream-control.h"
 #include "alsa-stream-output-control.h"
@@ -51,8 +52,7 @@ static gboolean alsa_stream_output_control_get_decibel_from_volume (AlsaStreamCo
                                                                     guint                        volume,
                                                                     gdouble                     *decibel);
 
-static void     read_volume_data (snd_mixer_elem_t *el,
-                                  AlsaControlData  *data);
+static void read_volume_data (snd_mixer_elem_t *el, AlsaControlData  *data);
 
 static void
 alsa_stream_output_control_class_init (AlsaStreamOutputControlClass *klass)
@@ -77,12 +77,14 @@ alsa_stream_output_control_init (AlsaStreamOutputControl *control)
 AlsaStreamControl *
 alsa_stream_output_control_new (const gchar               *name,
                                 const gchar               *label,
-                                MateMixerStreamControlRole role)
+                                MateMixerStreamControlRole role,
+                                AlsaStream                *stream)
 {
     return g_object_new (ALSA_TYPE_STREAM_OUTPUT_CONTROL,
                          "name", name,
                          "label", label,
                          "role", role,
+                         "stream", stream,
                          NULL);
 }
 
@@ -98,7 +100,6 @@ alsa_stream_output_control_load (AlsaStreamControl *control)
     if G_UNLIKELY (el == NULL)
         return FALSE;
 
-    /* Expect that the element has a volume control */
     if G_UNLIKELY (snd_mixer_selem_has_playback_volume (el) == 0 &&
                    snd_mixer_selem_has_common_volume (el) == 0) {
         g_warn_if_reached ();
@@ -180,8 +181,7 @@ alsa_stream_output_control_set_channel_volume (AlsaStreamControl           *cont
     if G_UNLIKELY (el == NULL)
         return FALSE;
 
-    /* Set the volume for a single channels, the volume may still be "joined" and
-     * set all the channels by itself */
+    /* Set the volume for a single channel */
     ret = snd_mixer_selem_set_playback_volume (el, channel, volume);
     if (ret < 0) {
         g_warning ("Failed to set channel volume: %s", snd_strerror (ret));

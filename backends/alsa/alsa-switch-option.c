@@ -18,9 +18,7 @@
 #include <glib.h>
 #include <glib-object.h>
 #include <alsa/asoundlib.h>
-
 #include <libmatemixer/matemixer.h>
-#include <libmatemixer/matemixer-private.h>
 
 #include "alsa-switch-option.h"
 
@@ -59,6 +57,7 @@ alsa_switch_option_new (const gchar *name,
     option = g_object_new (ALSA_TYPE_SWITCH_OPTION,
                            "name", name,
                            "label", label,
+                           "icon", icon,
                            NULL);
 
     option->priv->id = id;

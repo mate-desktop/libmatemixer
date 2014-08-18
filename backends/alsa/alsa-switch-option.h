@@ -24,17 +24,17 @@
 
 G_BEGIN_DECLS
 
-#define ALSA_TYPE_SWITCH_OPTION                        \
+#define ALSA_TYPE_SWITCH_OPTION                 \
         (alsa_switch_option_get_type ())
-#define ALSA_SWITCH_OPTION(o)                          \
+#define ALSA_SWITCH_OPTION(o)                   \
         (G_TYPE_CHECK_INSTANCE_CAST ((o), ALSA_TYPE_SWITCH_OPTION, AlsaSwitchOption))
-#define ALSA_IS_SWITCH_OPTION(o)                       \
+#define ALSA_IS_SWITCH_OPTION(o)                \
         (G_TYPE_CHECK_INSTANCE_TYPE ((o), ALSA_TYPE_SWITCH_OPTION))
-#define ALSA_SWITCH_OPTION_CLASS(k)                    \
+#define ALSA_SWITCH_OPTION_CLASS(k)             \
         (G_TYPE_CHECK_CLASS_CAST ((k), ALSA_TYPE_SWITCH_OPTION, AlsaSwitchOptionClass))
-#define ALSA_IS_SWITCH_OPTION_CLASS(k)                 \
+#define ALSA_IS_SWITCH_OPTION_CLASS(k)          \
         (G_TYPE_CHECK_CLASS_TYPE ((k), ALSA_TYPE_SWITCH_OPTION))
-#define ALSA_SWITCH_OPTION_GET_CLASS(o)                \
+#define ALSA_SWITCH_OPTION_GET_CLASS(o)         \
         (G_TYPE_INSTANCE_GET_CLASS ((o), ALSA_TYPE_SWITCH_OPTION, AlsaSwitchOptionClass))
 
 typedef struct _AlsaSwitchOption         AlsaSwitchOption;

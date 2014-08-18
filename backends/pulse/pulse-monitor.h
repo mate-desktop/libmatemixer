@@ -23,6 +23,8 @@
 
 #include <pulse/pulseaudio.h>
 
+#include "pulse-types.h"
+
 G_BEGIN_DECLS
 
 #define PULSE_TYPE_MONITOR                      \
@@ -38,7 +40,6 @@ G_BEGIN_DECLS
 #define PULSE_MONITOR_GET_CLASS(o)              \
         (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_TYPE_MONITOR, PulseMonitorClass))
 
-typedef struct _PulseMonitor         PulseMonitor;
 typedef struct _PulseMonitorClass    PulseMonitorClass;
 typedef struct _PulseMonitorPrivate  PulseMonitorPrivate;
 
@@ -54,7 +55,7 @@ struct _PulseMonitorClass
 {
     GObjectClass parent_class;
 
-    /* Signals */
+    /*< private >*/
     void (*value) (PulseMonitor *monitor,
                    gdouble       value);
 };
@@ -63,17 +64,12 @@ GType         pulse_monitor_get_type     (void) G_GNUC_CONST;
 
 PulseMonitor *pulse_monitor_new          (pa_context   *context,
                                           pa_proplist  *proplist,
-                                          const gchar  *name,
                                           guint32       index_source,
                                           guint32       index_sink_input);
 
 gboolean      pulse_monitor_get_enabled  (PulseMonitor *monitor);
 gboolean      pulse_monitor_set_enabled  (PulseMonitor *monitor,
                                           gboolean      enabled);
-
-const gchar * pulse_monitor_get_name     (PulseMonitor *monitor);
-gboolean      pulse_monitor_set_name     (PulseMonitor *monitor,
-                                          const gchar  *name);
 
 G_END_DECLS
 

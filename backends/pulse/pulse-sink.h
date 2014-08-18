@@ -23,9 +23,8 @@
 
 #include <pulse/pulseaudio.h>
 
-#include "pulse-connection.h"
-#include "pulse-device.h"
 #include "pulse-stream.h"
+#include "pulse-types.h"
 
 G_BEGIN_DECLS
 
@@ -42,7 +41,6 @@ G_BEGIN_DECLS
 #define PULSE_SINK_GET_CLASS(o)                 \
         (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_TYPE_SINK, PulseSinkClass))
 
-typedef struct _PulseSink         PulseSink;
 typedef struct _PulseSinkClass    PulseSinkClass;
 typedef struct _PulseSinkPrivate  PulseSinkPrivate;
 
@@ -59,17 +57,21 @@ struct _PulseSinkClass
     PulseStreamClass parent_class;
 };
 
-GType        pulse_sink_get_type          (void) G_GNUC_CONST;
+GType      pulse_sink_get_type (void) G_GNUC_CONST;
 
-PulseStream *pulse_sink_new               (PulseConnection    *connection,
-                                           const pa_sink_info *info,
-                                           PulseDevice        *device);
+PulseSink *pulse_sink_new      (PulseConnection    *connection,
+                                const pa_sink_info *info,
+                                PulseDevice        *device);
 
-guint32      pulse_sink_get_monitor_index (PulseStream        *pstream);
+void       pulse_sink_add_input (PulseSink          *sink,
+                                 const pa_sink_input_info *info);
 
-gboolean     pulse_sink_update            (PulseStream        *pstream,
-                                           const pa_sink_info *info,
-                                           PulseDevice        *device);
+void       pulse_sink_remove_input (PulseSink *sink, guint32 index);
+
+void       pulse_sink_update    (PulseSink          *sink,
+                                 const pa_sink_info *info);
+
+guint32    pulse_sink_get_index_monitor (PulseSink *sink);
 
 G_END_DECLS
 

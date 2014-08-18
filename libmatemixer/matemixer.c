@@ -100,13 +100,14 @@ mate_mixer_is_initialized (void)
     return initialized;
 }
 
-/* Return a list of loaded backend modules */
+/* Internal: return a list of loaded backend modules */
 const GList *
-_mate_mixer_get_modules (void)
+_mate_mixer_list_modules (void)
 {
     return (const GList *) modules;
 }
 
+/* Internal: create a channel mask using the given list of channel positions */
 guint32
 _mate_mixer_create_channel_mask (MateMixerChannelPosition *positions, guint n)
 {

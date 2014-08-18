@@ -42,13 +42,13 @@ G_DEFINE_TYPE_WITH_CODE (AlsaToggle, alsa_toggle, MATE_MIXER_TYPE_TOGGLE,
                          G_IMPLEMENT_INTERFACE (ALSA_TYPE_ELEMENT,
                                                 alsa_element_interface_init))
 
-static gboolean               alsa_toggle_set_active_option (MateMixerSwitch       *mms,
-                                                             MateMixerSwitchOption *mmso);
+static gboolean          alsa_toggle_set_active_option (MateMixerSwitch       *mms,
+                                                        MateMixerSwitchOption *mmso);
 
-static snd_mixer_elem_t *     alsa_toggle_get_snd_element   (AlsaElement           *element);
-static void                   alsa_toggle_set_snd_element   (AlsaElement           *element,
-                                                             snd_mixer_elem_t      *el);
-static gboolean               alsa_toggle_load              (AlsaElement           *element);
+static snd_mixer_elem_t *alsa_toggle_get_snd_element   (AlsaElement           *element);
+static void              alsa_toggle_set_snd_element   (AlsaElement           *element,
+                                                        snd_mixer_elem_t      *el);
+static gboolean          alsa_toggle_load              (AlsaElement           *element);
 
 static void
 alsa_element_interface_init (AlsaElementInterface *iface)
@@ -78,17 +78,20 @@ alsa_toggle_init (AlsaToggle *toggle)
 }
 
 AlsaToggle *
-alsa_toggle_new (const gchar      *name,
-                 const gchar      *label,
-                 AlsaToggleType    type,
-                 AlsaSwitchOption *on,
-                 AlsaSwitchOption *off)
+alsa_toggle_new (const gchar        *name,
+                 const gchar        *label,
+                 MateMixerSwitchRole role,
+                 AlsaToggleType      type,
+                 AlsaSwitchOption   *on,
+                 AlsaSwitchOption   *off)
 {
     AlsaToggle *toggle;
 
     toggle = g_object_new (ALSA_TYPE_TOGGLE,
                            "name", name,
                            "label", label,
+                           "flags", MATE_MIXER_SWITCH_TOGGLE,
+                           "role", role,
                            "state-option-on", on,
                            "state-option-off", off,
                            NULL);
@@ -109,7 +112,12 @@ alsa_toggle_set_active_option (MateMixerSwitch *mms, MateMixerSwitchOption *mmso
 
     toggle = ALSA_TOGGLE (mms);
 
-    /* For toggles the 0/1 value is stored as the switch option id */
+    if G_UNLIKELY (toggle->priv->element == NULL)
+        return FALSE;
+
+    /* For toggles the 0/1 value is stored as the switch option id, there is not really
+     * a need to validate that the option belong to the switch, just make sure it
+     * contains the value 0 or 1 */
     value = alsa_switch_option_get_id (ALSA_SWITCH_OPTION (mmso));
     if G_UNLIKELY (value != 0 && value != 1) {
         g_warn_if_reached ();
@@ -143,7 +151,6 @@ static void
 alsa_toggle_set_snd_element (AlsaElement *element, snd_mixer_elem_t *el)
 {
     g_return_if_fail (ALSA_IS_TOGGLE (element));
-    g_return_if_fail (el != NULL);
 
     ALSA_TOGGLE (element)->priv->element = el;
 }
@@ -157,6 +164,9 @@ alsa_toggle_load (AlsaElement *element)
     snd_mixer_selem_channel_id_t c;
 
     toggle = ALSA_TOGGLE (element);
+
+    if G_UNLIKELY (toggle->priv->element == NULL)
+        return FALSE;
 
     /* When reading the first time we try all the channels, otherwise only the
      * ones which returned success before */
@@ -207,7 +217,6 @@ alsa_toggle_load (AlsaElement *element)
             active = mate_mixer_toggle_get_state_option (MATE_MIXER_TOGGLE (toggle), FALSE);
 
         _mate_mixer_switch_set_active_option (MATE_MIXER_SWITCH (toggle), active);
-
         return TRUE;
     }
 

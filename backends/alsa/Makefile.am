@@ -3,6 +3,7 @@ backenddir = $(libdir)/libmatemixer
 backend_LTLIBRARIES = libmatemixer-alsa.la
 
 AM_CPPFLAGS =                                                   \
+        -Wno-unknown-pragmas                                    \
         -I$(top_srcdir)                                         \
         -DG_LOG_DOMAIN=\"libmatemixer-alsa\"
 

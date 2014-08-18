@@ -41,7 +41,7 @@ AC_PROG_INSTALL
 
 # Checks for header files.
 AC_HEADER_STDC
-AC_CHECK_HEADERS([string.h math.h sys/types.h unistd.h locale.h])
+AC_CHECK_HEADERS([string.h math.h sys/types.h unistd.h libintl.h locale.h])
 
 # =======================================================================
 # Libtool
@@ -55,6 +55,18 @@ AC_SUBST(LT_AGE)
 
 LT_PREREQ([2.2])
 LT_INIT
+
+# =======================================================================
+# Gettext
+# =======================================================================
+AM_GNU_GETTEXT_VERSION([0.18])
+AM_GNU_GETTEXT([external])
+
+IT_PROG_INTLTOOL([0.35.0])
+
+GETTEXT_PACKAGE=libmatemixer
+AC_SUBST(GETTEXT_PACKAGE)
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [Gettext Package])
 
 # =======================================================================
 # Check for required packages
@@ -257,6 +269,7 @@ docs/Makefile
 docs/reference/Makefile
 docs/reference/version.xml
 examples/Makefile
+po/Makefile.in
 ])
 
 AC_OUTPUT

@@ -20,10 +20,11 @@
 
 G_BEGIN_DECLS
 
+typedef struct _MateMixerAppInfo        MateMixerAppInfo;
 typedef struct _MateMixerDevice         MateMixerDevice;
-typedef struct _MateMixerClientStream   MateMixerClientStream;
 typedef struct _MateMixerContext        MateMixerContext;
 typedef struct _MateMixerDeviceProfile  MateMixerDeviceProfile;
+typedef struct _MateMixerStoredControl  MateMixerStoredControl;
 typedef struct _MateMixerStream         MateMixerStream;
 typedef struct _MateMixerStreamControl  MateMixerStreamControl;
 typedef struct _MateMixerSwitch         MateMixerSwitch;

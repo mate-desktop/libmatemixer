@@ -66,48 +66,60 @@ get_stream_control_role_string (MateMixerStreamControlRole role)
         return "Master";
     case MATE_MIXER_STREAM_CONTROL_ROLE_PCM:
         return "PCM";
+    case MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER:
+        return "Speaker";
+    case MATE_MIXER_STREAM_CONTROL_ROLE_MICROPHONE:
+        return "Microphone";
+    case MATE_MIXER_STREAM_CONTROL_ROLE_PORT:
+        return "Port";
+    case MATE_MIXER_STREAM_CONTROL_ROLE_BOOST:
+        return "Boost";
     case MATE_MIXER_STREAM_CONTROL_ROLE_BASS:
         return "Bass";
     case MATE_MIXER_STREAM_CONTROL_ROLE_TREBLE:
         return "Treble";
     case MATE_MIXER_STREAM_CONTROL_ROLE_CD:
         return "CD";
-    case MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER:
-        return "PC Speaker";
-    case MATE_MIXER_STREAM_CONTROL_ROLE_PORT:
-        return "Port";
+    case MATE_MIXER_STREAM_CONTROL_ROLE_VIDEO:
+        return "Video";
+    case MATE_MIXER_STREAM_CONTROL_ROLE_MUSIC:
+        return "Music";
+    default:
+        break;
     }
     return "Unknown";
 }
 
 static const gchar *
-create_role_string (MateMixerClientStreamRole role)
+get_stream_control_media_role_string (MateMixerStreamControlMediaRole role)
 {
     switch (role) {
-    case MATE_MIXER_CLIENT_STREAM_ROLE_NONE:
-        return "None";
-    case MATE_MIXER_CLIENT_STREAM_ROLE_VIDEO:
+    case MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_UNKNOWN:
+        return "Unknown";
+    case MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_VIDEO:
         return "Video";
-    case MATE_MIXER_CLIENT_STREAM_ROLE_MUSIC:
+    case MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_MUSIC:
         return "Music";
-    case MATE_MIXER_CLIENT_STREAM_ROLE_GAME:
+    case MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_GAME:
         return "Game";
-    case MATE_MIXER_CLIENT_STREAM_ROLE_EVENT:
+    case MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_EVENT:
         return "Event";
-    case MATE_MIXER_CLIENT_STREAM_ROLE_PHONE:
+    case MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_PHONE:
         return "Phone";
-    case MATE_MIXER_CLIENT_STREAM_ROLE_ANIMATION:
+    case MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_ANIMATION:
         return "Animation";
-    case MATE_MIXER_CLIENT_STREAM_ROLE_PRODUCTION:
+    case MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_PRODUCTION:
         return "Production";
-    case MATE_MIXER_CLIENT_STREAM_ROLE_A11Y:
+    case MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_A11Y:
         return "A11y";
-    case MATE_MIXER_CLIENT_STREAM_ROLE_TEST:
+    case MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_TEST:
         return "Test";
-    case MATE_MIXER_CLIENT_STREAM_ROLE_ABSTRACT:
+    case MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_ABSTRACT:
         return "Abstract";
-    case MATE_MIXER_CLIENT_STREAM_ROLE_FILTER:
+    case MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_FILTER:
         return "Filter";
+    default:
+        break;
     }
     return "Unknown";
 }
@@ -145,9 +157,7 @@ create_volume_bar (MateMixerStreamControl *ctl, double *percent)
 static void
 print_devices (void)
 {
-    const GList            *devices;
-    const GList            *profiles;
-    MateMixerDeviceProfile *active_profile;
+    const GList *devices;
 
     devices = mate_mixer_context_list_devices (context);
 
@@ -160,30 +170,6 @@ print_devices (void)
                  mate_mixer_device_get_name (device),
                  mate_mixer_device_get_label (device),
                  mate_mixer_device_get_icon (device));
-
-        profiles = mate_mixer_device_list_profiles (device);
-
-        active_profile = mate_mixer_device_get_active_profile (device);
-        while (profiles) {
-            MateMixerDeviceProfile *profile = MATE_MIXER_DEVICE_PROFILE (profiles->data);
-
-            g_print ("       |%c| Profile %s\n"
-                     "                |-| Label    : %s\n"
-                     "                |-| Priority : %u\n"
-                     "                |-| Inputs   : %u\n"
-                     "                |-| Outputs  : %u\n\n",
-                     (profile == active_profile)
-                        ? 'A'
-                        : '-',
-                     mate_mixer_device_profile_get_name (profile),
-                     mate_mixer_device_profile_get_label (profile),
-                     mate_mixer_device_profile_get_priority (profile),
-                     mate_mixer_device_profile_get_num_input_streams (profile),
-                     mate_mixer_device_profile_get_num_output_streams (profile));
-
-            profiles = profiles->next;
-        }
-        g_print ("\n");
 
         const GList *switches = mate_mixer_device_list_switches (device);
 
@@ -201,11 +187,12 @@ print_devices (void)
             while (options != NULL) {
                 MateMixerSwitchOption *option = MATE_MIXER_SWITCH_OPTION (options->data);
 
-                g_print ("       |%c| %s\n",
+                g_print ("       |%c| %s (icon: %s)\n",
                          (option == active)
                             ? '*'
                             : '-',
-                         mate_mixer_switch_option_get_label (option));
+                         mate_mixer_switch_option_get_label (option),
+                         mate_mixer_switch_option_get_icon (option));
 
                 options = options->next;
             }
@@ -229,18 +216,11 @@ print_streams (void)
         MateMixerStream        *stream = MATE_MIXER_STREAM (streams->data);
         MateMixerStreamControl *ctl;
         MateMixerSwitch        *swtch;
-        MateMixerClientStream  *client = NULL;
         gchar                  *volume_bar;
         gdouble                 volume;
 
         const GList *controls;
         const GList *switches;
-
-        if (mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_CLIENT) {
-            /* The application-specific details are accessible through the client
-             * interface, which all client streams implement */
-            client = MATE_MIXER_CLIENT_STREAM (stream);
-        }
 
         controls = mate_mixer_stream_list_controls (stream);
 
@@ -286,94 +266,28 @@ print_streams (void)
 
             options = mate_mixer_switch_list_options (swtch);
 
+            MateMixerSwitchOption *active = mate_mixer_switch_get_active_option (swtch);
+
             g_print ("Switch %s\n",
                      mate_mixer_switch_get_name (swtch));
 
             while (options != NULL) {
                 MateMixerSwitchOption *option = MATE_MIXER_SWITCH_OPTION (options->data);
 
-                g_print ("       |%c| %s\n",
-                         '-',
-                         mate_mixer_switch_option_get_label (option));
+                g_print ("       |%c| %s (icon: %s)\n",
+                         (option == active)
+                            ? '*'
+                            : '-',
+                         mate_mixer_switch_option_get_label (option),
+                         mate_mixer_switch_option_get_icon (option));
 
                 options = options->next;
             }
 
-            options = options->next;
-        }
-
-        if (client != NULL) {
-            MateMixerClientStreamFlags client_flags;
-
-            client_flags = mate_mixer_client_stream_get_flags (client);
-
-            if (client_flags & MATE_MIXER_CLIENT_STREAM_APPLICATION) {
-                gchar *app = create_app_string (mate_mixer_client_stream_get_app_name (client),
-                                                mate_mixer_client_stream_get_app_id (client),
-                                                mate_mixer_client_stream_get_app_version (client));
-
-                g_print ("       |-| Application : %s\n", app);
-                g_free (app);
-            }
+            switches = switches->next;
         }
 
         g_print ("\n");
-
-        streams = streams->next;
-    }
-}
-
-static void
-print_stored_streams (void)
-{
-    const GList *streams;
-
-    streams = mate_mixer_context_list_stored_streams (context);
-
-    while (streams) {
-        MateMixerStream           *stream = MATE_MIXER_STREAM (streams->data);
-        MateMixerStreamControl    *ctl;
-        MateMixerClientStream     *client;
-        MateMixerClientStreamFlags client_flags;
-        MateMixerClientStreamRole  client_role;
-        gchar                     *volume_bar;
-        gdouble                    volume;
-
-        ctl = mate_mixer_stream_get_default_control (stream);
-
-        client       = MATE_MIXER_CLIENT_STREAM (stream);
-        client_flags = mate_mixer_client_stream_get_flags (client);
-        client_role  = mate_mixer_client_stream_get_role (client);
-
-        volume_bar = create_volume_bar (ctl, &volume);
-
-        g_print ("Stored stream %s\n"
-                 "       |-| Role        : %s\n"
-                 "       |-| Volume      : %s %.1f %%\n"
-                 "       |-| Muted       : %s\n"
-                 "       |-| Channels    : %d\n"
-                 "       |-| Balance     : %.1f\n"
-                 "       |-| Fade        : %.1f\n",
-                 mate_mixer_stream_get_name (stream),
-                 create_role_string (client_role),
-                 volume_bar,
-                 volume,
-                 mate_mixer_stream_control_get_mute (ctl) ? "Yes" : "No",
-                 mate_mixer_stream_control_get_num_channels (ctl),
-                 mate_mixer_stream_control_get_balance (ctl),
-                 mate_mixer_stream_control_get_fade (ctl));
-
-        if (client_flags & MATE_MIXER_CLIENT_STREAM_APPLICATION) {
-            gchar *app = create_app_string (mate_mixer_client_stream_get_app_name (client),
-                                            mate_mixer_client_stream_get_app_id (client),
-                                            mate_mixer_client_stream_get_app_version (client));
-
-            g_print ("       |-| Application : %s\n", app);
-            g_free (app);
-        }
-
-        g_print ("\n");
-        g_free (volume_bar);
 
         streams = streams->next;
     }
@@ -387,7 +301,6 @@ connected (void)
 
     print_devices ();
     print_streams ();
-    print_stored_streams ();
 
     g_print ("Waiting for events. Hit CTRL+C to quit.\n");
 }

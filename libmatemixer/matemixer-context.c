@@ -22,7 +22,6 @@
 #include "matemixer.h"
 #include "matemixer-backend.h"
 #include "matemixer-backend-module.h"
-#include "matemixer-client-stream.h"
 #include "matemixer-context.h"
 #include "matemixer-enums.h"
 #include "matemixer-enum-types.h"
@@ -38,9 +37,10 @@
 struct _MateMixerContextPrivate
 {
     gboolean                backend_chosen;
+    gchar                  *server_address;
     MateMixerState          state;
     MateMixerBackend       *backend;
-    MateMixerBackendData    backend_data;
+    MateMixerAppInfo       *app_info;
     MateMixerBackendType    backend_type;
     MateMixerBackendModule *module;
 };
@@ -65,8 +65,8 @@ enum {
     DEVICE_REMOVED,
     STREAM_ADDED,
     STREAM_REMOVED,
-    STORED_STREAM_ADDED,
-    STORED_STREAM_REMOVED,
+    STORED_CONTROL_ADDED,
+    STORED_CONTROL_REMOVED,
     N_SIGNALS
 };
 
@@ -107,10 +107,10 @@ static void     on_backend_stream_removed               (MateMixerBackend *backe
                                                          const gchar      *name,
                                                          MateMixerContext *context);
 
-static void     on_backend_stored_stream_added          (MateMixerBackend *backend,
+static void     on_backend_stored_control_added         (MateMixerBackend *backend,
                                                          const gchar      *name,
                                                          MateMixerContext *context);
-static void     on_backend_stored_stream_removed        (MateMixerBackend *backend,
+static void     on_backend_stored_control_removed       (MateMixerBackend *backend,
                                                          const gchar      *name,
                                                          MateMixerContext *context);
 
@@ -303,17 +303,17 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
                       G_TYPE_STRING);
 
     /**
-     * MateMixerContext::stored-stream-added:
+     * MateMixerContext::stored-control-added:
      * @context: a #MateMixerContext
-     * @name: name of the added stored stream
+     * @name: name of the added stored control
      *
-     * The signal is emitted each time a stored stream is created.
+     * The signal is emitted each time a stored control is created.
      */
-    signals[STORED_STREAM_ADDED] =
+    signals[STORED_CONTROL_ADDED] =
         g_signal_new ("stored-control-added",
                       G_TYPE_FROM_CLASS (object_class),
                       G_SIGNAL_RUN_LAST,
-                      G_STRUCT_OFFSET (MateMixerContextClass, stored_stream_added),
+                      G_STRUCT_OFFSET (MateMixerContextClass, stored_control_added),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__STRING,
@@ -322,17 +322,17 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
                       G_TYPE_STRING);
 
     /**
-     * MateMixerContext::stream-removed:
+     * MateMixerContext::stored-control-removed:
      * @context: a #MateMixerContext
-     * @name: name of the removed stream
+     * @name: name of the removed control
      *
-     * The signal is emitted each time a stream is removed.
+     * The signal is emitted each time a control is removed.
      */
-    signals[STORED_STREAM_REMOVED] =
-        g_signal_new ("stored-stream-removed",
+    signals[STORED_CONTROL_REMOVED] =
+        g_signal_new ("stored-control-removed",
                       G_TYPE_FROM_CLASS (object_class),
                       G_SIGNAL_RUN_LAST,
-                      G_STRUCT_OFFSET (MateMixerContextClass, stored_stream_removed),
+                      G_STRUCT_OFFSET (MateMixerContextClass, stored_control_removed),
                       NULL,
                       NULL,
                       g_cclosure_marshal_VOID__STRING,
@@ -355,19 +355,19 @@ mate_mixer_context_get_property (GObject    *object,
 
     switch (param_id) {
     case PROP_APP_NAME:
-        g_value_set_string (value, context->priv->backend_data.app_name);
+        g_value_set_string (value, mate_mixer_app_info_get_name (context->priv->app_info));
         break;
     case PROP_APP_ID:
-        g_value_set_string (value, context->priv->backend_data.app_id);
+        g_value_set_string (value, mate_mixer_app_info_get_id (context->priv->app_info));
         break;
     case PROP_APP_VERSION:
-        g_value_set_string (value, context->priv->backend_data.app_version);
+        g_value_set_string (value, mate_mixer_app_info_get_version (context->priv->app_info));
         break;
     case PROP_APP_ICON:
-        g_value_set_string (value, context->priv->backend_data.app_icon);
+        g_value_set_string (value, mate_mixer_app_info_get_icon (context->priv->app_info));
         break;
     case PROP_SERVER_ADDRESS:
-        g_value_set_string (value, context->priv->backend_data.server_address);
+        g_value_set_string (value, context->priv->server_address);
         break;
     case PROP_STATE:
         g_value_set_enum (value, context->priv->state);
@@ -378,6 +378,7 @@ mate_mixer_context_get_property (GObject    *object,
     case PROP_DEFAULT_OUTPUT_STREAM:
         g_value_set_object (value, mate_mixer_context_get_default_output_stream (context));
         break;
+
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
         break;
@@ -416,6 +417,7 @@ mate_mixer_context_set_property (GObject      *object,
     case PROP_DEFAULT_OUTPUT_STREAM:
         mate_mixer_context_set_default_output_stream (context, g_value_get_object (value));
         break;
+
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
         break;
@@ -428,12 +430,18 @@ mate_mixer_context_init (MateMixerContext *context)
     context->priv = G_TYPE_INSTANCE_GET_PRIVATE (context,
                                                  MATE_MIXER_TYPE_CONTEXT,
                                                  MateMixerContextPrivate);
+
+    context->priv->app_info = _mate_mixer_app_info_new ();
 }
 
 static void
 mate_mixer_context_dispose (GObject *object)
 {
-    close_context (MATE_MIXER_CONTEXT (object));
+    MateMixerContext *context;
+
+    context = MATE_MIXER_CONTEXT (object);
+
+    close_context (context);
 
     G_OBJECT_CLASS (mate_mixer_context_parent_class)->dispose (object);
 }
@@ -445,11 +453,9 @@ mate_mixer_context_finalize (GObject *object)
 
     context = MATE_MIXER_CONTEXT (object);
 
-    g_free (context->priv->backend_data.app_name);
-    g_free (context->priv->backend_data.app_id);
-    g_free (context->priv->backend_data.app_version);
-    g_free (context->priv->backend_data.app_icon);
-    g_free (context->priv->backend_data.server_address);
+    _mate_mixer_app_info_free (context->priv->app_info);
+
+    g_free (context->priv->server_address);
 
     G_OBJECT_CLASS (mate_mixer_context_parent_class)->finalize (object);
 }
@@ -504,7 +510,7 @@ mate_mixer_context_set_backend_type (MateMixerContext     *context,
         context->priv->state == MATE_MIXER_STATE_READY)
         return FALSE;
 
-    modules = _mate_mixer_get_modules ();
+    modules = _mate_mixer_list_modules ();
 
     while (modules != NULL) {
         module = MATE_MIXER_BACKEND_MODULE (modules->data);
@@ -542,13 +548,11 @@ mate_mixer_context_set_app_name (MateMixerContext *context, const gchar *app_nam
         context->priv->state == MATE_MIXER_STATE_READY)
         return FALSE;
 
-    if (g_strcmp0 (context->priv->backend_data.app_name, app_name) != 0) {
-        g_free (context->priv->backend_data.app_name);
+    _mate_mixer_app_info_set_name (context->priv->app_info, app_name);
 
-        context->priv->backend_data.app_name = g_strdup (app_name);
+    g_object_notify_by_pspec (G_OBJECT (context),
+                              properties[PROP_APP_NAME]);
 
-        g_object_notify_by_pspec (G_OBJECT (context), properties[PROP_APP_NAME]);
-    }
     return TRUE;
 }
 
@@ -575,13 +579,11 @@ mate_mixer_context_set_app_id (MateMixerContext *context, const gchar *app_id)
         context->priv->state == MATE_MIXER_STATE_READY)
         return FALSE;
 
-    if (g_strcmp0 (context->priv->backend_data.app_id, app_id) != 0) {
-        g_free (context->priv->backend_data.app_id);
+    _mate_mixer_app_info_set_id (context->priv->app_info, app_id);
 
-        context->priv->backend_data.app_id = g_strdup (app_id);
+    g_object_notify_by_pspec (G_OBJECT (context),
+                              properties[PROP_APP_ID]);
 
-        g_object_notify_by_pspec (G_OBJECT (context), properties[PROP_APP_ID]);
-    }
     return TRUE;
 }
 
@@ -608,13 +610,11 @@ mate_mixer_context_set_app_version (MateMixerContext *context, const gchar *app_
         context->priv->state == MATE_MIXER_STATE_READY)
         return FALSE;
 
-    if (g_strcmp0 (context->priv->backend_data.app_version, app_version) != 0) {
-        g_free (context->priv->backend_data.app_version);
+    _mate_mixer_app_info_set_version (context->priv->app_info, app_version);
 
-        context->priv->backend_data.app_version = g_strdup (app_version);
+    g_object_notify_by_pspec (G_OBJECT (context),
+                              properties[PROP_APP_VERSION]);
 
-        g_object_notify_by_pspec (G_OBJECT (context), properties[PROP_APP_VERSION]);
-    }
     return TRUE;
 }
 
@@ -641,13 +641,11 @@ mate_mixer_context_set_app_icon (MateMixerContext *context, const gchar *app_ico
         context->priv->state == MATE_MIXER_STATE_READY)
         return FALSE;
 
-    if (g_strcmp0 (context->priv->backend_data.app_icon, app_icon) != 0) {
-        g_free (context->priv->backend_data.app_icon);
+    _mate_mixer_app_info_set_icon (context->priv->app_info, app_icon);
 
-        context->priv->backend_data.app_icon = g_strdup (app_icon);
+    g_object_notify_by_pspec (G_OBJECT (context),
+                              properties[PROP_APP_ICON]);
 
-        g_object_notify_by_pspec (G_OBJECT (context), properties[PROP_APP_ICON]);
-    }
     return TRUE;
 }
 
@@ -675,13 +673,13 @@ mate_mixer_context_set_server_address (MateMixerContext *context, const gchar *a
         context->priv->state == MATE_MIXER_STATE_READY)
         return FALSE;
 
-    if (g_strcmp0 (context->priv->backend_data.server_address, address) != 0) {
-        g_free (context->priv->backend_data.server_address);
+    g_free (context->priv->server_address);
 
-        context->priv->backend_data.server_address = g_strdup (address);
+    context->priv->server_address = g_strdup (address);
 
-        g_object_notify_by_pspec (G_OBJECT (context), properties[PROP_SERVER_ADDRESS]);
-    }
+    g_object_notify_by_pspec (G_OBJECT (context),
+                              properties[PROP_SERVER_ADDRESS]);
+
     return TRUE;
 }
 
@@ -727,7 +725,7 @@ mate_mixer_context_open (MateMixerContext *context)
 
     /* We are going to choose the first backend to try. It will be either the one
      * specified by the application or the one with the highest priority */
-    modules = _mate_mixer_get_modules ();
+    modules = _mate_mixer_list_modules ();
 
     if (context->priv->backend_type != MATE_MIXER_BACKEND_UNKNOWN) {
         while (modules != NULL) {
@@ -758,7 +756,8 @@ mate_mixer_context_open (MateMixerContext *context)
     context->priv->module  = g_object_ref (module);
     context->priv->backend = g_object_new (info->g_type, NULL);
 
-    mate_mixer_backend_set_data (context->priv->backend, &context->priv->backend_data);
+    mate_mixer_backend_set_app_info (context->priv->backend, context->priv->app_info);
+    mate_mixer_backend_set_server_address (context->priv->backend, context->priv->server_address);
 
     g_debug ("Trying to open backend %s", info->name);
 
@@ -848,21 +847,13 @@ mate_mixer_context_get_state (MateMixerContext *context)
 MateMixerDevice *
 mate_mixer_context_get_device (MateMixerContext *context, const gchar *name)
 {
-    GList *list;
-
     g_return_val_if_fail (MATE_MIXER_IS_CONTEXT (context), NULL);
     g_return_val_if_fail (name != NULL, NULL);
 
-    list = (GList *) mate_mixer_context_list_devices (context);
-    while (list != NULL) {
-        MateMixerDevice *device = MATE_MIXER_DEVICE (list->data);
+    if (context->priv->state != MATE_MIXER_STATE_READY)
+        return NULL;
 
-        if (strcmp (name, mate_mixer_device_get_name (device)) == 0)
-            return device;
-
-        list = list->next;
-    }
-    return NULL;
+    return mate_mixer_backend_get_device (MATE_MIXER_BACKEND (context->priv->backend), name);
 }
 
 /**
@@ -877,50 +868,34 @@ mate_mixer_context_get_device (MateMixerContext *context, const gchar *name)
 MateMixerStream *
 mate_mixer_context_get_stream (MateMixerContext *context, const gchar *name)
 {
-    GList *list;
-
     g_return_val_if_fail (MATE_MIXER_IS_CONTEXT (context), NULL);
     g_return_val_if_fail (name != NULL, NULL);
 
-    list = (GList *) mate_mixer_context_list_streams (context);
-    while (list != NULL) {
-        MateMixerStream *stream = MATE_MIXER_STREAM (list->data);
+    if (context->priv->state != MATE_MIXER_STATE_READY)
+        return NULL;
 
-        if (strcmp (name, mate_mixer_stream_get_name (stream)) == 0)
-            return stream;
-
-        list = list->next;
-    }
-    return NULL;
+    return mate_mixer_backend_get_stream (MATE_MIXER_BACKEND (context->priv->backend), name);
 }
 
 /**
- * mate_mixer_context_get_stored_stream:
+ * mate_mixer_context_get_stored_control:
  * @context: a #MateMixerContext
- * @name: a stream name
+ * @name: a stored control name
  *
- * Gets the stream with the given name.
+ * Gets the stored control with the given name.
  *
- * Returns: a #MateMixerStream or %NULL if there is no such stream.
+ * Returns: a #MateMixerStoredControl or %NULL if there is no such control.
  */
-MateMixerStream *
-mate_mixer_context_get_stored_stream (MateMixerContext *context, const gchar *name)
+MateMixerStoredControl *
+mate_mixer_context_get_stored_control (MateMixerContext *context, const gchar *name)
 {
-    GList *list;
-
     g_return_val_if_fail (MATE_MIXER_IS_CONTEXT (context), NULL);
     g_return_val_if_fail (name != NULL, NULL);
 
-    list = (GList *) mate_mixer_context_list_stored_streams (context);
-    while (list != NULL) {
-        MateMixerStream *stream = MATE_MIXER_STREAM (list->data);
+    if (context->priv->state != MATE_MIXER_STATE_READY)
+        return NULL;
 
-        if (strcmp (name, mate_mixer_stream_get_name (stream)) == 0)
-            return stream;
-
-        list = list->next;
-    }
-    return NULL;
+    return mate_mixer_backend_get_stored_control (MATE_MIXER_BACKEND (context->priv->backend), name);
 }
 
 /**
@@ -972,19 +947,19 @@ mate_mixer_context_list_streams (MateMixerContext *context)
 }
 
 /**
- * mate_mixer_context_list_stored_streams:
+ * mate_mixer_context_list_stored_controls:
  * @context: a #MateMixerContext
  *
  */
 const GList *
-mate_mixer_context_list_stored_streams (MateMixerContext *context)
+mate_mixer_context_list_stored_controls (MateMixerContext *context)
 {
     g_return_val_if_fail (MATE_MIXER_IS_CONTEXT (context), NULL);
 
     if (context->priv->state != MATE_MIXER_STATE_READY)
         return NULL;
 
-    return mate_mixer_backend_list_stored_streams (MATE_MIXER_BACKEND (context->priv->backend));
+    return mate_mixer_backend_list_stored_controls (MATE_MIXER_BACKEND (context->priv->backend));
 }
 
 /**
@@ -1028,11 +1003,7 @@ mate_mixer_context_set_default_input_stream (MateMixerContext *context,
     if (context->priv->state != MATE_MIXER_STATE_READY)
         return FALSE;
 
-    if (MATE_MIXER_IS_CLIENT_STREAM (stream)) {
-        g_warning ("Unable to set client stream as the default input stream");
-        return FALSE;
-    }
-    if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_INPUT)) {
+    if (mate_mixer_stream_get_direction (stream) != MATE_MIXER_DIRECTION_INPUT) {
         g_warning ("Unable to set non-input stream as the default input stream");
         return FALSE;
     }
@@ -1081,11 +1052,7 @@ mate_mixer_context_set_default_output_stream (MateMixerContext *context,
     if (context->priv->state != MATE_MIXER_STATE_READY)
         return FALSE;
 
-    if (MATE_MIXER_IS_CLIENT_STREAM (stream)) {
-        g_warning ("Unable to set client stream as the default output stream");
-        return FALSE;
-    }
-    if (!(mate_mixer_stream_get_flags (stream) & MATE_MIXER_STREAM_OUTPUT)) {
+    if (mate_mixer_stream_get_direction (stream) != MATE_MIXER_DIRECTION_OUTPUT) {
         g_warning ("Unable to set non-output stream as the default output stream");
         return FALSE;
     }
@@ -1231,23 +1198,23 @@ on_backend_stream_removed (MateMixerBackend *backend,
 }
 
 static void
-on_backend_stored_stream_added (MateMixerBackend *backend,
-                                const gchar      *name,
-                                MateMixerContext *context)
+on_backend_stored_control_added (MateMixerBackend *backend,
+                                 const gchar      *name,
+                                 MateMixerContext *context)
 {
     g_signal_emit (G_OBJECT (context),
-                   signals[STORED_STREAM_ADDED],
+                   signals[STORED_CONTROL_ADDED],
                    0,
                    name);
 }
 
 static void
-on_backend_stored_stream_removed (MateMixerBackend *backend,
-                                  const gchar      *name,
-                                  MateMixerContext *context)
+on_backend_stored_control_removed (MateMixerBackend *backend,
+                                   const gchar      *name,
+                                   MateMixerContext *context)
 {
     g_signal_emit (G_OBJECT (context),
-                   signals[STORED_STREAM_REMOVED],
+                   signals[STORED_CONTROL_REMOVED],
                    0,
                    name);
 }
@@ -1276,7 +1243,7 @@ try_next_backend (MateMixerContext *context)
     const GList                *modules;
     const MateMixerBackendInfo *info = NULL;
 
-    modules = _mate_mixer_get_modules ();
+    modules = _mate_mixer_list_modules ();
 
     while (modules != NULL) {
         if (context->priv->module == modules->data) {
@@ -1301,7 +1268,8 @@ try_next_backend (MateMixerContext *context)
     context->priv->module  = g_object_ref (module);
     context->priv->backend = g_object_new (info->g_type, NULL);
 
-    mate_mixer_backend_set_data (context->priv->backend, &context->priv->backend_data);
+    mate_mixer_backend_set_app_info (context->priv->backend, context->priv->app_info);
+    mate_mixer_backend_set_server_address (context->priv->backend, context->priv->server_address);
 
     g_debug ("Trying to open backend %s", info->name);
 
@@ -1359,20 +1327,20 @@ change_state (MateMixerContext *context, MateMixerState state)
                           G_CALLBACK (on_backend_stream_removed),
                           context);
         g_signal_connect (G_OBJECT (context->priv->backend),
-                          "stored-stream-added",
-                          G_CALLBACK (on_backend_stored_stream_added),
+                          "stored-control-added",
+                          G_CALLBACK (on_backend_stored_control_added),
                           context);
         g_signal_connect (G_OBJECT (context->priv->backend),
-                          "stored-stream-removed",
-                          G_CALLBACK (on_backend_stored_stream_removed),
+                          "stored-control-removed",
+                          G_CALLBACK (on_backend_stored_control_removed),
                           context);
 
         g_signal_connect (G_OBJECT (context->priv->backend),
-                          "notify::default-input",
+                          "notify::default-input-stream",
                           G_CALLBACK (on_backend_default_input_stream_notify),
                           context);
         g_signal_connect (G_OBJECT (context->priv->backend),
-                          "notify::default-output",
+                          "notify::default-output-stream",
                           G_CALLBACK (on_backend_default_output_stream_notify),
                           context);
 

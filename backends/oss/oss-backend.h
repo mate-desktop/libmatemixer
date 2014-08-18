@@ -20,9 +20,10 @@
 
 #include <glib.h>
 #include <glib-object.h>
+#include <libmatemixer/matemixer.h>
+#include <libmatemixer/matemixer-private.h>
 
-#include <libmatemixer/matemixer-backend.h>
-#include <libmatemixer/matemixer-backend-module.h>
+#include "oss-types.h"
 
 #define OSS_TYPE_BACKEND                        \
         (oss_backend_get_type ())
@@ -37,7 +38,6 @@
 #define OSS_BACKEND_GET_CLASS(o)                \
         (G_TYPE_INSTANCE_GET_CLASS ((o), OSS_TYPE_BACKEND, OssBackendClass))
 
-typedef struct _OssBackend         OssBackend;
 typedef struct _OssBackendClass    OssBackendClass;
 typedef struct _OssBackendPrivate  OssBackendPrivate;
 
@@ -54,7 +54,7 @@ struct _OssBackendClass
     MateMixerBackendClass parent_class;
 };
 
-GType                       oss_backend_get_type   (void) G_GNUC_CONST;
+GType                       oss_backend_get_type    (void) G_GNUC_CONST;
 
 /* Support function for dynamic loading of the backend module */
 void                        backend_module_init     (GTypeModule *module);

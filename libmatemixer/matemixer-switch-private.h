@@ -19,6 +19,7 @@
 #define MATEMIXER_SWITCH_PRIVATE_H
 
 #include <glib.h>
+
 #include "matemixer-types.h"
 
 G_BEGIN_DECLS

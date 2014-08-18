@@ -23,48 +23,43 @@
 
 #include <pulse/pulseaudio.h>
 
-#include "pulse-client-stream.h"
-#include "pulse-connection.h"
-#include "pulse-stream.h"
+#include "pulse-stream-control.h"
+#include "pulse-types.h"
 
 G_BEGIN_DECLS
 
-#define PULSE_TYPE_SOURCE_OUTPUT                \
+#define PULSE_TYPE_SOURCE_OUTPUT                   \
         (pulse_source_output_get_type ())
-#define PULSE_SOURCE_OUTPUT(o)                  \
+#define PULSE_SOURCE_OUTPUT(o)                     \
         (G_TYPE_CHECK_INSTANCE_CAST ((o), PULSE_TYPE_SOURCE_OUTPUT, PulseSourceOutput))
-#define PULSE_IS_SOURCE_OUTPUT(o)               \
+#define PULSE_IS_SOURCE_OUTPUT(o)                  \
         (G_TYPE_CHECK_INSTANCE_TYPE ((o), PULSE_TYPE_SOURCE_OUTPUT))
-#define PULSE_SOURCE_OUTPUT_CLASS(k)            \
+#define PULSE_SOURCE_OUTPUT_CLASS(k)               \
         (G_TYPE_CHECK_CLASS_CAST ((k), PULSE_TYPE_SOURCE_OUTPUT, PulseSourceOutputClass))
-#define PULSE_IS_SOURCE_OUTPUT_CLASS(k)         \
+#define PULSE_IS_SOURCE_OUTPUT_CLASS(k)            \
         (G_TYPE_CHECK_CLASS_TYPE ((k), PULSE_TYPE_SOURCE_OUTPUT))
-#define PULSE_SOURCE_OUTPUT_GET_CLASS(o)        \
+#define PULSE_SOURCE_OUTPUT_GET_CLASS(o)           \
         (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_TYPE_SOURCE_OUTPUT, PulseSourceOutputClass))
 
-typedef struct _PulseSourceOutput         PulseSourceOutput;
-typedef struct _PulseSourceOutputClass    PulseSourceOutputClass;
-typedef struct _PulseSourceOutputPrivate  PulseSourceOutputPrivate;
+typedef struct _PulseSourceOutputClass  PulseSourceOutputClass;
 
 struct _PulseSourceOutput
 {
-    PulseClientStream parent;
+    PulseStreamControl parent;
 };
 
 struct _PulseSourceOutputClass
 {
-    PulseClientStreamClass parent_class;
+    PulseStreamControlClass parent_class;
 };
 
-GType        pulse_source_output_get_type   (void) G_GNUC_CONST;
+GType              pulse_source_output_get_type (void) G_GNUC_CONST;
 
-PulseStream *pulse_source_output_new        (PulseConnection             *connection,
-                                             const pa_source_output_info *info,
-                                             PulseStream                 *parent);
+PulseSourceOutput *pulse_source_output_new      (PulseSource                 *source,
+                                                 const pa_source_output_info *info);
 
-gboolean     pulse_source_output_update     (PulseStream                 *pstream,
-                                             const pa_source_output_info *info,
-                                             PulseStream                 *parent);
+void               pulse_source_output_update   (PulseSourceOutput           *output,
+                                                 const pa_source_output_info *info);
 
 G_END_DECLS
 

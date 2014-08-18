@@ -37,6 +37,7 @@ static void alsa_element_interface_init (AlsaElementInterface *iface);
 
 static void alsa_switch_class_init      (AlsaSwitchClass      *klass);
 static void alsa_switch_init            (AlsaSwitch           *swtch);
+static void alsa_switch_dispose         (GObject              *object);
 
 G_DEFINE_TYPE_WITH_CODE (AlsaSwitch, alsa_switch,
                          MATE_MIXER_TYPE_SWITCH,
@@ -46,7 +47,7 @@ G_DEFINE_TYPE_WITH_CODE (AlsaSwitch, alsa_switch,
 static gboolean               alsa_switch_set_active_option (MateMixerSwitch       *mms,
                                                              MateMixerSwitchOption *mmso);
 
-static GList *                alsa_switch_list_options      (MateMixerSwitch       *mms);
+static const GList *          alsa_switch_list_options      (MateMixerSwitch       *mms);
 
 static snd_mixer_elem_t *     alsa_switch_get_snd_element   (AlsaElement           *element);
 static void                   alsa_switch_set_snd_element   (AlsaElement           *element,
@@ -64,13 +65,32 @@ alsa_element_interface_init (AlsaElementInterface *iface)
 static void
 alsa_switch_class_init (AlsaSwitchClass *klass)
 {
+    GObjectClass         *object_class;
     MateMixerSwitchClass *switch_class;
+
+    object_class = G_OBJECT_CLASS (klass);
+    object_class->dispose = alsa_switch_dispose;
 
     switch_class = MATE_MIXER_SWITCH_CLASS (klass);
     switch_class->set_active_option = alsa_switch_set_active_option;
     switch_class->list_options      = alsa_switch_list_options;
 
     g_type_class_add_private (G_OBJECT_CLASS (klass), sizeof (AlsaSwitchPrivate));
+}
+
+static void
+alsa_switch_dispose (GObject *object)
+{
+    AlsaSwitch *swtch;
+
+    swtch = ALSA_SWITCH (object);
+
+    if (swtch->priv->options != NULL) {
+        g_list_free_full (swtch->priv->options, g_object_unref);
+        swtch->priv->options = NULL;
+    }
+
+    G_OBJECT_CLASS (alsa_switch_parent_class)->dispose (object);
 }
 
 static void
@@ -82,13 +102,17 @@ alsa_switch_init (AlsaSwitch *swtch)
 }
 
 AlsaSwitch *
-alsa_switch_new (const gchar *name, const gchar *label, GList *options)
+alsa_switch_new (const gchar        *name,
+                 const gchar        *label,
+                 MateMixerSwitchRole role,
+                 GList              *options)
 {
     AlsaSwitch *swtch;
 
     swtch = g_object_new (ALSA_TYPE_SWITCH,
                           "name", name,
                           "label", label,
+                          "role", role,
                           NULL);
 
     /* Takes ownership of options */
@@ -108,6 +132,9 @@ alsa_switch_set_active_option (MateMixerSwitch *mms, MateMixerSwitchOption *mmso
     g_return_val_if_fail (ALSA_IS_SWITCH_OPTION (mmso), FALSE);
 
     swtch = ALSA_SWITCH (mms);
+
+    if G_UNLIKELY (swtch->priv->element == NULL)
+        return FALSE;
 
     /* The channel mask is created when reading the active option the first
      * time, so a successful load must be done before changing the option */
@@ -136,12 +163,12 @@ alsa_switch_set_active_option (MateMixerSwitch *mms, MateMixerSwitchOption *mmso
     return set_item;
 }
 
-static GList *
-alsa_switch_list_options (MateMixerSwitch *swtch)
+static const GList *
+alsa_switch_list_options (MateMixerSwitch *mms)
 {
-    g_return_val_if_fail (ALSA_IS_SWITCH (swtch), NULL);
+    g_return_val_if_fail (ALSA_IS_SWITCH (mms), NULL);
 
-    return ALSA_SWITCH (swtch)->priv->options;
+    return ALSA_SWITCH (mms)->priv->options;
 }
 
 static snd_mixer_elem_t *
@@ -156,7 +183,6 @@ static void
 alsa_switch_set_snd_element (AlsaElement *element, snd_mixer_elem_t *el)
 {
     g_return_if_fail (ALSA_IS_SWITCH (element));
-    g_return_if_fail (el != NULL);
 
     ALSA_SWITCH (element)->priv->element = el;
 }
@@ -170,7 +196,12 @@ alsa_switch_load (AlsaElement *element)
     gint                         ret;
     snd_mixer_selem_channel_id_t c;
 
+    g_return_val_if_fail (ALSA_IS_SWITCH (element), FALSE);
+
     swtch = ALSA_SWITCH (element);
+
+    if G_UNLIKELY (swtch->priv->element == NULL)
+        return FALSE;
 
     /* When reading the first time we try all the channels, otherwise only the
      * ones which returned success before */
@@ -220,7 +251,7 @@ alsa_switch_load (AlsaElement *element)
     }
 
     g_warning ("Unknown active option of switch %s: %d",
-               snd_mixer_selem_get_name (swtch->priv->element),
+               mate_mixer_switch_get_name (MATE_MIXER_SWITCH (swtch)),
                item);
 
     return FALSE;

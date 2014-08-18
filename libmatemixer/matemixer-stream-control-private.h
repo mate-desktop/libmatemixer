@@ -19,6 +19,7 @@
 #define MATEMIXER_STREAM_CONTROL_PRIVATE_H
 
 #include <glib.h>
+
 #include "matemixer-enums.h"
 #include "matemixer-types.h"
 
@@ -26,6 +27,9 @@ G_BEGIN_DECLS
 
 void _mate_mixer_stream_control_set_flags   (MateMixerStreamControl     *control,
                                              MateMixerStreamControlFlags flags);
+
+void _mate_mixer_stream_control_set_stream  (MateMixerStreamControl     *control,
+                                             MateMixerStream            *stream);
 
 void _mate_mixer_stream_control_set_mute    (MateMixerStreamControl     *control,
                                              gboolean                    mute);

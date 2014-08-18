@@ -18,6 +18,7 @@
 #include <glib.h>
 #include <glib-object.h>
 #include <alsa/asoundlib.h>
+
 #include <libmatemixer/matemixer.h>
 #include <libmatemixer/matemixer-private.h>
 
@@ -159,63 +160,66 @@ alsa_stream_control_set_data (AlsaStreamControl *control, AlsaControlData *data)
 {
     MateMixerStreamControlFlags flags = MATE_MIXER_STREAM_CONTROL_NO_FLAGS;
     MateMixerStreamControl     *mmsc;
+    gboolean                    mute = FALSE;
 
     g_return_if_fail (ALSA_IS_STREAM_CONTROL (control));
     g_return_if_fail (data != NULL);
 
     mmsc = MATE_MIXER_STREAM_CONTROL (control);
 
+    control->priv->data = *data;
+
     g_object_freeze_notify (G_OBJECT (control));
 
     if (data->channels > 0) {
         if (data->switch_usable == TRUE) {
-            flags |= MATE_MIXER_STREAM_CONTROL_HAS_MUTE;
+            /* If the mute switch is joined, all the channels get the same value,
+             * otherwise the element has per-channel mute, which we don't support.
+             * In that case, treat the control as unmuted if any channel is
+             * unmuted. */
+            if (data->channels == 1 || data->switch_joined == TRUE) {
+                mute = data->m[0];
+            } else {
+                gint i;
+                mute = TRUE;
+                for (i = 0; i < data->channels; i++)
+                    if (data->m[i] == FALSE) {
+                        mute = FALSE;
+                        break;
+                    }
+            }
+
+            flags |= MATE_MIXER_STREAM_CONTROL_MUTE_READABLE;
             if (data->active == TRUE)
-                flags |= MATE_MIXER_STREAM_CONTROL_CAN_SET_MUTE;
+                flags |= MATE_MIXER_STREAM_CONTROL_MUTE_WRITABLE;
         }
-        flags |= MATE_MIXER_STREAM_CONTROL_HAS_VOLUME;
+
+        flags |= MATE_MIXER_STREAM_CONTROL_VOLUME_READABLE;
         if (data->active == TRUE)
-            flags |= MATE_MIXER_STREAM_CONTROL_CAN_SET_VOLUME;
-    }
-    if (data->max_decibel > -MATE_MIXER_INFINITY)
-        flags |= MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL;
+            flags |= MATE_MIXER_STREAM_CONTROL_VOLUME_WRITABLE;
 
-    control->priv->data = *data;
-    control->priv->channel_mask = _mate_mixer_create_channel_mask (data->c, data->channels);
+        if (data->max_decibel > -MATE_MIXER_INFINITY)
+            flags |= MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL;
 
-    if (data->volume_joined == FALSE) {
-        if (MATE_MIXER_CHANNEL_MASK_HAS_LEFT (control->priv->channel_mask) &&
-            MATE_MIXER_CHANNEL_MASK_HAS_RIGHT (control->priv->channel_mask))
-            flags |= MATE_MIXER_STREAM_CONTROL_CAN_BALANCE;
+        control->priv->channel_mask = _mate_mixer_create_channel_mask (data->c, data->channels);
 
-        if (MATE_MIXER_CHANNEL_MASK_HAS_FRONT (control->priv->channel_mask) &&
-            MATE_MIXER_CHANNEL_MASK_HAS_BACK (control->priv->channel_mask))
-            flags |= MATE_MIXER_STREAM_CONTROL_CAN_FADE;
-    }
+        if (data->volume_joined == FALSE) {
+            if (MATE_MIXER_CHANNEL_MASK_HAS_LEFT (control->priv->channel_mask) &&
+                MATE_MIXER_CHANNEL_MASK_HAS_RIGHT (control->priv->channel_mask))
+                flags |= MATE_MIXER_STREAM_CONTROL_CAN_BALANCE;
 
-    _mate_mixer_stream_control_set_flags (mmsc, flags);
-
-    if (data->switch_usable == TRUE) {
-        gboolean mute;
-
-        /* If the mute switch is joined, all the channels get the same value,
-         * otherwise the element has per-channel mute, which we don't support.
-         * In that case, treat the control as unmuted if any channel is
-         * unmuted. */
-        if (data->channels == 1 || data->switch_joined == TRUE) {
-            mute = data->m[0];
-        } else {
-            gint i;
-            mute = TRUE;
-            for (i = 0; i < data->channels; i++)
-                if (data->m[i] == FALSE) {
-                    mute = FALSE;
-                    break;
-                }
+            if (MATE_MIXER_CHANNEL_MASK_HAS_FRONT (control->priv->channel_mask) &&
+                MATE_MIXER_CHANNEL_MASK_HAS_BACK (control->priv->channel_mask))
+                flags |= MATE_MIXER_STREAM_CONTROL_CAN_FADE;
         }
-        _mate_mixer_stream_control_set_mute (mmsc, mute);
-    } else
-        _mate_mixer_stream_control_set_mute (mmsc, FALSE);
+
+        g_object_notify (G_OBJECT (control), "volume");
+    } else {
+        control->priv->channel_mask = 0;
+    }
+
+    _mate_mixer_stream_control_set_mute (mmsc, mute);
+    _mate_mixer_stream_control_set_flags (mmsc, flags);
 
     if (flags & MATE_MIXER_STREAM_CONTROL_CAN_BALANCE)
         _mate_mixer_stream_control_set_balance (mmsc, control_data_get_balance (data));
@@ -237,7 +241,6 @@ static void
 alsa_stream_control_set_snd_element (AlsaElement *element, snd_mixer_elem_t *el)
 {
     g_return_if_fail (ALSA_IS_STREAM_CONTROL (element));
-    g_return_if_fail (el != NULL);
 
     ALSA_STREAM_CONTROL (element)->priv->element = el;
 }
@@ -288,6 +291,8 @@ alsa_stream_control_set_mute (MateMixerStreamControl *mmsc, gboolean mute)
 
         for (i = 0; i < control->priv->data.channels; i++)
             control->priv->data.m[i] = mute;
+
+        _mate_mixer_stream_control_set_mute (mmsc, mute);
     }
     return TRUE;
 }
@@ -344,6 +349,8 @@ alsa_stream_control_set_volume (MateMixerStreamControl *mmsc, guint volume)
         for (i = 0; i < control->priv->data.channels; i++)
             control->priv->data.v[i] = volume;
 
+        control->priv->data.volume = volume;
+
         g_object_notify (G_OBJECT (control), "volume");
     }
     return TRUE;
@@ -364,7 +371,7 @@ alsa_stream_control_get_decibel (MateMixerStreamControl *mmsc)
     volume  = alsa_stream_control_get_volume (mmsc);
 
     if (klass->get_decibel_from_volume (control, volume, &decibel) == FALSE)
-        return FALSE;
+        return -MATE_MIXER_INFINITY;
 
     return decibel;
 }
@@ -428,7 +435,7 @@ alsa_stream_control_get_channel_volume (MateMixerStreamControl *mmsc, guint chan
     control = ALSA_STREAM_CONTROL (mmsc);
 
     if (channel >= control->priv->data.channels)
-        return FALSE;
+        return 0;
 
     return control->priv->data.v[channel];
 }
@@ -463,6 +470,7 @@ alsa_stream_control_set_channel_volume (MateMixerStreamControl *mmsc, guint chan
         if (klass->set_channel_volume (control, c, volume) == FALSE)
             return FALSE;
 
+        // XXX recalc total volume
         control->priv->data.v[channel] = volume;
 
         g_object_notify (G_OBJECT (control), "volume");
@@ -483,13 +491,13 @@ alsa_stream_control_get_channel_decibel (MateMixerStreamControl *mmsc, guint cha
     control = ALSA_STREAM_CONTROL (mmsc);
 
     if (channel >= control->priv->data.channels)
-        return FALSE;
+        return -MATE_MIXER_INFINITY;
 
     klass  = ALSA_STREAM_CONTROL_GET_CLASS (control);
     volume = control->priv->data.v[channel];
 
     if (klass->get_decibel_from_volume (control, volume, &decibel) == FALSE)
-        return FALSE;
+        return -MATE_MIXER_INFINITY;
 
     return decibel;
 }
@@ -637,27 +645,27 @@ alsa_stream_control_set_fade (MateMixerStreamControl *mmsc, gfloat fade)
 }
 
 static guint
-alsa_stream_control_get_min_volume (MateMixerStreamControl *msc)
+alsa_stream_control_get_min_volume (MateMixerStreamControl *mmsc)
 {
-    return ALSA_STREAM_CONTROL (msc)->priv->data.min;
+    return ALSA_STREAM_CONTROL (mmsc)->priv->data.min;
 }
 
 static guint
-alsa_stream_control_get_max_volume (MateMixerStreamControl *msc)
+alsa_stream_control_get_max_volume (MateMixerStreamControl *mmsc)
 {
-    return ALSA_STREAM_CONTROL (msc)->priv->data.max;
+    return ALSA_STREAM_CONTROL (mmsc)->priv->data.max;
 }
 
 static guint
-alsa_stream_control_get_normal_volume (MateMixerStreamControl *msc)
+alsa_stream_control_get_normal_volume (MateMixerStreamControl *mmsc)
 {
-    return ALSA_STREAM_CONTROL (msc)->priv->data.max;
+    return ALSA_STREAM_CONTROL (mmsc)->priv->data.max;
 }
 
 static guint
-alsa_stream_control_get_base_volume (MateMixerStreamControl *msc)
+alsa_stream_control_get_base_volume (MateMixerStreamControl *mmsc)
 {
-    return ALSA_STREAM_CONTROL (msc)->priv->data.max;
+    return ALSA_STREAM_CONTROL (mmsc)->priv->data.max;
 }
 
 static void

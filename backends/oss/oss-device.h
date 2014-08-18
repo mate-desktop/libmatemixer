@@ -22,7 +22,7 @@
 #include <glib-object.h>
 #include <libmatemixer/matemixer.h>
 
-#include "oss-stream.h"
+#include "oss-types.h"
 
 G_BEGIN_DECLS
 
@@ -39,7 +39,6 @@ G_BEGIN_DECLS
 #define OSS_DEVICE_GET_CLASS(o)                 \
         (G_TYPE_INSTANCE_GET_CLASS ((o), OSS_TYPE_DEVICE, OssDeviceClass))
 
-typedef struct _OssDevice         OssDevice;
 typedef struct _OssDeviceClass    OssDeviceClass;
 typedef struct _OssDevicePrivate  OssDevicePrivate;
 
@@ -54,6 +53,9 @@ struct _OssDevice
 struct _OssDeviceClass
 {
     MateMixerDeviceClass parent;
+
+    /*< private >*/
+    void (*closed) (OssDevice *device);
 };
 
 GType        oss_device_get_type          (void) G_GNUC_CONST;
@@ -64,9 +66,11 @@ OssDevice *  oss_device_new               (const gchar *name,
                                            gint         fd);
 
 gboolean     oss_device_open              (OssDevice   *device);
-gboolean     oss_device_load              (OssDevice   *device);
+gboolean     oss_device_is_open           (OssDevice   *device);
+void         oss_device_close             (OssDevice   *device);
 
-gint         oss_device_get_fd            (OssDevice   *device);
+void         oss_device_load              (OssDevice   *device);
+
 const gchar *oss_device_get_path          (OssDevice   *device);
 
 OssStream *  oss_device_get_input_stream  (OssDevice   *device);

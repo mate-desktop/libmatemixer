@@ -22,8 +22,7 @@
 #include <glib-object.h>
 #include <libmatemixer/matemixer.h>
 
-#include "oss-device.h"
-#include "oss-stream-control.h"
+#include "oss-types.h"
 
 G_BEGIN_DECLS
 
@@ -40,7 +39,6 @@ G_BEGIN_DECLS
 #define OSS_STREAM_GET_CLASS(o)                 \
         (G_TYPE_INSTANCE_GET_CLASS ((o), OSS_TYPE_STREAM, OssStreamClass))
 
-typedef struct _OssStream         OssStream;
 typedef struct _OssStreamClass    OssStreamClass;
 typedef struct _OssStreamPrivate  OssStreamPrivate;
 
@@ -57,17 +55,29 @@ struct _OssStreamClass
     MateMixerStreamClass parent;
 };
 
-GType      oss_stream_get_type            (void) G_GNUC_CONST;
+GType             oss_stream_get_type            (void) G_GNUC_CONST;
 
-OssStream *oss_stream_new                 (const gchar         *name,
-                                           MateMixerDevice     *device,
-                                           MateMixerStreamFlags flags);
+OssStream *       oss_stream_new                 (const gchar       *name,
+                                                  MateMixerDevice   *device,
+                                                  MateMixerDirection direction);
 
-gboolean   oss_stream_add_control         (OssStream           *stream,
-                                           OssStreamControl    *control);
+void              oss_stream_add_control         (OssStream         *stream,
+                                                  OssStreamControl  *control);
 
-gboolean   oss_stream_set_default_control (OssStream           *stream,
-                                           OssStreamControl    *control);
+void              oss_stream_load                (OssStream         *stream);
+
+gboolean          oss_stream_has_controls        (OssStream         *stream);
+gboolean          oss_stream_has_default_control (OssStream         *stream);
+
+OssStreamControl *oss_stream_get_default_control (OssStream         *stream);
+void              oss_stream_set_default_control (OssStream         *stream,
+                                                  OssStreamControl  *control);
+
+void              oss_stream_set_switch_data     (OssStream         *stream,
+                                                  gint               fd,
+                                                  GList             *options);
+
+void              oss_stream_remove_all          (OssStream         *stream);
 
 G_END_DECLS
 

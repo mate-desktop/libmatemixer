@@ -21,7 +21,7 @@
 #include <glib.h>
 #include <glib-object.h>
 
-#include <libmatemixer/matemixer-enums.h>
+#include "matemixer-enums.h"
 
 G_BEGIN_DECLS
 

@@ -34,7 +34,8 @@ struct _MateMixerSwitchPrivate
 {
     gchar                 *name;
     gchar                 *label;
-    GList                 *options;
+    MateMixerSwitchFlags   flags;
+    MateMixerSwitchRole    role;
     MateMixerSwitchOption *active;
 };
 
@@ -42,6 +43,8 @@ enum {
     PROP_0,
     PROP_NAME,
     PROP_LABEL,
+    PROP_FLAGS,
+    PROP_ROLE,
     PROP_ACTIVE_OPTION,
     N_PROPERTIES
 };
@@ -60,6 +63,7 @@ static void mate_mixer_switch_set_property (GObject              *object,
                                             GParamSpec           *pspec);
 
 static void mate_mixer_switch_init         (MateMixerSwitch      *swtch);
+static void mate_mixer_switch_dispose      (GObject              *object);
 static void mate_mixer_switch_finalize     (GObject              *object);
 
 G_DEFINE_ABSTRACT_TYPE (MateMixerSwitch, mate_mixer_switch, G_TYPE_OBJECT)
@@ -75,6 +79,7 @@ mate_mixer_switch_class_init (MateMixerSwitchClass *klass)
     klass->get_option = mate_mixer_switch_real_get_option;
 
     object_class = G_OBJECT_CLASS (klass);
+    object_class->dispose      = mate_mixer_switch_dispose;
     object_class->finalize     = mate_mixer_switch_finalize;
     object_class->get_property = mate_mixer_switch_get_property;
     object_class->set_property = mate_mixer_switch_set_property;
@@ -97,12 +102,33 @@ mate_mixer_switch_class_init (MateMixerSwitchClass *klass)
                              G_PARAM_CONSTRUCT_ONLY |
                              G_PARAM_STATIC_STRINGS);
 
+    properties[PROP_ROLE] =
+        g_param_spec_enum ("role",
+                           "Role",
+                           "Role of the switch",
+                           MATE_MIXER_TYPE_SWITCH_ROLE,
+                           MATE_MIXER_SWITCH_ROLE_UNKNOWN,
+                           G_PARAM_READWRITE |
+                           G_PARAM_CONSTRUCT_ONLY |
+                           G_PARAM_STATIC_STRINGS);
+
+    properties[PROP_FLAGS] =
+        g_param_spec_flags ("flags",
+                            "Flags",
+                            "Flags of the switch",
+                            MATE_MIXER_TYPE_SWITCH_FLAGS,
+                            MATE_MIXER_SWITCH_NO_FLAGS,
+                            G_PARAM_READWRITE |
+                            G_PARAM_CONSTRUCT_ONLY |
+                            G_PARAM_STATIC_STRINGS);
+
     properties[PROP_ACTIVE_OPTION] =
         g_param_spec_object ("active-option",
                              "Active option",
                              "Active option of the switch",
                              MATE_MIXER_TYPE_SWITCH_OPTION,
-                             G_PARAM_READABLE |
+                             G_PARAM_READWRITE |
+                             G_PARAM_CONSTRUCT_ONLY |
                              G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_properties (object_class, N_PROPERTIES, properties);
@@ -127,6 +153,16 @@ mate_mixer_switch_get_property (GObject    *object,
     case PROP_LABEL:
         g_value_set_string (value, swtch->priv->label);
         break;
+    case PROP_FLAGS:
+        g_value_set_flags (value, swtch->priv->flags);
+        break;
+    case PROP_ROLE:
+        g_value_set_enum (value, swtch->priv->role);
+        break;
+    case PROP_ACTIVE_OPTION:
+        g_value_set_object (value, swtch->priv->active);
+        break;
+
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
         break;
@@ -152,6 +188,17 @@ mate_mixer_switch_set_property (GObject      *object,
         /* Construct-only string */
         swtch->priv->label = g_value_dup_string (value);
         break;
+    case PROP_FLAGS:
+        swtch->priv->flags = g_value_get_flags (value);
+        break;
+    case PROP_ROLE:
+        swtch->priv->role = g_value_get_enum (value);
+        break;
+    case PROP_ACTIVE_OPTION:
+        /* Construct-only object */
+        swtch->priv->active = g_value_dup_object (value);
+        break;
+
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
         break;
@@ -167,6 +214,18 @@ mate_mixer_switch_init (MateMixerSwitch *swtch)
 }
 
 static void
+mate_mixer_switch_dispose (GObject *object)
+{
+    MateMixerSwitch *swtch;
+
+    swtch = MATE_MIXER_SWITCH (object);
+
+    g_clear_object (&swtch->priv->active);
+
+    G_OBJECT_CLASS (mate_mixer_switch_parent_class)->dispose (object);
+}
+
+static void
 mate_mixer_switch_finalize (GObject *object)
 {
     MateMixerSwitch *swtch;
@@ -179,6 +238,10 @@ mate_mixer_switch_finalize (GObject *object)
     G_OBJECT_CLASS (mate_mixer_switch_parent_class)->finalize (object);
 }
 
+/**
+ * mate_mixer_switch_get_name:
+ * @swtch: a #MateMixerSwitch
+ */
 const gchar *
 mate_mixer_switch_get_name (MateMixerSwitch *swtch)
 {
@@ -187,6 +250,10 @@ mate_mixer_switch_get_name (MateMixerSwitch *swtch)
     return swtch->priv->name;
 }
 
+/**
+ * mate_mixer_switch_get_label:
+ * @swtch: a #MateMixerSwitch
+ */
 const gchar *
 mate_mixer_switch_get_label (MateMixerSwitch *swtch)
 {
@@ -195,6 +262,34 @@ mate_mixer_switch_get_label (MateMixerSwitch *swtch)
     return swtch->priv->label;
 }
 
+/**
+ * mate_mixer_switch_get_flags:
+ * @swtch: a #MateMixerSwitch
+ */
+MateMixerSwitchFlags
+mate_mixer_switch_get_flags (MateMixerSwitch *swtch)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_SWITCH (swtch), MATE_MIXER_SWITCH_NO_FLAGS);
+
+    return swtch->priv->flags;
+}
+
+/**
+ * mate_mixer_switch_get_role:
+ * @swtch: a #MateMixerSwitch
+ */
+MateMixerSwitchRole
+mate_mixer_switch_get_role (MateMixerSwitch *swtch)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_SWITCH (swtch), MATE_MIXER_SWITCH_ROLE_UNKNOWN);
+
+    return swtch->priv->role;
+}
+
+/**
+ * mate_mixer_switch_get_option:
+ * @swtch: a #MateMixerSwitch
+ */
 MateMixerSwitchOption *
 mate_mixer_switch_get_option (MateMixerSwitch *swtch, const gchar *name)
 {
@@ -203,6 +298,10 @@ mate_mixer_switch_get_option (MateMixerSwitch *swtch, const gchar *name)
     return MATE_MIXER_SWITCH_GET_CLASS (swtch)->get_option (swtch, name);
 }
 
+/**
+ * mate_mixer_switch_get_active_option:
+ * @swtch: a #MateMixerSwitch
+ */
 MateMixerSwitchOption *
 mate_mixer_switch_get_active_option (MateMixerSwitch *swtch)
 {
@@ -211,45 +310,48 @@ mate_mixer_switch_get_active_option (MateMixerSwitch *swtch)
     return swtch->priv->active;
 }
 
+/**
+ * mate_mixer_switch_set_active_option:
+ * @swtch: a #MateMixerSwitch
+ */
 gboolean
 mate_mixer_switch_set_active_option (MateMixerSwitch       *swtch,
                                      MateMixerSwitchOption *option)
 {
-    MateMixerSwitchClass *klass;
-
     g_return_val_if_fail (MATE_MIXER_IS_SWITCH (swtch), FALSE);
 
-    klass = MATE_MIXER_SWITCH_GET_CLASS (swtch);
-    if (klass->set_active_option != NULL) {
-        if (klass->set_active_option (swtch, option) == FALSE)
+    if (swtch->priv->active != option) {
+        MateMixerSwitchClass *klass;
+
+        klass = MATE_MIXER_SWITCH_GET_CLASS (swtch);
+        if (klass->set_active_option == NULL ||
+            klass->set_active_option (swtch, option) == FALSE)
             return FALSE;
 
         _mate_mixer_switch_set_active_option (swtch, option);
-        return TRUE;
     }
-    return FALSE;
+    return TRUE;
 }
 
+/**
+ * mate_mixer_switch_get_name:
+ * @swtch: a #MateMixerSwitch
+ */
 const GList *
 mate_mixer_switch_list_options (MateMixerSwitch *swtch)
 {
     g_return_val_if_fail (MATE_MIXER_IS_SWITCH (swtch), NULL);
 
-    if (swtch->priv->options == NULL) {
-        MateMixerSwitchClass *klass = MATE_MIXER_SWITCH_GET_CLASS (swtch);
-
-        if (klass->list_options != NULL)
-            swtch->priv->options = klass->list_options (swtch);
-    }
-    return (const GList *) swtch->priv->options;
+    return MATE_MIXER_SWITCH_GET_CLASS (swtch)->list_options (swtch);
 }
 
+/* Protected functions */
 void
 _mate_mixer_switch_set_active_option (MateMixerSwitch       *swtch,
                                       MateMixerSwitchOption *option)
 {
     g_return_if_fail (MATE_MIXER_IS_SWITCH (swtch));
-    g_return_if_fail (MATE_MIXER_IS_SWITCH_OPTION (option));
+    g_return_if_fail (option == NULL || MATE_MIXER_IS_SWITCH_OPTION (option));
 
     if (swtch->priv->active == option)
         return;
@@ -257,9 +359,13 @@ _mate_mixer_switch_set_active_option (MateMixerSwitch       *swtch,
     if (swtch->priv->active != NULL)
         g_object_unref (swtch->priv->active);
 
-    swtch->priv->active = g_object_ref (option);
+    if (option != NULL)
+        swtch->priv->active = g_object_ref (option);
+    else
+        swtch->priv->active = NULL;
 
-    g_object_notify_by_pspec (G_OBJECT (swtch), properties[PROP_ACTIVE_OPTION]);
+    g_object_notify_by_pspec (G_OBJECT (swtch),
+                              properties[PROP_ACTIVE_OPTION]);
 }
 
 static MateMixerSwitchOption *

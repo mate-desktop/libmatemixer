@@ -26,26 +26,27 @@
 #include "oss-common.h"
 #include "oss-stream-control.h"
 
+#define OSS_VOLUME_JOIN(left,right)   (((left) & 0xFF) | (((right) & 0xFF) << 8))
+
+#define OSS_VOLUME_JOIN_SAME(volume)  (OSS_VOLUME_JOIN ((volume), (volume)))
+#define OSS_VOLUME_JOIN_ARRAY(volume) (OSS_VOLUME_JOIN ((volume[0]), (volume[1])))
+
+#define OSS_VOLUME_TAKE_LEFT(volume)  ((volume) & 0xFF)
+#define OSS_VOLUME_TAKE_RIGHT(volume) (((volume) >> 8) & 0xFF)
+
 struct _OssStreamControlPrivate
 {
-    gint                        fd;
-    gint                        devnum;
-    guint                       volume[2];
-    gfloat                      balance;
-    gboolean                    stereo;
-    MateMixerStreamControlRole  role;
-    MateMixerStreamControlFlags flags;
+    gint     fd;
+    gint     devnum;
+    guint8   volume[2];
+    gboolean stereo;
 };
 
 static void oss_stream_control_class_init (OssStreamControlClass *klass);
-
 static void oss_stream_control_init       (OssStreamControl      *control);
 static void oss_stream_control_finalize   (GObject               *object);
 
 G_DEFINE_TYPE (OssStreamControl, oss_stream_control, MATE_MIXER_TYPE_STREAM_CONTROL)
-
-static gboolean                 oss_stream_control_set_mute             (MateMixerStreamControl  *mmsc,
-                                                                         gboolean                 mute);
 
 static guint                    oss_stream_control_get_num_channels     (MateMixerStreamControl  *mmsc);
 
@@ -73,7 +74,9 @@ static guint                    oss_stream_control_get_max_volume       (MateMix
 static guint                    oss_stream_control_get_normal_volume    (MateMixerStreamControl  *mmsc);
 static guint                    oss_stream_control_get_base_volume      (MateMixerStreamControl  *mmsc);
 
-static gboolean                 write_volume                            (OssStreamControl        *control,
+static void                     read_balance                            (OssStreamControl        *control);
+
+static gboolean                 write_and_set_volume                    (OssStreamControl        *control,
                                                                          gint                     volume);
 
 static void
@@ -86,14 +89,13 @@ oss_stream_control_class_init (OssStreamControlClass *klass)
     object_class->finalize = oss_stream_control_finalize;
 
     control_class = MATE_MIXER_STREAM_CONTROL_CLASS (klass);
-    control_class->set_mute             = oss_stream_control_set_mute;
     control_class->get_num_channels     = oss_stream_control_get_num_channels;
     control_class->get_volume           = oss_stream_control_get_volume;
     control_class->set_volume           = oss_stream_control_set_volume;
     control_class->get_channel_volume   = oss_stream_control_get_channel_volume;
     control_class->set_channel_volume   = oss_stream_control_set_channel_volume;
-    control_class->get_channel_position = oss_stream_control_get_channel_position;
     control_class->has_channel_position = oss_stream_control_has_channel_position;
+    control_class->get_channel_position = oss_stream_control_get_channel_position;
     control_class->set_balance          = oss_stream_control_set_balance;
     control_class->get_min_volume       = oss_stream_control_get_min_volume;
     control_class->get_max_volume       = oss_stream_control_get_max_volume;
@@ -118,7 +120,8 @@ oss_stream_control_finalize (GObject *object)
 
     control = OSS_STREAM_CONTROL (object);
 
-    close (control->priv->fd);
+    if (control->priv->fd != -1)
+        close (control->priv->fd);
 
     G_OBJECT_CLASS (oss_stream_control_parent_class)->finalize (object);
 }
@@ -127,6 +130,7 @@ OssStreamControl *
 oss_stream_control_new (const gchar               *name,
                         const gchar               *label,
                         MateMixerStreamControlRole role,
+                        OssStream                 *stream,
                         gint                       fd,
                         gint                       devnum,
                         gboolean                   stereo)
@@ -134,8 +138,11 @@ oss_stream_control_new (const gchar               *name,
     OssStreamControl           *control;
     MateMixerStreamControlFlags flags;
 
-    flags = MATE_MIXER_STREAM_CONTROL_HAS_VOLUME |
-            MATE_MIXER_STREAM_CONTROL_CAN_SET_VOLUME;
+    g_return_val_if_fail (name  != NULL, NULL);
+    g_return_val_if_fail (label != NULL, NULL);
+
+    flags = MATE_MIXER_STREAM_CONTROL_VOLUME_READABLE |
+            MATE_MIXER_STREAM_CONTROL_VOLUME_WRITABLE;
     if (stereo == TRUE)
         flags |= MATE_MIXER_STREAM_CONTROL_CAN_BALANCE;
 
@@ -143,6 +150,8 @@ oss_stream_control_new (const gchar               *name,
                             "name", name,
                             "label", label,
                             "flags", flags,
+                            "role", role,
+                            "stream", stream,
                             NULL);
 
     control->priv->fd = fd;
@@ -151,52 +160,50 @@ oss_stream_control_new (const gchar               *name,
     return control;
 }
 
-gboolean
-oss_stream_control_update (OssStreamControl *control)
+gint
+oss_stream_control_get_devnum (OssStreamControl *control)
 {
-    gint v;
-    gint ret;
+    g_return_val_if_fail (OSS_IS_STREAM_CONTROL (control), 0);
 
-    g_return_val_if_fail (OSS_IS_STREAM_CONTROL (control), FALSE);
-
-    ret = ioctl (control->priv->fd, MIXER_READ (control->priv->devnum), &v);
-    if (ret < 0) {
-        g_warning ("Failed to read volume: %s", g_strerror (errno));
-        return FALSE;
-    }
-
-    control->priv->volume[0] = v & 0xFF;
-
-    if (control->priv->stereo == TRUE) {
-        gfloat balance;
-        guint  left;
-        guint  right;
-
-        control->priv->volume[1] = (v >> 8) & 0xFF;
-
-        /* Calculate balance */
-        left  = control->priv->volume[0];
-        right = control->priv->volume[1];
-        if (left == right)
-            balance = 0.0f;
-        else if (left > right)
-            balance = -1.0f + ((gfloat) right / (gfloat) left);
-        else
-            balance = +1.0f - ((gfloat) left / (gfloat) right);
-
-        _mate_mixer_stream_control_set_balance (MATE_MIXER_STREAM_CONTROL (control),
-                                                balance);
-    }
-    return TRUE;
+    return control->priv->devnum;
 }
 
-static gboolean
-oss_stream_control_set_mute (MateMixerStreamControl *mmsc, gboolean mute)
+void
+oss_stream_control_load (OssStreamControl *control)
 {
-    g_return_val_if_fail (OSS_IS_STREAM_CONTROL (mmsc), FALSE);
+    gint v, ret;
 
-    // TODO
-    return TRUE;
+    g_return_if_fail (OSS_IS_STREAM_CONTROL (control));
+
+    if G_UNLIKELY (control->priv->fd == -1)
+        return;
+
+    ret = ioctl (control->priv->fd, MIXER_READ (control->priv->devnum), &v);
+    if (ret == -1)
+        return;
+
+    if (v != OSS_VOLUME_JOIN_ARRAY (control->priv->volume)) {
+        control->priv->volume[0] = OSS_VOLUME_TAKE_LEFT (v);
+        if (control->priv->stereo == TRUE)
+            control->priv->volume[1] = OSS_VOLUME_TAKE_RIGHT (v);
+
+        g_object_notify (G_OBJECT (control), "volume");
+    }
+
+    if (control->priv->stereo == TRUE)
+        read_balance (control);
+}
+
+void
+oss_stream_control_close (OssStreamControl *control)
+{
+    g_return_if_fail (OSS_IS_STREAM_CONTROL (control));
+
+    if (control->priv->fd == -1)
+        return;
+
+    close (control->priv->fd);
+    control->priv->fd = -1;
 }
 
 static guint
@@ -226,17 +233,15 @@ static gboolean
 oss_stream_control_set_volume (MateMixerStreamControl *mmsc, guint volume)
 {
     OssStreamControl *control;
-    gint              v;
 
     g_return_val_if_fail (OSS_IS_STREAM_CONTROL (mmsc), FALSE);
 
     control = OSS_STREAM_CONTROL (mmsc);
 
-    v = CLAMP (volume, 0, 100);
-    if (control->priv->stereo == TRUE)
-        v |= (volume & 0xFF) << 8;
+    if G_UNLIKELY (control->priv->fd == -1)
+        return FALSE;
 
-    return write_volume (control, v);
+    return write_and_set_volume (control, OSS_VOLUME_JOIN_SAME (CLAMP (volume, 0, 100)));
 }
 
 static guint
@@ -269,27 +274,26 @@ oss_stream_control_set_channel_volume (MateMixerStreamControl *mmsc,
     g_return_val_if_fail (OSS_IS_STREAM_CONTROL (mmsc), FALSE);
 
     control = OSS_STREAM_CONTROL (mmsc);
-    volume  = CLAMP (volume, 0, 100);
+
+    if G_UNLIKELY (control->priv->fd == -1)
+        return FALSE;
+    if (channel > 1 || (control->priv->stereo == FALSE && channel > 0))
+        return FALSE;
+
+    volume = CLAMP (volume, 0, 100);
 
     if (control->priv->stereo == TRUE) {
-        if (channel > 1)
-            return FALSE;
-
-        /* Stereo channel volume - left channel is in the lowest 8 bits and
+        /* Stereo channel volume - left channel is in the lower 8 bits and
          * right channel is in the higher 8 bits */
         if (channel == 0)
-            v = volume | (control->priv->volume[1] << 8);
+            v = OSS_VOLUME_JOIN (volume, control->priv->volume[1]);
         else
-            v = control->priv->volume[0] | (volume << 8);
+            v = OSS_VOLUME_JOIN (control->priv->volume[0], volume);
     } else {
-        if (channel > 0)
-            return FALSE;
-
-        /* Single channel volume - only lowest 8 bits are used */
+        /* Single channel volume - only lower 8 bits are used */
         v = volume;
     }
-
-    return write_volume (control, v);
+    return write_and_set_volume (control, v);
 }
 
 static MateMixerChannelPosition
@@ -334,24 +338,24 @@ oss_stream_control_set_balance (MateMixerStreamControl *mmsc, gfloat balance)
 {
     OssStreamControl *control;
     guint             max;
-    gint              v;
+    gint              volume[2];
 
     g_return_val_if_fail (OSS_IS_STREAM_CONTROL (mmsc), FALSE);
 
     control = OSS_STREAM_CONTROL (mmsc);
 
+    if G_UNLIKELY (control->priv->fd == -1)
+        return FALSE;
+
     max = MAX (control->priv->volume[0], control->priv->volume[1]);
     if (balance <= 0) {
-        control->priv->volume[1] = (balance + 1.0f) * max;
-        control->priv->volume[0] = max;
+        volume[1] = (balance + 1.0f) * max;
+        volume[0] = max;
     } else {
-        control->priv->volume[0] = (1.0f - balance) * max;
-        control->priv->volume[1] = max;
+        volume[0] = (1.0f - balance) * max;
+        volume[1] = max;
     }
-
-    v = control->priv->volume[0] | (control->priv->volume[1] << 8);
-
-    return write_volume (control, v);
+    return write_and_set_volume (control, OSS_VOLUME_JOIN_ARRAY (volume));
 }
 
 static guint
@@ -378,15 +382,45 @@ oss_stream_control_get_base_volume (MateMixerStreamControl *mmsc)
     return 100;
 }
 
+static void
+read_balance (OssStreamControl *control)
+{
+    gfloat balance;
+    guint  left  = control->priv->volume[0];
+    guint  right = control->priv->volume[1];
+
+    if (left == right)
+        balance = 0.0f;
+    else if (left > right)
+        balance = -1.0f + ((gfloat) right / (gfloat) left);
+    else
+        balance = +1.0f - ((gfloat) left / (gfloat) right);
+
+    _mate_mixer_stream_control_set_balance (MATE_MIXER_STREAM_CONTROL (control),
+                                            balance);
+}
+
 static gboolean
-write_volume (OssStreamControl *control, gint volume)
+write_and_set_volume (OssStreamControl *control, gint volume)
 {
     gint ret;
 
+    /* Nothing to do? */
+    if (volume == OSS_VOLUME_JOIN_ARRAY (control->priv->volume))
+        return TRUE;
+
     ret = ioctl (control->priv->fd, MIXER_WRITE (control->priv->devnum), &volume);
-    if (ret < 0) {
-        g_warning ("Failed to set volume: %s", g_strerror (errno));
+    if (ret == -1)
         return FALSE;
-    }
+
+    oss_stream_control_load (control);
+    return TRUE;
+
+    /* The ioctl may make adjustments to the passed volume, so make sure we have
+     * the correct value saved */
+    control->priv->volume[0] = OSS_VOLUME_TAKE_LEFT (volume);
+    control->priv->volume[1] = OSS_VOLUME_TAKE_RIGHT (volume);
+
+    g_object_notify (G_OBJECT (control), "volume");
     return TRUE;
 }

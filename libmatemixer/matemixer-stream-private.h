@@ -15,26 +15,18 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef MATEMIXER_BACKEND_PRIVATE_H
-#define MATEMIXER_BACKEND_PRIVATE_H
+#ifndef MATEMIXER_STREAM_PRIVATE_H
+#define MATEMIXER_STREAM_PRIVATE_H
 
 #include <glib.h>
 
-#include "matemixer-backend.h"
-#include "matemixer-enums.h"
-#include "matemixer-stream.h"
+#include "matemixer-types.h"
 
 G_BEGIN_DECLS
 
-void _mate_mixer_backend_set_state (MateMixerBackend *backend,
-                                    MateMixerState    state);
-
-void _mate_mixer_backend_set_default_input_stream (MateMixerBackend *backend,
-                                                   MateMixerStream  *stream);
-
-void _mate_mixer_backend_set_default_output_stream (MateMixerBackend *backend,
-                                                    MateMixerStream  *stream);
+void _mate_mixer_stream_set_default_control (MateMixerStream        *stream,
+                                             MateMixerStreamControl *control);
 
 G_END_DECLS
 
-#endif /* MATEMIXER_BACKEND_PRIVATE_H */
+#endif /* MATEMIXER_STREAM_PRIVATE_H */

@@ -3,6 +3,7 @@ backenddir = $(libdir)/libmatemixer
 backend_LTLIBRARIES = libmatemixer-oss.la
 
 AM_CPPFLAGS =                                                   \
+        -Wno-unknown-pragmas                                    \
         -I$(top_srcdir)                                         \
         -DG_LOG_DOMAIN=\"libmatemixer-oss\"
 
@@ -19,7 +20,12 @@ libmatemixer_oss_la_SOURCES =                                   \
         oss-stream.c                                            \
         oss-stream.h                                            \
         oss-stream-control.c                                    \
-        oss-stream-control.h
+        oss-stream-control.h                                    \
+        oss-switch.c                                            \
+        oss-switch.h                                            \
+        oss-switch-option.c                                     \
+        oss-switch-option.h                                     \
+        oss-types.h
 
 libmatemixer_oss_la_LIBADD =                                    \
         $(GLIB_LIBS)                                            \

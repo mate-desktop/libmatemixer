@@ -121,6 +121,7 @@ mate_mixer_switch_option_get_property (GObject    *object,
     case PROP_ICON:
         g_value_set_string (value, option->priv->icon);
         break;
+
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
         break;
@@ -150,6 +151,7 @@ mate_mixer_switch_option_set_property (GObject      *object,
         /* Construct-only string */
         option->priv->icon = g_value_dup_string (value);
         break;
+
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
         break;

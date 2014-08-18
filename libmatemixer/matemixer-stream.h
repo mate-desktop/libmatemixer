@@ -42,6 +42,12 @@ G_BEGIN_DECLS
 typedef struct _MateMixerStreamClass    MateMixerStreamClass;
 typedef struct _MateMixerStreamPrivate  MateMixerStreamPrivate;
 
+/**
+ * MateMixerStream:
+ *
+ * The #MateMixerStream structure contains only private data and should only
+ * be accessed using the provided API.
+ */
 struct _MateMixerStream
 {
     GObject object;
@@ -50,39 +56,43 @@ struct _MateMixerStream
     MateMixerStreamPrivate *priv;
 };
 
+/**
+ * MateMixerStreamClass:
+ *
+ * The class structure of #MateMixerStream.
+ */
 struct _MateMixerStreamClass
 {
     GObjectClass parent_class;
 
     /*< private >*/
-    MateMixerStreamControl *(*get_control)         (MateMixerStream *stream,
-                                                    const gchar     *name);
+    MateMixerStreamControl *(*get_control)   (MateMixerStream *stream,
+                                              const gchar     *name);
+    MateMixerSwitch        *(*get_switch)    (MateMixerStream *stream,
+                                              const gchar     *name);
 
-    MateMixerStreamControl *(*get_default_control) (MateMixerStream *stream);
-
-    MateMixerSwitch        *(*get_switch)          (MateMixerStream *stream,
-                                                    const gchar     *name);
-
-    GList                  *(*list_controls)       (MateMixerStream *stream);
-    GList                  *(*list_switches)       (MateMixerStream *stream);
-
-    gboolean                (*suspend)             (MateMixerStream *stream);
-    gboolean                (*resume)              (MateMixerStream *stream);
-
-    gboolean                (*monitor_start)       (MateMixerStream *stream);
-    gboolean                (*monitor_stop)        (MateMixerStream *stream);
+    const GList            *(*list_controls) (MateMixerStream *stream);
+    const GList            *(*list_switches) (MateMixerStream *stream);
 
     /* Signals */
-    void (*monitor_value) (MateMixerStream *stream, gdouble value);
+    void (*control_added)   (MateMixerStream *stream,
+                             const gchar     *name);
+    void (*control_removed) (MateMixerStream *stream,
+                             const gchar     *name);
+
+    void (*switch_added)    (MateMixerStream *stream,
+                             const gchar     *name);
+    void (*switch_removed)  (MateMixerStream *stream,
+                             const gchar     *name);
 };
 
 GType                   mate_mixer_stream_get_type            (void) G_GNUC_CONST;
 
 const gchar *           mate_mixer_stream_get_name            (MateMixerStream *stream);
-MateMixerDevice *       mate_mixer_stream_get_device          (MateMixerStream *stream);
-MateMixerStreamFlags    mate_mixer_stream_get_flags           (MateMixerStream *stream);
-MateMixerStreamState    mate_mixer_stream_get_state           (MateMixerStream *stream);
+const gchar *           mate_mixer_stream_get_label           (MateMixerStream *stream);
+MateMixerDirection      mate_mixer_stream_get_direction       (MateMixerStream *stream);
 
+MateMixerDevice *       mate_mixer_stream_get_device          (MateMixerStream *stream);
 MateMixerStreamControl *mate_mixer_stream_get_control         (MateMixerStream *stream,
                                                                const gchar     *name);
 MateMixerSwitch *       mate_mixer_stream_get_switch          (MateMixerStream *stream,
@@ -92,13 +102,6 @@ MateMixerStreamControl *mate_mixer_stream_get_default_control (MateMixerStream *
 
 const GList *           mate_mixer_stream_list_controls       (MateMixerStream *stream);
 const GList *           mate_mixer_stream_list_switches       (MateMixerStream *stream);
-
-gboolean                mate_mixer_stream_suspend             (MateMixerStream *stream);
-gboolean                mate_mixer_stream_resume              (MateMixerStream *stream);
-
-gboolean                mate_mixer_stream_monitor_get_enabled (MateMixerStream *stream);
-gboolean                mate_mixer_stream_monitor_set_enabled (MateMixerStream *stream,
-                                                               gboolean         enabled);
 
 G_END_DECLS
 

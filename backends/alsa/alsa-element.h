@@ -46,6 +46,7 @@ struct _AlsaElementInterface
                                           snd_mixer_elem_t *el);
 
     gboolean          (*load)            (AlsaElement      *element);
+    void              (*close)           (AlsaElement      *element);
 };
 
 GType             alsa_element_get_type        (void) G_GNUC_CONST;
@@ -55,6 +56,8 @@ void              alsa_element_set_snd_element (AlsaElement      *element,
                                                 snd_mixer_elem_t *el);
 
 gboolean          alsa_element_load            (AlsaElement      *element);
+
+void              alsa_element_close           (AlsaElement      *element);
 
 G_END_DECLS
 

@@ -24,9 +24,8 @@
 #include <pulse/pulseaudio.h>
 #include <pulse/ext-stream-restore.h>
 
-#include "pulse-client-stream.h"
-#include "pulse-connection.h"
-#include "pulse-stream.h"
+#include "pulse-stream-control.h"
+#include "pulse-types.h"
 
 G_BEGIN_DECLS
 
@@ -43,28 +42,31 @@ G_BEGIN_DECLS
 #define PULSE_EXT_STREAM_GET_CLASS(o)           \
         (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_TYPE_EXT_STREAM, PulseExtStreamClass))
 
-typedef struct _PulseExtStream       PulseExtStream;
-typedef struct _PulseExtStreamClass  PulseExtStreamClass;
+typedef struct _PulseExtStreamClass    PulseExtStreamClass;
+typedef struct _PulseExtStreamPrivate  PulseExtStreamPrivate;
 
 struct _PulseExtStream
 {
-    PulseClientStream parent;
+    PulseStreamControl parent;
+
+    /*< private >*/
+    PulseExtStreamPrivate *priv;
 };
 
 struct _PulseExtStreamClass
 {
-    PulseClientStreamClass parent_class;
+    PulseStreamControlClass parent_class;
 };
 
-GType        pulse_ext_stream_get_type   (void) G_GNUC_CONST;
+GType           pulse_ext_stream_get_type (void) G_GNUC_CONST;
 
-PulseStream *pulse_ext_stream_new        (PulseConnection                  *connection,
-                                          const pa_ext_stream_restore_info *info,
-                                          PulseStream                      *parent);
+PulseExtStream *pulse_ext_stream_new      (PulseConnection                  *connection,
+                                           const pa_ext_stream_restore_info *info,
+                                           PulseStream                      *parent);
 
-gboolean     pulse_ext_stream_update     (PulseStream                      *pstream,
-                                          const pa_ext_stream_restore_info *info,
-                                          PulseStream                      *parent);
+void            pulse_ext_stream_update   (PulseExtStream                   *ext,
+                                           const pa_ext_stream_restore_info *info,
+                                           PulseStream                      *parent);
 
 G_END_DECLS
 

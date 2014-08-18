@@ -23,9 +23,8 @@
 
 #include <pulse/pulseaudio.h>
 
-#include "pulse-connection.h"
-#include "pulse-device.h"
 #include "pulse-stream.h"
+#include "pulse-types.h"
 
 G_BEGIN_DECLS
 
@@ -42,12 +41,15 @@ G_BEGIN_DECLS
 #define PULSE_SOURCE_GET_CLASS(o)               \
         (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_TYPE_SOURCE, PulseSourceClass))
 
-typedef struct _PulseSource         PulseSource;
 typedef struct _PulseSourceClass    PulseSourceClass;
+typedef struct _PulseSourcePrivate  PulseSourcePrivate;
 
 struct _PulseSource
 {
     PulseStream parent;
+
+    /*< private >*/
+    PulseSourcePrivate *priv;
 };
 
 struct _PulseSourceClass
@@ -55,15 +57,20 @@ struct _PulseSourceClass
     PulseStreamClass parent_class;
 };
 
-GType        pulse_source_get_type   (void) G_GNUC_CONST;
+GType        pulse_source_get_type      (void) G_GNUC_CONST;
 
-PulseStream *pulse_source_new        (PulseConnection      *connection,
-                                      const pa_source_info *info,
-                                      PulseDevice          *device);
+PulseSource *pulse_source_new           (PulseConnection             *connection,
+                                         const pa_source_info        *info,
+                                         PulseDevice                 *device);
 
-gboolean     pulse_source_update     (PulseStream          *pstream,
-                                      const pa_source_info *info,
-                                      PulseDevice          *device);
+void         pulse_source_add_output    (PulseSource                 *source,
+                                         const pa_source_output_info *info);
+
+void         pulse_source_remove_output (PulseSource                 *source,
+                                         guint32                      index);
+
+void         pulse_source_update        (PulseSource                 *source,
+                                         const pa_source_info        *info);
 
 G_END_DECLS
 

@@ -51,3 +51,19 @@ alsa_element_load (AlsaElement *element)
 
     return ALSA_ELEMENT_GET_INTERFACE (element)->load (element);
 }
+
+void
+alsa_element_close (AlsaElement *element)
+{
+    AlsaElementInterface *iface;
+
+    g_return_if_fail (ALSA_IS_ELEMENT (element));
+
+    /* Close the element by unsetting the ALSA element and optionally calling
+     * a closing function */
+    alsa_element_set_snd_element (element, NULL);
+
+    iface = ALSA_ELEMENT_GET_INTERFACE (element);
+    if (iface->close != NULL)
+        iface->close (element);
+}

@@ -16,6 +16,7 @@
  */
 
 #include <glib.h>
+#include <glib/gi18n.h>
 #include <glib-object.h>
 
 #include <pulse/pulseaudio.h>
@@ -27,7 +28,6 @@ struct _PulseMonitorPrivate
     pa_context  *context;
     pa_proplist *proplist;
     pa_stream   *stream;
-    gchar       *name;
     guint32      index_source;
     guint32      index_sink_input;
     gboolean     enabled;
@@ -36,7 +36,6 @@ struct _PulseMonitorPrivate
 enum {
     PROP_0,
     PROP_ENABLED,
-    PROP_NAME,
     PROP_INDEX_SOURCE,
     PROP_INDEX_SINK_INPUT,
     N_PROPERTIES
@@ -91,15 +90,6 @@ pulse_monitor_class_init (PulseMonitorClass *klass)
                               G_PARAM_READABLE |
                               G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_NAME] =
-        g_param_spec_string ("name",
-                             "Name",
-                             "Name of the monitor",
-                             NULL,
-                             G_PARAM_READWRITE |
-                             G_PARAM_CONSTRUCT |
-                             G_PARAM_STATIC_STRINGS);
-
     properties[PROP_INDEX_SOURCE] =
         g_param_spec_uint ("index-source",
                            "Index of source",
@@ -153,9 +143,6 @@ pulse_monitor_get_property (GObject    *object,
     case PROP_ENABLED:
         g_value_set_boolean (value, monitor->priv->enabled);
         break;
-    case PROP_NAME:
-        g_value_set_string (value, monitor->priv->name);
-        break;
     case PROP_INDEX_SOURCE:
         g_value_set_uint (value, monitor->priv->index_source);
         break;
@@ -179,9 +166,6 @@ pulse_monitor_set_property (GObject      *object,
     monitor = PULSE_MONITOR (object);
 
     switch (param_id) {
-    case PROP_NAME:
-        pulse_monitor_set_name (monitor, g_value_get_string (value));
-        break;
     case PROP_INDEX_SOURCE:
         monitor->priv->index_source = g_value_get_uint (value);
         break;
@@ -218,15 +202,12 @@ pulse_monitor_finalize (GObject *object)
     pa_context_unref (monitor->priv->context);
     pa_proplist_free (monitor->priv->proplist);
 
-    g_free (monitor->priv->name);
-
     G_OBJECT_CLASS (pulse_monitor_parent_class)->finalize (object);
 }
 
 PulseMonitor *
 pulse_monitor_new (pa_context  *context,
                    pa_proplist *proplist,
-                   const gchar *name,
                    guint32      index_source,
                    guint32      index_sink_input)
 {
@@ -236,7 +217,6 @@ pulse_monitor_new (pa_context  *context,
     g_return_val_if_fail (proplist != NULL, NULL);
 
     monitor = g_object_new (PULSE_TYPE_MONITOR,
-                            "name", name,
                             "index-source", index_source,
                             "index-sink-input", index_sink_input,
                             NULL);
@@ -280,34 +260,11 @@ pulse_monitor_set_enabled (PulseMonitor *monitor, gboolean enabled)
     return TRUE;
 }
 
-const gchar *
-pulse_monitor_get_name (PulseMonitor *monitor)
-{
-    g_return_val_if_fail (PULSE_IS_MONITOR (monitor), NULL);
-
-    return monitor->priv->name;
-}
-
-gboolean
-pulse_monitor_set_name (PulseMonitor *monitor, const gchar *name)
-{
-    g_return_val_if_fail (PULSE_IS_MONITOR (monitor), FALSE);
-
-    if (g_strcmp0 (name, monitor->priv->name) != 0) {
-        g_free (monitor->priv->name);
-        monitor->priv->name = g_strdup (name);
-
-        g_object_notify_by_pspec (G_OBJECT (monitor), properties[PROP_NAME]);
-    }
-    return TRUE;
-}
-
 static gboolean
 stream_connect (PulseMonitor *monitor)
 {
     pa_sample_spec  spec;
     pa_buffer_attr  attr;
-    const gchar    *name;
     gchar          *idx;
     int             ret;
 
@@ -320,14 +277,9 @@ stream_connect (PulseMonitor *monitor)
     spec.format    = PA_SAMPLE_FLOAT32;
     spec.rate      = 25;
 
-    if (monitor->priv->name != NULL)
-        name = monitor->priv->name;
-    else
-        name = "Peak detect";
-
     monitor->priv->stream =
         pa_stream_new_with_proplist (monitor->priv->context,
-                                     name,
+                                     _("Peak detect"),
                                      &spec,
                                      NULL,
                                      monitor->priv->proplist);

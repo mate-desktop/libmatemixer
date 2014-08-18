@@ -10,11 +10,12 @@ libmatemixer_includedir = $(includedir)/libmatemixer
 
 libmatemixer_include_HEADERS =                                  \
         matemixer.h                                             \
-        matemixer-client-stream.h                               \
+        matemixer-app-info.h                                    \
         matemixer-context.h                                     \
         matemixer-device.h                                      \
-        matemixer-device-profile.h                              \
         matemixer-enums.h                                       \
+        matemixer-enum-types.h                                  \
+        matemixer-stored-control.h                              \
         matemixer-stream.h                                      \
         matemixer-stream-control.h                              \
         matemixer-switch.h                                      \
@@ -28,19 +29,18 @@ libmatemixer_la_CFLAGS = $(GLIB_CFLAGS)
 libmatemixer_la_SOURCES =                                       \
         matemixer.c                                             \
         matemixer-private.h                                     \
+        matemixer-app-info.c                                    \
+        matemixer-app-info-private.h                            \
         matemixer-backend.c                                     \
         matemixer-backend.h                                     \
-        matemixer-backend-private.h                             \
         matemixer-backend-module.c                              \
         matemixer-backend-module.h                              \
-        matemixer-client-stream.c                               \
         matemixer-context.c                                     \
         matemixer-device.c                                      \
-        matemixer-device-profile.c                              \
-        matemixer-device-profile-private.h                      \
         matemixer-enum-types.c                                  \
-        matemixer-enum-types.h                                  \
+        matemixer-stored-control.c                              \
         matemixer-stream.c                                      \
+        matemixer-stream-private.h                              \
         matemixer-stream-control.c                              \
         matemixer-stream-control-private.h                      \
         matemixer-switch.c                                      \

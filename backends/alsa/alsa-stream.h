@@ -22,9 +22,9 @@
 #include <glib-object.h>
 #include <libmatemixer/matemixer.h>
 
-#include "alsa-element.h"
 #include "alsa-stream-control.h"
 #include "alsa-switch.h"
+#include "alsa-toggle.h"
 
 G_BEGIN_DECLS
 
@@ -58,30 +58,35 @@ struct _AlsaStreamClass
     MateMixerStreamClass parent_class;
 };
 
-GType       alsa_stream_get_type            (void) G_GNUC_CONST;
+GType              alsa_stream_get_type                 (void) G_GNUC_CONST;
 
-AlsaStream *alsa_stream_new                 (const gchar         *name,
-                                             MateMixerDevice     *device,
-                                             MateMixerStreamFlags flags);
+AlsaStream *       alsa_stream_new                      (const gchar       *name,
+                                                         MateMixerDevice   *device,
+                                                         MateMixerDirection direction);
 
-void        alsa_stream_add_control         (AlsaStream          *stream,
-                                             AlsaStreamControl   *control);
+void               alsa_stream_add_control              (AlsaStream        *stream,
+                                                         AlsaStreamControl *control);
+void               alsa_stream_add_switch               (AlsaStream        *stream,
+                                                         AlsaSwitch        *swtch);
+void               alsa_stream_add_toggle               (AlsaStream        *stream,
+                                                         AlsaToggle        *toggle);
 
-void        alsa_stream_add_switch          (AlsaStream          *stream,
-                                             AlsaSwitch          *swtch);
+gboolean           alsa_stream_has_controls             (AlsaStream        *stream);
+gboolean           alsa_stream_has_switches             (AlsaStream        *stream);
+gboolean           alsa_stream_has_controls_or_switches (AlsaStream        *stream);
+gboolean           alsa_stream_has_default_control      (AlsaStream        *stream);
 
-gboolean    alsa_stream_is_empty            (AlsaStream          *stream);
+AlsaStreamControl *alsa_stream_get_default_control      (AlsaStream        *stream);
+void               alsa_stream_set_default_control      (AlsaStream        *stream,
+                                                         AlsaStreamControl *control);
 
-void        alsa_stream_set_default_control (AlsaStream          *stream,
-                                             AlsaStreamControl   *control);
+void               alsa_stream_load_elements            (AlsaStream        *stream,
+                                                         const gchar       *name);
 
-void        alsa_stream_load_elements       (AlsaStream          *stream,
-                                             const gchar         *name);
+gboolean           alsa_stream_remove_elements          (AlsaStream        *stream,
+                                                         const gchar       *name);
 
-gboolean    alsa_stream_remove_elements     (AlsaStream          *stream,
-                                             const gchar         *name);
-
-void        alsa_stream_remove_all          (AlsaStream          *stream);
+void               alsa_stream_remove_all               (AlsaStream        *stream);
 
 G_END_DECLS
 

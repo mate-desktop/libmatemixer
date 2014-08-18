@@ -19,7 +19,6 @@
 #include <glib-object.h>
 #include <gmodule.h>
 
-#include "matemixer-backend.h"
 #include "matemixer-backend-module.h"
 
 /* Initialize backend */

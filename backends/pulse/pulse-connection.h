@@ -25,7 +25,7 @@
 #include <pulse/ext-stream-restore.h>
 
 #include "pulse-enums.h"
-#include "pulse-monitor.h"
+#include "pulse-types.h"
 
 G_BEGIN_DECLS
 
@@ -42,7 +42,6 @@ G_BEGIN_DECLS
 #define PULSE_CONNECTION_GET_CLASS(o)           \
         (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_TYPE_CONNECTION, PulseConnectionClass))
 
-typedef struct _PulseConnection         PulseConnection;
 typedef struct _PulseConnectionClass    PulseConnectionClass;
 typedef struct _PulseConnectionPrivate  PulseConnectionPrivate;
 
@@ -59,7 +58,6 @@ struct _PulseConnectionClass
     GObjectClass parent_class;
 
     /*< private >*/
-    /* Signals */
     void (*server_info)           (PulseConnection                  *connection,
                                    const pa_server_info             *info);
 
@@ -201,7 +199,6 @@ gboolean             pulse_connection_kill_source_output       (PulseConnection 
 
 gboolean             pulse_connection_write_ext_stream         (PulseConnection                  *connection,
                                                                 const pa_ext_stream_restore_info *info);
-
 gboolean             pulse_connection_delete_ext_stream        (PulseConnection                  *connection,
                                                                 const gchar                      *name);
 
