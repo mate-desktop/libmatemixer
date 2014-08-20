@@ -188,7 +188,7 @@ pulse_sink_add_input (PulseSink *sink, const pa_sink_input_info *info)
         input = pulse_sink_input_new (sink, info);
         g_hash_table_insert (sink->priv->inputs,
                              GINT_TO_POINTER (info->index),
-                             input);
+                             g_object_ref (input));
 
         name = mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (input));
         g_signal_emit_by_name (G_OBJECT (sink),

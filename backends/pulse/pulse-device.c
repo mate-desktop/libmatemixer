@@ -281,7 +281,10 @@ pulse_device_add_stream (PulseDevice *device, PulseStream *stream)
 
     free_list_streams (device);
 
-    g_hash_table_insert (device->priv->streams, g_strdup (name), stream);
+    g_hash_table_insert (device->priv->streams,
+                         g_strdup (name),
+                         g_object_ref (stream));
+
     g_signal_emit_by_name (G_OBJECT (device),
                            "stream-added",
                            name);
@@ -382,7 +385,9 @@ pulse_device_load (PulseDevice *device, const pa_card_info *info)
                                icon,
                                info->ports[i]->priority);
 
-        g_hash_table_insert (device->priv->ports, g_strdup (name), port);
+        g_hash_table_insert (device->priv->ports,
+                             g_strdup (name),
+                             g_object_ref (port));
     }
 #endif
 

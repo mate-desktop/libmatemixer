@@ -762,7 +762,7 @@ on_connection_card_info (PulseConnection    *connection,
 
         g_hash_table_insert (pulse->priv->devices,
                              GUINT_TO_POINTER (info->index),
-                             device);
+                             g_object_ref (device));
 
         free_list_devices (pulse);
         g_signal_emit_by_name (G_OBJECT (pulse),
@@ -814,7 +814,7 @@ on_connection_sink_info (PulseConnection    *connection,
         free_list_streams (pulse);
         g_hash_table_insert (pulse->priv->sinks,
                              GUINT_TO_POINTER (info->index),
-                             stream);
+                             g_object_ref (stream));
 
         if (device != NULL) {
             pulse_device_add_stream (device, stream);
@@ -932,7 +932,7 @@ on_connection_source_info (PulseConnection      *connection,
         free_list_streams (pulse);
         g_hash_table_insert (pulse->priv->sources,
                              GUINT_TO_POINTER (info->index),
-                             stream);
+                             g_object_ref (stream));
 
         if (device != NULL) {
             pulse_device_add_stream (device, stream);
@@ -1051,7 +1051,7 @@ on_connection_ext_stream_info (PulseConnection                  *connection,
         free_list_ext_streams (pulse);
         g_hash_table_insert (pulse->priv->ext_streams,
                              g_strdup (info->name),
-                             ext);
+                             g_object_ref (ext));
 
         g_signal_emit_by_name (G_OBJECT (pulse),
                                "stored-control-added",
@@ -1091,7 +1091,7 @@ on_connection_ext_stream_loaded (PulseConnection *connection, PulseBackend *puls
             continue;
 
         free_list_ext_streams (pulse);
-        g_hash_table_remove (pulse->priv->ext_streams, (gconstpointer) name);
+        g_hash_table_iter_remove (&iter);
 
         g_signal_emit_by_name (G_OBJECT (pulse),
                                "stored-control-removed",

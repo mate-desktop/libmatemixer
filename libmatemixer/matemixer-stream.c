@@ -257,10 +257,9 @@ mate_mixer_stream_set_property (GObject      *object,
         /* Construct-only object */
         stream->priv->device = g_value_get_object (value);
 
-        if (stream->priv->device != NULL) {
+        if (stream->priv->device != NULL)
             g_object_add_weak_pointer (G_OBJECT (stream->priv->device),
                                        (gpointer *) &stream->priv->device);
-        }
         break;
     case PROP_DEFAULT_CONTROL:
         /* Construct-only object */

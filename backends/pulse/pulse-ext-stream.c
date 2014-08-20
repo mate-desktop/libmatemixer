@@ -274,7 +274,7 @@ pulse_ext_stream_set_stream (MateMixerStreamControl *mmsc, MateMixerStream *mms)
     g_return_val_if_fail (PULSE_IS_EXT_STREAM (mmsc), FALSE);
     g_return_val_if_fail (mms == NULL || PULSE_IS_STREAM (mms), FALSE);
 
-    fill_ext_stream_restore_info (PULSE_STREAM_CONTROL (mms), &info);
+    fill_ext_stream_restore_info (PULSE_STREAM_CONTROL (mmsc), &info);
 
     if (mms != NULL)
         info.device = mate_mixer_stream_get_name (mms);
@@ -331,10 +331,16 @@ fill_ext_stream_restore_info (PulseStreamControl         *control,
     info->mute = mate_mixer_stream_control_get_mute (mmsc);
 
     map = pulse_stream_control_get_channel_map (control);
-    info->channel_map = *map;
+    if G_LIKELY (map != NULL)
+        info->channel_map = *map;
+    else
+        pa_channel_map_init (&info->channel_map);
 
     cvolume = pulse_stream_control_get_cvolume (control);
-    info->volume = *cvolume;
+    if G_LIKELY (cvolume != NULL)
+        info->volume = *cvolume;
+    else
+        pa_cvolume_init (&info->volume);
 
     stream = mate_mixer_stream_control_get_stream (mmsc);
     if (stream != NULL)
