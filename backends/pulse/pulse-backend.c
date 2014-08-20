@@ -99,8 +99,7 @@ struct _PulseBackendPrivate
                             NULL))
 
 #define PULSE_GET_HANGING(o)                                            \
-        ((gboolean) g_object_get_data (G_OBJECT (o),                    \
-                                       "__matemixer_pulse_hanging"))
+        ((gboolean) GPOINTER_TO_UINT (g_object_get_data (G_OBJECT (o), "__matemixer_pulse_hanging")))
 
 #define PULSE_SET_HANGING(o)                                            \
         (g_object_set_data (G_OBJECT (o),                               \

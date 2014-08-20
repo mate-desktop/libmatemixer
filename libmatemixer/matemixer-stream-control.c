@@ -774,7 +774,7 @@ mate_mixer_stream_control_set_fade (MateMixerStreamControl *control, gfloat fade
             klass->set_fade (control, fade) == FALSE)
             return FALSE;
 
-        _mate_mixer_stream_control_set_fade (control, balance);
+        _mate_mixer_stream_control_set_fade (control, fade);
         return TRUE;
     }
     return FALSE;

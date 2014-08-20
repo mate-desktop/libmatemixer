@@ -63,15 +63,12 @@ G_DEFINE_ABSTRACT_TYPE (PulseStream, pulse_stream, MATE_MIXER_TYPE_STREAM)
 static void
 pulse_stream_class_init (PulseStreamClass *klass)
 {
-    GObjectClass         *object_class;
-    MateMixerStreamClass *stream_class;
+    GObjectClass *object_class;
 
     object_class = G_OBJECT_CLASS (klass);
     object_class->dispose      = pulse_stream_dispose;
     object_class->get_property = pulse_stream_get_property;
     object_class->set_property = pulse_stream_set_property;
-
-    stream_class = MATE_MIXER_STREAM_CLASS (klass);
 
     properties[PROP_INDEX] =
         g_param_spec_uint ("index",
