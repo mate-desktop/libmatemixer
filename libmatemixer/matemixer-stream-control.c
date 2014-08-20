@@ -465,8 +465,11 @@ mate_mixer_stream_control_set_mute (MateMixerStreamControl *control, gboolean mu
 
         klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
 
-        if G_LIKELY (klass->set_mute != NULL)
-            return klass->set_mute (control, mute);
+        if (klass->set_mute == NULL ||
+            klass->set_mute (control, mute) == FALSE)
+            return FALSE;
+
+        _mate_mixer_stream_control_set_mute (control, mute);
     }
     return FALSE;
 }
@@ -786,7 +789,6 @@ mate_mixer_stream_control_get_monitor_enabled (MateMixerStreamControl *control)
         if (klass->get_monitor_enabled != NULL)
             return klass->get_monitor_enabled (control);
     }
-
     return FALSE;
 }
 
@@ -806,10 +808,17 @@ mate_mixer_stream_control_set_monitor_enabled (MateMixerStreamControl *control, 
         MateMixerStreamControlClass *klass;
 
         klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
-        if (klass->set_monitor_enabled != NULL)
-            return klass->set_monitor_enabled (control, enabled);
-    }
+        if (klass->set_monitor_enabled == NULL ||
+            klass->set_monitor_enabled (control, enabled) == FALSE)
+            return FALSE;
 
+        if (enabled == TRUE)
+            g_debug ("Control %s monitor enabled",
+                     control->priv->name);
+        else
+            g_debug ("Control %s monitor disabled",
+                     control->priv->name);
+    }
     return FALSE;
 }
 
@@ -904,7 +913,6 @@ _mate_mixer_stream_control_set_flags (MateMixerStreamControl     *control,
     g_object_notify_by_pspec (G_OBJECT (control), properties[PROP_FLAGS]);
 }
 
-/* Protected functions */
 void
 _mate_mixer_stream_control_set_stream (MateMixerStreamControl *control,
                                        MateMixerStream        *stream)
