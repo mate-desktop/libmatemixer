@@ -289,6 +289,7 @@ mate_mixer_switch_get_role (MateMixerSwitch *swtch)
 /**
  * mate_mixer_switch_get_option:
  * @swtch: a #MateMixerSwitch
+ * @name: the name of an option
  */
 MateMixerSwitchOption *
 mate_mixer_switch_get_option (MateMixerSwitch *swtch, const gchar *name)
@@ -313,6 +314,7 @@ mate_mixer_switch_get_active_option (MateMixerSwitch *swtch)
 /**
  * mate_mixer_switch_set_active_option:
  * @swtch: a #MateMixerSwitch
+ * @option: the #MateMixerSwitchOption to set as the active option
  */
 gboolean
 mate_mixer_switch_set_active_option (MateMixerSwitch       *swtch,

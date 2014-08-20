@@ -57,8 +57,9 @@ struct _MateMixerToggle
 
 /**
  * MateMixerToggleClass:
+ * @parent_class: The parent class.
  *
- * The class structure of #MateMixerToggle.
+ * The class structure for #MateMixerToggle.
  */
 struct _MateMixerToggleClass
 {

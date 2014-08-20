@@ -39,8 +39,9 @@ typedef struct _MateMixerStoredControlInterface  MateMixerStoredControlInterface
 
 /**
  * MateMixerStoredControlInterface:
+ * @parent_iface: The parent interface.
  *
- * The interface structure of #MateMixerStoredControl.
+ * The interface structure for #MateMixerStoredControl.
  */
 struct _MateMixerStoredControlInterface
 {

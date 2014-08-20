@@ -58,8 +58,9 @@ struct _MateMixerContext
 
 /**
  * MateMixerContextClass:
+ * @parent_class: The parent class.
  *
- * The class structure of #MateMixerContext.
+ * The class structure for #MateMixerContext.
  */
 struct _MateMixerContextClass
 {

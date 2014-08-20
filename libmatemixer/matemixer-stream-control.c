@@ -399,6 +399,7 @@ mate_mixer_stream_control_get_stream (MateMixerStreamControl *control)
 /**
  * mate_mixer_stream_control_set_stream:
  * @control: a #MateMixerStreamControl
+ * @stream: a #MateMixerStream
  */
 gboolean
 mate_mixer_stream_control_set_stream (MateMixerStreamControl *control,
@@ -435,6 +436,7 @@ mate_mixer_stream_control_get_mute (MateMixerStreamControl *control)
 /**
  * mate_mixer_stream_control_set_mute:
  * @control: a #MateMixerStreamControl
+ * @mute: the mute toggle state to set
  */
 gboolean
 mate_mixer_stream_control_set_mute (MateMixerStreamControl *control, gboolean mute)
@@ -501,6 +503,7 @@ mate_mixer_stream_control_get_volume (MateMixerStreamControl *control)
 /**
  * mate_mixer_stream_control_set_volume:
  * @control: a #MateMixerStreamControl
+ * @volume: the volume to set
  */
 gboolean
 mate_mixer_stream_control_set_volume (MateMixerStreamControl *control, guint volume)
@@ -541,6 +544,7 @@ mate_mixer_stream_control_get_decibel (MateMixerStreamControl *control)
 /**
  * mate_mixer_stream_control_set_decibel:
  * @control: a #MateMixerStreamControl
+ * @decibel: the volume to set in decibels
  */
 gboolean
 mate_mixer_stream_control_set_decibel (MateMixerStreamControl *control, gdouble decibel)
@@ -562,6 +566,7 @@ mate_mixer_stream_control_set_decibel (MateMixerStreamControl *control, gdouble 
 /**
  * mate_mixer_stream_control_has_channel_position:
  * @control: a #MateMixerStreamControl
+ * @position: to channel position to check
  */
 gboolean
 mate_mixer_stream_control_has_channel_position (MateMixerStreamControl   *control,
@@ -582,6 +587,7 @@ mate_mixer_stream_control_has_channel_position (MateMixerStreamControl   *contro
 /**
  * mate_mixer_stream_control_get_channel_position:
  * @control: a #MateMixerStreamControl
+ * @channel: a channel index
  */
 MateMixerChannelPosition
 mate_mixer_stream_control_get_channel_position (MateMixerStreamControl *control, guint channel)
@@ -601,6 +607,7 @@ mate_mixer_stream_control_get_channel_position (MateMixerStreamControl *control,
 /**
  * mate_mixer_stream_control_get_channel_volume:
  * @control: a #MateMixerStreamControl
+ * @channel: a channel index
  */
 guint
 mate_mixer_stream_control_get_channel_volume (MateMixerStreamControl *control, guint channel)
@@ -621,6 +628,8 @@ mate_mixer_stream_control_get_channel_volume (MateMixerStreamControl *control, g
 /**
  * mate_mixer_stream_control_set_channel_volume:
  * @control: a #MateMixerStreamControl
+ * @channel: a channel index
+ * @volume: the volume to set
  */
 gboolean
 mate_mixer_stream_control_set_channel_volume (MateMixerStreamControl *control,
@@ -643,6 +652,7 @@ mate_mixer_stream_control_set_channel_volume (MateMixerStreamControl *control,
 /**
  * mate_mixer_stream_control_get_channel_decibel:
  * @control: a #MateMixerStreamControl
+ * @channel: a channel index
  */
 gdouble
 mate_mixer_stream_control_get_channel_decibel (MateMixerStreamControl *control, guint channel)
@@ -663,6 +673,8 @@ mate_mixer_stream_control_get_channel_decibel (MateMixerStreamControl *control, 
 /**
  * mate_mixer_stream_control_set_channel_decibel:
  * @control: a #MateMixerStreamControl
+ * @channel: a channel index
+ * @decibel: the volume to set in decibels
  */
 gboolean
 mate_mixer_stream_control_set_channel_decibel (MateMixerStreamControl *control,
@@ -700,6 +712,7 @@ mate_mixer_stream_control_get_balance (MateMixerStreamControl *control)
 /**
  * mate_mixer_stream_control_set_balance:
  * @control: a #MateMixerStreamControl
+ * @balance: the balance value
  */
 gboolean
 mate_mixer_stream_control_set_balance (MateMixerStreamControl *control, gfloat balance)
@@ -738,6 +751,7 @@ mate_mixer_stream_control_get_fade (MateMixerStreamControl *control)
 /**
  * mate_mixer_stream_control_set_fade:
  * @control: a #MateMixerStreamControl
+ * @fade: the fade value
  */
 gboolean
 mate_mixer_stream_control_set_fade (MateMixerStreamControl *control, gfloat fade)
@@ -780,6 +794,7 @@ mate_mixer_stream_control_get_monitor_enabled (MateMixerStreamControl *control)
 /**
  * mate_mixer_stream_control_set_monitor_enabled:
  * @control: a #MateMixerStreamControl
+ * @enabled: a boolean value
  */
 gboolean
 mate_mixer_stream_control_set_monitor_enabled (MateMixerStreamControl *control, gboolean enabled)

@@ -355,6 +355,7 @@ mate_mixer_stream_get_device (MateMixerStream *stream)
 /**
  * mate_mixer_stream_get_control:
  * @stream: a #MateMixerStream
+ * @name: the name of a stream control
  */
 MateMixerStreamControl *
 mate_mixer_stream_get_control (MateMixerStream *stream, const gchar *name)
@@ -368,6 +369,7 @@ mate_mixer_stream_get_control (MateMixerStream *stream, const gchar *name)
 /**
  * mate_mixer_stream_get_switch:
  * @stream: a #MateMixerStream
+ * @name: the name of a stream switch
  */
 MateMixerSwitch *
 mate_mixer_stream_get_switch (MateMixerStream *stream, const gchar *name)

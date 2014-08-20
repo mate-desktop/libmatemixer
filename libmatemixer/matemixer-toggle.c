@@ -213,6 +213,7 @@ mate_mixer_toggle_get_state (MateMixerToggle *toggle)
 /**
  * mate_mixer_toggle_get_state_option:
  * @toggle: a #MateMixerToggle
+ * @state: the state to retrieve
  */
 MateMixerSwitchOption *
 mate_mixer_toggle_get_state_option (MateMixerToggle *toggle, gboolean state)
@@ -228,6 +229,7 @@ mate_mixer_toggle_get_state_option (MateMixerToggle *toggle, gboolean state)
 /**
  * mate_mixer_toggle_set_state:
  * @toggle: a #MateMixerToggle
+ * @state: the state to set
  */
 gboolean
 mate_mixer_toggle_set_state (MateMixerToggle *toggle, gboolean state)

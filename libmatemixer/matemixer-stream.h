@@ -58,8 +58,9 @@ struct _MateMixerStream
 
 /**
  * MateMixerStreamClass:
+ * @parent_class: The parent class.
  *
- * The class structure of #MateMixerStream.
+ * The class structure for #MateMixerStream.
  */
 struct _MateMixerStreamClass
 {

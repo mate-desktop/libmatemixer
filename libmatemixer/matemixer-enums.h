@@ -48,7 +48,9 @@ typedef enum {
  *     will be the first one to try unless you select a specific backend
  *     to connect to.
  * @MATE_MIXER_BACKEND_ALSA:
+ *     The Advanced Linux Sound Architecture sound system.
  * @MATE_MIXER_BACKEND_OSS:
+ *     The Open Sound System.
  * @MATE_MIXER_BACKEND_NULL:
  *     Fallback backend which never fails to initialize, but provides no
  *     functionality. This backend has the lowest priority and will be used
@@ -65,17 +67,32 @@ typedef enum {
 
 /**
  * MateMixerBackendFlags:
+ * @MATE_MIXER_BACKEND_NO_FLAGS:
+ *     No flags.
+ * @MATE_MIXER_BACKEND_HAS_APPLICATION_CONTROLS:
+ *     The backend includes support for application stream controls.
+ * @MATE_MIXER_BACKEND_CAN_SET_DEFAULT_INPUT_STREAM:
+ *     The backend is able to change the current default input stream using
+ *     the mate_mixer_context_set_default_input_stream() function.
+ * @MATE_MIXER_BACKEND_CAN_SET_DEFAULT_OUTPUT_STREAM:
+ *     The backend is able to change the current default output stream using
+ *     the mate_mixer_context_set_default_output_stream() function.
  */
-
 typedef enum { /*< flags >*/
-    MATE_MIXER_BACKEND_NO_FLAGS    = 0,
-    MATE_MIXER_BACKEND_HAS_APPLICATION_CONTROLS,
-    MATE_MIXER_BACKEND_CAN_SET_DEFAULT_INPUT_STREAM,
-    MATE_MIXER_BACKEND_CAN_SET_DEFAULT_OUTPUT_STREAM
+    MATE_MIXER_BACKEND_NO_FLAGS                         = 0,
+    MATE_MIXER_BACKEND_HAS_APPLICATION_CONTROLS         = 1 << 0,
+    MATE_MIXER_BACKEND_CAN_SET_DEFAULT_INPUT_STREAM     = 1 << 1,
+    MATE_MIXER_BACKEND_CAN_SET_DEFAULT_OUTPUT_STREAM    = 1 << 2
 } MateMixerBackendFlags;
 
 /**
  * MateMixerDirection:
+ * @MATE_MIXER_DIRECTION_UNKNOWN:
+ *     Unknown direction.
+ * @MATE_MIXER_DIRECTION_INPUT:
+ *     Input direction (recording).
+ * @MATE_MIXER_DIRECTION_OUTPUT:
+ *     Output direction (playback).
  */
 typedef enum {
     MATE_MIXER_DIRECTION_UNKNOWN,
@@ -86,13 +103,21 @@ typedef enum {
 /**
  * MateMixerStreamControlFlags:
  * @MATE_MIXER_STREAM_CONTROL_NO_FLAGS:
- * @MATE_MIXER_STREAM_CONTROL_HAS_MUTE:
- * @MATE_MIXER_STREAM_CONTROL_HAS_VOLUME:
- * @MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL:
- * @MATE_MIXER_STREAM_CONTROL_HAS_FLAT_VOLUME:
- * @MATE_MIXER_STREAM_CONTROL_CAN_SET_VOLUME:
+ *     No flags.
+ * @MATE_MIXER_STREAM_CONTROL_MUTE_READABLE:
+ *     The stream control includes a mute toggle and allows reading the mute state.
+ * @MATE_MIXER_STREAM_CONTROL_MUTE_WRITABLE:
+ * @MATE_MIXER_STREAM_CONTROL_VOLUME_READABLE:
+ * @MATE_MIXER_STREAM_CONTROL_VOLUME_WRITABLE:
  * @MATE_MIXER_STREAM_CONTROL_CAN_BALANCE:
  * @MATE_MIXER_STREAM_CONTROL_CAN_FADE:
+ * @MATE_MIXER_STREAM_CONTROL_MOVABLE:
+ *     It is possible to move the stream control to a different stream using the
+ *     mate_mixer_stream_control_set_stream() function. See the function description
+ *     for details.
+ * @MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL:
+ * @MATE_MIXER_STREAM_CONTROL_HAS_MONITOR:
+ * @MATE_MIXER_STREAM_CONTROL_STORED:
  */
 typedef enum {
     MATE_MIXER_STREAM_CONTROL_NO_FLAGS        = 0,

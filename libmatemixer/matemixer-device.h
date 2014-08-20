@@ -57,8 +57,9 @@ struct _MateMixerDevice
 
 /**
  * MateMixerDeviceClass:
+ * @parent_class: The parent class.
  *
- * The class structure of #MateMixerDevice.
+ * The class structure for #MateMixerDevice.
  */
 struct _MateMixerDeviceClass
 {

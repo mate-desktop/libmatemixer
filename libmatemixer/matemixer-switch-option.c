@@ -22,7 +22,7 @@
 #include "matemixer-switch-option-private.h"
 
 /**
- * SECTION:matemixer-stream-switch-option
+ * SECTION:matemixer-switch-option
  * @include: libmatemixer/matemixer.h
  */
 
@@ -182,6 +182,7 @@ mate_mixer_switch_option_finalize (GObject *object)
 
 /**
  * mate_mixer_switch_option_get_name:
+ * @option: a #MateMixerSwitchOption
  */
 const gchar *
 mate_mixer_switch_option_get_name (MateMixerSwitchOption *option)
@@ -193,6 +194,7 @@ mate_mixer_switch_option_get_name (MateMixerSwitchOption *option)
 
 /**
  * mate_mixer_switch_option_get_label:
+ * @option: a #MateMixerSwitchOption
  */
 const gchar *
 mate_mixer_switch_option_get_label (MateMixerSwitchOption *option)
@@ -204,6 +206,7 @@ mate_mixer_switch_option_get_label (MateMixerSwitchOption *option)
 
 /**
  * mate_mixer_switch_option_get_icon:
+ * @option: a #MateMixerSwitchOption
  */
 const gchar *
 mate_mixer_switch_option_get_icon (MateMixerSwitchOption *option)

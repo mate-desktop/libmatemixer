@@ -18,13 +18,19 @@
 #include "matemixer-app-info.h"
 #include "matemixer-app-info-private.h"
 
+/**
+ * SECTION:matemixer-app-info
+ * @short_description: Application information
+ * @include: libmatemixer/matemixer.h
+ */
+
 G_DEFINE_BOXED_TYPE (MateMixerAppInfo, mate_mixer_app_info,
                      _mate_mixer_app_info_copy,
                      _mate_mixer_app_info_free)
 
 /**
  * mate_mixer_app_info_get_name:
- * @device: a #MateMixerAppInfo
+ * @info: a #MateMixerAppInfo
  */
 const gchar *
 mate_mixer_app_info_get_name (MateMixerAppInfo *info)
@@ -36,7 +42,7 @@ mate_mixer_app_info_get_name (MateMixerAppInfo *info)
 
 /**
  * mate_mixer_app_info_get_id:
- * @device: a #MateMixerAppInfo
+ * @info: a #MateMixerAppInfo
  */
 const gchar *
 mate_mixer_app_info_get_id (MateMixerAppInfo *info)
@@ -48,7 +54,7 @@ mate_mixer_app_info_get_id (MateMixerAppInfo *info)
 
 /**
  * mate_mixer_app_info_get_version:
- * @device: a #MateMixerAppInfo
+ * @info: a #MateMixerAppInfo
  */
 const gchar *
 mate_mixer_app_info_get_version (MateMixerAppInfo *info)
@@ -60,7 +66,7 @@ mate_mixer_app_info_get_version (MateMixerAppInfo *info)
 
 /**
  * mate_mixer_app_info_get_icon:
- * @device: a #MateMixerAppInfo
+ * @info: a #MateMixerAppInfo
  */
 const gchar *
 mate_mixer_app_info_get_icon (MateMixerAppInfo *info)
