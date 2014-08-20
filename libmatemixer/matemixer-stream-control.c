@@ -727,8 +727,12 @@ mate_mixer_stream_control_set_balance (MateMixerStreamControl *control, gfloat b
 
         klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
 
-        if (G_LIKELY (klass->set_balance != NULL))
-            return klass->set_balance (control, balance);
+        if (klass->set_balance == NULL ||
+            klass->set_balance (control, balance) == FALSE)
+            return FALSE;
+
+        _mate_mixer_stream_control_set_balance (control, balance);
+        return TRUE;
     }
     return FALSE;
 }
@@ -766,8 +770,12 @@ mate_mixer_stream_control_set_fade (MateMixerStreamControl *control, gfloat fade
 
         klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
 
-        if (klass->set_fade != NULL)
-            return klass->set_fade (control, fade);
+        if (klass->set_fade == NULL ||
+            klass->set_fade (control, fade) == FALSE)
+            return FALSE;
+
+        _mate_mixer_stream_control_set_fade (control, balance);
+        return TRUE;
     }
     return FALSE;
 }
