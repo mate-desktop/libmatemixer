@@ -417,7 +417,6 @@ mate_mixer_stream_control_set_stream (MateMixerStreamControl *control,
 
         _mate_mixer_stream_control_set_stream (control, stream);
     }
-
     return TRUE;
 }
 
@@ -455,6 +454,7 @@ mate_mixer_stream_control_set_mute (MateMixerStreamControl *control, gboolean mu
             return FALSE;
 
         _mate_mixer_stream_control_set_mute (control, mute);
+        return TRUE;
     }
     return FALSE;
 }
