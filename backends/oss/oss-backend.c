@@ -461,6 +461,7 @@ read_device_label_sndstat (OssBackend  *oss,
 static void
 add_device (OssBackend *oss, OssDevice *device)
 {
+    /* Takes reference of device */
     oss->priv->devices =
         g_list_insert_sorted_with_data (oss->priv->devices,
                                         device,

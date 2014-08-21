@@ -363,10 +363,12 @@ read_device (AlsaBackend *alsa, const gchar *card)
 static void
 add_device (AlsaBackend *alsa, AlsaDevice *device)
 {
-    alsa->priv->devices = g_list_insert_sorted_with_data (alsa->priv->devices,
-                                                          device,
-                                                          (GCompareDataFunc) compare_devices,
-                                                          NULL);
+    /* Takes reference of device */
+    alsa->priv->devices =
+        g_list_insert_sorted_with_data (alsa->priv->devices,
+                                        device,
+                                        (GCompareDataFunc) compare_devices,
+                                        NULL);
 
     /* Keep track of device identifiers */
     g_hash_table_add (alsa->priv->devices_ids, g_strdup (ALSA_DEVICE_GET_ID (device)));

@@ -92,8 +92,8 @@ alsa_toggle_new (const gchar        *name,
                            "label", label,
                            "flags", MATE_MIXER_SWITCH_TOGGLE,
                            "role", role,
-                           "state-option-on", on,
-                           "state-option-off", off,
+                           "on-state-option", on,
+                           "off-state-option", off,
                            NULL);
 
     toggle->priv->type = type;
