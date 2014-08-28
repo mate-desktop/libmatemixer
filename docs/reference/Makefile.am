@@ -61,8 +61,7 @@ IGNORE_HFILES=                                          \
         matemixer-stream-private.h                      \
         matemixer-switch-option-private.h               \
         matemixer-switch-private.h                      \
-        matemixer-private.h                             \
-        matemixer-types.h
+        matemixer-private.h
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png

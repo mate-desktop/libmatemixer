@@ -9,6 +9,7 @@ LIBMATEMIXER_CHECK_VERSION
 <SECTION>
 <FILE>matemixer-app-info</FILE>
 <TITLE>MateMixerAppInfo</TITLE>
+MateMixerAppInfo
 mate_mixer_app_info_get_name
 mate_mixer_app_info_get_id
 mate_mixer_app_info_get_version
@@ -16,6 +17,7 @@ mate_mixer_app_info_get_icon
 <SUBSECTION Standard>
 MATE_MIXER_APP_INFO
 MATE_MIXER_TYPE_APP_INFO
+<SUBSECTION Private>
 mate_mixer_app_info_get_type
 </SECTION>
 
@@ -50,7 +52,6 @@ mate_mixer_context_set_default_output_stream
 mate_mixer_context_get_backend_name
 mate_mixer_context_get_backend_type
 mate_mixer_context_get_backend_flags
-MateMixerContextPrivate
 <SUBSECTION Standard>
 MATE_MIXER_CONTEXT
 MATE_MIXER_CONTEXT_CLASS
@@ -59,6 +60,8 @@ MATE_MIXER_IS_CONTEXT
 MATE_MIXER_IS_CONTEXT_CLASS
 MATE_MIXER_TYPE_CONTEXT
 mate_mixer_context_get_type
+<SUBSECTION Private>
+MateMixerContextPrivate
 </SECTION>
 
 <SECTION>
@@ -73,7 +76,6 @@ mate_mixer_device_get_stream
 mate_mixer_device_get_switch
 mate_mixer_device_list_streams
 mate_mixer_device_list_switches
-MateMixerDevicePrivate
 <SUBSECTION Standard>
 MATE_MIXER_DEVICE
 MATE_MIXER_DEVICE_CLASS
@@ -82,6 +84,8 @@ MATE_MIXER_IS_DEVICE
 MATE_MIXER_IS_DEVICE_CLASS
 MATE_MIXER_TYPE_DEVICE
 mate_mixer_device_get_type
+<SUBSECTION Private>
+MateMixerDevicePrivate
 </SECTION>
 
 <SECTION>

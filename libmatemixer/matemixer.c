@@ -28,8 +28,8 @@
 /**
  * SECTION:matemixer
  * @short_description: Library initialization and support functions
- * @title: MateMixer
  * @include: libmatemixer/matemixer.h
+ * @see_also: #MateMixerContext
  */
 
 static void       load_modules     (void);

@@ -213,7 +213,7 @@ mate_mixer_backend_module_get_info (MateMixerBackendModule *module)
  *
  * Gets file path to the backend module.
  *
- * Returns: string containing the path.
+ * Returns: the file path.
  */
 const gchar *
 mate_mixer_backend_module_get_path (MateMixerBackendModule *module)

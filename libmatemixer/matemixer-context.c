@@ -178,12 +178,12 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
     /**
      * MateMixerContext:app-icon:
      *
-     * An XDG icon name for the application.
+     * The XDG icon name of the application.
      */
     properties[PROP_APP_ICON] =
         g_param_spec_string ("app-icon",
                              "App icon",
-                             "Application icon name",
+                             "Application XDG icon name",
                              NULL,
                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
@@ -192,8 +192,9 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
      *
      * Address of the sound server to connect to.
      *
-     * This feature is only supported in the PulseAudio backend. There is
-     * no need to specify an address in order to connect to the local daemon.
+     * This feature is only supported by the PulseAudio sound system.
+     * There is no need to specify an address in order to connect to the
+     * local PulseAudio daemon.
      */
     properties[PROP_SERVER_ADDRESS] =
         g_param_spec_string ("server-address",
@@ -202,6 +203,11 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
                              NULL,
                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    /**
+     * MateMixerContext:state:
+     *
+     * The current state of the connection to a sound system.
+     */
     properties[PROP_STATE] =
         g_param_spec_enum ("state",
                            "State",
@@ -210,6 +216,14 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
                            MATE_MIXER_STATE_IDLE,
                            G_PARAM_READABLE | G_PARAM_STATIC_STRINGS);
 
+    /**
+     * MateMixerContext:default-input-stream:
+     *
+     * The stream sound input most likely comes from by default.
+     *
+     * See mate_mixer_context_set_default_input_stream() for more information
+     * about changing the default input stream.
+     */
     properties[PROP_DEFAULT_INPUT_STREAM] =
         g_param_spec_object ("default-input-stream",
                              "Default input stream",
@@ -217,6 +231,14 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
                              MATE_MIXER_TYPE_STREAM,
                              G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 
+    /**
+     * MateMixerContext:default-output-stream:
+     *
+     * The stream sound output is most likely directed to by default.
+     *
+     * See mate_mixer_context_set_default_output_stream() for more information
+     * about changing the default output stream.
+     */
     properties[PROP_DEFAULT_OUTPUT_STREAM] =
         g_param_spec_object ("default-output-stream",
                              "Default output stream",
@@ -232,6 +254,11 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
      * @name: name of the added device
      *
      * The signal is emitted each time a device is added to the system.
+     *
+     * Use mate_mixer_context_get_device() to get the #MateMixerDevice.
+     *
+     * Note that at the time this signal is emitted, the streams and switches
+     * of the device may not yet be known.
      */
     signals[DEVICE_ADDED] =
         g_signal_new ("device-added",
@@ -251,6 +278,11 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
      * @name: name of the removed device
      *
      * The signal is emitted each time a device is removed from the system.
+     *
+     * When this signal is emitted, the device is no longer known to the library,
+     * it will not be included in the device list provided by the
+     * mate_mixer_context_list_devices() function and it is not possible to get
+     * the device with mate_mixer_context_get_device().
      */
     signals[DEVICE_REMOVED] =
         g_signal_new ("device-removed",
@@ -269,7 +301,14 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
      * @context: a #MateMixerContext
      * @name: name of the added stream
      *
-     * The signal is emitted each time a stream is created.
+     * The signal is emitted each time a stream is added.
+     *
+     * This signal is emitted for streams which belong to devices as well as
+     * streams which do not. If you are only interested in streams of a
+     * specific device, the signal is also available in #MateMixerDevice.
+     *
+     * Note that at the time this signal is emitted, the controls and switches
+     * of the stream may not yet be known.
      */
     signals[STREAM_ADDED] =
         g_signal_new ("stream-added",
@@ -289,6 +328,15 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
      * @name: name of the removed stream
      *
      * The signal is emitted each time a stream is removed.
+     *
+     * When this signal is emitted, the stream is no longer known to the library,
+     * it will not be included in the stream list provided by the
+     * mate_mixer_context_list_streams() function and it is not possible to get
+     * the stream with mate_mixer_context_get_stream().
+     *
+     * This signal is emitted for streams which belong to devices as well as
+     * streams which do not. If you are only interested in streams of a
+     * specific device, the signal is also available in #MateMixerDevice.
      */
     signals[STREAM_REMOVED] =
         g_signal_new ("stream-removed",
@@ -307,7 +355,9 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
      * @context: a #MateMixerContext
      * @name: name of the added stored control
      *
-     * The signal is emitted each time a stored control is created.
+     * The signal is emitted each time a stored control is added.
+     *
+     * Use mate_mixer_context_get_stored_control() to get the #MateMixerStoredControl.
      */
     signals[STORED_CONTROL_ADDED] =
         g_signal_new ("stored-control-added",
@@ -324,9 +374,14 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
     /**
      * MateMixerContext::stored-control-removed:
      * @context: a #MateMixerContext
-     * @name: name of the removed control
+     * @name: name of the removed stored control
      *
-     * The signal is emitted each time a control is removed.
+     * The signal is emitted each time a stored control is removed.
+     *
+     * When this signal is emitted, the stored control is no longer known to the
+     * library, it will not be included in the stream list provided by the
+     * mate_mixer_context_list_stored_controls() function and it is not possible to
+     * get the stored control with mate_mixer_context_get_stored_control().
      */
     signals[STORED_CONTROL_REMOVED] =
         g_signal_new ("stored-control-removed",
@@ -466,7 +521,7 @@ mate_mixer_context_finalize (GObject *object)
  * Creates a new #MateMixerContext instance.
  *
  * Returns: a new #MateMixerContext instance or %NULL if the library has not
- * been initialized using mate_mixer_init().
+ * been initialized with mate_mixer_init().
  */
 MateMixerContext *
 mate_mixer_context_new (void)
@@ -487,12 +542,11 @@ mate_mixer_context_new (void)
  * Makes the #MateMixerContext use the given #MateMixerBackendType.
  *
  * By default the backend type is determined automatically. This function can
- * be used before mate_mixer_context_open() to alter this behavior and make the
- * @context use the given backend.
+ * be used to alter this behavior and make the @context use the selected sound
+ * system.
  *
- * This function will fail if support for the backend is not installed in
- * the system or if the current state is either %MATE_MIXER_STATE_CONNECTING or
- * %MATE_MIXER_STATE_READY.
+ * This function must be used before opening a connection to a sound system with
+ * mate_mixer_context_open(), otherwise it will fail.
  *
  * Returns: %TRUE on success or %FALSE on failure.
  */
@@ -530,12 +584,11 @@ mate_mixer_context_set_backend_type (MateMixerContext     *context,
  * @context: a #MateMixerContext
  * @app_name: the name of your application, or %NULL to unset
  *
- * Sets the name of the application. This feature is only supported in the
- * PulseAudio backend.
+ * Sets the name of your application. This information may be used when
+ * registering with the sound system.
  *
- * This function will fail if the current state is either
- * %MATE_MIXER_STATE_CONNECTING or %MATE_MIXER_STATE_READY, therefore you should
- * use it before opening a connection to the sound system.
+ * This function must be used before opening a connection to a sound system with
+ * mate_mixer_context_open(), otherwise it will fail.
  *
  * Returns: %TRUE on success or %FALSE on failure.
  */
@@ -561,12 +614,11 @@ mate_mixer_context_set_app_name (MateMixerContext *context, const gchar *app_nam
  * @context: a #MateMixerContext
  * @app_id: the identifier of your application, or %NULL to unset
  *
- * Sets the identifier of the application (e.g. org.example.app). This feature
- * is only supported in the PulseAudio backend.
+ * Sets the identifier of your application (e.g. org.example.app). This
+ * information may be used when registering with the sound system.
  *
- * This function will fail if the current state is either
- * %MATE_MIXER_STATE_CONNECTING or %MATE_MIXER_STATE_READY, therefore you should
- * use it before opening a connection to the sound system.
+ * This function must be used before opening a connection to a sound system with
+ * mate_mixer_context_open(), otherwise it will fail.
  *
  * Returns: %TRUE on success or %FALSE on failure.
  */
@@ -592,12 +644,11 @@ mate_mixer_context_set_app_id (MateMixerContext *context, const gchar *app_id)
  * @context: a #MateMixerContext
  * @app_version: the version of your application, or %NULL to unset
  *
- * Sets the version of the application. This feature is only supported in the
- * PulseAudio backend.
+ * Sets the version of your application. This information may be used when
+ * registering with the sound system.
  *
- * This function will fail if the current state is either
- * %MATE_MIXER_STATE_CONNECTING or %MATE_MIXER_STATE_READY, therefore you should
- * use it before opening a connection to the sound system.
+ * This function must be used before opening a connection to a sound system with
+ * mate_mixer_context_open(), otherwise it will fail.
  *
  * Returns: %TRUE on success or %FALSE on failure.
  */
@@ -623,12 +674,11 @@ mate_mixer_context_set_app_version (MateMixerContext *context, const gchar *app_
  * @context: a #MateMixerContext
  * @app_icon: the XDG icon name of your application, or %NULL to unset
  *
- * Sets the XDG icon name of the application. This feature is only supported in
- * the PulseAudio backend.
+ * Sets the XDG icon name of your application. This information may be used when
+ * registering with the sound system.
  *
- * This function will fail if the current state is either
- * %MATE_MIXER_STATE_CONNECTING or %MATE_MIXER_STATE_READY, therefore you should
- * use it before opening a connection to the sound system.
+ * This function must be used before opening a connection to a sound system with
+ * mate_mixer_context_open(), otherwise it will fail.
  *
  * Returns: %TRUE on success or %FALSE on failure.
  */
@@ -658,9 +708,8 @@ mate_mixer_context_set_app_icon (MateMixerContext *context, const gchar *app_ico
  * PulseAudio backend. If the address is not set, the default PulseAudio sound
  * server will be used, which is normally the local daemon.
  *
- * This function will fail if the current state is either
- * %MATE_MIXER_STATE_CONNECTING or %MATE_MIXER_STATE_READY, therefore you should
- * use it before opening a connection to the sound system.
+ * This function must be used before opening a connection to a sound system with
+ * mate_mixer_context_open(), otherwise it will fail.
  *
  * Returns: %TRUE on success or %FALSE on failure.
  */
@@ -687,24 +736,30 @@ mate_mixer_context_set_server_address (MateMixerContext *context, const gchar *a
  * mate_mixer_context_open:
  * @context: a #MateMixerContext
  *
- * Opens connection to a sound system. Unless the backend type was given
- * beforehand, the library will find a working sound system automatically.
- * If the automatic discovery fails to find a working sound system, it will
- * use the "Null" backend, which provides no functionality.
+ * Opens connection to a sound system. Unless the sound system backend type
+ * was chosen manually with mate_mixer_context_set_backend_type(), the library
+ * will find a working sound system automatically.
  *
  * This function can complete the operation either synchronously or
- * asynchronously.
+ * asynchronously and it may go through a series of connection
+ * #MateMixerContext:state transitions.
  *
- * In case this function returns %TRUE, you should check the current state of
- * the connection using mate_mixer_context_get_state(). If the current state
- * is %MATE_MIXER_STATE_READY, the connection has been established successfully.
- * Otherwise the state will be set to %MATE_MIXER_STATE_CONNECTING and the
- * result of the operation will be determined asynchronously. You should wait
- * for the state transition by connecting to the notification signal of the
- * #MateMixerContext:state property.
+ * If this function returns %TRUE, the connection has either been established, or
+ * it hasn't been established yet and the result will be determined asynchronously.
+ * You can differentiate between these two possibilities by checking the connection
+ * #MateMixerContext:state.
  *
- * In case this function returns %FALSE, it is not possible to use the selected
- * backend and the state will be set to %MATE_MIXER_STATE_FAILED.
+ * The %MATE_MIXER_STATE_READY state indicates, that the connection has been
+ * established successfully.
+ *
+ * The %MATE_MIXER_STATE_CONNECTING state is reached when the connection has not been
+ * established yet and you should wait for the state to change to either
+ * %MATE_MIXER_STATE_READY or %MATE_MIXER_STATE_FAILED. It is required to have a main
+ * loop running to allow an asynchronous connection to proceed. The library will use
+ * the thread's default main context for this purpose.
+ *
+ * If this function returns %FALSE, it was not possible to connect to a sound system
+ * and the #MateMixerContext:state will be set to %MATE_MIXER_STATE_FAILED.
  *
  * Returns: %TRUE on success or if the result will be determined asynchronously,
  * or %FALSE on failure.
@@ -807,8 +862,8 @@ mate_mixer_context_open (MateMixerContext *context)
  * mate_mixer_context_close:
  * @context: a #MateMixerContext
  *
- * Closes connection to the currently used sound system. The state will be
- * set to %MATE_MIXER_STATE_IDLE.
+ * Closes an open connection to the sound system. The #MateMixerContext:state
+ * will be set to %MATE_MIXER_STATE_IDLE.
  */
 void
 mate_mixer_context_close (MateMixerContext *context)
@@ -823,9 +878,9 @@ mate_mixer_context_close (MateMixerContext *context)
  * mate_mixer_context_get_state:
  * @context: a #MateMixerContext
  *
- * Gets the current backend connection state of the #MateMixerContext.
+ * Gets the state of the @context's connection to a sound system.
  *
- * Returns: The current connection state.
+ * Returns: the connection state.
  */
 MateMixerState
 mate_mixer_context_get_state (MateMixerContext *context)
@@ -884,7 +939,7 @@ mate_mixer_context_get_stream (MateMixerContext *context, const gchar *name)
  *
  * Gets the stored control with the given name.
  *
- * Returns: a #MateMixerStoredControl or %NULL if there is no such control.
+ * Returns: a #MateMixerStoredControl or %NULL if there is no such stored control.
  */
 MateMixerStoredControl *
 mate_mixer_context_get_stored_control (MateMixerContext *context, const gchar *name)
@@ -902,11 +957,10 @@ mate_mixer_context_get_stored_control (MateMixerContext *context, const gchar *n
  * mate_mixer_context_list_devices:
  * @context: a #MateMixerContext
  *
- * Gets a list of devices. Each list item is a #MateMixerDevice representing a
- * hardware or software sound device in the system.
+ * Gets a list of devices. Each item in the list is a #MateMixerDevice representing
+ * a sound device in the system.
  *
- * The returned #GList is owned by the #MateMixerContext and may be invalidated
- * at any time.
+ * The returned #GList is owned by the library and may be invalidated at any time.
  *
  * Returns: a #GList of all devices in the system or %NULL if there are none or
  * you are not connected to a sound system.
@@ -926,11 +980,14 @@ mate_mixer_context_list_devices (MateMixerContext *context)
  * mate_mixer_context_list_streams:
  * @context: a #MateMixerContext
  *
- * Gets a list of streams. Each list item is a #MateMixerStream representing an
- * input or output of a sound device.
+ * Gets a list of streams. Each item in the list is a #MateMixerStream representing
+ * an input or output stream.
  *
- * The returned #GList is owned by the #MateMixerContext and may be invalidated
- * at any time.
+ * Note that the list will contain streams which belong to devices as well
+ * as streams which do not. If you are only interested in streams of a specific
+ * device, use mate_mixer_device_list_streams().
+ *
+ * The returned #GList is owned by the library and may be invalidated at any time.
  *
  * Returns: a #GList of all streams in the system or %NULL if there are none or
  * you are not connected to a sound system.
@@ -950,6 +1007,12 @@ mate_mixer_context_list_streams (MateMixerContext *context)
  * mate_mixer_context_list_stored_controls:
  * @context: a #MateMixerContext
  *
+ * Gets a list of stored controls. Each item in the list is a #MateMixerStoredControl.
+ *
+ * The returned #GList is owned by the library and may be invalidated at any time.
+ *
+ * Returns: a #GList of stored controls or %NULL if there are none or you are not
+ * connected to a sound system.
  */
 const GList *
 mate_mixer_context_list_stored_controls (MateMixerContext *context)
@@ -966,11 +1029,10 @@ mate_mixer_context_list_stored_controls (MateMixerContext *context)
  * mate_mixer_context_get_default_input_stream:
  * @context: a #MateMixerContext
  *
- * Gets the default input stream. The returned stream is where sound input is
- * directed to by default.
+ * Gets the default input stream. The returned stream is where sound input
+ * most likely comes from by default.
  *
- * Returns: a #MateMixerStream or %NULL if there are no input streams in
- * the system.
+ * Returns: a #MateMixerStream or %NULL if there is no default input stream.
  */
 MateMixerStream *
 mate_mixer_context_get_default_input_stream (MateMixerContext *context)
@@ -988,8 +1050,10 @@ mate_mixer_context_get_default_input_stream (MateMixerContext *context)
  * @context: a #MateMixerContext
  * @stream: a #MateMixerStream to set as the default input stream
  *
- * Changes the default input stream in the system. The @stream must be an
- * input non-client stream.
+ * Changes the default input stream. The given @stream must be an input stream.
+ *
+ * Changing the default input stream may not be supported by the sound system.
+ * Use mate_mixer_context_get_backend_flags() to find out.
  *
  * Returns: %TRUE on success or %FALSE on failure.
  */
@@ -1016,7 +1080,7 @@ mate_mixer_context_set_default_input_stream (MateMixerContext *context,
  * @context: a #MateMixerContext
  *
  * Gets the default output stream. The returned stream is where sound output is
- * directed to by default.
+ * most likely directed to by default.
  *
  * Returns: a #MateMixerStream or %NULL if there are no output streams in
  * the system.
@@ -1037,8 +1101,10 @@ mate_mixer_context_get_default_output_stream (MateMixerContext *context)
  * @context: a #MateMixerContext
  * @stream: a #MateMixerStream to set as the default output stream
  *
- * Changes the default output stream in the system. The @stream must be an
- * output non-client stream.
+ * Changes the default output stream. The given @stream must be an output stream.
+ *
+ * Changing the default output stream may not be supported by the sound system.
+ * Use mate_mixer_context_get_backend_flags() to find out.
  *
  * Returns: %TRUE on success or %FALSE on failure.
  */
@@ -1064,8 +1130,8 @@ mate_mixer_context_set_default_output_stream (MateMixerContext *context,
  * mate_mixer_context_get_backend_name:
  * @context: a #MateMixerContext
  *
- * Gets the name of the currently used backend. This function will not
- * work until connected to a sound system.
+ * Gets the name of the currently used sound system backend. This function will
+ * not work until connected to a sound system.
  *
  * Returns: the name or %NULL on error.
  */
@@ -1084,8 +1150,8 @@ mate_mixer_context_get_backend_name (MateMixerContext *context)
  * mate_mixer_context_get_backend_type:
  * @context: a #MateMixerContext
  *
- * Gets the type of the currently used backend. This function will not
- * work until connected to a sound system.
+ * Gets the type of the currently used sound system backend. This function will
+ * not work until connected to a sound system.
  *
  * Returns: the backend type or %MATE_MIXER_BACKEND_UNKNOWN on error.
  */
@@ -1103,6 +1169,11 @@ mate_mixer_context_get_backend_type (MateMixerContext *context)
 /**
  * mate_mixer_context_get_backend_flags:
  * @context: a #MateMixerContext
+ *
+ * Gets the capability flags of the currently used sound system backend. This
+ * function will not work until connected to a sound system.
+ *
+ * Returns: the capability flags.
  */
 MateMixerBackendFlags
 mate_mixer_context_get_backend_flags (MateMixerContext *context)

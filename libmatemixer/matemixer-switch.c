@@ -336,7 +336,7 @@ mate_mixer_switch_set_active_option (MateMixerSwitch       *swtch,
 }
 
 /**
- * mate_mixer_switch_get_name:
+ * mate_mixer_switch_list_options:
  * @swtch: a #MateMixerSwitch
  */
 const GList *
