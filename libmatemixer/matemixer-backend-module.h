@@ -61,6 +61,7 @@ struct _MateMixerBackendInfo
     gchar                *name;
     guint                 priority;
     GType                 g_type;
+    MateMixerBackendFlags backend_flags;
     MateMixerBackendType  backend_type;
 };
 

@@ -24,6 +24,7 @@
 
 #define BACKEND_NAME      "Null"
 #define BACKEND_PRIORITY  0
+#define BACKEND_FLAGS     MATE_MIXER_BACKEND_NO_FLAGS
 
 static void null_backend_class_init     (NullBackendClass *klass);
 static void null_backend_class_finalize (NullBackendClass *klass);
@@ -43,10 +44,11 @@ backend_module_init (GTypeModule *module)
 {
     null_backend_register_type (module);
 
-    info.name         = BACKEND_NAME;
-    info.priority     = BACKEND_PRIORITY;
-    info.g_type       = NULL_TYPE_BACKEND;
-    info.backend_type = MATE_MIXER_BACKEND_NULL;
+    info.name          = BACKEND_NAME;
+    info.priority      = BACKEND_PRIORITY;
+    info.g_type        = NULL_TYPE_BACKEND;
+    info.backend_flags = BACKEND_FLAGS;
+    info.backend_type  = MATE_MIXER_BACKEND_NULL;
 }
 
 const MateMixerBackendInfo *backend_module_get_info (void)

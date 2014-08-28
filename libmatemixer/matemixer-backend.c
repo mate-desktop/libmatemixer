@@ -356,14 +356,6 @@ mate_mixer_backend_get_state (MateMixerBackend *backend)
     return backend->priv->state;
 }
 
-MateMixerBackendFlags
-mate_mixer_backend_get_flags (MateMixerBackend *backend)
-{
-    g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), MATE_MIXER_BACKEND_NO_FLAGS);
-
-    return backend->priv->flags;
-}
-
 MateMixerDevice *
 mate_mixer_backend_get_device (MateMixerBackend *backend, const gchar *name)
 {
@@ -609,14 +601,6 @@ _mate_mixer_backend_set_state (MateMixerBackend *backend, MateMixerState state)
     backend->priv->state = state;
 
     g_object_notify_by_pspec (G_OBJECT (backend), properties[PROP_STATE]);
-}
-
-void
-_mate_mixer_backend_set_flags (MateMixerBackend *backend, MateMixerBackendFlags flags)
-{
-    g_return_if_fail (MATE_MIXER_IS_BACKEND (backend));
-
-    backend->priv->flags = flags;
 }
 
 void

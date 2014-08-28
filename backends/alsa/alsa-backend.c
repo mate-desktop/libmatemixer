@@ -28,6 +28,7 @@
 
 #define BACKEND_NAME      "ALSA"
 #define BACKEND_PRIORITY  20
+#define BACKEND_FLAGS     MATE_MIXER_BACKEND_NO_FLAGS
 
 #define ALSA_DEVICE_GET_ID(d)                                               \
         (g_object_get_data (G_OBJECT (d), "__matemixer_alsa_device_id"))
@@ -97,10 +98,11 @@ backend_module_init (GTypeModule *module)
 {
     alsa_backend_register_type (module);
 
-    info.name         = BACKEND_NAME;
-    info.priority     = BACKEND_PRIORITY;
-    info.g_type       = ALSA_TYPE_BACKEND;
-    info.backend_type = MATE_MIXER_BACKEND_ALSA;
+    info.name          = BACKEND_NAME;
+    info.priority      = BACKEND_PRIORITY;
+    info.g_type        = ALSA_TYPE_BACKEND;
+    info.backend_flags = BACKEND_FLAGS;
+    info.backend_type  = MATE_MIXER_BACKEND_ALSA;
 }
 
 const MateMixerBackendInfo *backend_module_get_info (void)

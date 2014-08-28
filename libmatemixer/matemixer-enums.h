@@ -79,21 +79,26 @@ typedef enum {
  * @MATE_MIXER_BACKEND_NO_FLAGS:
  *     No flags.
  * @MATE_MIXER_BACKEND_HAS_APPLICATION_CONTROLS:
- *     The backend includes support for application stream controls.
+ *     The sound system backend includes support for application stream controls.
+ * @MATE_MIXER_BACKEND_HAS_STORED_CONTROLS:
+ *     The sound system backend includes support for stored controls. The presence
+ *     of this flag does not guarantee that this feature is enabled in the sound
+ *     system's configuration.
  * @MATE_MIXER_BACKEND_CAN_SET_DEFAULT_INPUT_STREAM:
- *     The backend is able to change the current default input stream using
- *     the mate_mixer_context_set_default_input_stream() function.
+ *     The sound system backend is able to change the current default input stream
+ *     using the mate_mixer_context_set_default_input_stream() function.
  * @MATE_MIXER_BACKEND_CAN_SET_DEFAULT_OUTPUT_STREAM:
- *     The backend is able to change the current default output stream using
- *     the mate_mixer_context_set_default_output_stream() function.
+ *     The sound system backend is able to change the current default output stream
+ *     using the mate_mixer_context_set_default_output_stream() function.
  *
  * Flags describing capabilities of a sound system.
  */
 typedef enum { /*< flags >*/
-    MATE_MIXER_BACKEND_NO_FLAGS                         = 0,
-    MATE_MIXER_BACKEND_HAS_APPLICATION_CONTROLS         = 1 << 0,
-    MATE_MIXER_BACKEND_CAN_SET_DEFAULT_INPUT_STREAM     = 1 << 1,
-    MATE_MIXER_BACKEND_CAN_SET_DEFAULT_OUTPUT_STREAM    = 1 << 2
+    MATE_MIXER_BACKEND_NO_FLAGS                      = 0,
+    MATE_MIXER_BACKEND_HAS_APPLICATION_CONTROLS      = 1 << 0,
+    MATE_MIXER_BACKEND_HAS_STORED_CONTROLS           = 1 << 1,
+    MATE_MIXER_BACKEND_CAN_SET_DEFAULT_INPUT_STREAM  = 1 << 2,
+    MATE_MIXER_BACKEND_CAN_SET_DEFAULT_OUTPUT_STREAM = 1 << 3
 } MateMixerBackendFlags;
 
 /**

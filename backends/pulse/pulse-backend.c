@@ -38,6 +38,10 @@
 
 #define BACKEND_NAME      "PulseAudio"
 #define BACKEND_PRIORITY  100
+#define BACKEND_FLAGS     (MATE_MIXER_BACKEND_HAS_APPLICATION_CONTROLS |        \
+                           MATE_MIXER_BACKEND_HAS_STORED_CONTROLS |             \
+                           MATE_MIXER_BACKEND_CAN_SET_DEFAULT_INPUT_STREAM |    \
+                           MATE_MIXER_BACKEND_CAN_SET_DEFAULT_OUTPUT_STREAM)
 
 struct _PulseBackendPrivate
 {
@@ -209,10 +213,11 @@ backend_module_init (GTypeModule *module)
 {
     pulse_backend_register_type (module);
 
-    info.name         = BACKEND_NAME;
-    info.priority     = BACKEND_PRIORITY;
-    info.g_type       = PULSE_TYPE_BACKEND;
-    info.backend_type = MATE_MIXER_BACKEND_PULSEAUDIO;
+    info.name          = BACKEND_NAME;
+    info.priority      = BACKEND_PRIORITY;
+    info.g_type        = PULSE_TYPE_BACKEND;
+    info.backend_flags = BACKEND_FLAGS;
+    info.backend_type  = MATE_MIXER_BACKEND_PULSEAUDIO;
 }
 
 const MateMixerBackendInfo *backend_module_get_info (void)
@@ -431,11 +436,6 @@ pulse_backend_open (MateMixerBackend *backend)
         PULSE_CHANGE_STATE (pulse, MATE_MIXER_STATE_FAILED);
         return FALSE;
     }
-
-    _mate_mixer_backend_set_flags (backend,
-                                   MATE_MIXER_BACKEND_HAS_APPLICATION_CONTROLS |
-                                   MATE_MIXER_BACKEND_CAN_SET_DEFAULT_INPUT_STREAM |
-                                   MATE_MIXER_BACKEND_CAN_SET_DEFAULT_OUTPUT_STREAM);
 
     pulse->priv->connection = connection;
     return TRUE;

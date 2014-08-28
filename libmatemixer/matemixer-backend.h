@@ -99,7 +99,6 @@ gboolean                mate_mixer_backend_open                      (MateMixerB
 void                    mate_mixer_backend_close                     (MateMixerBackend     *backend);
 
 MateMixerState          mate_mixer_backend_get_state                 (MateMixerBackend     *backend);
-MateMixerBackendFlags   mate_mixer_backend_get_flags                 (MateMixerBackend     *backend);
 
 MateMixerDevice *       mate_mixer_backend_get_device                (MateMixerBackend     *backend,
                                                                       const gchar          *name);
@@ -123,8 +122,6 @@ gboolean                mate_mixer_backend_set_default_output_stream (MateMixerB
 /* Protected functions */
 void                   _mate_mixer_backend_set_state                 (MateMixerBackend     *backend,
                                                                       MateMixerState        state);
-void                   _mate_mixer_backend_set_flags                 (MateMixerBackend     *backend,
-                                                                      MateMixerBackendFlags flags);
 
 void                   _mate_mixer_backend_set_default_input_stream  (MateMixerBackend     *backend,
                                                                       MateMixerStream      *stream);

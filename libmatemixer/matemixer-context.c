@@ -1180,7 +1180,10 @@ mate_mixer_context_get_backend_flags (MateMixerContext *context)
 {
     g_return_val_if_fail (MATE_MIXER_IS_CONTEXT (context), MATE_MIXER_BACKEND_NO_FLAGS);
 
-    return mate_mixer_backend_get_flags (context->priv->backend);
+    if (context->priv->backend_chosen == FALSE)
+        return MATE_MIXER_BACKEND_NO_FLAGS;
+
+    return mate_mixer_backend_module_get_info (context->priv->module)->backend_flags;
 }
 
 static void
