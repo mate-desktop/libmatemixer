@@ -199,6 +199,8 @@ _mate_mixer_app_info_copy (MateMixerAppInfo *info)
 {
     MateMixerAppInfo *info2;
 
+    g_return_val_if_fail (info != NULL, NULL);
+
     info2 = _mate_mixer_app_info_new ();
     info2->name     = g_strdup (info->name);
     info2->id       = g_strdup (info->id);
@@ -217,6 +219,8 @@ _mate_mixer_app_info_copy (MateMixerAppInfo *info)
 void
 _mate_mixer_app_info_free (MateMixerAppInfo *info)
 {
+    g_return_if_fail (info != NULL);
+
     g_free (info->name);
     g_free (info->id);
     g_free (info->version);

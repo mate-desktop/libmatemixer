@@ -150,7 +150,7 @@ mate_mixer_device_class_init (MateMixerDeviceClass *klass)
     signals[STREAM_ADDED] =
         g_signal_new ("stream-added",
                       G_TYPE_FROM_CLASS (object_class),
-                      G_SIGNAL_RUN_LAST,
+                      G_SIGNAL_RUN_FIRST,
                       G_STRUCT_OFFSET (MateMixerDeviceClass, stream_added),
                       NULL,
                       NULL,
@@ -174,7 +174,7 @@ mate_mixer_device_class_init (MateMixerDeviceClass *klass)
     signals[STREAM_REMOVED] =
         g_signal_new ("stream-removed",
                       G_TYPE_FROM_CLASS (object_class),
-                      G_SIGNAL_RUN_LAST,
+                      G_SIGNAL_RUN_FIRST,
                       G_STRUCT_OFFSET (MateMixerDeviceClass, stream_removed),
                       NULL,
                       NULL,
@@ -193,7 +193,7 @@ mate_mixer_device_class_init (MateMixerDeviceClass *klass)
     signals[SWITCH_ADDED] =
         g_signal_new ("switch-added",
                       G_TYPE_FROM_CLASS (object_class),
-                      G_SIGNAL_RUN_LAST,
+                      G_SIGNAL_RUN_FIRST,
                       G_STRUCT_OFFSET (MateMixerDeviceClass, switch_added),
                       NULL,
                       NULL,
@@ -217,7 +217,7 @@ mate_mixer_device_class_init (MateMixerDeviceClass *klass)
     signals[SWITCH_REMOVED] =
         g_signal_new ("switch-removed",
                       G_TYPE_FROM_CLASS (object_class),
-                      G_SIGNAL_RUN_LAST,
+                      G_SIGNAL_RUN_FIRST,
                       G_STRUCT_OFFSET (MateMixerDeviceClass, switch_removed),
                       NULL,
                       NULL,

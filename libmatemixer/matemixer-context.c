@@ -263,7 +263,7 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
     signals[DEVICE_ADDED] =
         g_signal_new ("device-added",
                       G_TYPE_FROM_CLASS (object_class),
-                      G_SIGNAL_RUN_LAST,
+                      G_SIGNAL_RUN_FIRST,
                       G_STRUCT_OFFSET (MateMixerContextClass, device_added),
                       NULL,
                       NULL,
@@ -287,7 +287,7 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
     signals[DEVICE_REMOVED] =
         g_signal_new ("device-removed",
                       G_TYPE_FROM_CLASS (object_class),
-                      G_SIGNAL_RUN_LAST,
+                      G_SIGNAL_RUN_FIRST,
                       G_STRUCT_OFFSET (MateMixerContextClass, device_removed),
                       NULL,
                       NULL,
@@ -313,7 +313,7 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
     signals[STREAM_ADDED] =
         g_signal_new ("stream-added",
                       G_TYPE_FROM_CLASS (object_class),
-                      G_SIGNAL_RUN_LAST,
+                      G_SIGNAL_RUN_FIRST,
                       G_STRUCT_OFFSET (MateMixerContextClass, stream_added),
                       NULL,
                       NULL,
@@ -341,7 +341,7 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
     signals[STREAM_REMOVED] =
         g_signal_new ("stream-removed",
                       G_TYPE_FROM_CLASS (object_class),
-                      G_SIGNAL_RUN_LAST,
+                      G_SIGNAL_RUN_FIRST,
                       G_STRUCT_OFFSET (MateMixerContextClass, stream_removed),
                       NULL,
                       NULL,
@@ -362,7 +362,7 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
     signals[STORED_CONTROL_ADDED] =
         g_signal_new ("stored-control-added",
                       G_TYPE_FROM_CLASS (object_class),
-                      G_SIGNAL_RUN_LAST,
+                      G_SIGNAL_RUN_FIRST,
                       G_STRUCT_OFFSET (MateMixerContextClass, stored_control_added),
                       NULL,
                       NULL,
@@ -386,7 +386,7 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
     signals[STORED_CONTROL_REMOVED] =
         g_signal_new ("stored-control-removed",
                       G_TYPE_FROM_CLASS (object_class),
-                      G_SIGNAL_RUN_LAST,
+                      G_SIGNAL_RUN_FIRST,
                       G_STRUCT_OFFSET (MateMixerContextClass, stored_control_removed),
                       NULL,
                       NULL,
