@@ -27,6 +27,10 @@
  * SECTION:matemixer-device
  * @short_description: Hardware or software device in the sound system
  * @include: libmatemixer/matemixer.h
+ *
+ * A #MateMixerDevice represents a sound device, most typically a sound card.
+ *
+ * Each device may contain an arbitrary number of streams.
  */
 
 struct _MateMixerDevicePrivate
@@ -95,7 +99,6 @@ mate_mixer_device_class_init (MateMixerDeviceClass *klass)
      *
      * The name of the device. The name serves as a unique identifier and
      * in most cases it is not in a user-readable form.
-     *
      */
     properties[PROP_NAME] =
         g_param_spec_string ("name",
@@ -311,8 +314,10 @@ mate_mixer_device_finalize (GObject *object)
  * mate_mixer_device_get_name:
  * @device: a #MateMixerDevice
  *
- * Gets the name of the device. The name serves as a unique identifier and
- * in most cases it is not in a user-readable form.
+ * Gets the name of the device.
+ *
+ * The name serves as a unique identifier and in most cases it is not in a
+ * user-readable form.
  *
  * The returned name is guaranteed to be unique across all the known devices
  * and may be used to get the #MateMixerDevice using
@@ -332,8 +337,10 @@ mate_mixer_device_get_name (MateMixerDevice *device)
  * mate_mixer_device_get_label:
  * @device: a #MateMixerDevice
  *
- * Gets the label of the device. This is a potentially translated string
- * that should be presented to users in the user interface.
+ * Gets the label of the device.
+ *
+ * This is a potentially translated string that should be presented to users
+ * in the user interface.
  *
  * Returns: the label of the device.
  */
@@ -351,7 +358,7 @@ mate_mixer_device_get_label (MateMixerDevice *device)
  *
  * Gets the XDG icon name of the device.
  *
- * Returns: the icon name.
+ * Returns: the icon name or %NULL.
  */
 const gchar *
 mate_mixer_device_get_icon (MateMixerDevice *device)

@@ -69,6 +69,12 @@ mate_mixer_switch_option_class_init (MateMixerSwitchOptionClass *klass)
     object_class->get_property = mate_mixer_switch_option_get_property;
     object_class->set_property = mate_mixer_switch_option_set_property;
 
+    /**
+     * MateMixerSwitchOption:name:
+     *
+     * The name of the switch option. The name serves as a unique identifier
+     * and in most cases it is not in a user-readable form.
+     */
     properties[PROP_NAME] =
         g_param_spec_string ("name",
                              "Name",
@@ -78,6 +84,12 @@ mate_mixer_switch_option_class_init (MateMixerSwitchOptionClass *klass)
                              G_PARAM_CONSTRUCT_ONLY |
                              G_PARAM_STATIC_STRINGS);
 
+    /**
+     * MateMixerSwitchOption:label:
+     *
+     * The label of the switch option. This is a potentially translated string
+     * that should be presented to users in the user interface.
+     */
     properties[PROP_LABEL] =
         g_param_spec_string ("label",
                              "Label",
@@ -87,6 +99,11 @@ mate_mixer_switch_option_class_init (MateMixerSwitchOptionClass *klass)
                              G_PARAM_CONSTRUCT_ONLY |
                              G_PARAM_STATIC_STRINGS);
 
+    /**
+     * MateMixerSwitchOption:icon:
+     *
+     * The XDG icon name of the switch option.
+     */
     properties[PROP_ICON] =
         g_param_spec_string ("icon",
                              "Icon",
@@ -183,6 +200,15 @@ mate_mixer_switch_option_finalize (GObject *object)
 /**
  * mate_mixer_switch_option_get_name:
  * @option: a #MateMixerSwitchOption
+ *
+ * Gets the name of the switch option. The name serves as a unique identifier
+ * and in most cases it is not in a user-readable form.
+ *
+ * The returned name is guaranteed to be unique across all the switch options
+ * of a particular #MateMixerSwitch and may be used to get the #MateMixerSwitchOption
+ * using mate_mixer_switch_get_option().
+ *
+ * Returns: the name of the switch option.
  */
 const gchar *
 mate_mixer_switch_option_get_name (MateMixerSwitchOption *option)
@@ -195,6 +221,11 @@ mate_mixer_switch_option_get_name (MateMixerSwitchOption *option)
 /**
  * mate_mixer_switch_option_get_label:
  * @option: a #MateMixerSwitchOption
+ *
+ * Gets the label of the switch option. This is a potentially translated string
+ * that should be presented to users in the user interface.
+ *
+ * Returns: the label of the switch option.
  */
 const gchar *
 mate_mixer_switch_option_get_label (MateMixerSwitchOption *option)
@@ -207,6 +238,10 @@ mate_mixer_switch_option_get_label (MateMixerSwitchOption *option)
 /**
  * mate_mixer_switch_option_get_icon:
  * @option: a #MateMixerSwitchOption
+ *
+ * Gets the XDG icon name of the switch option.
+ *
+ * Returns: the icon name or %NULL.
  */
 const gchar *
 mate_mixer_switch_option_get_icon (MateMixerSwitchOption *option)

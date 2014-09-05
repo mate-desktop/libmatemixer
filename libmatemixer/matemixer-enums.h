@@ -30,7 +30,7 @@
  * @MATE_MIXER_STATE_CONNECTING:
  *     Connection is in progress.
  * @MATE_MIXER_STATE_READY:
- *     Connected successfully.
+ *     Connected.
  * @MATE_MIXER_STATE_FAILED:
  *     Connection has failed.
  * @MATE_MIXER_STATE_UNKNOWN:
@@ -49,7 +49,7 @@ typedef enum {
 /**
  * MateMixerBackendType:
  * @MATE_MIXER_BACKEND_UNKNOWN:
- *     Unknown or undefined backend type.
+ *     Unknown or undefined sound system backend type.
  * @MATE_MIXER_BACKEND_PULSEAUDIO:
  *     PulseAudio sound system backend. It has the highest priority and
  *     will be the first one to try when you call mate_mixer_context_open(),
@@ -79,11 +79,13 @@ typedef enum {
  * @MATE_MIXER_BACKEND_NO_FLAGS:
  *     No flags.
  * @MATE_MIXER_BACKEND_HAS_APPLICATION_CONTROLS:
- *     The sound system backend includes support for application stream controls.
+ *     The sound system backend includes support for application stream controls,
+ *     allowing per-application volume control.
  * @MATE_MIXER_BACKEND_HAS_STORED_CONTROLS:
- *     The sound system backend includes support for stored controls. The presence
- *     of this flag does not guarantee that this feature is enabled in the sound
- *     system's configuration.
+ *     The sound system backend includes support for stored controls. See the
+ *     #MateMixerStoredControl description for more information.
+ *     The presence of this flag does not guarantee that this feature is enabled
+ *     in the sound system's configuration.
  * @MATE_MIXER_BACKEND_CAN_SET_DEFAULT_INPUT_STREAM:
  *     The sound system backend is able to change the current default input stream
  *     using the mate_mixer_context_set_default_input_stream() function.
@@ -214,8 +216,11 @@ typedef enum {
  * @MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_UNKNOWN:
  *     Unknown media role.
  * @MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_VIDEO:
+ *     Video role.
  * @MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_MUSIC:
+ *     Music role.
  * @MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_GAME:
+ *     Game role.
  * @MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_EVENT:
  *     Event sounds.
  * @MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_PHONE:
@@ -227,13 +232,16 @@ typedef enum {
  * @MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_FILTER:
  *
  * Constants describing a media role of a control. These constants are mapped
- * to PulseAudio media role property and therefore only available when using the
- * PulseAudio sound system.
+ * to PulseAudio media role property and therefore are only available when using
+ * the PulseAudio sound system.
  *
  * Media roles are commonly set by applications to indicate what kind of sound
  * input/output they provide and may be the defining property of stored controls
  * (for example an event role stored control can be used to provide a volume
  * slider for event sounds).
+ *
+ * See the PulseAudio documentation for more detailed information about media
+ * roles.
  */
 typedef enum {
     MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_UNKNOWN,
@@ -302,18 +310,27 @@ typedef enum {
  * @MATE_MIXER_CHANNEL_BACK_CENTER:
  *     Back (rear) center channel.
  * @MATE_MIXER_CHANNEL_FRONT_LEFT_CENTER:
+ *     Front left of center channel.
  * @MATE_MIXER_CHANNEL_FRONT_RIGHT_CENTER:
+ *     Front right of center channel.
  * @MATE_MIXER_CHANNEL_SIDE_LEFT:
  *     Side left channel.
  * @MATE_MIXER_CHANNEL_SIDE_RIGHT:
  *     Side right channel.
  * @MATE_MIXER_CHANNEL_TOP_FRONT_LEFT:
+ *     Top front left channel.
  * @MATE_MIXER_CHANNEL_TOP_FRONT_RIGHT:
+ *     Top front right channel.
  * @MATE_MIXER_CHANNEL_TOP_FRONT_CENTER:
+ *     Top front center channel.
  * @MATE_MIXER_CHANNEL_TOP_CENTER:
+ *     Top center channel.
  * @MATE_MIXER_CHANNEL_TOP_BACK_LEFT:
+ *     Top back (rear) left channel.
  * @MATE_MIXER_CHANNEL_TOP_BACK_RIGHT:
+ *     Top back (rear) right channel.
  * @MATE_MIXER_CHANNEL_TOP_BACK_CENTER:
+ *     Top back (rear) center channel.
  */
 typedef enum {
     MATE_MIXER_CHANNEL_UNKNOWN = 0,

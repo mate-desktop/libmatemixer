@@ -30,6 +30,15 @@
  * @short_description: Library initialization and support functions
  * @include: libmatemixer/matemixer.h
  * @see_also: #MateMixerContext
+ *
+ * The libmatemixer library must be initialized before it is used by an
+ * application. The initialization function loads dynamic modules which provide
+ * access to sound systems (also called backends) and it only succeeds if there
+ * is at least one usable module present on the target system.
+ *
+ * To connect to a sound system and access the mixer functionality after the
+ * library is initialized, create a #MateMixerContext using the
+ * mate_mixer_context_new() function.
  */
 
 static void       load_modules     (void);
@@ -100,14 +109,28 @@ mate_mixer_is_initialized (void)
     return initialized;
 }
 
-/* Internal: return a list of loaded backend modules */
+/**
+ * _mate_mixer_list_modules:
+ *
+ * Gets a list of loaded backend modules.
+ *
+ * Returns: a #GList.
+ */
 const GList *
 _mate_mixer_list_modules (void)
 {
     return (const GList *) modules;
 }
 
-/* Internal: create a channel mask using the given list of channel positions */
+/**
+ * _mate_mixer_create_channel_mask:
+ * @positions: an array of channel positions
+ * @n: number of channel positions in the array
+ *
+ * Creates a channel mask using the given list of channel positions.
+ *
+ * Returns: a channel mask.
+ */
 guint32
 _mate_mixer_create_channel_mask (MateMixerChannelPosition *positions, guint n)
 {
@@ -164,7 +187,8 @@ load_modules (void)
     loaded = TRUE;
 }
 
-/* Backend modules sorting function, higher priority number means higher priority */
+/* Backend modules sorting function, higher priority number means higher priority
+ * of the backend module */
 static gint
 compare_modules (gconstpointer a, gconstpointer b)
 {

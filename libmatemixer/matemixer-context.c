@@ -32,6 +32,43 @@
  * SECTION:matemixer-context
  * @short_description:The main class for interfacing with the library
  * @include: libmatemixer/matemixer.h
+ *
+ * After the library is initialized, a context should be created to gain
+ * access to a sound system.
+ *
+ * To create a new context, use the mate_mixer_context_new() function.
+ *
+ * The mate_mixer_context_set_backend_type() function can be used to associate
+ * the context with a particular type of sound system. Using this function is
+ * not necessary, by default the context will select a working sound system
+ * backend automatically.
+ *
+ * To connect to a sound system, use mate_mixer_context_open().
+ *
+ * When the connection is established, it is possible to query a list of sound
+ * devices with mate_mixer_context_list_devices() and streams with
+ * mate_mixer_context_list_streams().
+ *
+ * A device represents a hardware or software sound device in the system,
+ * typically a sound card.
+ *
+ * A stream is an input or output channel that may exist either as a part of a
+ * sound device, or independently. Streams essentially serve as containers for
+ * volume controls and switches, for example a sound card with microphone and
+ * line-in connectors may have an input stream containing volume controls for
+ * each of these connectors and possibly a switch allowing to change the active
+ * connector.
+ *
+ * Streams may also exist independently as the sound system may for example
+ * allow audio streaming over a network.
+ *
+ * For a more thorough description of devices and streams, see #MateMixerDevice
+ * and #MateMixerStream.
+ *
+ * Devices and streams (as almost all other elements in the library) may appear
+ * and disappear at any time, for example when external sound cards are plugged
+ * and unplugged. The application should connect to the appropriate signals to
+ * handle these events.
  */
 
 struct _MateMixerContextPrivate
@@ -545,11 +582,15 @@ mate_mixer_context_new (void)
  * be used to alter this behavior and make the @context use the selected sound
  * system.
  *
+ * Setting the sound system backend only succeeds if the selected backend module
+ * is available in the target system.
+ *
  * This function must be used before opening a connection to a sound system with
  * mate_mixer_context_open(), otherwise it will fail.
  *
  * Returns: %TRUE on success or %FALSE on failure.
  */
+// XXX handle UNKNOWN
 gboolean
 mate_mixer_context_set_backend_type (MateMixerContext     *context,
                                      MateMixerBackendType  backend_type)
@@ -747,9 +788,9 @@ mate_mixer_context_set_server_address (MateMixerContext *context, const gchar *a
  * If this function returns %TRUE, the connection has either been established, or
  * it hasn't been established yet and the result will be determined asynchronously.
  * You can differentiate between these two possibilities by checking the connection
- * #MateMixerContext:state.
+ * #MateMixerContext:state after this function returns.
  *
- * The %MATE_MIXER_STATE_READY state indicates, that the connection has been
+ * The %MATE_MIXER_STATE_READY state indicates that the connection has been
  * established successfully.
  *
  * The %MATE_MIXER_STATE_CONNECTING state is reached when the connection has not been
@@ -1130,8 +1171,9 @@ mate_mixer_context_set_default_output_stream (MateMixerContext *context,
  * mate_mixer_context_get_backend_name:
  * @context: a #MateMixerContext
  *
- * Gets the name of the currently used sound system backend. This function will
- * not work until connected to a sound system.
+ * Gets the name of the currently used sound system backend.
+ *
+ * This function will not work until the @context is connected to a sound system.
  *
  * Returns: the name or %NULL on error.
  */
@@ -1150,8 +1192,9 @@ mate_mixer_context_get_backend_name (MateMixerContext *context)
  * mate_mixer_context_get_backend_type:
  * @context: a #MateMixerContext
  *
- * Gets the type of the currently used sound system backend. This function will
- * not work until connected to a sound system.
+ * Gets the type of the currently used sound system backend.
+ *
+ * This function will not work until the @context is connected to a sound system.
  *
  * Returns: the backend type or %MATE_MIXER_BACKEND_UNKNOWN on error.
  */
@@ -1170,8 +1213,9 @@ mate_mixer_context_get_backend_type (MateMixerContext *context)
  * mate_mixer_context_get_backend_flags:
  * @context: a #MateMixerContext
  *
- * Gets the capability flags of the currently used sound system backend. This
- * function will not work until connected to a sound system.
+ * Gets the capability flags of the currently used sound system backend.
+ *
+ * This function will not work until the @context is connected to a sound system.
  *
  * Returns: the capability flags.
  */

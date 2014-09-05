@@ -24,6 +24,7 @@
 
 /**
  * SECTION:matemixer-toggle
+ * @short_description: On/Off switch
  * @include: libmatemixer/matemixer.h
  */
 
@@ -80,6 +81,12 @@ mate_mixer_toggle_class_init (MateMixerToggleClass *klass)
     switch_class->get_option   = mate_mixer_toggle_get_option;
     switch_class->list_options = mate_mixer_toggle_list_options;
 
+    /**
+     * MateMixerToggle:state:
+     *
+     * The current state of the toggle. %TRUE corresponds to the 'on' state and
+     * %FALSE to the 'off' state.
+     */
     properties[PROP_STATE] =
         g_param_spec_boolean ("state",
                               "State",
@@ -88,19 +95,29 @@ mate_mixer_toggle_class_init (MateMixerToggleClass *klass)
                               G_PARAM_READABLE |
                               G_PARAM_STATIC_STRINGS);
 
+    /**
+     * MateMixerToggle:on-state-option:
+     *
+     * The #MateMixerSwitchOption representing the 'on' value of the toggle.
+     */
     properties[PROP_ON_STATE_OPTION] =
         g_param_spec_object ("on-state-option",
-                             "State option for on",
-                             "Option corresponding to the 'on' value of the toggle",
+                             "On state option",
+                             "On state option",
                              MATE_MIXER_TYPE_SWITCH_OPTION,
                              G_PARAM_READWRITE |
                              G_PARAM_CONSTRUCT_ONLY |
                              G_PARAM_STATIC_STRINGS);
 
+    /**
+     * MateMixerToggle:off-state-option:
+     *
+     * The #MateMixerSwitchOption representing the 'off' value of the toggle.
+     */
     properties[PROP_OFF_STATE_OPTION] =
         g_param_spec_object ("off-state-option",
-                             "State option for off",
-                             "Option corresponding to the 'off' value of the toggle",
+                             "Off state option",
+                             "Off state option",
                              MATE_MIXER_TYPE_SWITCH_OPTION,
                              G_PARAM_READWRITE |
                              G_PARAM_CONSTRUCT_ONLY |
@@ -193,6 +210,11 @@ mate_mixer_toggle_dispose (GObject *object)
 /**
  * mate_mixer_toggle_get_state:
  * @toggle: a #MateMixerToggle
+ *
+ * Gets the current state of the toggle. %TRUE corresponds to the 'on' state and
+ * %FALSE to the 'off' state.
+ *
+ * Returns: %TRUE or %FALSE.
  */
 gboolean
 mate_mixer_toggle_get_state (MateMixerToggle *toggle)
@@ -214,7 +236,11 @@ mate_mixer_toggle_get_state (MateMixerToggle *toggle)
 /**
  * mate_mixer_toggle_get_state_option:
  * @toggle: a #MateMixerToggle
- * @state: the state to retrieve
+ * @state: the state to get the #MateMixerSwitchOption for
+ *
+ * Gets the #MateMixerSwitchOption representing the selected state.
+ *
+ * Returns: a #MateMixerSwitchOption.
  */
 MateMixerSwitchOption *
 mate_mixer_toggle_get_state_option (MateMixerToggle *toggle, gboolean state)
@@ -231,6 +257,13 @@ mate_mixer_toggle_get_state_option (MateMixerToggle *toggle, gboolean state)
  * mate_mixer_toggle_set_state:
  * @toggle: a #MateMixerToggle
  * @state: the state to set
+ *
+ * Sets the @toggle to the selected state.
+ *
+ * This function is equivalent to using mate_mixer_switch_set_active_option()
+ * with a #MateMixerSwitchOption representing the selected state.
+ *
+ * Returns: %TRUE on success or %FALSE on failure.
  */
 gboolean
 mate_mixer_toggle_set_state (MateMixerToggle *toggle, gboolean state)
