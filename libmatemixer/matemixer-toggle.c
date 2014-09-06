@@ -92,7 +92,7 @@ mate_mixer_toggle_class_init (MateMixerToggleClass *klass)
                               "State",
                               "Current state of the toggle",
                               FALSE,
-                              G_PARAM_READABLE |
+                              G_PARAM_READWRITE |
                               G_PARAM_STATIC_STRINGS);
 
     /**
@@ -166,6 +166,9 @@ mate_mixer_toggle_set_property (GObject      *object,
     toggle = MATE_MIXER_TOGGLE (object);
 
     switch (param_id) {
+    case PROP_STATE:
+        mate_mixer_toggle_set_state (toggle, g_value_get_boolean (value));
+        break;
     case PROP_ON_STATE_OPTION:
         /* Construct-only object */
         toggle->priv->on = g_value_dup_object (value);

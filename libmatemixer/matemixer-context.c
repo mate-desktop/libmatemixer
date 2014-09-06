@@ -15,7 +15,6 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <string.h>
 #include <glib.h>
 #include <glib-object.h>
 
@@ -582,18 +581,20 @@ mate_mixer_context_new (void)
  * be used to alter this behavior and make the @context use the selected sound
  * system.
  *
- * Setting the sound system backend only succeeds if the selected backend module
- * is available in the target system.
+ * Setting the backend type only succeeds if the selected backend module is
+ * available in the target system.
+ *
+ * If you have used this function before and want restore the default automatic
+ * backend type discovery, set the backend type to %MATE_MIXER_BACKEND_UNKNOWN.
  *
  * This function must be used before opening a connection to a sound system with
  * mate_mixer_context_open(), otherwise it will fail.
  *
  * Returns: %TRUE on success or %FALSE on failure.
  */
-// XXX handle UNKNOWN
 gboolean
-mate_mixer_context_set_backend_type (MateMixerContext     *context,
-                                     MateMixerBackendType  backend_type)
+mate_mixer_context_set_backend_type (MateMixerContext    *context,
+                                     MateMixerBackendType backend_type)
 {
     MateMixerBackendModule     *module;
     const GList                *modules;
@@ -605,8 +606,13 @@ mate_mixer_context_set_backend_type (MateMixerContext     *context,
         context->priv->state == MATE_MIXER_STATE_READY)
         return FALSE;
 
-    modules = _mate_mixer_list_modules ();
+    /* Allow setting the backend to unknown to restore the auto-detection */
+    if (backend_type == MATE_MIXER_BACKEND_UNKNOWN) {
+        context->priv->backend_type = backend_type;
+        return TRUE;
+    }
 
+    modules = _mate_mixer_list_modules ();
     while (modules != NULL) {
         module = MATE_MIXER_BACKEND_MODULE (modules->data);
         info   = mate_mixer_backend_module_get_info (module);
@@ -644,9 +650,7 @@ mate_mixer_context_set_app_name (MateMixerContext *context, const gchar *app_nam
 
     _mate_mixer_app_info_set_name (context->priv->app_info, app_name);
 
-    g_object_notify_by_pspec (G_OBJECT (context),
-                              properties[PROP_APP_NAME]);
-
+    g_object_notify_by_pspec (G_OBJECT (context), properties[PROP_APP_NAME]);
     return TRUE;
 }
 
@@ -674,9 +678,7 @@ mate_mixer_context_set_app_id (MateMixerContext *context, const gchar *app_id)
 
     _mate_mixer_app_info_set_id (context->priv->app_info, app_id);
 
-    g_object_notify_by_pspec (G_OBJECT (context),
-                              properties[PROP_APP_ID]);
-
+    g_object_notify_by_pspec (G_OBJECT (context), properties[PROP_APP_ID]);
     return TRUE;
 }
 
@@ -704,9 +706,7 @@ mate_mixer_context_set_app_version (MateMixerContext *context, const gchar *app_
 
     _mate_mixer_app_info_set_version (context->priv->app_info, app_version);
 
-    g_object_notify_by_pspec (G_OBJECT (context),
-                              properties[PROP_APP_VERSION]);
-
+    g_object_notify_by_pspec (G_OBJECT (context), properties[PROP_APP_VERSION]);
     return TRUE;
 }
 
@@ -734,9 +734,7 @@ mate_mixer_context_set_app_icon (MateMixerContext *context, const gchar *app_ico
 
     _mate_mixer_app_info_set_icon (context->priv->app_info, app_icon);
 
-    g_object_notify_by_pspec (G_OBJECT (context),
-                              properties[PROP_APP_ICON]);
-
+    g_object_notify_by_pspec (G_OBJECT (context), properties[PROP_APP_ICON]);
     return TRUE;
 }
 
@@ -767,9 +765,7 @@ mate_mixer_context_set_server_address (MateMixerContext *context, const gchar *a
 
     context->priv->server_address = g_strdup (address);
 
-    g_object_notify_by_pspec (G_OBJECT (context),
-                              properties[PROP_SERVER_ADDRESS]);
-
+    g_object_notify_by_pspec (G_OBJECT (context), properties[PROP_SERVER_ADDRESS]);
     return TRUE;
 }
 
@@ -820,7 +816,7 @@ mate_mixer_context_open (MateMixerContext *context)
         return FALSE;
 
     /* We are going to choose the first backend to try. It will be either the one
-     * specified by the application or the one with the highest priority */
+     * selected by the application or the one with the highest priority */
     modules = _mate_mixer_list_modules ();
 
     if (context->priv->backend_type != MATE_MIXER_BACKEND_UNKNOWN) {
@@ -877,8 +873,8 @@ mate_mixer_context_open (MateMixerContext *context)
 
     state = mate_mixer_backend_get_state (context->priv->backend);
 
-    if (G_UNLIKELY (state != MATE_MIXER_STATE_READY &&
-                    state != MATE_MIXER_STATE_CONNECTING)) {
+    if G_UNLIKELY (state != MATE_MIXER_STATE_READY &&
+                   state != MATE_MIXER_STATE_CONNECTING) {
         /* This would be a backend bug */
         g_warn_if_reached ();
 
@@ -1108,11 +1104,6 @@ mate_mixer_context_set_default_input_stream (MateMixerContext *context,
     if (context->priv->state != MATE_MIXER_STATE_READY)
         return FALSE;
 
-    if (mate_mixer_stream_get_direction (stream) != MATE_MIXER_DIRECTION_INPUT) {
-        g_warning ("Unable to set non-input stream as the default input stream");
-        return FALSE;
-    }
-
     return mate_mixer_backend_set_default_input_stream (context->priv->backend, stream);
 }
 
@@ -1158,11 +1149,6 @@ mate_mixer_context_set_default_output_stream (MateMixerContext *context,
 
     if (context->priv->state != MATE_MIXER_STATE_READY)
         return FALSE;
-
-    if (mate_mixer_stream_get_direction (stream) != MATE_MIXER_DIRECTION_OUTPUT) {
-        g_warning ("Unable to set non-output stream as the default output stream");
-        return FALSE;
-    }
 
     return mate_mixer_backend_set_default_output_stream (context->priv->backend, stream);
 }
@@ -1398,8 +1384,8 @@ try_next_backend (MateMixerContext *context)
 
     state = mate_mixer_backend_get_state (context->priv->backend);
 
-    if (G_UNLIKELY (state != MATE_MIXER_STATE_READY &&
-                    state != MATE_MIXER_STATE_CONNECTING)) {
+    if G_UNLIKELY (state != MATE_MIXER_STATE_READY &&
+                   state != MATE_MIXER_STATE_CONNECTING) {
         /* This would be a backend bug */
         g_warn_if_reached ();
 

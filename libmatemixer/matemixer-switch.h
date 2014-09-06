@@ -26,17 +26,17 @@
 
 G_BEGIN_DECLS
 
-#define MATE_MIXER_TYPE_SWITCH           \
+#define MATE_MIXER_TYPE_SWITCH                  \
         (mate_mixer_switch_get_type ())
-#define MATE_MIXER_SWITCH(o)             \
+#define MATE_MIXER_SWITCH(o)                    \
         (G_TYPE_CHECK_INSTANCE_CAST ((o), MATE_MIXER_TYPE_SWITCH, MateMixerSwitch))
-#define MATE_MIXER_IS_SWITCH(o)          \
+#define MATE_MIXER_IS_SWITCH(o)                 \
         (G_TYPE_CHECK_INSTANCE_TYPE ((o), MATE_MIXER_TYPE_SWITCH))
-#define MATE_MIXER_SWITCH_CLASS(k)       \
+#define MATE_MIXER_SWITCH_CLASS(k)              \
         (G_TYPE_CHECK_CLASS_CAST ((k), MATE_MIXER_TYPE_SWITCH, MateMixerSwitchClass))
-#define MATE_MIXER_IS_SWITCH_CLASS(k)    \
+#define MATE_MIXER_IS_SWITCH_CLASS(k)           \
         (G_TYPE_CHECK_CLASS_TYPE ((k), MATE_MIXER_TYPE_SWITCH))
-#define MATE_MIXER_SWITCH_GET_CLASS(o)   \
+#define MATE_MIXER_SWITCH_GET_CLASS(o)          \
         (G_TYPE_INSTANCE_GET_CLASS ((o), MATE_MIXER_TYPE_SWITCH, MateMixerSwitchClass))
 
 typedef struct _MateMixerSwitchClass    MateMixerSwitchClass;

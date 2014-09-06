@@ -153,7 +153,7 @@ load_modules (void)
     if (loaded == TRUE)
         return;
 
-    if (G_LIKELY (g_module_supported () == TRUE)) {
+    if G_LIKELY (g_module_supported () == TRUE) {
         GDir   *dir;
         GError *error = NULL;
 
@@ -181,7 +181,7 @@ load_modules (void)
             g_error_free (error);
         }
     } else {
-        g_critical ("Unable to load backend modules: not supported");
+        g_critical ("Unable to load backend modules: Not supported");
     }
 
     loaded = TRUE;

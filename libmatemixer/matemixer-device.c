@@ -76,18 +76,18 @@ static void mate_mixer_device_finalize     (GObject              *object);
 
 G_DEFINE_ABSTRACT_TYPE (MateMixerDevice, mate_mixer_device, G_TYPE_OBJECT)
 
-static MateMixerStream *mate_mixer_device_real_get_stream  (MateMixerDevice *device,
-                                                            const gchar     *name);
-static MateMixerSwitch *mate_mixer_device_real_get_switch  (MateMixerDevice *device,
-                                                            const gchar     *name);
+static MateMixerStream *mate_mixer_device_real_get_stream (MateMixerDevice *device,
+                                                           const gchar     *name);
+static MateMixerSwitch *mate_mixer_device_real_get_switch (MateMixerDevice *device,
+                                                           const gchar     *name);
 
 static void
 mate_mixer_device_class_init (MateMixerDeviceClass *klass)
 {
     GObjectClass *object_class;
 
-    klass->get_stream  = mate_mixer_device_real_get_stream;
-    klass->get_switch  = mate_mixer_device_real_get_switch;
+    klass->get_stream = mate_mixer_device_real_get_stream;
+    klass->get_switch = mate_mixer_device_real_get_switch;
 
     object_class = G_OBJECT_CLASS (klass);
     object_class->finalize     = mate_mixer_device_finalize;
@@ -252,6 +252,7 @@ mate_mixer_device_get_property (GObject    *object,
     case PROP_ICON:
         g_value_set_string (value, device->priv->icon);
         break;
+
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
         break;
@@ -271,15 +272,15 @@ mate_mixer_device_set_property (GObject      *object,
     switch (param_id) {
     case PROP_NAME:
         /* Construct-only string */
-        device->priv->name = g_strdup (g_value_get_string (value));
+        device->priv->name = g_value_dup_string (value);
         break;
     case PROP_LABEL:
         /* Construct-only string */
-        device->priv->label = g_strdup (g_value_get_string (value));
+        device->priv->label = g_value_dup_string (value);
         break;
     case PROP_ICON:
         /* Construct-only string */
-        device->priv->icon = g_strdup (g_value_get_string (value));
+        device->priv->icon = g_value_dup_string (value);
         break;
 
     default:

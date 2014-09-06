@@ -26,7 +26,6 @@
 G_BEGIN_DECLS
 
 #define MATE_MIXER_TYPE_APP_INFO (mate_mixer_app_info_get_type ())
-#define MATE_MIXER_APP_INFO(o)   ((MateMixerAppInfo *) o)
 
 GType        mate_mixer_app_info_get_type    (void) G_GNUC_CONST;
 

@@ -124,7 +124,7 @@ mate_mixer_backend_module_set_property (GObject      *object,
     switch (param_id) {
     case PROP_PATH:
         /* Construct-only string */
-        module->priv->path = g_strdup (g_value_get_string (value));
+        module->priv->path = g_value_dup_string (value);
 
         g_type_module_set_name (G_TYPE_MODULE (object), module->priv->path);
         break;
@@ -234,7 +234,8 @@ backend_module_load (GTypeModule *type_module)
         return TRUE;
 
     module->priv->gmodule = g_module_open (module->priv->path,
-                                           G_MODULE_BIND_LAZY | G_MODULE_BIND_LOCAL);
+                                           G_MODULE_BIND_LAZY |
+                                           G_MODULE_BIND_LOCAL);
     if (module->priv->gmodule == NULL) {
         g_warning ("Failed to load backend module %s: %s",
                    module->priv->path,
@@ -263,7 +264,7 @@ backend_module_load (GTypeModule *type_module)
 
     /* Make sure get_info() returns something, so we can avoid checking it
      * in other parts of the library */
-    if (G_UNLIKELY (module->priv->get_info () == NULL)) {
+    if G_UNLIKELY (module->priv->get_info () == NULL) {
         g_critical ("Backend module %s does not provide module information",
                     module->priv->path);
 

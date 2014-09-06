@@ -356,14 +356,16 @@ gboolean
 mate_mixer_switch_set_active_option (MateMixerSwitch       *swtch,
                                      MateMixerSwitchOption *option)
 {
+    MateMixerSwitchClass *klass;
+
     g_return_val_if_fail (MATE_MIXER_IS_SWITCH (swtch), FALSE);
 
-    if (swtch->priv->active != option) {
-        MateMixerSwitchClass *klass;
+    klass = MATE_MIXER_SWITCH_GET_CLASS (swtch);
+    if (klass->set_active_option == NULL)
+        return FALSE;
 
-        klass = MATE_MIXER_SWITCH_GET_CLASS (swtch);
-        if (klass->set_active_option == NULL ||
-            klass->set_active_option (swtch, option) == FALSE)
+    if (swtch->priv->active != option) {
+        if (klass->set_active_option (swtch, option) == FALSE)
             return FALSE;
 
         _mate_mixer_switch_set_active_option (swtch, option);
@@ -409,8 +411,7 @@ _mate_mixer_switch_set_active_option (MateMixerSwitch       *swtch,
     else
         swtch->priv->active = NULL;
 
-    g_object_notify_by_pspec (G_OBJECT (swtch),
-                              properties[PROP_ACTIVE_OPTION]);
+    g_object_notify_by_pspec (G_OBJECT (swtch), properties[PROP_ACTIVE_OPTION]);
 }
 
 static MateMixerSwitchOption *
