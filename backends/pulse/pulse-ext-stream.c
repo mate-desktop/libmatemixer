@@ -236,7 +236,9 @@ pulse_ext_stream_new (PulseConnection                  *connection,
     gchar                          *suffix;
     MateMixerAppInfo               *app_info = NULL;
     MateMixerDirection              direction;
-    MateMixerStreamControlFlags     flags = MATE_MIXER_STREAM_CONTROL_MOVABLE |
+    MateMixerStreamControlFlags     flags = MATE_MIXER_STREAM_CONTROL_MUTE_READABLE |
+                                            MATE_MIXER_STREAM_CONTROL_MUTE_WRITABLE |
+                                            MATE_MIXER_STREAM_CONTROL_MOVABLE |
                                             MATE_MIXER_STREAM_CONTROL_STORED;
     MateMixerStreamControlRole      role  = MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN;
     MateMixerStreamControlMediaRole media_role =
