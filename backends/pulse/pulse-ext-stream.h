@@ -47,7 +47,7 @@ typedef struct _PulseExtStreamPrivate  PulseExtStreamPrivate;
 
 struct _PulseExtStream
 {
-    PulseStreamControl parent;
+    MateMixerStoredControl parent;
 
     /*< private >*/
     PulseExtStreamPrivate *priv;
@@ -55,7 +55,7 @@ struct _PulseExtStream
 
 struct _PulseExtStreamClass
 {
-    PulseStreamControlClass parent_class;
+    MateMixerStoredControlClass parent_class;
 };
 
 GType           pulse_ext_stream_get_type (void) G_GNUC_CONST;

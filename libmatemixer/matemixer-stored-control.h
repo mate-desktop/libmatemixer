@@ -22,33 +22,50 @@
 #include <glib-object.h>
 
 #include <libmatemixer/matemixer-enums.h>
+#include <libmatemixer/matemixer-stream-control.h>
 #include <libmatemixer/matemixer-types.h>
 
 G_BEGIN_DECLS
 
-#define MATE_MIXER_TYPE_STORED_CONTROL              \
+#define MATE_MIXER_TYPE_STORED_CONTROL          \
         (mate_mixer_stored_control_get_type ())
-#define MATE_MIXER_STORED_CONTROL(o)                \
+#define MATE_MIXER_STORED_CONTROL(o)            \
         (G_TYPE_CHECK_INSTANCE_CAST ((o), MATE_MIXER_TYPE_STORED_CONTROL, MateMixerStoredControl))
-#define MATE_MIXER_IS_STORED_CONTROL(o)             \
+#define MATE_MIXER_IS_STORED_CONTROL(o)         \
         (G_TYPE_CHECK_INSTANCE_TYPE ((o), MATE_MIXER_TYPE_STORED_CONTROL))
-#define MATE_MIXER_STORED_CONTROL_GET_INTERFACE(o)  \
-        (G_TYPE_INSTANCE_GET_INTERFACE ((o), MATE_MIXER_TYPE_STORED_CONTROL, MateMixerStoredControlInterface))
+#define MATE_MIXER_STORED_CONTROL_CLASS(k)      \
+        (G_TYPE_CHECK_CLASS_CAST ((k), MATE_MIXER_TYPE_STORED_CONTROL, MateMixerStoredControlClass))
+#define MATE_MIXER_IS_STORED_CONTROL_CLASS(k)   \
+        (G_TYPE_CHECK_CLASS_TYPE ((k), MATE_MIXER_TYPE_STORED_CONTROL))
+#define MATE_MIXER_STORED_CONTROL_GET_CLASS(o)  \
+        (G_TYPE_INSTANCE_GET_CLASS ((o), MATE_MIXER_TYPE_STORED_CONTROL, MateMixerStoredControlClass))
 
-typedef struct _MateMixerStoredControlInterface  MateMixerStoredControlInterface;
+typedef struct _MateMixerStoredControlClass    MateMixerStoredControlClass;
+typedef struct _MateMixerStoredControlPrivate  MateMixerStoredControlPrivate;
 
 /**
- * MateMixerStoredControlInterface:
- * @parent_iface: The parent interface.
+ * MateMixerStoredControl:
  *
- * The interface structure for #MateMixerStoredControl.
+ * The #MateMixerStoredControl structure contains only private data and should only
+ * be accessed using the provided API.
  */
-struct _MateMixerStoredControlInterface
+struct _MateMixerStoredControl
 {
-    GTypeInterface parent_iface;
+    MateMixerStreamControl object;
 
     /*< private >*/
-    MateMixerDirection (*get_direction) (MateMixerStoredControl *control);
+    MateMixerStoredControlPrivate *priv;
+};
+
+/**
+ * MateMixerStoredControlClass:
+ * @parent_class: The parent class.
+ *
+ * The class structure for #MateMixerStoredControl.
+ */
+struct _MateMixerStoredControlClass
+{
+    MateMixerStreamControlClass parent_class;
 };
 
 GType              mate_mixer_stored_control_get_type      (void) G_GNUC_CONST;

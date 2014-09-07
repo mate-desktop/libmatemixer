@@ -91,14 +91,18 @@ mate_mixer_device_get_type
 <SECTION>
 <FILE>matemixer-stored-control</FILE>
 <TITLE>MateMixerStoredControl</TITLE>
-MateMixerStoredControlInterface
+MateMixerStoredControl
+MateMixerStoredControlClass
 mate_mixer_stored_control_get_direction
 <SUBSECTION Standard>
-MATE_MIXER_IS_STORED_CONTROL
 MATE_MIXER_STORED_CONTROL
-MATE_MIXER_STORED_CONTROL_GET_INTERFACE
+MATE_MIXER_STORED_CONTROL_CLASS
+MATE_MIXER_STORED_CONTROL_GET_CLASS
+MATE_MIXER_IS_STORED_CONTROL
+MATE_MIXER_IS_STORED_CONTROL_CLASS
 MATE_MIXER_TYPE_STORED_CONTROL
 <SUBSECTION Private>
+MateMixerStoredControlPrivate
 mate_mixer_stored_control_get_type
 </SECTION>
 
