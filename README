@@ -1,0 +1,36 @@
+libmatemixer
+============
+
+libmatemixer is a mixer library for MATE desktop.
+
+It provides an abstract API allowing access to mixer functionality available
+in the PulseAudio, ALSA and OSS sound systems.
+
+Documentation for the API is provided with gtk-doc.
+
+Installation and packaging
+==========================
+
+See the INSTALL file for general instructions about the build process.
+
+The library includes dynamically loaded modules which provide access to each
+of the supported sound systems.
+
+By default configure auto-detects whether support for PulseAudio and ALSA
+is available in the system. Make sure to install the appropriate development
+packages to allow the modules to be built.
+
+Building the OSS module is only advised on non-Linux systems as OSS support
+in Linux is only provided as an ALSA emulation layer. To build the OSS module,
+you will need to pass --enable-oss=yes to configure.
+
+As the modules are loaded dynamically each time an application utilizes the
+library, it is possible to provide the modules in separate distribution
+packages.
+
+How to report bugs
+==================
+
+Bugs should be reported to the MATE bug tracking system on GitHub:
+
+   https://github.com/mate-desktop/libmatemixer/issues/
