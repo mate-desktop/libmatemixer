@@ -550,7 +550,7 @@ pulse_stream_control_get_channel_position (MateMixerStreamControl *mmsc, guint c
     if (channel >= control->priv->channel_map.channels)
         return MATE_MIXER_CHANNEL_UNKNOWN;
 
-    return pulse_convert_position_to_pulse (control->priv->channel_map.map[channel]);
+    return pulse_convert_position_from_pulse (control->priv->channel_map.map[channel]);
 }
 
 static gboolean

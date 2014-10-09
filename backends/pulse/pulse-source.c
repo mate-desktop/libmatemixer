@@ -183,7 +183,7 @@ pulse_source_add_output (PulseSource *source, const pa_source_output_info *info)
         output = pulse_source_output_new (source, info);
         g_hash_table_insert (source->priv->outputs,
                              GINT_TO_POINTER (info->index),
-                             output);
+                             g_object_ref (output));
 
         name = mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (output));
         g_signal_emit_by_name (G_OBJECT (source),

@@ -356,14 +356,6 @@ mate_mixer_backend_get_state (MateMixerBackend *backend)
     return backend->priv->state;
 }
 
-MateMixerBackendFlags
-mate_mixer_backend_get_flags (MateMixerBackend *backend)
-{
-    g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), MATE_MIXER_BACKEND_NO_FLAGS);
-
-    return backend->priv->flags;
-}
-
 MateMixerDevice *
 mate_mixer_backend_get_device (MateMixerBackend *backend, const gchar *name)
 {
@@ -433,7 +425,7 @@ mate_mixer_backend_list_devices (MateMixerBackend *backend)
 
     klass = MATE_MIXER_BACKEND_GET_CLASS (backend);
 
-    if G_LIKELY (klass->list_devices != NULL)
+    if (klass->list_devices != NULL)
         return klass->list_devices (backend);
 
     return NULL;
@@ -448,7 +440,7 @@ mate_mixer_backend_list_streams (MateMixerBackend *backend)
 
     klass = MATE_MIXER_BACKEND_GET_CLASS (backend);
 
-    if G_LIKELY (klass->list_streams != NULL)
+    if (klass->list_streams != NULL)
         return klass->list_streams (backend);
 
     return NULL;
@@ -481,21 +473,26 @@ gboolean
 mate_mixer_backend_set_default_input_stream (MateMixerBackend *backend,
                                              MateMixerStream  *stream)
 {
+    MateMixerBackendClass *klass;
+
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), FALSE);
     g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), FALSE);
 
+    klass = MATE_MIXER_BACKEND_GET_CLASS (backend);
+    if (klass->set_default_input_stream == NULL)
+        return FALSE;
+
     if (backend->priv->default_input != stream) {
-        MateMixerBackendClass *klass;
+        if (mate_mixer_stream_get_direction (stream) != MATE_MIXER_DIRECTION_INPUT) {
+            g_warning ("Unable to set non-input stream as the default input stream");
+            return FALSE;
+        }
 
-        klass = MATE_MIXER_BACKEND_GET_CLASS (backend);
-
-        if (klass->set_default_input_stream == NULL ||
-            klass->set_default_input_stream (backend, stream) == FALSE)
+        if (klass->set_default_input_stream (backend, stream) == FALSE)
             return FALSE;
 
         _mate_mixer_backend_set_default_input_stream (backend, stream);
     }
-
     return TRUE;
 }
 
@@ -511,21 +508,26 @@ gboolean
 mate_mixer_backend_set_default_output_stream (MateMixerBackend *backend,
                                               MateMixerStream  *stream)
 {
+    MateMixerBackendClass *klass;
+
     g_return_val_if_fail (MATE_MIXER_IS_BACKEND (backend), FALSE);
     g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), FALSE);
 
+    klass = MATE_MIXER_BACKEND_GET_CLASS (backend);
+    if (klass->set_default_output_stream == NULL)
+        return FALSE;
+
     if (backend->priv->default_input != stream) {
-        MateMixerBackendClass *klass;
+        if (mate_mixer_stream_get_direction (stream) != MATE_MIXER_DIRECTION_OUTPUT) {
+            g_warning ("Unable to set non-output stream as the default output stream");
+            return FALSE;
+        }
 
-        klass = MATE_MIXER_BACKEND_GET_CLASS (backend);
-
-        if (klass->set_default_output_stream == NULL ||
-            klass->set_default_output_stream (backend, stream) == FALSE)
+        if (klass->set_default_output_stream (backend, stream) == FALSE)
             return FALSE;
 
         _mate_mixer_backend_set_default_output_stream (backend, stream);
     }
-
     return TRUE;
 }
 
@@ -609,14 +611,6 @@ _mate_mixer_backend_set_state (MateMixerBackend *backend, MateMixerState state)
     backend->priv->state = state;
 
     g_object_notify_by_pspec (G_OBJECT (backend), properties[PROP_STATE]);
-}
-
-void
-_mate_mixer_backend_set_flags (MateMixerBackend *backend, MateMixerBackendFlags flags)
-{
-    g_return_if_fail (MATE_MIXER_IS_BACKEND (backend));
-
-    backend->priv->flags = flags;
 }
 
 void

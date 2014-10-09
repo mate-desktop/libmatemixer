@@ -257,10 +257,9 @@ mate_mixer_stream_set_property (GObject      *object,
         /* Construct-only object */
         stream->priv->device = g_value_get_object (value);
 
-        if (stream->priv->device != NULL) {
+        if (stream->priv->device != NULL)
             g_object_add_weak_pointer (G_OBJECT (stream->priv->device),
                                        (gpointer *) &stream->priv->device);
-        }
         break;
     case PROP_DEFAULT_CONTROL:
         /* Construct-only object */
@@ -301,6 +300,7 @@ mate_mixer_stream_finalize (GObject *object)
     stream = MATE_MIXER_STREAM (object);
 
     g_free (stream->priv->name);
+    g_free (stream->priv->label);
 
     G_OBJECT_CLASS (mate_mixer_stream_parent_class)->finalize (object);
 }
@@ -356,6 +356,7 @@ mate_mixer_stream_get_device (MateMixerStream *stream)
 /**
  * mate_mixer_stream_get_control:
  * @stream: a #MateMixerStream
+ * @name: the name of a stream control
  */
 MateMixerStreamControl *
 mate_mixer_stream_get_control (MateMixerStream *stream, const gchar *name)
@@ -369,6 +370,7 @@ mate_mixer_stream_get_control (MateMixerStream *stream, const gchar *name)
 /**
  * mate_mixer_stream_get_switch:
  * @stream: a #MateMixerStream
+ * @name: the name of a stream switch
  */
 MateMixerSwitch *
 mate_mixer_stream_get_switch (MateMixerStream *stream, const gchar *name)
@@ -398,9 +400,16 @@ mate_mixer_stream_get_default_control (MateMixerStream *stream)
 const GList *
 mate_mixer_stream_list_controls (MateMixerStream *stream)
 {
+    MateMixerStreamClass *klass;
+
     g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), NULL);
 
-    return MATE_MIXER_STREAM_GET_CLASS (stream)->list_controls (stream);
+    klass = MATE_MIXER_STREAM_GET_CLASS (stream);
+
+    if G_LIKELY (klass->list_controls != NULL)
+        return klass->list_controls (stream);
+
+    return NULL;
 }
 
 /**
@@ -410,9 +419,16 @@ mate_mixer_stream_list_controls (MateMixerStream *stream)
 const GList *
 mate_mixer_stream_list_switches (MateMixerStream *stream)
 {
+    MateMixerStreamClass *klass;
+
     g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), NULL);
 
-    return MATE_MIXER_STREAM_GET_CLASS (stream)->list_switches (stream);
+    klass = MATE_MIXER_STREAM_GET_CLASS (stream);
+
+    if G_LIKELY (klass->list_switches != NULL)
+        return klass->list_switches (stream);
+
+    return NULL;
 }
 
 static MateMixerStreamControl *
@@ -482,6 +498,5 @@ _mate_mixer_stream_set_default_control (MateMixerStream        *stream,
                  mate_mixer_stream_get_name (stream));
     }
 
-    g_object_notify_by_pspec (G_OBJECT (stream),
-                              properties[PROP_DEFAULT_CONTROL]);
+    g_object_notify_by_pspec (G_OBJECT (stream), properties[PROP_DEFAULT_CONTROL]);
 }

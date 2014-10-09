@@ -16,12 +16,15 @@
   <chapter>
     <title>API Reference</title>
     <xi:include href="xml/matemixer.xml"/>
-    <xi:include href="xml/matemixer-client-stream.xml"/>
-    <xi:include href="xml/matemixer-control.xml"/>
+    <xi:include href="xml/matemixer-app-info.xml"/>
+    <xi:include href="xml/matemixer-context.xml"/>
     <xi:include href="xml/matemixer-device.xml"/>
-    <xi:include href="xml/matemixer-device-profile.xml"/>
-    <xi:include href="xml/matemixer-port.xml"/>
     <xi:include href="xml/matemixer-stream.xml"/>
+    <xi:include href="xml/matemixer-stream-control.xml"/>
+    <xi:include href="xml/matemixer-stored-control.xml"/>
+    <xi:include href="xml/matemixer-switch.xml"/>
+    <xi:include href="xml/matemixer-switch-option.xml"/>
+    <xi:include href="xml/matemixer-toggle.xml"/>
   </chapter>
   <index id="api-index-full">
     <title>API Index</title>

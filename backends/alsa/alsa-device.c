@@ -230,7 +230,7 @@ alsa_device_finalize (GObject *object)
 
     close_mixer (device);
 
-    G_OBJECT_CLASS (alsa_device_parent_class)->dispose (object);
+    G_OBJECT_CLASS (alsa_device_parent_class)->finalize (object);
 }
 
 AlsaDevice *

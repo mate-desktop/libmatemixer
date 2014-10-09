@@ -291,8 +291,6 @@ alsa_stream_control_set_mute (MateMixerStreamControl *mmsc, gboolean mute)
 
         for (i = 0; i < control->priv->data.channels; i++)
             control->priv->data.m[i] = mute;
-
-        _mate_mixer_stream_control_set_mute (mmsc, mute);
     }
     return TRUE;
 }

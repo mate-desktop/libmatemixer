@@ -53,11 +53,14 @@ EXTRA_HFILES=
 # Header files or dirs to ignore when scanning. Use base file/dir names
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h private_code
 IGNORE_HFILES=                                          \
+        matemixer-app-info-private.h                    \
         matemixer-backend.h                             \
         matemixer-backend-module.h                      \
-        matemixer-device-profile-private.h              \
         matemixer-enum-types.h                          \
-        matemixer-port-private.h                        \
+        matemixer-stream-control-private.h              \
+        matemixer-stream-private.h                      \
+        matemixer-switch-option-private.h               \
+        matemixer-switch-private.h                      \
         matemixer-private.h
 
 # Images to copy into HTML directory.

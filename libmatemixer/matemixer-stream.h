@@ -58,8 +58,9 @@ struct _MateMixerStream
 
 /**
  * MateMixerStreamClass:
+ * @parent_class: The parent class.
  *
- * The class structure of #MateMixerStream.
+ * The class structure for #MateMixerStream.
  */
 struct _MateMixerStreamClass
 {
@@ -90,6 +91,7 @@ GType                   mate_mixer_stream_get_type            (void) G_GNUC_CONS
 
 const gchar *           mate_mixer_stream_get_name            (MateMixerStream *stream);
 const gchar *           mate_mixer_stream_get_label           (MateMixerStream *stream);
+
 MateMixerDirection      mate_mixer_stream_get_direction       (MateMixerStream *stream);
 
 MateMixerDevice *       mate_mixer_stream_get_device          (MateMixerStream *stream);

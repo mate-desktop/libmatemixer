@@ -15,7 +15,6 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <string.h>
 #include <glib.h>
 #include <glib-object.h>
 
@@ -25,6 +24,7 @@
 
 /**
  * SECTION:matemixer-toggle
+ * @short_description: On/Off switch
  * @include: libmatemixer/matemixer.h
  */
 
@@ -38,8 +38,8 @@ struct _MateMixerTogglePrivate
 enum {
     PROP_0,
     PROP_STATE,
-    PROP_STATE_OPTION_ON,
-    PROP_STATE_OPTION_OFF,
+    PROP_ON_STATE_OPTION,
+    PROP_OFF_STATE_OPTION,
     N_PROPERTIES
 };
 
@@ -81,27 +81,43 @@ mate_mixer_toggle_class_init (MateMixerToggleClass *klass)
     switch_class->get_option   = mate_mixer_toggle_get_option;
     switch_class->list_options = mate_mixer_toggle_list_options;
 
+    /**
+     * MateMixerToggle:state:
+     *
+     * The current state of the toggle. %TRUE corresponds to the 'on' state and
+     * %FALSE to the 'off' state.
+     */
     properties[PROP_STATE] =
         g_param_spec_boolean ("state",
                               "State",
                               "Current state of the toggle",
                               FALSE,
-                              G_PARAM_READABLE |
+                              G_PARAM_READWRITE |
                               G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_STATE_OPTION_ON] =
-        g_param_spec_object ("state-option-on",
-                             "State option for on",
-                             "Option corresponding to the 'on' value of the toggle",
+    /**
+     * MateMixerToggle:on-state-option:
+     *
+     * The #MateMixerSwitchOption representing the 'on' value of the toggle.
+     */
+    properties[PROP_ON_STATE_OPTION] =
+        g_param_spec_object ("on-state-option",
+                             "On state option",
+                             "On state option",
                              MATE_MIXER_TYPE_SWITCH_OPTION,
                              G_PARAM_READWRITE |
                              G_PARAM_CONSTRUCT_ONLY |
                              G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_STATE_OPTION_OFF] =
-        g_param_spec_object ("state-option-off",
-                             "State option for off",
-                             "Option corresponding to the 'off' value of the toggle",
+    /**
+     * MateMixerToggle:off-state-option:
+     *
+     * The #MateMixerSwitchOption representing the 'off' value of the toggle.
+     */
+    properties[PROP_OFF_STATE_OPTION] =
+        g_param_spec_object ("off-state-option",
+                             "Off state option",
+                             "Off state option",
                              MATE_MIXER_TYPE_SWITCH_OPTION,
                              G_PARAM_READWRITE |
                              G_PARAM_CONSTRUCT_ONLY |
@@ -126,10 +142,10 @@ mate_mixer_toggle_get_property (GObject    *object,
     case PROP_STATE:
         g_value_set_boolean (value, mate_mixer_toggle_get_state (toggle));
         break;
-    case PROP_STATE_OPTION_ON:
+    case PROP_ON_STATE_OPTION:
         g_value_set_object (value, toggle->priv->on);
         break;
-    case PROP_STATE_OPTION_OFF:
+    case PROP_OFF_STATE_OPTION:
         g_value_set_object (value, toggle->priv->off);
         break;
 
@@ -150,11 +166,14 @@ mate_mixer_toggle_set_property (GObject      *object,
     toggle = MATE_MIXER_TOGGLE (object);
 
     switch (param_id) {
-    case PROP_STATE_OPTION_ON:
+    case PROP_STATE:
+        mate_mixer_toggle_set_state (toggle, g_value_get_boolean (value));
+        break;
+    case PROP_ON_STATE_OPTION:
         /* Construct-only object */
         toggle->priv->on = g_value_dup_object (value);
         break;
-    case PROP_STATE_OPTION_OFF:
+    case PROP_OFF_STATE_OPTION:
         /* Construct-only object */
         toggle->priv->off = g_value_dup_object (value);
         break;
@@ -181,11 +200,10 @@ mate_mixer_toggle_dispose (GObject *object)
     toggle = MATE_MIXER_TOGGLE (object);
 
     if (toggle->priv->options != NULL) {
-        g_list_free_full (toggle->priv->options, g_object_unref);
+        g_list_free (toggle->priv->options);
         toggle->priv->options = NULL;
     }
 
-    /* FIXME: crashes on ALSA without the polling thread */
     g_clear_object (&toggle->priv->on);
     g_clear_object (&toggle->priv->off);
 
@@ -195,6 +213,11 @@ mate_mixer_toggle_dispose (GObject *object)
 /**
  * mate_mixer_toggle_get_state:
  * @toggle: a #MateMixerToggle
+ *
+ * Gets the current state of the toggle. %TRUE corresponds to the 'on' state and
+ * %FALSE to the 'off' state.
+ *
+ * Returns: %TRUE or %FALSE.
  */
 gboolean
 mate_mixer_toggle_get_state (MateMixerToggle *toggle)
@@ -204,6 +227,9 @@ mate_mixer_toggle_get_state (MateMixerToggle *toggle)
     g_return_val_if_fail (MATE_MIXER_IS_TOGGLE (toggle), FALSE);
 
     active = mate_mixer_switch_get_active_option (MATE_MIXER_SWITCH (toggle));
+    if G_UNLIKELY (active == NULL)
+        return FALSE;
+
     if (active == toggle->priv->on)
         return TRUE;
     else
@@ -213,6 +239,11 @@ mate_mixer_toggle_get_state (MateMixerToggle *toggle)
 /**
  * mate_mixer_toggle_get_state_option:
  * @toggle: a #MateMixerToggle
+ * @state: the state to get the #MateMixerSwitchOption for
+ *
+ * Gets the #MateMixerSwitchOption representing the selected state.
+ *
+ * Returns: a #MateMixerSwitchOption.
  */
 MateMixerSwitchOption *
 mate_mixer_toggle_get_state_option (MateMixerToggle *toggle, gboolean state)
@@ -228,6 +259,14 @@ mate_mixer_toggle_get_state_option (MateMixerToggle *toggle, gboolean state)
 /**
  * mate_mixer_toggle_set_state:
  * @toggle: a #MateMixerToggle
+ * @state: the state to set
+ *
+ * Sets the @toggle to the selected state.
+ *
+ * This function is equivalent to using mate_mixer_switch_set_active_option()
+ * with a #MateMixerSwitchOption representing the selected state.
+ *
+ * Returns: %TRUE on success or %FALSE on failure.
  */
 gboolean
 mate_mixer_toggle_set_state (MateMixerToggle *toggle, gboolean state)
@@ -241,6 +280,9 @@ mate_mixer_toggle_set_state (MateMixerToggle *toggle, gboolean state)
     else
         active = toggle->priv->off;
 
+    if G_UNLIKELY (active == NULL)
+        return FALSE;
+
     return mate_mixer_switch_set_active_option (MATE_MIXER_SWITCH (toggle), active);
 }
 
@@ -250,12 +292,13 @@ mate_mixer_toggle_get_option (MateMixerSwitch *swtch, const gchar *name)
     MateMixerToggle *toggle;
 
     g_return_val_if_fail (MATE_MIXER_IS_TOGGLE (swtch), NULL);
+    g_return_val_if_fail (name != NULL, NULL);
 
     toggle = MATE_MIXER_TOGGLE (swtch);
 
-    if (strcmp (name, mate_mixer_switch_option_get_name (toggle->priv->on)) == 0)
+    if (g_strcmp0 (name, mate_mixer_switch_option_get_name (toggle->priv->on)) == 0)
         return toggle->priv->on;
-    if (strcmp (name, mate_mixer_switch_option_get_name (toggle->priv->off)) == 0)
+    if (g_strcmp0 (name, mate_mixer_switch_option_get_name (toggle->priv->off)) == 0)
         return toggle->priv->off;
 
     return NULL;
@@ -271,10 +314,12 @@ mate_mixer_toggle_list_options (MateMixerSwitch *swtch)
     toggle = MATE_MIXER_TOGGLE (swtch);
 
     if (toggle->priv->options == NULL) {
-        toggle->priv->options = g_list_prepend (toggle->priv->options,
-                                                toggle->priv->off);
-        toggle->priv->options = g_list_prepend (toggle->priv->options,
-                                                toggle->priv->on);
+        if G_LIKELY (toggle->priv->off != NULL)
+            toggle->priv->options = g_list_prepend (toggle->priv->options,
+                                                    toggle->priv->off);
+        if G_LIKELY (toggle->priv->on != NULL)
+            toggle->priv->options = g_list_prepend (toggle->priv->options,
+                                                    toggle->priv->on);
     }
     return toggle->priv->options;
 }

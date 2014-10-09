@@ -33,6 +33,7 @@
 
 #define BACKEND_NAME      "OSS"
 #define BACKEND_PRIORITY  10
+#define BACKEND_FLAGS     MATE_MIXER_BACKEND_NO_FLAGS
 
 #if !defined(__linux__) && !defined(__NetBSD__) && !defined(__OpenBSD__)
     /* At least on systems based on FreeBSD we will need to read device names
@@ -114,10 +115,11 @@ backend_module_init (GTypeModule *module)
 {
     oss_backend_register_type (module);
 
-    info.name         = BACKEND_NAME;
-    info.priority     = BACKEND_PRIORITY;
-    info.g_type       = OSS_TYPE_BACKEND;
-    info.backend_type = MATE_MIXER_BACKEND_OSS;
+    info.name          = BACKEND_NAME;
+    info.priority      = BACKEND_PRIORITY;
+    info.g_type        = OSS_TYPE_BACKEND;
+    info.backend_flags = BACKEND_FLAGS;
+    info.backend_type  = MATE_MIXER_BACKEND_OSS;
 }
 
 const MateMixerBackendInfo *backend_module_get_info (void)
@@ -461,6 +463,7 @@ read_device_label_sndstat (OssBackend  *oss,
 static void
 add_device (OssBackend *oss, OssDevice *device)
 {
+    /* Takes reference of device */
     oss->priv->devices =
         g_list_insert_sorted_with_data (oss->priv->devices,
                                         device,

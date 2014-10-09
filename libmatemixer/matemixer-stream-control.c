@@ -78,7 +78,6 @@ static void mate_mixer_stream_control_set_property (GObject                     
                                                     GParamSpec                  *pspec);
 
 static void mate_mixer_stream_control_init         (MateMixerStreamControl      *control);
-static void mate_mixer_stream_control_dispose      (GObject                     *object);
 static void mate_mixer_stream_control_finalize     (GObject                     *object);
 
 G_DEFINE_ABSTRACT_TYPE (MateMixerStreamControl, mate_mixer_stream_control, G_TYPE_OBJECT)
@@ -89,7 +88,6 @@ mate_mixer_stream_control_class_init (MateMixerStreamControlClass *klass)
     GObjectClass *object_class;
 
     object_class = G_OBJECT_CLASS (klass);
-    object_class->dispose      = mate_mixer_stream_control_dispose;
     object_class->finalize     = mate_mixer_stream_control_finalize;
     object_class->get_property = mate_mixer_stream_control_get_property;
     object_class->set_property = mate_mixer_stream_control_set_property;
@@ -274,10 +272,9 @@ mate_mixer_stream_control_set_property (GObject      *object,
         /* Construct-only object */
         control->priv->stream = g_value_get_object (value);
 
-        if (control->priv->stream != NULL) {
+        if (control->priv->stream != NULL)
             g_object_add_weak_pointer (G_OBJECT (control->priv->stream),
                                        (gpointer *) &control->priv->stream);
-        }
         break;
 
     default:
@@ -292,18 +289,6 @@ mate_mixer_stream_control_init (MateMixerStreamControl *control)
     control->priv = G_TYPE_INSTANCE_GET_PRIVATE (control,
                                                  MATE_MIXER_TYPE_STREAM_CONTROL,
                                                  MateMixerStreamControlPrivate);
-}
-
-static void
-mate_mixer_stream_control_dispose (GObject *object)
-{
-    MateMixerStreamControl *control;
-
-    control = MATE_MIXER_STREAM_CONTROL (object);
-
-    g_clear_object (&control->priv->stream);
-
-    G_OBJECT_CLASS (mate_mixer_stream_control_parent_class)->dispose (object);
 }
 
 static void
@@ -389,12 +374,11 @@ mate_mixer_stream_control_get_app_info (MateMixerStreamControl *control)
     g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), NULL);
 
     if (control->priv->role == MATE_MIXER_STREAM_CONTROL_ROLE_APPLICATION) {
-        MateMixerStreamControlClass *klass;
+        MateMixerStreamControlClass *klass =
+            MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
 
-        klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
-
-        if G_LIKELY (klass->get_app_info != NULL)
-            return klass->get_app_info (control);
+        /* Implementation required for application role controls */
+        return klass->get_app_info (control);
     }
     return NULL;
 }
@@ -414,25 +398,27 @@ mate_mixer_stream_control_get_stream (MateMixerStreamControl *control)
 /**
  * mate_mixer_stream_control_set_stream:
  * @control: a #MateMixerStreamControl
+ * @stream: a #MateMixerStream
  */
 gboolean
 mate_mixer_stream_control_set_stream (MateMixerStreamControl *control,
                                       MateMixerStream        *stream)
 {
-    g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), 0);
+    g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), FALSE);
+
+    if ((control->priv->flags & MATE_MIXER_STREAM_CONTROL_MOVABLE) == 0)
+        return FALSE;
 
     if (control->priv->stream != stream) {
-        MateMixerStreamControlClass *klass;
+        MateMixerStreamControlClass *klass =
+            MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
 
-        klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
-
-        if (klass->set_stream == NULL ||
-            klass->set_stream (control, stream) == FALSE)
+        /* Implementation required when the flag is available */
+        if (klass->set_stream (control, stream) == FALSE)
             return FALSE;
 
         _mate_mixer_stream_control_set_stream (control, stream);
     }
-
     return TRUE;
 }
 
@@ -451,24 +437,27 @@ mate_mixer_stream_control_get_mute (MateMixerStreamControl *control)
 /**
  * mate_mixer_stream_control_set_mute:
  * @control: a #MateMixerStreamControl
+ * @mute: the mute toggle state to set
  */
 gboolean
 mate_mixer_stream_control_set_mute (MateMixerStreamControl *control, gboolean mute)
 {
     g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), FALSE);
 
-    if (control->priv->mute == mute)
-        return TRUE;
+    if ((control->priv->flags & MATE_MIXER_STREAM_CONTROL_MUTE_WRITABLE) == 0)
+        return FALSE;
 
-    if (control->priv->flags & MATE_MIXER_STREAM_CONTROL_MUTE_WRITABLE) {
-        MateMixerStreamControlClass *klass;
+    if (control->priv->mute != mute) {
+        MateMixerStreamControlClass *klass =
+            MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
 
-        klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
+        /* Implementation required when the flag is available */
+        if (klass->set_mute (control, mute) == FALSE)
+            return FALSE;
 
-        if G_LIKELY (klass->set_mute != NULL)
-            return klass->set_mute (control, mute);
+        _mate_mixer_stream_control_set_mute (control, mute);
     }
-    return FALSE;
+    return TRUE;
 }
 
 /**
@@ -504,8 +493,8 @@ mate_mixer_stream_control_get_volume (MateMixerStreamControl *control)
     klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
 
     if (control->priv->flags & MATE_MIXER_STREAM_CONTROL_VOLUME_READABLE) {
-        if G_LIKELY (klass->get_volume != NULL)
-            return klass->get_volume (control);
+        /* Implementation required when the flag is available */
+        return klass->get_volume (control);
     }
     return klass->get_min_volume (control);
 }
@@ -513,6 +502,7 @@ mate_mixer_stream_control_get_volume (MateMixerStreamControl *control)
 /**
  * mate_mixer_stream_control_set_volume:
  * @control: a #MateMixerStreamControl
+ * @volume: the volume to set
  */
 gboolean
 mate_mixer_stream_control_set_volume (MateMixerStreamControl *control, guint volume)
@@ -520,12 +510,11 @@ mate_mixer_stream_control_set_volume (MateMixerStreamControl *control, guint vol
     g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), FALSE);
 
     if (control->priv->flags & MATE_MIXER_STREAM_CONTROL_VOLUME_WRITABLE) {
-        MateMixerStreamControlClass *klass;
+        MateMixerStreamControlClass *klass =
+            MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
 
-        klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
-
-        if G_LIKELY (klass->set_volume != NULL)
-            return klass->set_volume (control, volume);
+        /* Implementation required when the flag is available */
+        return klass->set_volume (control, volume);
     }
     return FALSE;
 }
@@ -539,13 +528,13 @@ mate_mixer_stream_control_get_decibel (MateMixerStreamControl *control)
 {
     g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), -MATE_MIXER_INFINITY);
 
-    if (control->priv->flags & MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL) {
-        MateMixerStreamControlClass *klass;
+    if (control->priv->flags & MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL &&
+        control->priv->flags & MATE_MIXER_STREAM_CONTROL_VOLUME_READABLE) {
+        MateMixerStreamControlClass *klass =
+            MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
 
-        klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
-
-        if G_LIKELY (klass->get_decibel != NULL)
-            return klass->get_decibel (control);
+        /* Implementation required when the flags are available */
+        return klass->get_decibel (control);
     }
     return -MATE_MIXER_INFINITY;
 }
@@ -553,6 +542,7 @@ mate_mixer_stream_control_get_decibel (MateMixerStreamControl *control)
 /**
  * mate_mixer_stream_control_set_decibel:
  * @control: a #MateMixerStreamControl
+ * @decibel: the volume to set in decibels
  */
 gboolean
 mate_mixer_stream_control_set_decibel (MateMixerStreamControl *control, gdouble decibel)
@@ -561,12 +551,11 @@ mate_mixer_stream_control_set_decibel (MateMixerStreamControl *control, gdouble 
 
     if (control->priv->flags & MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL &&
         control->priv->flags & MATE_MIXER_STREAM_CONTROL_VOLUME_WRITABLE) {
-        MateMixerStreamControlClass *klass;
+        MateMixerStreamControlClass *klass =
+            MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
 
-        klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
-
-        if G_LIKELY (klass->set_decibel != NULL)
-            return klass->set_decibel (control, decibel);
+        /* Implementation required when the flags are available */
+        return klass->set_decibel (control, decibel);
     }
     return FALSE;
 }
@@ -574,10 +563,11 @@ mate_mixer_stream_control_set_decibel (MateMixerStreamControl *control, gdouble 
 /**
  * mate_mixer_stream_control_has_channel_position:
  * @control: a #MateMixerStreamControl
+ * @position: to channel position to check
  */
 gboolean
-mate_mixer_stream_control_has_channel_position (MateMixerStreamControl   *control,
-                                                MateMixerChannelPosition  position)
+mate_mixer_stream_control_has_channel_position (MateMixerStreamControl  *control,
+                                                MateMixerChannelPosition position)
 {
     MateMixerStreamControlClass *klass;
 
@@ -594,6 +584,7 @@ mate_mixer_stream_control_has_channel_position (MateMixerStreamControl   *contro
 /**
  * mate_mixer_stream_control_get_channel_position:
  * @control: a #MateMixerStreamControl
+ * @channel: a channel index
  */
 MateMixerChannelPosition
 mate_mixer_stream_control_get_channel_position (MateMixerStreamControl *control, guint channel)
@@ -613,26 +604,29 @@ mate_mixer_stream_control_get_channel_position (MateMixerStreamControl *control,
 /**
  * mate_mixer_stream_control_get_channel_volume:
  * @control: a #MateMixerStreamControl
+ * @channel: a channel index
  */
 guint
 mate_mixer_stream_control_get_channel_volume (MateMixerStreamControl *control, guint channel)
 {
+    MateMixerStreamControlClass *klass;
+
     g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), 0);
 
+    klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
+
     if (control->priv->flags & MATE_MIXER_STREAM_CONTROL_VOLUME_READABLE) {
-        MateMixerStreamControlClass *klass;
-
-        klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
-
-        if G_LIKELY (klass->get_channel_volume != NULL)
-            return klass->get_channel_volume (control, channel);
+        /* Implementation required when the flag is available */
+        return klass->get_channel_volume (control, channel);
     }
-    return 0;
+    return klass->get_min_volume (control);
 }
 
 /**
  * mate_mixer_stream_control_set_channel_volume:
  * @control: a #MateMixerStreamControl
+ * @channel: a channel index
+ * @volume: the volume to set
  */
 gboolean
 mate_mixer_stream_control_set_channel_volume (MateMixerStreamControl *control,
@@ -641,13 +635,12 @@ mate_mixer_stream_control_set_channel_volume (MateMixerStreamControl *control,
 {
     g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), FALSE);
 
-    if (control->priv->flags & MATE_MIXER_STREAM_CONTROL_VOLUME_READABLE) {
-        MateMixerStreamControlClass *klass;
+    if (control->priv->flags & MATE_MIXER_STREAM_CONTROL_VOLUME_WRITABLE) {
+        MateMixerStreamControlClass *klass =
+            MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
 
-        klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
-
-        if G_LIKELY (klass->set_channel_volume != NULL)
-            return klass->set_channel_volume (control, channel, volume);
+        /* Implementation required when the flag is available */
+        return klass->set_channel_volume (control, channel, volume);
     }
     return FALSE;
 }
@@ -655,19 +648,20 @@ mate_mixer_stream_control_set_channel_volume (MateMixerStreamControl *control,
 /**
  * mate_mixer_stream_control_get_channel_decibel:
  * @control: a #MateMixerStreamControl
+ * @channel: a channel index
  */
 gdouble
 mate_mixer_stream_control_get_channel_decibel (MateMixerStreamControl *control, guint channel)
 {
     g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), -MATE_MIXER_INFINITY);
 
-    if (control->priv->flags & MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL) {
-        MateMixerStreamControlClass *klass;
+    if (control->priv->flags & MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL &&
+        control->priv->flags & MATE_MIXER_STREAM_CONTROL_VOLUME_READABLE) {
+        MateMixerStreamControlClass *klass =
+            MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
 
-        klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
-
-        if G_LIKELY (klass->get_channel_decibel != NULL)
-            return klass->get_channel_decibel (control, channel);
+        /* Implementation required when the flags are available */
+        return klass->get_channel_decibel (control, channel);
     }
     return -MATE_MIXER_INFINITY;
 }
@@ -675,6 +669,8 @@ mate_mixer_stream_control_get_channel_decibel (MateMixerStreamControl *control, 
 /**
  * mate_mixer_stream_control_set_channel_decibel:
  * @control: a #MateMixerStreamControl
+ * @channel: a channel index
+ * @decibel: the volume to set in decibels
  */
 gboolean
 mate_mixer_stream_control_set_channel_decibel (MateMixerStreamControl *control,
@@ -683,13 +679,13 @@ mate_mixer_stream_control_set_channel_decibel (MateMixerStreamControl *control,
 {
     g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), FALSE);
 
-    if (control->priv->flags & MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL) {
-        MateMixerStreamControlClass *klass;
+    if (control->priv->flags & MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL &&
+        control->priv->flags & MATE_MIXER_STREAM_CONTROL_VOLUME_WRITABLE) {
+        MateMixerStreamControlClass *klass =
+            MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
 
-        klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
-
-        if G_LIKELY (klass->set_channel_decibel != NULL)
-            return klass->set_channel_decibel (control, channel, decibel);
+        /* Implementation required when the flags are available */
+        return klass->set_channel_decibel (control, channel, decibel);
     }
     return FALSE;
 }
@@ -712,24 +708,28 @@ mate_mixer_stream_control_get_balance (MateMixerStreamControl *control)
 /**
  * mate_mixer_stream_control_set_balance:
  * @control: a #MateMixerStreamControl
+ * @balance: the balance value
  */
 gboolean
 mate_mixer_stream_control_set_balance (MateMixerStreamControl *control, gfloat balance)
 {
     g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), FALSE);
+    g_return_val_if_fail (balance >= -1.0f && balance <= 1.0f, FALSE);
 
-    if (control->priv->flags & MATE_MIXER_STREAM_CONTROL_CAN_BALANCE) {
-        MateMixerStreamControlClass *klass;
+    if ((control->priv->flags & MATE_MIXER_STREAM_CONTROL_CAN_BALANCE) == 0)
+        return FALSE;
 
-        if (balance < -1.0f || balance > 1.0f)
+    if (control->priv->balance != balance) {
+        MateMixerStreamControlClass *klass =
+            MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
+
+        /* Implementation required when the flag is available */
+        if (klass->set_balance (control, balance) == FALSE)
             return FALSE;
 
-        klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
-
-        if (G_LIKELY (klass->set_balance != NULL))
-            return klass->set_balance (control, balance);
+        _mate_mixer_stream_control_set_balance (control, balance);
     }
-    return FALSE;
+    return TRUE;
 }
 
 /**
@@ -750,24 +750,28 @@ mate_mixer_stream_control_get_fade (MateMixerStreamControl *control)
 /**
  * mate_mixer_stream_control_set_fade:
  * @control: a #MateMixerStreamControl
+ * @fade: the fade value
  */
 gboolean
 mate_mixer_stream_control_set_fade (MateMixerStreamControl *control, gfloat fade)
 {
     g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), FALSE);
+    g_return_val_if_fail (fade >= -1.0f && fade <= 1.0f, FALSE);
 
-    if (control->priv->flags & MATE_MIXER_STREAM_CONTROL_CAN_FADE) {
-        MateMixerStreamControlClass *klass;
+    if ((control->priv->flags & MATE_MIXER_STREAM_CONTROL_CAN_FADE) == 0)
+        return FALSE;
 
-        if (fade < -1.0f || fade > 1.0f)
+    if (control->priv->fade != fade) {
+        MateMixerStreamControlClass *klass =
+            MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
+
+        /* Implementation required when the flag is available */
+        if (klass->set_fade (control, fade) == FALSE)
             return FALSE;
 
-        klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
-
-        if (klass->set_fade != NULL)
-            return klass->set_fade (control, fade);
+        _mate_mixer_stream_control_set_fade (control, fade);
     }
-    return FALSE;
+    return TRUE;
 }
 
 /**
@@ -780,37 +784,30 @@ mate_mixer_stream_control_get_monitor_enabled (MateMixerStreamControl *control)
     g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), FALSE);
 
     if (control->priv->flags & MATE_MIXER_STREAM_CONTROL_HAS_MONITOR) {
-        MateMixerStreamControlClass *klass;
+        MateMixerStreamControlClass *klass =
+            MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
 
-        klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
-        if (klass->get_monitor_enabled != NULL)
-            return klass->get_monitor_enabled (control);
+        /* Implementation required when the flag is available */
+        return klass->get_monitor_enabled (control);
     }
-
     return FALSE;
 }
 
 /**
  * mate_mixer_stream_control_set_monitor_enabled:
  * @control: a #MateMixerStreamControl
+ * @enabled: a boolean value
  */
 gboolean
 mate_mixer_stream_control_set_monitor_enabled (MateMixerStreamControl *control, gboolean enabled)
 {
     g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), FALSE);
 
-    if (enabled == mate_mixer_stream_control_get_monitor_enabled (control))
-        return TRUE;
+    if ((control->priv->flags & MATE_MIXER_STREAM_CONTROL_HAS_MONITOR) == 0)
+        return FALSE;
 
-    if (control->priv->flags & MATE_MIXER_STREAM_CONTROL_HAS_MONITOR) {
-        MateMixerStreamControlClass *klass;
-
-        klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
-        if (klass->set_monitor_enabled != NULL)
-            return klass->set_monitor_enabled (control, enabled);
-    }
-
-    return FALSE;
+    /* Implementation required when the flag is available */
+    return MATE_MIXER_STREAM_CONTROL_GET_CLASS (control)->set_monitor_enabled (control, enabled);
 }
 
 /**
@@ -820,16 +817,10 @@ mate_mixer_stream_control_set_monitor_enabled (MateMixerStreamControl *control, 
 guint
 mate_mixer_stream_control_get_min_volume (MateMixerStreamControl *control)
 {
-    MateMixerStreamControlClass *klass;
-
     g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), 0);
 
-    klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
-
-    if (klass->get_min_volume != NULL)
-        return klass->get_min_volume (control);
-
-    return 0;
+    /* Implementation required */
+    return MATE_MIXER_STREAM_CONTROL_GET_CLASS (control)->get_min_volume (control);
 }
 
 /**
@@ -839,16 +830,10 @@ mate_mixer_stream_control_get_min_volume (MateMixerStreamControl *control)
 guint
 mate_mixer_stream_control_get_max_volume (MateMixerStreamControl *control)
 {
-    MateMixerStreamControlClass *klass;
-
     g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), 0);
 
-    klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
-
-    if (klass->get_max_volume != NULL)
-        return klass->get_max_volume (control);
-
-    return 0;
+    /* Implementation required */
+    return MATE_MIXER_STREAM_CONTROL_GET_CLASS (control)->get_max_volume (control);
 }
 
 /**
@@ -858,16 +843,10 @@ mate_mixer_stream_control_get_max_volume (MateMixerStreamControl *control)
 guint
 mate_mixer_stream_control_get_normal_volume (MateMixerStreamControl *control)
 {
-    MateMixerStreamControlClass *klass;
-
     g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), 0);
 
-    klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
-
-    if (klass->get_normal_volume != NULL)
-        return klass->get_normal_volume (control);
-
-    return 0;
+    /* Implementation required */
+    return MATE_MIXER_STREAM_CONTROL_GET_CLASS (control)->get_normal_volume (control);
 }
 
 /**
@@ -877,16 +856,10 @@ mate_mixer_stream_control_get_normal_volume (MateMixerStreamControl *control)
 guint
 mate_mixer_stream_control_get_base_volume (MateMixerStreamControl *control)
 {
-    MateMixerStreamControlClass *klass;
-
     g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), 0);
 
-    klass = MATE_MIXER_STREAM_CONTROL_GET_CLASS (control);
-
-    if (klass->get_base_volume != NULL)
-        return klass->get_base_volume (control);
-
-    return 0;
+    /* Implementation required */
+    return MATE_MIXER_STREAM_CONTROL_GET_CLASS (control)->get_base_volume (control);
 }
 
 /* Protected functions */
@@ -904,7 +877,6 @@ _mate_mixer_stream_control_set_flags (MateMixerStreamControl     *control,
     g_object_notify_by_pspec (G_OBJECT (control), properties[PROP_FLAGS]);
 }
 
-/* Protected functions */
 void
 _mate_mixer_stream_control_set_stream (MateMixerStreamControl *control,
                                        MateMixerStream        *stream)
@@ -915,11 +887,14 @@ _mate_mixer_stream_control_set_stream (MateMixerStreamControl *control,
         return;
 
     if (control->priv->stream != NULL)
-        g_object_unref (control->priv->stream);
+        g_object_remove_weak_pointer (G_OBJECT (control->priv->stream),
+                                      (gpointer *) &control->priv->stream);
 
-    if (stream != NULL)
-        control->priv->stream = g_object_ref (stream);
-    else
+    if (stream != NULL) {
+        control->priv->stream = stream;
+        g_object_add_weak_pointer (G_OBJECT (control->priv->stream),
+                                   (gpointer *) &control->priv->stream);
+    } else
         control->priv->stream = NULL;
 
     g_object_notify_by_pspec (G_OBJECT (control), properties[PROP_STREAM]);

@@ -241,6 +241,13 @@ mate_mixer_switch_finalize (GObject *object)
 /**
  * mate_mixer_switch_get_name:
  * @swtch: a #MateMixerSwitch
+ *
+ * Gets the name of the switch.
+ *
+ * The name serves as a unique identifier and in most cases it is not in a
+ * user-readable form.
+ *
+ * Returns: the name of the switch.
  */
 const gchar *
 mate_mixer_switch_get_name (MateMixerSwitch *swtch)
@@ -253,6 +260,13 @@ mate_mixer_switch_get_name (MateMixerSwitch *swtch)
 /**
  * mate_mixer_switch_get_label:
  * @swtch: a #MateMixerSwitch
+ *
+ * Gets the label of the switch.
+ *
+ * This is a potentially translated string that should be presented to users
+ * in the user interface.
+ *
+ * Returns: the label of the switch option.
  */
 const gchar *
 mate_mixer_switch_get_label (MateMixerSwitch *swtch)
@@ -265,6 +279,11 @@ mate_mixer_switch_get_label (MateMixerSwitch *swtch)
 /**
  * mate_mixer_switch_get_flags:
  * @swtch: a #MateMixerSwitch
+ *
+ * Gets the flags of the switch. See #MateMixerSwitchFlags for information about
+ * the meaning of the individual flags.
+ *
+ * Returns: the flags of the switch.
  */
 MateMixerSwitchFlags
 mate_mixer_switch_get_flags (MateMixerSwitch *swtch)
@@ -277,6 +296,11 @@ mate_mixer_switch_get_flags (MateMixerSwitch *swtch)
 /**
  * mate_mixer_switch_get_role:
  * @swtch: a #MateMixerSwitch
+ *
+ * Gets the role of the switch. The role identifies the purpose of the switch.
+
+ * Note that while the role identification should be reliable, it may be based on
+ * looking for well-known switch names on some sound systems.
  */
 MateMixerSwitchRole
 mate_mixer_switch_get_role (MateMixerSwitch *swtch)
@@ -289,6 +313,11 @@ mate_mixer_switch_get_role (MateMixerSwitch *swtch)
 /**
  * mate_mixer_switch_get_option:
  * @swtch: a #MateMixerSwitch
+ * @name: the name of an option
+ *
+ * Gets the #MateMixerSwitchOption with the given name.
+ *
+ * Returns: a #MateMixerSwitchOption or %NULL if there is no such switch option.
  */
 MateMixerSwitchOption *
 mate_mixer_switch_get_option (MateMixerSwitch *swtch, const gchar *name)
@@ -301,6 +330,10 @@ mate_mixer_switch_get_option (MateMixerSwitch *swtch, const gchar *name)
 /**
  * mate_mixer_switch_get_active_option:
  * @swtch: a #MateMixerSwitch
+ *
+ * Gets the #MateMixerSwitchOption which is currently active.
+ *
+ * Returns: a #MateMixerSwitchOption.
  */
 MateMixerSwitchOption *
 mate_mixer_switch_get_active_option (MateMixerSwitch *swtch)
@@ -313,19 +346,26 @@ mate_mixer_switch_get_active_option (MateMixerSwitch *swtch)
 /**
  * mate_mixer_switch_set_active_option:
  * @swtch: a #MateMixerSwitch
+ * @option: the #MateMixerSwitchOption to set as the active option
+ *
+ * Changes the currently active switch option.
+ *
+ * Returns: %TRUE on success or %FALSE on failure.
  */
 gboolean
 mate_mixer_switch_set_active_option (MateMixerSwitch       *swtch,
                                      MateMixerSwitchOption *option)
 {
+    MateMixerSwitchClass *klass;
+
     g_return_val_if_fail (MATE_MIXER_IS_SWITCH (swtch), FALSE);
 
-    if (swtch->priv->active != option) {
-        MateMixerSwitchClass *klass;
+    klass = MATE_MIXER_SWITCH_GET_CLASS (swtch);
+    if (klass->set_active_option == NULL)
+        return FALSE;
 
-        klass = MATE_MIXER_SWITCH_GET_CLASS (swtch);
-        if (klass->set_active_option == NULL ||
-            klass->set_active_option (swtch, option) == FALSE)
+    if (swtch->priv->active != option) {
+        if (klass->set_active_option (swtch, option) == FALSE)
             return FALSE;
 
         _mate_mixer_switch_set_active_option (swtch, option);
@@ -334,8 +374,15 @@ mate_mixer_switch_set_active_option (MateMixerSwitch       *swtch,
 }
 
 /**
- * mate_mixer_switch_get_name:
+ * mate_mixer_switch_list_options:
  * @swtch: a #MateMixerSwitch
+ *
+ * Gets the list of switch options that belong to the switch.
+ *
+ * The returned #GList is owned by the #MateMixerSwitch and may be invalidated
+ * at any time.
+ *
+ * Returns: a #GList of the switch options.
  */
 const GList *
 mate_mixer_switch_list_options (MateMixerSwitch *swtch)
@@ -364,8 +411,7 @@ _mate_mixer_switch_set_active_option (MateMixerSwitch       *swtch,
     else
         swtch->priv->active = NULL;
 
-    g_object_notify_by_pspec (G_OBJECT (swtch),
-                              properties[PROP_ACTIVE_OPTION]);
+    g_object_notify_by_pspec (G_OBJECT (swtch), properties[PROP_ACTIVE_OPTION]);
 }
 
 static MateMixerSwitchOption *

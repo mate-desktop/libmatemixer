@@ -106,10 +106,10 @@ G_BEGIN_DECLS
 #define MATE_MIXER_CHANNEL_MASK_HAS_FRONT(m)        ((m) & MATE_MIXER_CHANNEL_MASK_FRONT)
 #define MATE_MIXER_CHANNEL_MASK_HAS_BACK(m)         ((m) & MATE_MIXER_CHANNEL_MASK_BACK)
 
-G_GNUC_INTERNAL
 const GList *_mate_mixer_list_modules        (void);
 
-guint32      _mate_mixer_create_channel_mask (MateMixerChannelPosition *positions, guint n);
+guint32      _mate_mixer_create_channel_mask (MateMixerChannelPosition *positions,
+                                              guint                     n) G_GNUC_PURE;
 
 G_END_DECLS
 

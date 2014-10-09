@@ -74,6 +74,7 @@ mate_mixer_backend_flags_get_type (void)
         static const GFlagsValue values[] = {
             { MATE_MIXER_BACKEND_NO_FLAGS, "MATE_MIXER_STREAM_NO_FLAGS", "no-flags" },
             { MATE_MIXER_BACKEND_HAS_APPLICATION_CONTROLS, "MATE_MIXER_BACKEND_HAS_APPLICATION_CONTROLS", "has-application-controls" },
+            { MATE_MIXER_BACKEND_HAS_STORED_CONTROLS, "MATE_MIXER_BACKEND_HAS_STORED_CONTROLS", "has-stored-controls" },
             { MATE_MIXER_BACKEND_CAN_SET_DEFAULT_INPUT_STREAM, "MATE_MIXER_BACKEND_CAN_SET_DEFAULT_INPUT_STREAM", "can-set-default-input-stream" },
             { MATE_MIXER_BACKEND_CAN_SET_DEFAULT_OUTPUT_STREAM, "MATE_MIXER_BACKEND_CAN_SET_DEFAULT_OUTPUT_STREAM", "can-set-default-output-stream" },
             { 0, NULL, NULL }
@@ -254,6 +255,7 @@ mate_mixer_channel_position_get_type (void)
             { MATE_MIXER_CHANNEL_TOP_BACK_LEFT, "MATE_MIXER_CHANNEL_TOP_BACK_LEFT", "top-back-left" },
             { MATE_MIXER_CHANNEL_TOP_BACK_RIGHT, "MATE_MIXER_CHANNEL_TOP_BACK_RIGHT", "top-back-right" },
             { MATE_MIXER_CHANNEL_TOP_BACK_CENTER, "MATE_MIXER_CHANNEL_TOP_BACK_CENTER", "top-back-center" },
+            { MATE_MIXER_CHANNEL_MAX, "MATE_MIXER_CHANNEL_MAX", "max" },
             { 0, NULL, NULL }
         };
         etype = g_enum_register_static (

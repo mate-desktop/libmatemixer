@@ -57,8 +57,9 @@ struct _MateMixerSwitchOption
 
 /**
  * MateMixerSwitchOptionClass:
+ * @parent_class: The parent class.
  *
- * The class structure of #MateMixerSwitchOption.
+ * The class structure for #MateMixerSwitchOption.
  */
 struct _MateMixerSwitchOptionClass
 {

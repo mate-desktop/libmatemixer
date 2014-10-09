@@ -38,6 +38,10 @@
 
 #define BACKEND_NAME      "PulseAudio"
 #define BACKEND_PRIORITY  100
+#define BACKEND_FLAGS     (MATE_MIXER_BACKEND_HAS_APPLICATION_CONTROLS |        \
+                           MATE_MIXER_BACKEND_HAS_STORED_CONTROLS |             \
+                           MATE_MIXER_BACKEND_CAN_SET_DEFAULT_INPUT_STREAM |    \
+                           MATE_MIXER_BACKEND_CAN_SET_DEFAULT_OUTPUT_STREAM)
 
 struct _PulseBackendPrivate
 {
@@ -99,8 +103,7 @@ struct _PulseBackendPrivate
                             NULL))
 
 #define PULSE_GET_HANGING(o)                                            \
-        ((gboolean) g_object_get_data (G_OBJECT (o),                    \
-                                       "__matemixer_pulse_hanging"))
+        ((gboolean) GPOINTER_TO_UINT (g_object_get_data (G_OBJECT (o), "__matemixer_pulse_hanging")))
 
 #define PULSE_SET_HANGING(o)                                            \
         (g_object_set_data (G_OBJECT (o),                               \
@@ -210,10 +213,11 @@ backend_module_init (GTypeModule *module)
 {
     pulse_backend_register_type (module);
 
-    info.name         = BACKEND_NAME;
-    info.priority     = BACKEND_PRIORITY;
-    info.g_type       = PULSE_TYPE_BACKEND;
-    info.backend_type = MATE_MIXER_BACKEND_PULSEAUDIO;
+    info.name          = BACKEND_NAME;
+    info.priority      = BACKEND_PRIORITY;
+    info.g_type        = PULSE_TYPE_BACKEND;
+    info.backend_flags = BACKEND_FLAGS;
+    info.backend_type  = MATE_MIXER_BACKEND_PULSEAUDIO;
 }
 
 const MateMixerBackendInfo *backend_module_get_info (void)
@@ -432,11 +436,6 @@ pulse_backend_open (MateMixerBackend *backend)
         PULSE_CHANGE_STATE (pulse, MATE_MIXER_STATE_FAILED);
         return FALSE;
     }
-
-    _mate_mixer_backend_set_flags (backend,
-                                   MATE_MIXER_BACKEND_HAS_APPLICATION_CONTROLS |
-                                   MATE_MIXER_BACKEND_CAN_SET_DEFAULT_INPUT_STREAM |
-                                   MATE_MIXER_BACKEND_CAN_SET_DEFAULT_OUTPUT_STREAM);
 
     pulse->priv->connection = connection;
     return TRUE;
@@ -762,7 +761,7 @@ on_connection_card_info (PulseConnection    *connection,
 
         g_hash_table_insert (pulse->priv->devices,
                              GUINT_TO_POINTER (info->index),
-                             device);
+                             g_object_ref (device));
 
         free_list_devices (pulse);
         g_signal_emit_by_name (G_OBJECT (pulse),
@@ -814,7 +813,7 @@ on_connection_sink_info (PulseConnection    *connection,
         free_list_streams (pulse);
         g_hash_table_insert (pulse->priv->sinks,
                              GUINT_TO_POINTER (info->index),
-                             stream);
+                             g_object_ref (stream));
 
         if (device != NULL) {
             pulse_device_add_stream (device, stream);
@@ -932,7 +931,7 @@ on_connection_source_info (PulseConnection      *connection,
         free_list_streams (pulse);
         g_hash_table_insert (pulse->priv->sources,
                              GUINT_TO_POINTER (info->index),
-                             stream);
+                             g_object_ref (stream));
 
         if (device != NULL) {
             pulse_device_add_stream (device, stream);
@@ -1051,7 +1050,7 @@ on_connection_ext_stream_info (PulseConnection                  *connection,
         free_list_ext_streams (pulse);
         g_hash_table_insert (pulse->priv->ext_streams,
                              g_strdup (info->name),
-                             ext);
+                             g_object_ref (ext));
 
         g_signal_emit_by_name (G_OBJECT (pulse),
                                "stored-control-added",
@@ -1091,7 +1090,7 @@ on_connection_ext_stream_loaded (PulseConnection *connection, PulseBackend *puls
             continue;
 
         free_list_ext_streams (pulse);
-        g_hash_table_remove (pulse->priv->ext_streams, (gconstpointer) name);
+        g_hash_table_iter_remove (&iter);
 
         g_signal_emit_by_name (G_OBJECT (pulse),
                                "stored-control-removed",
