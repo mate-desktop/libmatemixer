@@ -1,1 +1,10 @@
 # List of source files which contain translatable strings.
+backends/alsa/alsa-constants.c
+backends/alsa/alsa-device.c
+backends/oss/oss-backend.c
+backends/oss/oss-device.c
+backends/oss/oss-stream.c
+backends/pulse/pulse-device.c
+backends/pulse/pulse-monitor.c
+backends/pulse/pulse-sink.c
+backends/pulse/pulse-source.c
