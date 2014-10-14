@@ -502,7 +502,8 @@ pulse_connection_disconnect (PulseConnection *connection)
     if (connection->priv->state == PULSE_CONNECTION_DISCONNECTED)
         return;
 
-    pa_context_unref (connection->priv->context);
+    if (connection->priv->context)
+        pa_context_unref (connection->priv->context);
 
     connection->priv->context = NULL;
     connection->priv->outstanding = 0;
