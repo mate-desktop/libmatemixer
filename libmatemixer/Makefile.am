@@ -6,7 +6,7 @@ AM_CPPFLAGS =                                                   \
         -DG_LOG_DOMAIN=\"libmatemixer\"                         \
         -DLIBMATEMIXER_BACKEND_DIR=\"$(libdir)/libmatemixer\"
 
-libmatemixer_includedir = $(includedir)/libmatemixer
+libmatemixer_includedir = $(includedir)/mate-mixer/libmatemixer
 
 libmatemixer_include_HEADERS =                                  \
         matemixer.h                                             \
