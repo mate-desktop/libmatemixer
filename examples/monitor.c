@@ -1,24 +1,24 @@
 /*
  * Copyright (C) 2014 Michal Ratajsky <michal.ratajsky@gmail.com>
  *
- * This library is free software; you can redistribute it and/or
+ * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
  * License as published by the Free Software Foundation; either
  * version 2 of the licence, or (at your option) any later version.
  *
- * This library is distributed in the hope that it will be useful,
+ * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  * Lesser General Public License for more details.
  *
  * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, see <http://www.gnu.org/licenses/>.
+ * License along with this program; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <glib.h>
-#include <glib-object.h>
 #include <string.h>
 #include <locale.h>
+#include <glib.h>
+#include <glib-object.h>
 
 #ifdef G_OS_UNIX
 #include <glib-unix.h>
@@ -27,43 +27,17 @@
 #include <libmatemixer/matemixer.h>
 
 static MateMixerContext *context;
-static GMainLoop *mainloop;
+static GMainLoop        *mainloop;
 
-static gchar *
-create_app_string (const gchar *app_name,
-                   const gchar *app_id,
-                   const gchar *app_version)
-{
-    GString *string;
-
-    string = g_string_new ("");
-
-    if (app_name != NULL) {
-        g_string_append (string, app_name);
-
-        if (app_version != NULL)
-            g_string_append_printf (string, " %s", app_version);
-        if (app_id != NULL)
-            g_string_append_printf (string, " (%s)", app_id);
-    }
-    else if (app_id != NULL) {
-        g_string_append (string, app_id);
-
-        if (app_version != NULL)
-            g_string_append_printf (string, " %s", app_version);
-    }
-
-    return g_string_free (string, FALSE);
-}
-
+/* Convert MateMixerStreamControlRole constant to a string */
 static const gchar *
-get_stream_control_role_string (MateMixerStreamControlRole role)
+get_role_string (MateMixerStreamControlRole role)
 {
     switch (role) {
-    case MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN:
-        return "Unknown";
     case MATE_MIXER_STREAM_CONTROL_ROLE_MASTER:
         return "Master";
+    case MATE_MIXER_STREAM_CONTROL_ROLE_APPLICATION:
+        return "Application";
     case MATE_MIXER_STREAM_CONTROL_ROLE_PCM:
         return "PCM";
     case MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER:
@@ -85,17 +59,15 @@ get_stream_control_role_string (MateMixerStreamControlRole role)
     case MATE_MIXER_STREAM_CONTROL_ROLE_MUSIC:
         return "Music";
     default:
-        break;
+        return "Unknown";
     }
-    return "Unknown";
 }
 
+/* Convert MateMixerStreamControlMediaRole constant to a string */
 static const gchar *
-get_stream_control_media_role_string (MateMixerStreamControlMediaRole role)
+get_media_role_string (MateMixerStreamControlMediaRole role)
 {
     switch (role) {
-    case MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_UNKNOWN:
-        return "Unknown";
     case MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_VIDEO:
         return "Video";
     case MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_MUSIC:
@@ -119,175 +91,192 @@ get_stream_control_media_role_string (MateMixerStreamControlMediaRole role)
     case MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_FILTER:
         return "Filter";
     default:
-        break;
+        return "Unknown";
     }
-    return "Unknown";
 }
 
-static gchar *
-create_volume_bar (MateMixerStreamControl *ctl, double *percent)
+/* Convert MateMixerSwitchRole constant to a string */
+static const gchar *
+get_switch_role_string (MateMixerSwitchRole role)
 {
-    GString *string;
-    gint64   volume;
-    gint64   volume_min;
-    gint64   volume_max;
-    double   p;
-    int      i;
-    int      length = 30;
-    int      stars;
-
-    volume     = mate_mixer_stream_control_get_volume (ctl);
-    volume_min = mate_mixer_stream_control_get_min_volume (ctl);
-    volume_max = mate_mixer_stream_control_get_normal_volume (ctl);
-
-    string = g_string_new ("[");
-
-    p = (double) (volume - volume_min) / (volume_max - volume_min) * 100;
-    if (percent != NULL)
-        *percent = p;
-
-    stars = (int) ((p / 100) * length);
-
-    for (i = 0; i < length; i++)
-        g_string_append_c (string, (i < stars) ? '*' : '.');
-
-    return g_string_free (g_string_append_c (string, ']'), FALSE);
+    switch (role) {
+    case MATE_MIXER_SWITCH_ROLE_DEVICE_PROFILE:
+        return "Device Profile";
+    case MATE_MIXER_SWITCH_ROLE_PORT:
+        return "Port";
+    case MATE_MIXER_SWITCH_ROLE_BOOST:
+        return "Boost";
+    default:
+        return "Unknown";
+    }
 }
 
+/* Convert MateMixerDirection constant to a string */
+static const gchar *
+get_direction_string (MateMixerDirection direction)
+{
+    switch (direction) {
+    case MATE_MIXER_DIRECTION_INPUT:
+        return "Record";
+    case MATE_MIXER_DIRECTION_OUTPUT:
+        return "Playback";
+    default:
+        return "Unknown";
+    }
+}
+
+static gdouble
+get_volume_percentage (MateMixerStreamControl *control)
+{
+    guint volume;
+    guint volume_min;
+    guint volume_max;
+
+    volume     = mate_mixer_stream_control_get_volume (control);
+    volume_min = mate_mixer_stream_control_get_min_volume (control);
+    volume_max = mate_mixer_stream_control_get_normal_volume (control);
+
+    return (gdouble) (volume - volume_min) / (volume_max - volume_min) * 100;
+}
+
+/* Print a list of sound devices */
 static void
 print_devices (void)
 {
     const GList *devices;
 
+    /* Read a list of devices from the context */
     devices = mate_mixer_context_list_devices (context);
-
-    while (devices) {
+    while (devices != NULL) {
+        const GList     *switches;
         MateMixerDevice *device = MATE_MIXER_DEVICE (devices->data);
 
-        g_print ("Device %s\n"
-                 "       |-| Label     : %s\n"
-                 "       |-| Icon Name : %s\n\n",
+        g_print ("Device %s:\n"
+                 "\tLabel     : %s\n"
+                 "\tIcon Name : %s\n\n",
                  mate_mixer_device_get_name (device),
                  mate_mixer_device_get_label (device),
                  mate_mixer_device_get_icon (device));
 
-        const GList *switches = mate_mixer_device_list_switches (device);
-
+        /* Read a list of switches that belong to the device */
+        switches = mate_mixer_device_list_switches (device);
         while (switches != NULL) {
-            MateMixerSwitch *swtch = MATE_MIXER_SWITCH (switches->data);
+            const GList           *options;
+            MateMixerSwitch       *swtch  = MATE_MIXER_SWITCH (switches->data);
             MateMixerSwitchOption *active = mate_mixer_switch_get_active_option (swtch);
 
-            const GList *options;
+            g_print ("\tSwitch %s:\n"
+                     "\t\tLabel : %s\n"
+                     "\t\tRole  : %s\n",
+                     mate_mixer_switch_get_name (swtch),
+                     mate_mixer_switch_get_label (swtch),
+                     get_switch_role_string (mate_mixer_switch_get_role (swtch)));
 
+            g_print ("\tOptions:\n");
+
+            /* Read a list of switch options that belong to the switch */
             options = mate_mixer_switch_list_options (swtch);
-
-            g_print ("Switch %s\n",
-                     mate_mixer_switch_get_name (swtch));
-
             while (options != NULL) {
                 MateMixerSwitchOption *option = MATE_MIXER_SWITCH_OPTION (options->data);
 
-                g_print ("       |%c| %s (icon: %s)\n",
-                         (option == active)
+                g_print ("\t\t|%c| %s\n",
+                         (active != NULL && option == active)
                             ? '*'
                             : '-',
-                         mate_mixer_switch_option_get_label (option),
-                         mate_mixer_switch_option_get_icon (option));
+                         mate_mixer_switch_option_get_label (option));
 
                 options = options->next;
             }
 
+            g_print ("\n");
             switches = switches->next;
         }
-        g_print ("\n");
 
         devices = devices->next;
     }
 }
 
+/* Print a list of streams */
 static void
 print_streams (void)
 {
     const GList *streams;
 
+    /* Read a list of streams from the context */
     streams = mate_mixer_context_list_streams (context);
+    while (streams != NULL) {
+        MateMixerStream *stream = MATE_MIXER_STREAM (streams->data);
+        const GList     *controls;
+        const GList     *switches;
 
-    while (streams) {
-        MateMixerStream        *stream = MATE_MIXER_STREAM (streams->data);
-        MateMixerStreamControl *ctl;
-        MateMixerSwitch        *swtch;
-        gchar                  *volume_bar;
-        gdouble                 volume;
+        g_print ("Stream %s:\n"
+                 "\tLabel     : %s\n"
+                 "\tDirection : %s\n\n",
+                 mate_mixer_stream_get_name (stream),
+                 mate_mixer_stream_get_label (stream),
+                 get_direction_string (mate_mixer_stream_get_direction (stream)));
 
-        const GList *controls;
-        const GList *switches;
-
+        /* Read a list of controls in the stream */
         controls = mate_mixer_stream_list_controls (stream);
-
         while (controls != NULL) {
-            ctl = MATE_MIXER_STREAM_CONTROL (controls->data);
+            MateMixerStreamControl *control = MATE_MIXER_STREAM_CONTROL (controls->data);
 
-            const gchar *role;
+            g_print ("\tControl %s:\n"
+                     "\t\tLabel      : %s\n"
+                     "\t\tVolume     : %.0f %%\n"
+                     "\t\tMuted      : %s\n"
+                     "\t\tChannels   : %d\n"
+                     "\t\tBalance    : %.1f\n"
+                     "\t\tFade       : %.1f\n"
+                     "\t\tRole       : %s\n"
+                     "\t\tMedia role : %s\n",
+                     mate_mixer_stream_control_get_name (control),
+                     mate_mixer_stream_control_get_label (control),
+                     get_volume_percentage (control),
+                     mate_mixer_stream_control_get_mute (control) ? "Yes" : "No",
+                     mate_mixer_stream_control_get_num_channels (control),
+                     mate_mixer_stream_control_get_balance (control),
+                     mate_mixer_stream_control_get_fade (control),
+                     get_role_string (mate_mixer_stream_control_get_role (control)),
+                     get_media_role_string (mate_mixer_stream_control_get_media_role (control)));
 
-            role = get_stream_control_role_string (mate_mixer_stream_control_get_role (ctl));
-
-            // XXX volume is sometimes -nan, use flags
-            volume_bar = create_volume_bar (ctl, &volume);
-
-            g_print ("Stream %s control %s / %s\n"
-                     "       |-| Volume      : %s %.1f %% (%.1f dB)\n"
-                     "       |-| Muted       : %s\n"
-                     "       |-| Channels    : %d\n"
-                     "       |-| Balance     : %.1f\n"
-                     "       |-| Fade        : %.1f\n"
-                     "       |-| Role        : %s\n",
-                     mate_mixer_stream_get_name (stream),
-                     mate_mixer_stream_control_get_name (ctl),
-                     mate_mixer_stream_control_get_label (ctl),
-                     volume_bar,
-                     volume,
-                     mate_mixer_stream_control_get_decibel (ctl),
-                     mate_mixer_stream_control_get_mute (ctl) ? "Yes" : "No",
-                     mate_mixer_stream_control_get_num_channels (ctl),
-                     mate_mixer_stream_control_get_balance (ctl),
-                     mate_mixer_stream_control_get_fade (ctl),
-                     role);
-
-            g_free (volume_bar);
-
+            g_print ("\n");
             controls = controls->next;
         }
 
+        /* Read a list of switches in the stream */
         switches = mate_mixer_stream_list_switches (stream);
-
         while (switches != NULL) {
-            swtch = MATE_MIXER_SWITCH (switches->data);
-            const GList *options;
-
-            options = mate_mixer_switch_list_options (swtch);
-
+            const GList           *options;
+            MateMixerSwitch       *swtch  = MATE_MIXER_SWITCH (switches->data);
             MateMixerSwitchOption *active = mate_mixer_switch_get_active_option (swtch);
 
-            g_print ("Switch %s\n",
-                     mate_mixer_switch_get_name (swtch));
+            g_print ("\tSwitch %s:\n"
+                     "\t\tLabel      : %s\n"
+                     "\t\tRole       : %s\n",
+                     mate_mixer_switch_get_name (swtch),
+                     mate_mixer_switch_get_label (swtch),
+                     get_switch_role_string (mate_mixer_switch_get_role (swtch)));
 
+            g_print ("\tOptions:\n");
+
+            /* Read a list of switch options that belong to the switch */
+            options = mate_mixer_switch_list_options (swtch);
             while (options != NULL) {
                 MateMixerSwitchOption *option = MATE_MIXER_SWITCH_OPTION (options->data);
 
-                g_print ("       |%c| %s (icon: %s)\n",
-                         (option == active)
+                g_print ("\t\t|%c| %s\n",
+                         (active != NULL && option == active)
                             ? '*'
                             : '-',
-                         mate_mixer_switch_option_get_label (option),
-                         mate_mixer_switch_option_get_icon (option));
+                         mate_mixer_switch_option_get_label (option));
 
                 options = options->next;
             }
 
+            g_print ("\n");
             switches = switches->next;
         }
-
-        g_print ("\n");
 
         streams = streams->next;
     }
@@ -306,7 +295,7 @@ connected (void)
 }
 
 static void
-state_cb (void)
+on_context_state_notify (void)
 {
     MateMixerState state;
 
@@ -314,6 +303,8 @@ state_cb (void)
 
     switch (state) {
     case MATE_MIXER_STATE_READY:
+        /* This state can be reached repeatedly if the context is connected
+         * to a sound server, the connection is dropped and then reestablished */
         connected ();
         break;
     case MATE_MIXER_STATE_FAILED:
@@ -326,35 +317,36 @@ state_cb (void)
 }
 
 static void
-device_added_cb (MateMixerContext *context, const gchar *name)
+on_context_device_added (MateMixerContext *context, const gchar *name)
 {
     g_print ("Device added: %s\n", name);
 }
 
 static void
-device_removed_cb (MateMixerContext *context, const gchar *name)
+on_context_device_removed (MateMixerContext *context, const gchar *name)
 {
     g_print ("Device removed: %s\n", name);
 }
 
 static void
-stream_added_cb (MateMixerContext *context, const gchar *name)
+on_context_stream_added (MateMixerContext *context, const gchar *name)
 {
     g_print ("Stream added: %s\n", name);
 }
 
 static void
-stream_removed_cb (MateMixerContext *context, const gchar *name)
+on_context_stream_removed (MateMixerContext *context, const gchar *name)
 {
     g_print ("Stream removed: %s\n", name);
 }
 
 #ifdef G_OS_UNIX
 static gboolean
-signal_cb (gpointer mainloop)
+on_signal (gpointer mainloop)
 {
     g_idle_add ((GSourceFunc) g_main_loop_quit, mainloop);
-    return FALSE;
+
+    return G_SOURCE_REMOVE;
 }
 #endif
 
@@ -363,9 +355,8 @@ int main (int argc, char *argv[])
     MateMixerState  state;
     GOptionContext *ctx;
     gchar          *backend = NULL;
-    gchar          *server = NULL;
-    GError         *error = NULL;
-
+    gchar          *server  = NULL;
+    GError         *error   = NULL;
     GOptionEntry    entries[] = {
         { "backend", 'b', 0, G_OPTION_ARG_STRING, &backend, "Sound system to use (pulseaudio, alsa, oss, null)", NULL },
         { "server",  's', 0, G_OPTION_ARG_STRING, &server,  "Sound server address", NULL },
@@ -376,76 +367,80 @@ int main (int argc, char *argv[])
 
     g_option_context_add_main_entries (ctx, entries, NULL);
 
-    if (!g_option_context_parse (ctx, &argc, &argv, &error)) {
+    if (g_option_context_parse (ctx, &argc, &argv, &error) == FALSE) {
         g_printerr ("%s\n", error->message);
         g_error_free (error);
+        g_option_context_free (ctx);
         return 1;
     }
 
-    /* Initialize the library, if the function returns FALSE, it is not usable */
-    if (!mate_mixer_init ())
+    g_option_context_free (ctx);
+
+    /* Initialize the library.
+     * If the function returns FALSE, the library is not usable. */
+    if (mate_mixer_init () == FALSE)
         return 1;
 
     setlocale (LC_ALL, "");
 
-    /* Set up the contextler, through which we access the main functionality */
+    /* Create a libmatemixer context to access the library */
     context = mate_mixer_context_new ();
 
-    /* Some details about our application, only used with the PulseAudio backend */
+    /* Fill in some details about our application, only used with the PulseAudio backend */
     mate_mixer_context_set_app_name (context, "MateMixer Monitor");
     mate_mixer_context_set_app_id (context, "org.mate-desktop.libmatemixer-monitor");
     mate_mixer_context_set_app_version (context, "1.0");
-    mate_mixer_context_set_app_icon (context, "multimedia-volume-context");
+    mate_mixer_context_set_app_icon (context, "multimedia-volume-control");
 
-    if (backend) {
-        if (!strcmp (backend, "pulseaudio"))
+    if (backend != NULL) {
+        if (strcmp (backend, "pulseaudio") == 0)
             mate_mixer_context_set_backend_type (context, MATE_MIXER_BACKEND_PULSEAUDIO);
-        else if (!strcmp (backend, "alsa"))
+        else if (strcmp (backend, "alsa") == 0)
             mate_mixer_context_set_backend_type (context, MATE_MIXER_BACKEND_ALSA);
-        else if (!strcmp (backend, "oss"))
+        else if (strcmp (backend, "oss") == 0)
             mate_mixer_context_set_backend_type (context, MATE_MIXER_BACKEND_OSS);
-        else if (!strcmp (backend, "null"))
+        else if (strcmp (backend, "null") == 0)
             mate_mixer_context_set_backend_type (context, MATE_MIXER_BACKEND_NULL);
         else
-            g_printerr ("Sound system backend '%s' is unknown, it will be auto-detected.\n",
+            g_printerr ("Sound system backend '%s' is unknown, the backend will be auto-detected.\n",
                         backend);
 
         g_free (backend);
     }
 
-    if (server) {
+    /* Set PulseAudio server address if requested */
+    if (server != NULL) {
         mate_mixer_context_set_server_address (context, server);
         g_free (server);
     }
 
-    /* Initiate connection to the sound server */
-    if (!mate_mixer_context_open (context)) {
+    /* Initiate connection to a sound system */
+    if (mate_mixer_context_open (context) == FALSE) {
+        g_printerr ("Could not connect to a sound system, quitting.\n");
         g_object_unref (context);
         return 1;
     }
 
+    /* Connect to some basic signals of the context */
     g_signal_connect (G_OBJECT (context),
                       "device-added",
-                      G_CALLBACK (device_added_cb),
+                      G_CALLBACK (on_context_device_added),
                       NULL);
     g_signal_connect (G_OBJECT (context),
                       "device-removed",
-                      G_CALLBACK (device_removed_cb),
+                      G_CALLBACK (on_context_device_removed),
                       NULL);
     g_signal_connect (G_OBJECT (context),
                       "stream-added",
-                      G_CALLBACK (stream_added_cb),
+                      G_CALLBACK (on_context_stream_added),
                       NULL);
     g_signal_connect (G_OBJECT (context),
                       "stream-removed",
-                      G_CALLBACK (stream_removed_cb),
+                      G_CALLBACK (on_context_stream_removed),
                       NULL);
 
-    /* If mate_mixer_context_open() returns TRUE, the state will be either
-     * MATE_MIXER_STATE_READY or MATE_MIXER_STATE_CONNECTING.
-     *
-     * In case mate_mixer_context_open() returned FALSE, the current state
-     * would be MATE_MIXER_STATE_FAILED */
+    /* When mate_mixer_context_open() returns TRUE, the state must be either
+     * MATE_MIXER_STATE_READY or MATE_MIXER_STATE_CONNECTING. */
     state = mate_mixer_context_get_state (context);
 
     switch (state) {
@@ -455,10 +450,11 @@ int main (int argc, char *argv[])
     case MATE_MIXER_STATE_CONNECTING:
         g_print ("Waiting for connection...\n");
 
-        /* Wait for the state transition */
-        g_signal_connect (context,
+        /* The state will change asynchronously to either MATE_MIXER_STATE_READY
+         * or MATE_MIXER_STATE_FAILED, wait for the change in a main loop */
+        g_signal_connect (G_OBJECT (context),
                           "notify::state",
-                          G_CALLBACK (state_cb),
+                          G_CALLBACK (on_context_state_notify),
                           NULL);
         break;
     default:
@@ -469,13 +465,12 @@ int main (int argc, char *argv[])
     mainloop = g_main_loop_new (NULL, FALSE);
 
 #ifdef G_OS_UNIX
-    g_unix_signal_add (SIGTERM, signal_cb, mainloop);
-    g_unix_signal_add (SIGINT,  signal_cb, mainloop);
+    g_unix_signal_add (SIGTERM, on_signal, mainloop);
+    g_unix_signal_add (SIGINT,  on_signal, mainloop);
 #endif
 
     g_main_loop_run (mainloop);
 
     g_object_unref (context);
-
     return 0;
 }
