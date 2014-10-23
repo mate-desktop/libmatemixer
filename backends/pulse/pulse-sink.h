@@ -63,7 +63,7 @@ PulseSink *pulse_sink_new      (PulseConnection    *connection,
                                 const pa_sink_info *info,
                                 PulseDevice        *device);
 
-void       pulse_sink_add_input (PulseSink          *sink,
+gboolean   pulse_sink_add_input (PulseSink          *sink,
                                  const pa_sink_input_info *info);
 
 void       pulse_sink_remove_input (PulseSink *sink, guint32 index);

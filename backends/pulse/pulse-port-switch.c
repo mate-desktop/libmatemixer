@@ -53,6 +53,7 @@ static void pulse_port_switch_set_property (GObject                 *object,
                                             GParamSpec              *pspec);
 
 static void pulse_port_switch_init         (PulsePortSwitch         *swtch);
+static void pulse_port_switch_dispose      (GObject                 *object);
 
 G_DEFINE_ABSTRACT_TYPE (PulsePortSwitch, pulse_port_switch, MATE_MIXER_TYPE_SWITCH)
 
@@ -73,6 +74,7 @@ pulse_port_switch_class_init (PulsePortSwitchClass *klass)
     MateMixerSwitchClass *switch_class;
 
     object_class = G_OBJECT_CLASS (klass);
+    object_class->dispose      = pulse_port_switch_dispose;
     object_class->get_property = pulse_port_switch_get_property;
     object_class->set_property = pulse_port_switch_set_property;
 
@@ -145,6 +147,20 @@ pulse_port_switch_init (PulsePortSwitch *swtch)
     swtch->priv = G_TYPE_INSTANCE_GET_PRIVATE (swtch,
                                                PULSE_TYPE_PORT_SWITCH,
                                                PulsePortSwitchPrivate);
+}
+
+static void
+pulse_port_switch_dispose (GObject *object)
+{
+    PulsePortSwitch *swtch;
+
+    swtch = PULSE_PORT_SWITCH (object);
+
+    if (swtch->priv->ports != NULL) {
+        g_list_free_full (swtch->priv->ports, g_object_unref);
+        swtch->priv->ports = NULL;
+    }
+    G_OBJECT_CLASS (pulse_port_switch_parent_class)->dispose (object);
 }
 
 PulseStream *

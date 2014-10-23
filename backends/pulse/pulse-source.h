@@ -63,7 +63,7 @@ PulseSource *pulse_source_new           (PulseConnection             *connection
                                          const pa_source_info        *info,
                                          PulseDevice                 *device);
 
-void         pulse_source_add_output    (PulseSource                 *source,
+gboolean     pulse_source_add_output    (PulseSource                 *source,
                                          const pa_source_output_info *info);
 
 void         pulse_source_remove_output (PulseSource                 *source,

@@ -38,9 +38,9 @@ struct _PulseDevicePrivate
     GHashTable        *ports;
     GHashTable        *streams;
     GList             *streams_list;
-    GList             *switches_list;
     PulseConnection   *connection;
     PulseDeviceSwitch *pswitch;
+    GList             *pswitch_list;
 };
 
 enum {
@@ -79,7 +79,6 @@ static void             pulse_device_load          (PulseDevice        *device,
                                                     const pa_card_info *info);
 
 static void             free_list_streams          (PulseDevice        *device);
-static void             free_list_switches         (PulseDevice        *device);
 
 static void
 pulse_device_class_init (PulseDeviceClass *klass)
@@ -201,8 +200,11 @@ pulse_device_dispose (GObject *object)
     g_clear_object (&device->priv->pswitch);
 
     free_list_streams (device);
-    free_list_switches (device);
 
+    if (device->priv->pswitch_list != NULL) {
+        g_list_free (device->priv->pswitch_list);
+        device->priv->pswitch_list = NULL;
+    }
     G_OBJECT_CLASS (pulse_device_parent_class)->dispose (object);
 }
 
@@ -279,11 +281,11 @@ pulse_device_add_stream (PulseDevice *device, PulseStream *stream)
 
     name = mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream));
 
-    free_list_streams (device);
-
     g_hash_table_insert (device->priv->streams,
                          g_strdup (name),
                          g_object_ref (stream));
+
+    free_list_streams (device);
 
     g_signal_emit_by_name (G_OBJECT (device),
                            "stream-added",
@@ -363,7 +365,7 @@ pulse_device_list_switches (MateMixerDevice *mmd)
 {
     g_return_val_if_fail (PULSE_IS_DEVICE (mmd), NULL);
 
-    return PULSE_DEVICE (mmd)->priv->switches_list;
+    return PULSE_DEVICE (mmd)->priv->pswitch_list;
 }
 
 static void
@@ -387,7 +389,7 @@ pulse_device_load (PulseDevice *device, const pa_card_info *info)
 
         g_hash_table_insert (device->priv->ports,
                              g_strdup (name),
-                             g_object_ref (port));
+                             port);
     }
 #endif
 
@@ -397,7 +399,7 @@ pulse_device_load (PulseDevice *device, const pa_card_info *info)
                                                          _("Profile"),
                                                          device);
 
-        device->priv->switches_list = g_list_prepend (NULL, g_object_ref (device->priv->pswitch));
+        device->priv->pswitch_list = g_list_prepend (NULL, device->priv->pswitch);
     }
 
     for (i = 0; i < info->n_profiles; i++) {
@@ -421,6 +423,8 @@ pulse_device_load (PulseDevice *device, const pa_card_info *info)
                                             p_info->priority);
 
         pulse_device_switch_add_profile (device->priv->pswitch, profile);
+
+        g_object_unref (profile);
     }
 }
 
@@ -433,15 +437,4 @@ free_list_streams (PulseDevice *device)
     g_list_free_full (device->priv->streams_list, g_object_unref);
 
     device->priv->streams_list = NULL;
-}
-
-static void
-free_list_switches (PulseDevice *device)
-{
-    if (device->priv->switches_list == NULL)
-        return;
-
-    g_list_free_full (device->priv->switches_list, g_object_unref);
-
-    device->priv->switches_list = NULL;
 }

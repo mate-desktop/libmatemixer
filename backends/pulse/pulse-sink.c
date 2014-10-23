@@ -38,9 +38,9 @@ struct _PulseSinkPrivate
 {
     guint32           monitor;
     GHashTable       *inputs;
+    GList            *inputs_list;
     PulsePortSwitch  *pswitch;
-    GList            *streams_list;
-    GList            *switches_list;
+    GList            *pswitch_list;
     PulseSinkControl *control;
 };
 
@@ -53,6 +53,8 @@ G_DEFINE_TYPE (PulseSink, pulse_sink, PULSE_TYPE_STREAM);
 
 static const GList *pulse_sink_list_controls (MateMixerStream *mms);
 static const GList *pulse_sink_list_switches (MateMixerStream *mms);
+
+static void         free_list_controls       (PulseSink       *sink);
 
 static void
 pulse_sink_class_init (PulseSinkClass *klass)
@@ -93,11 +95,17 @@ pulse_sink_dispose (GObject *object)
 
     sink = PULSE_SINK (object);
 
+    g_hash_table_remove_all (sink->priv->inputs);
+
     g_clear_object (&sink->priv->control);
     g_clear_object (&sink->priv->pswitch);
 
-    g_hash_table_remove_all (sink->priv->inputs);
+    free_list_controls (sink);
 
+    if (sink->priv->pswitch_list != NULL) {
+        g_list_free (sink->priv->pswitch_list);
+        sink->priv->pswitch_list = NULL;
+    }
     G_OBJECT_CLASS (pulse_sink_parent_class)->dispose (object);
 }
 
@@ -164,6 +172,7 @@ pulse_sink_new (PulseConnection    *connection,
             if (p == info->active_port)
                 pulse_port_switch_set_active_port (sink->priv->pswitch, port);
         }
+        sink->priv->pswitch_list = g_list_prepend (NULL, sink->priv->pswitch);
 
         g_debug ("Created port list for sink %s", info->name);
     }
@@ -175,7 +184,7 @@ pulse_sink_new (PulseConnection    *connection,
     return sink;
 }
 
-void
+gboolean
 pulse_sink_add_input (PulseSink *sink, const pa_sink_input_info *info)
 {
     PulseSinkInput *input;
@@ -188,32 +197,40 @@ pulse_sink_add_input (PulseSink *sink, const pa_sink_input_info *info)
         input = pulse_sink_input_new (sink, info);
         g_hash_table_insert (sink->priv->inputs,
                              GINT_TO_POINTER (info->index),
-                             g_object_ref (input));
+                             input);
+
+        free_list_controls (sink);
 
         name = mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (input));
         g_signal_emit_by_name (G_OBJECT (sink),
                                "control-added",
                                name);
-    } else
-        pulse_sink_input_update (input, info);
+        return TRUE;
+    }
+
+    pulse_sink_input_update (input, info);
+    return FALSE;
 }
 
 void
 pulse_sink_remove_input (PulseSink *sink, guint32 index)
 {
     PulseSinkInput *input;
-    const gchar    *name;
+    gchar          *name;
 
     input = g_hash_table_lookup (sink->priv->inputs, GINT_TO_POINTER (index));
     if G_UNLIKELY (input == NULL)
         return;
 
-    name = mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (input));
+    name = g_strdup (mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (input)));
 
     g_hash_table_remove (sink->priv->inputs, GINT_TO_POINTER (index));
+
+    free_list_controls (sink);
     g_signal_emit_by_name (G_OBJECT (sink),
                            "control-removed",
                            name);
+    g_free (name);
 }
 
 void
@@ -244,16 +261,21 @@ pulse_sink_get_index_monitor (PulseSink *sink)
 static const GList *
 pulse_sink_list_controls (MateMixerStream *mms)
 {
-    GList *list;
+    PulseSink *sink;
 
     g_return_val_if_fail (PULSE_IS_SINK (mms), NULL);
 
-    // XXX
-    list = g_hash_table_get_values (PULSE_SINK (mms)->priv->inputs);
-    if (list != NULL)
-        g_list_foreach (list, (GFunc) g_object_ref, NULL);
+    sink = PULSE_SINK (mms);
 
-    return g_list_prepend (list, g_object_ref (PULSE_SINK (mms)->priv->control));
+    if (sink->priv->inputs_list == NULL) {
+        sink->priv->inputs_list = g_hash_table_get_values (sink->priv->inputs);
+        if (sink->priv->inputs_list != NULL)
+            g_list_foreach (sink->priv->inputs_list, (GFunc) g_object_ref, NULL);
+
+        sink->priv->inputs_list = g_list_prepend (sink->priv->inputs_list,
+                                                  g_object_ref (sink->priv->control));
+    }
+    return sink->priv->inputs_list;
 }
 
 static const GList *
@@ -261,9 +283,16 @@ pulse_sink_list_switches (MateMixerStream *mms)
 {
     g_return_val_if_fail (PULSE_IS_SINK (mms), NULL);
 
-    // XXX
-    if (PULSE_SINK (mms)->priv->pswitch != NULL)
-        return g_list_prepend (NULL, PULSE_SINK (mms)->priv->pswitch);
+    return PULSE_SINK (mms)->priv->pswitch_list;
+}
 
-    return NULL;
+static void
+free_list_controls (PulseSink *sink)
+{
+    if (sink->priv->inputs_list == NULL)
+        return;
+
+    g_list_free_full (sink->priv->inputs_list, g_object_unref);
+
+    sink->priv->inputs_list = NULL;
 }

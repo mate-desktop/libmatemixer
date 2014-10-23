@@ -129,7 +129,11 @@ pulse_device_switch_set_property (GObject      *object,
     switch (param_id) {
     case PROP_DEVICE:
         /* Construct-only object */
-        swtch->priv->device = g_value_dup_object (value);
+        swtch->priv->device = g_value_get_object (value);
+
+        if (swtch->priv->device != NULL)
+            g_object_add_weak_pointer (G_OBJECT (swtch->priv->device),
+                                       (gpointer *) &swtch->priv->device);
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -152,8 +156,10 @@ pulse_device_switch_dispose (GObject *object)
 
     swtch = PULSE_DEVICE_SWITCH (object);
 
-    g_clear_object (&swtch->priv->device);
-
+    if (swtch->priv->profiles != NULL) {
+        g_list_free_full (swtch->priv->profiles, g_object_unref);
+        swtch->priv->profiles = NULL;
+    }
     G_OBJECT_CLASS (pulse_device_switch_parent_class)->dispose (object);
 }
 
@@ -183,7 +189,7 @@ pulse_device_switch_add_profile (PulseDeviceSwitch *swtch, PulseDeviceProfile *p
     g_return_if_fail (PULSE_IS_DEVICE_PROFILE (profile));
 
     swtch->priv->profiles = g_list_insert_sorted (swtch->priv->profiles,
-                                                  profile,
+                                                  g_object_ref (profile),
                                                   compare_profiles);
 }
 

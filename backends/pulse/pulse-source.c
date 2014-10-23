@@ -37,7 +37,9 @@
 struct _PulseSourcePrivate
 {
     GHashTable         *outputs;
+    GList              *outputs_list;
     PulsePortSwitch    *pswitch;
+    GList              *pswitch_list;
     PulseSourceControl *control;
 };
 
@@ -50,6 +52,8 @@ G_DEFINE_TYPE (PulseSource, pulse_source, PULSE_TYPE_STREAM);
 
 static const GList *pulse_source_list_controls (MateMixerStream *mms);
 static const GList *pulse_source_list_switches (MateMixerStream *mms);
+
+static void         free_list_controls         (PulseSource     *source);
 
 static void
 pulse_source_class_init (PulseSourceClass *klass)
@@ -88,11 +92,17 @@ pulse_source_dispose (GObject *object)
 
     source = PULSE_SOURCE (object);
 
+    g_hash_table_remove_all (source->priv->outputs);
+
     g_clear_object (&source->priv->control);
     g_clear_object (&source->priv->pswitch);
 
-    g_hash_table_remove_all (source->priv->outputs);
+    free_list_controls (source);
 
+    if (source->priv->pswitch_list != NULL) {
+        g_list_free (source->priv->pswitch_list);
+        source->priv->pswitch_list = NULL;
+    }
     G_OBJECT_CLASS (pulse_source_parent_class)->dispose (object);
 }
 
@@ -159,6 +169,7 @@ pulse_source_new (PulseConnection      *connection,
             if (p == info->active_port)
                 pulse_port_switch_set_active_port (source->priv->pswitch, port);
         }
+        source->priv->pswitch_list = g_list_prepend (NULL, source->priv->pswitch);
 
         g_debug ("Created port list for source %s", info->name);
     }
@@ -170,7 +181,7 @@ pulse_source_new (PulseConnection      *connection,
     return source;
 }
 
-void
+gboolean
 pulse_source_add_output (PulseSource *source, const pa_source_output_info *info)
 {
     PulseSourceOutput *output;
@@ -183,32 +194,40 @@ pulse_source_add_output (PulseSource *source, const pa_source_output_info *info)
         output = pulse_source_output_new (source, info);
         g_hash_table_insert (source->priv->outputs,
                              GINT_TO_POINTER (info->index),
-                             g_object_ref (output));
+                             output);
+
+        free_list_controls (source);
 
         name = mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (output));
         g_signal_emit_by_name (G_OBJECT (source),
                                "control-added",
                                name);
-    } else
-        pulse_source_output_update (output, info);
+        return TRUE;
+    }
+
+    pulse_source_output_update (output, info);
+    return FALSE;
 }
 
 void
 pulse_source_remove_output (PulseSource *source, guint32 index)
 {
     PulseSourceOutput *output;
-    const gchar       *name;
+    gchar             *name;
 
     output = g_hash_table_lookup (source->priv->outputs, GINT_TO_POINTER (index));
     if G_UNLIKELY (output == NULL)
         return;
 
-    name = mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (output));
+    name = g_strdup (mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (output)));
 
     g_hash_table_remove (source->priv->outputs, GINT_TO_POINTER (index));
+
+    free_list_controls (source);
     g_signal_emit_by_name (G_OBJECT (source),
                            "control-removed",
                            name);
+    g_free (name);
 }
 
 void
@@ -230,16 +249,21 @@ pulse_source_update (PulseSource          *source,
 static const GList *
 pulse_source_list_controls (MateMixerStream *mms)
 {
-    GList *list;
+    PulseSource *source;
 
     g_return_val_if_fail (PULSE_IS_SOURCE (mms), NULL);
 
-    // XXX
-    list = g_hash_table_get_values (PULSE_SOURCE (mms)->priv->outputs);
-    if (list != NULL)
-        g_list_foreach (list, (GFunc) g_object_ref, NULL);
+    source = PULSE_SOURCE (mms);
 
-    return g_list_prepend (list, g_object_ref (PULSE_SOURCE (mms)->priv->control));
+    if (source->priv->outputs_list == NULL) {
+        source->priv->outputs_list = g_hash_table_get_values (source->priv->outputs);
+        if (source->priv->outputs_list != NULL)
+            g_list_foreach (source->priv->outputs_list, (GFunc) g_object_ref, NULL);
+
+        source->priv->outputs_list = g_list_prepend (source->priv->outputs_list,
+                                                     g_object_ref (source->priv->control));
+    }
+    return source->priv->outputs_list;
 }
 
 static const GList *
@@ -247,9 +271,16 @@ pulse_source_list_switches (MateMixerStream *mms)
 {
     g_return_val_if_fail (PULSE_IS_SOURCE (mms), NULL);
 
-    // XXX
-    if (PULSE_SOURCE (mms)->priv->pswitch != NULL)
-        return g_list_prepend (NULL, PULSE_SOURCE (mms)->priv->pswitch);
+    return PULSE_SOURCE (mms)->priv->pswitch_list;
+}
 
-    return NULL;
+static void
+free_list_controls (PulseSource *source)
+{
+    if (source->priv->outputs_list == NULL)
+        return;
+
+    g_list_free_full (source->priv->outputs_list, g_object_unref);
+
+    source->priv->outputs_list = NULL;
 }
