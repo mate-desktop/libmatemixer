@@ -1,0 +1,545 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+# Микола Ткач <Stuartlittle1970@gmail.com>, 2014
+msgid ""
+msgstr ""
+"Project-Id-Version: MATE Desktop Environment\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-09 15:53+0200\n"
+"PO-Revision-Date: 2014-10-23 05:55+0000\n"
+"Last-Translator: Микола Ткач <Stuartlittle1970@gmail.com>\n"
+"Language-Team: Ukrainian (http://www.transifex.com/projects/p/MATE/language/uk/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: uk\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+#. Output controls
+#: ../backends/alsa/alsa-constants.c:40
+msgid "Master"
+msgstr "Майстер"
+
+#: ../backends/alsa/alsa-constants.c:41
+msgid "Hardware Master"
+msgstr "Майстер Обладнання"
+
+#: ../backends/alsa/alsa-constants.c:42 ../backends/oss/oss-device.c:92
+msgid "PCM"
+msgstr "PCM"
+
+#: ../backends/alsa/alsa-constants.c:43
+msgid "Desktop Speaker"
+msgstr "Динамік Комп’ютера"
+
+#. OSS manual says this should be the beeper, but Linux OSS seems to assign it
+#. to
+#. * regular volume control
+#: ../backends/alsa/alsa-constants.c:44 ../backends/oss/oss-device.c:95
+msgid "Speaker"
+msgstr "Динамік"
+
+#: ../backends/alsa/alsa-constants.c:45 ../backends/alsa/alsa-constants.c:46
+#: ../backends/alsa/alsa-constants.c:47
+msgid "Front Speaker"
+msgstr "Фронтальний Динамік"
+
+#: ../backends/alsa/alsa-constants.c:48
+msgid "Headphone"
+msgstr "Навушники"
+
+#: ../backends/alsa/alsa-constants.c:49
+msgid "Headphone 2"
+msgstr "Навушники 2"
+
+#: ../backends/alsa/alsa-constants.c:50
+msgid "Headset"
+msgstr "Гарнітура"
+
+#: ../backends/alsa/alsa-constants.c:51 ../backends/alsa/alsa-constants.c:52
+#: ../backends/alsa/alsa-constants.c:53 ../backends/alsa/alsa-constants.c:54
+msgid "Surround Speaker"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:55 ../backends/alsa/alsa-constants.c:56
+msgid "Center Speaker"
+msgstr "Центральний Динамік"
+
+#: ../backends/alsa/alsa-constants.c:57 ../backends/alsa/alsa-constants.c:58
+msgid "CLFE Speaker"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:59
+msgid "Master Mono"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:60
+msgid "Master Digital"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:61 ../backends/alsa/alsa-constants.c:132
+msgid "Digital"
+msgstr "Цифровий"
+
+#: ../backends/alsa/alsa-constants.c:62 ../backends/alsa/alsa-constants.c:63
+msgid "Side Speaker"
+msgstr "Бічник Динамік"
+
+#: ../backends/alsa/alsa-constants.c:64
+msgid "Rear Speaker"
+msgstr "Задній Динамік"
+
+#: ../backends/alsa/alsa-constants.c:65
+msgid "Wave"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:66
+msgid "Phone"
+msgstr "Телефон"
+
+#: ../backends/alsa/alsa-constants.c:67 ../backends/oss/oss-device.c:98
+msgid "CD"
+msgstr "CD"
+
+#: ../backends/alsa/alsa-constants.c:68
+msgid "Music"
+msgstr "Музика"
+
+#: ../backends/alsa/alsa-constants.c:69
+msgid "AC97"
+msgstr "AC97"
+
+#: ../backends/alsa/alsa-constants.c:70 ../backends/alsa/alsa-constants.c:71
+msgid "LFE Speaker"
+msgstr "Динамік LFE"
+
+#: ../backends/alsa/alsa-constants.c:72
+msgid "Bass Speaker"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:73
+msgid "PC Speaker"
+msgstr "Динамік PC"
+
+#: ../backends/alsa/alsa-constants.c:74 ../backends/oss/oss-device.c:91
+msgid "Synth"
+msgstr "Синтезатор"
+
+#: ../backends/alsa/alsa-constants.c:75
+msgid "MIDI"
+msgstr "MIDI"
+
+#: ../backends/alsa/alsa-constants.c:76
+msgid "Synth/MIDI"
+msgstr "Синтезатор/MIDI"
+
+#: ../backends/alsa/alsa-constants.c:77 ../backends/oss/oss-device.c:89
+msgid "Bass"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:78 ../backends/oss/oss-device.c:90
+msgid "Treble"
+msgstr ""
+
+#. Input controls
+#: ../backends/alsa/alsa-constants.c:81
+msgid "Capture"
+msgstr "Захоплення"
+
+#. Microphone options
+#: ../backends/alsa/alsa-constants.c:82 ../backends/alsa/alsa-constants.c:152
+#: ../backends/alsa/alsa-constants.c:153 ../backends/oss/oss-device.c:97
+msgid "Microphone"
+msgstr "Мікрофон"
+
+#: ../backends/alsa/alsa-constants.c:83 ../backends/alsa/alsa-constants.c:188
+msgid "Microphone/Line In"
+msgstr "Мікрофон/Лінійний вхід"
+
+#: ../backends/alsa/alsa-constants.c:84 ../backends/alsa/alsa-constants.c:85
+#: ../backends/alsa/alsa-constants.c:163 ../backends/alsa/alsa-constants.c:164
+#: ../backends/alsa/alsa-constants.c:166 ../backends/alsa/alsa-constants.c:167
+#: ../backends/alsa/alsa-constants.c:168
+msgid "Internal Microphone"
+msgstr "Вбудований Мікрофон"
+
+#: ../backends/alsa/alsa-constants.c:86 ../backends/alsa/alsa-constants.c:158
+#: ../backends/alsa/alsa-constants.c:159
+msgid "Front Microphone"
+msgstr "Фронтальний Мікрофон"
+
+#: ../backends/alsa/alsa-constants.c:87 ../backends/alsa/alsa-constants.c:178
+msgid "Rear Microphone"
+msgstr "Задній Мікрофон"
+
+#: ../backends/alsa/alsa-constants.c:88 ../backends/alsa/alsa-constants.c:162
+msgid "Dock Microphone"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:89 ../backends/alsa/alsa-constants.c:160
+msgid "Headphone Microphone"
+msgstr "Мікрофон Навушників"
+
+#: ../backends/alsa/alsa-constants.c:90 ../backends/alsa/alsa-constants.c:161
+msgid "Headset Microphone"
+msgstr "Мікрофон Гарнітури"
+
+#: ../backends/alsa/alsa-constants.c:91
+msgid "Inverted Internal Microphone"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:92 ../backends/alsa/alsa-constants.c:185
+#: ../backends/alsa/alsa-constants.c:186 ../backends/alsa/alsa-constants.c:187
+#: ../backends/alsa/alsa-constants.c:190 ../backends/alsa/alsa-constants.c:191
+#: ../backends/oss/oss-device.c:96
+msgid "Line In"
+msgstr "Лінійний вхід"
+
+#: ../backends/alsa/alsa-constants.c:93 ../backends/alsa/alsa-constants.c:197
+#: ../backends/alsa/alsa-constants.c:200
+msgid "Auxiliary"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:94 ../backends/oss/oss-device.c:115
+msgid "Video"
+msgstr "Видиво"
+
+#: ../backends/alsa/alsa-constants.c:95 ../backends/alsa/alsa-constants.c:195
+msgid "TV Tuner"
+msgstr "ТВ-Тюнер"
+
+#: ../backends/alsa/alsa-constants.c:96 ../backends/alsa/alsa-constants.c:196
+msgid "FM"
+msgstr "FM"
+
+#: ../backends/alsa/alsa-constants.c:97
+msgid "Microphone Boost"
+msgstr "Підсилення Мікрофону"
+
+#: ../backends/alsa/alsa-constants.c:98
+msgid "Microphone Boost (+20dB)"
+msgstr "Підсилення Мікрофону (+20dB)"
+
+#: ../backends/alsa/alsa-constants.c:99 ../backends/alsa/alsa-constants.c:100
+msgid "Internal Microphone Boost"
+msgstr "Підсилення Вбудованого Мікрофону"
+
+#: ../backends/alsa/alsa-constants.c:101
+msgid "Front Microphone Boost"
+msgstr "Підсилення Фронтального Мікрофону"
+
+#: ../backends/alsa/alsa-constants.c:102
+msgid "Rear Microphone Boost"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:103
+msgid "Dock Microphone Boost"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:104
+msgid "Headphone Microphone Boost"
+msgstr "Підсилення Мікрофону Навушників"
+
+#: ../backends/alsa/alsa-constants.c:105
+msgid "Headset Microphone Boost"
+msgstr "Підсилення Мікрофону Гарнітури"
+
+#: ../backends/alsa/alsa-constants.c:106
+msgid "Line In Boost"
+msgstr "Підсилення Лінійного Входу"
+
+#: ../backends/alsa/alsa-constants.c:113
+msgid "Analog Output"
+msgstr "Аналоговий Вихід"
+
+#: ../backends/alsa/alsa-constants.c:114
+msgid "Analog Source"
+msgstr "Аналогове Джерело"
+
+#: ../backends/alsa/alsa-constants.c:115 ../backends/oss/oss-stream.c:207
+msgid "Capture Source"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:116
+msgid "Input Source"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:117
+msgid "Input Source Select"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:118
+msgid "Digital Input Source"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:119
+msgid "PCM Capture Source"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:120
+msgid "Digital Playback Source"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:121
+msgid "Mono Output Select"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:122
+msgid "Shared Mic/Line In"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:123
+msgid "Microphone Select"
+msgstr "Вибір Мікрофону"
+
+#: ../backends/alsa/alsa-constants.c:124
+msgid "Microphone Jack Mode"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:125
+msgid "Surround Jack Mode"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:126
+msgid "Auto-Mute Mode"
+msgstr ""
+
+#. (Probably) toggles
+#: ../backends/alsa/alsa-constants.c:129
+msgid "External Amplifier"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:130
+msgid "Bass Boost"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:131
+msgid "Capture Boost"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:133 ../backends/alsa/alsa-constants.c:194
+msgid "Digital In"
+msgstr "Цифровий вхід"
+
+#: ../backends/alsa/alsa-constants.c:134
+msgid "Optical"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:135
+msgid "Auto Gain Control"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:136
+msgid "Mix"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:137
+msgid "Mix Mono"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:138
+msgid "Mic Capture"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:139 ../backends/alsa/alsa-constants.c:192
+msgid "Input 1"
+msgstr "Вхід 1"
+
+#: ../backends/alsa/alsa-constants.c:140 ../backends/alsa/alsa-constants.c:193
+msgid "Input 2"
+msgstr "Вхід 2"
+
+#. Output options
+#: ../backends/alsa/alsa-constants.c:147
+msgid "Speakers"
+msgstr "Гучномовці"
+
+#: ../backends/alsa/alsa-constants.c:148
+msgid "Headphones"
+msgstr "Навушники"
+
+#: ../backends/alsa/alsa-constants.c:149
+msgid "Front Panel Headphones"
+msgstr "Навушники Фронтальної Панелі"
+
+#: ../backends/alsa/alsa-constants.c:154
+msgid "Microphone 1"
+msgstr "Мікрофон 1"
+
+#: ../backends/alsa/alsa-constants.c:155
+msgid "Microphone 2"
+msgstr "Мікрофон 2"
+
+#: ../backends/alsa/alsa-constants.c:156 ../backends/alsa/alsa-constants.c:157
+msgid "Microphone In"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:165
+msgid "Internal Microphone 1"
+msgstr "Вбудований Мікрофон 1"
+
+#: ../backends/alsa/alsa-constants.c:169
+msgid "Internal Digital Microphone"
+msgstr "Вбудований Цифровий Мікрофон"
+
+#: ../backends/alsa/alsa-constants.c:170 ../backends/alsa/alsa-constants.c:173
+msgid "Digital Microphone"
+msgstr "Цифровий Мікрофон"
+
+#: ../backends/alsa/alsa-constants.c:171
+msgid "Digital Microphone 1"
+msgstr "Цифровий Мікрофон 1"
+
+#: ../backends/alsa/alsa-constants.c:172
+msgid "Digital Microphone 2"
+msgstr "Цифровий Мікрофон 2"
+
+#: ../backends/alsa/alsa-constants.c:174 ../backends/alsa/alsa-constants.c:175
+#: ../backends/alsa/alsa-constants.c:176 ../backends/alsa/alsa-constants.c:177
+msgid "External Microphone"
+msgstr "Зовнішній Мікрофон"
+
+#: ../backends/alsa/alsa-constants.c:179
+msgid "Camera Microphone"
+msgstr "Мікрофон Камери"
+
+#. Other options
+#: ../backends/alsa/alsa-constants.c:182
+msgid "Analog"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:183
+msgid "Analog In"
+msgstr "Аналоговий вхід"
+
+#: ../backends/alsa/alsa-constants.c:184
+msgid "Analog Inputs"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:189
+msgid "Line In/Microphone"
+msgstr "Лінійний вхід/Мікрофон"
+
+#: ../backends/alsa/alsa-constants.c:198 ../backends/alsa/alsa-constants.c:199
+msgid "Auxiliary In"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:201
+msgid "Auxiliary 0"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:202
+msgid "Auxiliary 1"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:203
+msgid "Auxiliary 2"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:204
+msgid "Auxiliary 3"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:205
+msgid "Docking Station"
+msgstr ""
+
+#. Recording monitor
+#: ../backends/alsa/alsa-constants.c:206 ../backends/oss/oss-device.c:100
+msgid "Mixer"
+msgstr "Мікшер"
+
+#: ../backends/alsa/alsa-constants.c:207
+msgid "Unknown 1"
+msgstr ""
+
+#: ../backends/alsa/alsa-constants.c:208
+msgid "Unknown 2"
+msgstr ""
+
+#: ../backends/alsa/alsa-device.c:610
+msgid "On"
+msgstr "Увімк."
+
+#: ../backends/alsa/alsa-device.c:611
+msgid "Off"
+msgstr "Вимк."
+
+#: ../backends/oss/oss-backend.c:401
+#, c-format
+msgid "OSS Mixer %d"
+msgstr "Мікшер OSS %d"
+
+#: ../backends/oss/oss-device.c:88
+msgid "Volume"
+msgstr "Гучність"
+
+#: ../backends/oss/oss-device.c:101
+msgid "PCM 2"
+msgstr "PCM 2"
+
+#. Recording level (master input)
+#: ../backends/oss/oss-device.c:103
+msgid "Record"
+msgstr "Запис"
+
+#: ../backends/oss/oss-device.c:104
+msgid "Input Gain"
+msgstr ""
+
+#: ../backends/oss/oss-device.c:105
+msgid "Output Gain"
+msgstr ""
+
+#: ../backends/oss/oss-device.c:106
+msgid "Line In 1"
+msgstr "Лінійний вхід 1"
+
+#: ../backends/oss/oss-device.c:107
+msgid "Line In 2"
+msgstr "Лінійний вхід 2"
+
+#: ../backends/oss/oss-device.c:108
+msgid "Line In 3"
+msgstr "Лінійний вхід 3"
+
+#. These 3 can be attached to either digital input or output
+#: ../backends/oss/oss-device.c:110
+msgid "Digital 1"
+msgstr "Цифровий 1"
+
+#: ../backends/oss/oss-device.c:111
+msgid "Digital 2"
+msgstr "Цифровий 2"
+
+#: ../backends/oss/oss-device.c:112
+msgid "Digital 3"
+msgstr "Цифровий 3"
+
+#: ../backends/oss/oss-device.c:113
+msgid "Phone In"
+msgstr ""
+
+#: ../backends/oss/oss-device.c:114
+msgid "Phone Out"
+msgstr ""
+
+#: ../backends/oss/oss-device.c:116
+msgid "Radio"
+msgstr "Радіо"
+
+#: ../backends/pulse/pulse-device.c:392
+msgid "Profile"
+msgstr "Профіль"
+
+#: ../backends/pulse/pulse-monitor.c:282
+msgid "Peak detect"
+msgstr ""
+
+#. Create the port switch
+#: ../backends/pulse/pulse-sink.c:141 ../backends/pulse/pulse-source.c:136
+msgid "Port"
+msgstr "Порт"

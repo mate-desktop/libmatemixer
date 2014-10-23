@@ -1,0 +1,545 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+# Jeff Huang <s8321414@gmail.com>, 2014
+msgid ""
+msgstr ""
+"Project-Id-Version: MATE Desktop Environment\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-09 15:53+0200\n"
+"PO-Revision-Date: 2014-10-10 08:04+0000\n"
+"Last-Translator: Jeff Huang <s8321414@gmail.com>\n"
+"Language-Team: Chinese (Taiwan) (http://www.transifex.com/projects/p/MATE/language/zh_TW/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: zh_TW\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#. Output controls
+#: ../backends/alsa/alsa-constants.c:40
+msgid "Master"
+msgstr "主音量"
+
+#: ../backends/alsa/alsa-constants.c:41
+msgid "Hardware Master"
+msgstr "硬體主音量"
+
+#: ../backends/alsa/alsa-constants.c:42 ../backends/oss/oss-device.c:92
+msgid "PCM"
+msgstr "PCM"
+
+#: ../backends/alsa/alsa-constants.c:43
+msgid "Desktop Speaker"
+msgstr "桌面喇叭"
+
+#. OSS manual says this should be the beeper, but Linux OSS seems to assign it
+#. to
+#. * regular volume control
+#: ../backends/alsa/alsa-constants.c:44 ../backends/oss/oss-device.c:95
+msgid "Speaker"
+msgstr "喇叭"
+
+#: ../backends/alsa/alsa-constants.c:45 ../backends/alsa/alsa-constants.c:46
+#: ../backends/alsa/alsa-constants.c:47
+msgid "Front Speaker"
+msgstr "前方喇叭"
+
+#: ../backends/alsa/alsa-constants.c:48
+msgid "Headphone"
+msgstr "頭戴式耳機"
+
+#: ../backends/alsa/alsa-constants.c:49
+msgid "Headphone 2"
+msgstr "頭戴式耳機 2"
+
+#: ../backends/alsa/alsa-constants.c:50
+msgid "Headset"
+msgstr "耳機麥克風"
+
+#: ../backends/alsa/alsa-constants.c:51 ../backends/alsa/alsa-constants.c:52
+#: ../backends/alsa/alsa-constants.c:53 ../backends/alsa/alsa-constants.c:54
+msgid "Surround Speaker"
+msgstr "環繞式喇叭"
+
+#: ../backends/alsa/alsa-constants.c:55 ../backends/alsa/alsa-constants.c:56
+msgid "Center Speaker"
+msgstr "中央喇叭"
+
+#: ../backends/alsa/alsa-constants.c:57 ../backends/alsa/alsa-constants.c:58
+msgid "CLFE Speaker"
+msgstr "CLFE 喇叭"
+
+#: ../backends/alsa/alsa-constants.c:59
+msgid "Master Mono"
+msgstr "單聲道主音量"
+
+#: ../backends/alsa/alsa-constants.c:60
+msgid "Master Digital"
+msgstr "數位主音量"
+
+#: ../backends/alsa/alsa-constants.c:61 ../backends/alsa/alsa-constants.c:132
+msgid "Digital"
+msgstr "數位"
+
+#: ../backends/alsa/alsa-constants.c:62 ../backends/alsa/alsa-constants.c:63
+msgid "Side Speaker"
+msgstr "側邊喇叭"
+
+#: ../backends/alsa/alsa-constants.c:64
+msgid "Rear Speaker"
+msgstr "直立喇叭"
+
+#: ../backends/alsa/alsa-constants.c:65
+msgid "Wave"
+msgstr "振動"
+
+#: ../backends/alsa/alsa-constants.c:66
+msgid "Phone"
+msgstr "耳機"
+
+#: ../backends/alsa/alsa-constants.c:67 ../backends/oss/oss-device.c:98
+msgid "CD"
+msgstr "CD"
+
+#: ../backends/alsa/alsa-constants.c:68
+msgid "Music"
+msgstr "音樂"
+
+#: ../backends/alsa/alsa-constants.c:69
+msgid "AC97"
+msgstr "AC97"
+
+#: ../backends/alsa/alsa-constants.c:70 ../backends/alsa/alsa-constants.c:71
+msgid "LFE Speaker"
+msgstr "LFE 喇叭"
+
+#: ../backends/alsa/alsa-constants.c:72
+msgid "Bass Speaker"
+msgstr "重低音喇叭"
+
+#: ../backends/alsa/alsa-constants.c:73
+msgid "PC Speaker"
+msgstr "個人電腦喇叭"
+
+#: ../backends/alsa/alsa-constants.c:74 ../backends/oss/oss-device.c:91
+msgid "Synth"
+msgstr "合成器"
+
+#: ../backends/alsa/alsa-constants.c:75
+msgid "MIDI"
+msgstr "MIDI"
+
+#: ../backends/alsa/alsa-constants.c:76
+msgid "Synth/MIDI"
+msgstr "合成器／MIDI"
+
+#: ../backends/alsa/alsa-constants.c:77 ../backends/oss/oss-device.c:89
+msgid "Bass"
+msgstr "重低音"
+
+#: ../backends/alsa/alsa-constants.c:78 ../backends/oss/oss-device.c:90
+msgid "Treble"
+msgstr "高音"
+
+#. Input controls
+#: ../backends/alsa/alsa-constants.c:81
+msgid "Capture"
+msgstr "拍攝"
+
+#. Microphone options
+#: ../backends/alsa/alsa-constants.c:82 ../backends/alsa/alsa-constants.c:152
+#: ../backends/alsa/alsa-constants.c:153 ../backends/oss/oss-device.c:97
+msgid "Microphone"
+msgstr "麥克風"
+
+#: ../backends/alsa/alsa-constants.c:83 ../backends/alsa/alsa-constants.c:188
+msgid "Microphone/Line In"
+msgstr "麥克風／線路輸入"
+
+#: ../backends/alsa/alsa-constants.c:84 ../backends/alsa/alsa-constants.c:85
+#: ../backends/alsa/alsa-constants.c:163 ../backends/alsa/alsa-constants.c:164
+#: ../backends/alsa/alsa-constants.c:166 ../backends/alsa/alsa-constants.c:167
+#: ../backends/alsa/alsa-constants.c:168
+msgid "Internal Microphone"
+msgstr "內部麥克風"
+
+#: ../backends/alsa/alsa-constants.c:86 ../backends/alsa/alsa-constants.c:158
+#: ../backends/alsa/alsa-constants.c:159
+msgid "Front Microphone"
+msgstr "前方麥克風"
+
+#: ../backends/alsa/alsa-constants.c:87 ../backends/alsa/alsa-constants.c:178
+msgid "Rear Microphone"
+msgstr "直立麥克風"
+
+#: ../backends/alsa/alsa-constants.c:88 ../backends/alsa/alsa-constants.c:162
+msgid "Dock Microphone"
+msgstr "基座麥克風"
+
+#: ../backends/alsa/alsa-constants.c:89 ../backends/alsa/alsa-constants.c:160
+msgid "Headphone Microphone"
+msgstr "頭戴式耳機麥克風"
+
+#: ../backends/alsa/alsa-constants.c:90 ../backends/alsa/alsa-constants.c:161
+msgid "Headset Microphone"
+msgstr "耳機麥克風"
+
+#: ../backends/alsa/alsa-constants.c:91
+msgid "Inverted Internal Microphone"
+msgstr "反向內部麥克風"
+
+#: ../backends/alsa/alsa-constants.c:92 ../backends/alsa/alsa-constants.c:185
+#: ../backends/alsa/alsa-constants.c:186 ../backends/alsa/alsa-constants.c:187
+#: ../backends/alsa/alsa-constants.c:190 ../backends/alsa/alsa-constants.c:191
+#: ../backends/oss/oss-device.c:96
+msgid "Line In"
+msgstr "線路輸入"
+
+#: ../backends/alsa/alsa-constants.c:93 ../backends/alsa/alsa-constants.c:197
+#: ../backends/alsa/alsa-constants.c:200
+msgid "Auxiliary"
+msgstr "輔助"
+
+#: ../backends/alsa/alsa-constants.c:94 ../backends/oss/oss-device.c:115
+msgid "Video"
+msgstr "視訊"
+
+#: ../backends/alsa/alsa-constants.c:95 ../backends/alsa/alsa-constants.c:195
+msgid "TV Tuner"
+msgstr "電視調諧器"
+
+#: ../backends/alsa/alsa-constants.c:96 ../backends/alsa/alsa-constants.c:196
+msgid "FM"
+msgstr "調頻"
+
+#: ../backends/alsa/alsa-constants.c:97
+msgid "Microphone Boost"
+msgstr "麥克風增強"
+
+#: ../backends/alsa/alsa-constants.c:98
+msgid "Microphone Boost (+20dB)"
+msgstr "麥克風增強 (+20dB)"
+
+#: ../backends/alsa/alsa-constants.c:99 ../backends/alsa/alsa-constants.c:100
+msgid "Internal Microphone Boost"
+msgstr "內部麥克風增強"
+
+#: ../backends/alsa/alsa-constants.c:101
+msgid "Front Microphone Boost"
+msgstr "前方麥克風增強"
+
+#: ../backends/alsa/alsa-constants.c:102
+msgid "Rear Microphone Boost"
+msgstr "直立麥克風增強"
+
+#: ../backends/alsa/alsa-constants.c:103
+msgid "Dock Microphone Boost"
+msgstr "基座麥克風增強"
+
+#: ../backends/alsa/alsa-constants.c:104
+msgid "Headphone Microphone Boost"
+msgstr "頭戴式耳機麥克風增強"
+
+#: ../backends/alsa/alsa-constants.c:105
+msgid "Headset Microphone Boost"
+msgstr "耳機麥克風增強"
+
+#: ../backends/alsa/alsa-constants.c:106
+msgid "Line In Boost"
+msgstr "線路輸入增強"
+
+#: ../backends/alsa/alsa-constants.c:113
+msgid "Analog Output"
+msgstr "類比輸出"
+
+#: ../backends/alsa/alsa-constants.c:114
+msgid "Analog Source"
+msgstr "類比來源"
+
+#: ../backends/alsa/alsa-constants.c:115 ../backends/oss/oss-stream.c:207
+msgid "Capture Source"
+msgstr "拍攝來源"
+
+#: ../backends/alsa/alsa-constants.c:116
+msgid "Input Source"
+msgstr "輸入來源"
+
+#: ../backends/alsa/alsa-constants.c:117
+msgid "Input Source Select"
+msgstr "輸入來源選擇"
+
+#: ../backends/alsa/alsa-constants.c:118
+msgid "Digital Input Source"
+msgstr "數位輸入來源"
+
+#: ../backends/alsa/alsa-constants.c:119
+msgid "PCM Capture Source"
+msgstr "PCM 拍攝來源"
+
+#: ../backends/alsa/alsa-constants.c:120
+msgid "Digital Playback Source"
+msgstr "數位錄放來源"
+
+#: ../backends/alsa/alsa-constants.c:121
+msgid "Mono Output Select"
+msgstr "單聲道輸出選擇"
+
+#: ../backends/alsa/alsa-constants.c:122
+msgid "Shared Mic/Line In"
+msgstr "共享的麥克風／線路輸入"
+
+#: ../backends/alsa/alsa-constants.c:123
+msgid "Microphone Select"
+msgstr "麥克風選擇"
+
+#: ../backends/alsa/alsa-constants.c:124
+msgid "Microphone Jack Mode"
+msgstr "麥克風 Jack 模式"
+
+#: ../backends/alsa/alsa-constants.c:125
+msgid "Surround Jack Mode"
+msgstr "環繞 Jack 模式"
+
+#: ../backends/alsa/alsa-constants.c:126
+msgid "Auto-Mute Mode"
+msgstr "自動靜音模式"
+
+#. (Probably) toggles
+#: ../backends/alsa/alsa-constants.c:129
+msgid "External Amplifier"
+msgstr "外部揚聲器"
+
+#: ../backends/alsa/alsa-constants.c:130
+msgid "Bass Boost"
+msgstr "重低音增強"
+
+#: ../backends/alsa/alsa-constants.c:131
+msgid "Capture Boost"
+msgstr "拍攝增強"
+
+#: ../backends/alsa/alsa-constants.c:133 ../backends/alsa/alsa-constants.c:194
+msgid "Digital In"
+msgstr "數位輸入"
+
+#: ../backends/alsa/alsa-constants.c:134
+msgid "Optical"
+msgstr "光纖"
+
+#: ../backends/alsa/alsa-constants.c:135
+msgid "Auto Gain Control"
+msgstr "自動增加控制"
+
+#: ../backends/alsa/alsa-constants.c:136
+msgid "Mix"
+msgstr "混音"
+
+#: ../backends/alsa/alsa-constants.c:137
+msgid "Mix Mono"
+msgstr "單聲道混音"
+
+#: ../backends/alsa/alsa-constants.c:138
+msgid "Mic Capture"
+msgstr "麥克風錄音"
+
+#: ../backends/alsa/alsa-constants.c:139 ../backends/alsa/alsa-constants.c:192
+msgid "Input 1"
+msgstr "輸入 1"
+
+#: ../backends/alsa/alsa-constants.c:140 ../backends/alsa/alsa-constants.c:193
+msgid "Input 2"
+msgstr "輸入 2"
+
+#. Output options
+#: ../backends/alsa/alsa-constants.c:147
+msgid "Speakers"
+msgstr "喇叭"
+
+#: ../backends/alsa/alsa-constants.c:148
+msgid "Headphones"
+msgstr "頭戴式耳機"
+
+#: ../backends/alsa/alsa-constants.c:149
+msgid "Front Panel Headphones"
+msgstr "前方面板頭戴式耳機"
+
+#: ../backends/alsa/alsa-constants.c:154
+msgid "Microphone 1"
+msgstr "麥克風 1"
+
+#: ../backends/alsa/alsa-constants.c:155
+msgid "Microphone 2"
+msgstr "麥克風 2"
+
+#: ../backends/alsa/alsa-constants.c:156 ../backends/alsa/alsa-constants.c:157
+msgid "Microphone In"
+msgstr "麥克風輸入"
+
+#: ../backends/alsa/alsa-constants.c:165
+msgid "Internal Microphone 1"
+msgstr "內部麥克風 1"
+
+#: ../backends/alsa/alsa-constants.c:169
+msgid "Internal Digital Microphone"
+msgstr "內部數位麥克風"
+
+#: ../backends/alsa/alsa-constants.c:170 ../backends/alsa/alsa-constants.c:173
+msgid "Digital Microphone"
+msgstr "數位麥克風"
+
+#: ../backends/alsa/alsa-constants.c:171
+msgid "Digital Microphone 1"
+msgstr "數位麥克風 1"
+
+#: ../backends/alsa/alsa-constants.c:172
+msgid "Digital Microphone 2"
+msgstr "數位麥克風 2"
+
+#: ../backends/alsa/alsa-constants.c:174 ../backends/alsa/alsa-constants.c:175
+#: ../backends/alsa/alsa-constants.c:176 ../backends/alsa/alsa-constants.c:177
+msgid "External Microphone"
+msgstr "外部麥克風"
+
+#: ../backends/alsa/alsa-constants.c:179
+msgid "Camera Microphone"
+msgstr "攝影機麥克風"
+
+#. Other options
+#: ../backends/alsa/alsa-constants.c:182
+msgid "Analog"
+msgstr "類比"
+
+#: ../backends/alsa/alsa-constants.c:183
+msgid "Analog In"
+msgstr "類比輸入"
+
+#: ../backends/alsa/alsa-constants.c:184
+msgid "Analog Inputs"
+msgstr "類比輸入"
+
+#: ../backends/alsa/alsa-constants.c:189
+msgid "Line In/Microphone"
+msgstr "線路輸入／麥克風"
+
+#: ../backends/alsa/alsa-constants.c:198 ../backends/alsa/alsa-constants.c:199
+msgid "Auxiliary In"
+msgstr "輔助輸入"
+
+#: ../backends/alsa/alsa-constants.c:201
+msgid "Auxiliary 0"
+msgstr "輔助 0"
+
+#: ../backends/alsa/alsa-constants.c:202
+msgid "Auxiliary 1"
+msgstr "輔助 1"
+
+#: ../backends/alsa/alsa-constants.c:203
+msgid "Auxiliary 2"
+msgstr "輔助 2"
+
+#: ../backends/alsa/alsa-constants.c:204
+msgid "Auxiliary 3"
+msgstr "輔助 3"
+
+#: ../backends/alsa/alsa-constants.c:205
+msgid "Docking Station"
+msgstr "迷你音樂站"
+
+#. Recording monitor
+#: ../backends/alsa/alsa-constants.c:206 ../backends/oss/oss-device.c:100
+msgid "Mixer"
+msgstr "混音器"
+
+#: ../backends/alsa/alsa-constants.c:207
+msgid "Unknown 1"
+msgstr "未知 1"
+
+#: ../backends/alsa/alsa-constants.c:208
+msgid "Unknown 2"
+msgstr "未知 2"
+
+#: ../backends/alsa/alsa-device.c:610
+msgid "On"
+msgstr "開啟"
+
+#: ../backends/alsa/alsa-device.c:611
+msgid "Off"
+msgstr "關閉"
+
+#: ../backends/oss/oss-backend.c:401
+#, c-format
+msgid "OSS Mixer %d"
+msgstr "OSS 混音器 %d"
+
+#: ../backends/oss/oss-device.c:88
+msgid "Volume"
+msgstr "音量"
+
+#: ../backends/oss/oss-device.c:101
+msgid "PCM 2"
+msgstr "PCM 2"
+
+#. Recording level (master input)
+#: ../backends/oss/oss-device.c:103
+msgid "Record"
+msgstr "錄製"
+
+#: ../backends/oss/oss-device.c:104
+msgid "Input Gain"
+msgstr "輸入增加"
+
+#: ../backends/oss/oss-device.c:105
+msgid "Output Gain"
+msgstr "輸出增加"
+
+#: ../backends/oss/oss-device.c:106
+msgid "Line In 1"
+msgstr "線路輸入 1"
+
+#: ../backends/oss/oss-device.c:107
+msgid "Line In 2"
+msgstr "線路輸入 2"
+
+#: ../backends/oss/oss-device.c:108
+msgid "Line In 3"
+msgstr "線路輸入 3"
+
+#. These 3 can be attached to either digital input or output
+#: ../backends/oss/oss-device.c:110
+msgid "Digital 1"
+msgstr "數位 1"
+
+#: ../backends/oss/oss-device.c:111
+msgid "Digital 2"
+msgstr "數位 2"
+
+#: ../backends/oss/oss-device.c:112
+msgid "Digital 3"
+msgstr "數位 3"
+
+#: ../backends/oss/oss-device.c:113
+msgid "Phone In"
+msgstr "耳機輸入"
+
+#: ../backends/oss/oss-device.c:114
+msgid "Phone Out"
+msgstr "耳機輸出"
+
+#: ../backends/oss/oss-device.c:116
+msgid "Radio"
+msgstr "廣播"
+
+#: ../backends/pulse/pulse-device.c:392
+msgid "Profile"
+msgstr "設定檔"
+
+#: ../backends/pulse/pulse-monitor.c:282
+msgid "Peak detect"
+msgstr "峰值偵測"
+
+#. Create the port switch
+#: ../backends/pulse/pulse-sink.c:141 ../backends/pulse/pulse-source.c:136
+msgid "Port"
+msgstr "連接埠"

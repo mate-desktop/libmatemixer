@@ -1,0 +1,545 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# 
+# Translators:
+# Tubuntu <tubuntu@testimonium.be>, 2014
+msgid ""
+msgstr ""
+"Project-Id-Version: MATE Desktop Environment\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2014-10-09 15:53+0200\n"
+"PO-Revision-Date: 2014-10-09 17:01+0000\n"
+"Last-Translator: Tubuntu <tubuntu@testimonium.be>\n"
+"Language-Team: French (http://www.transifex.com/projects/p/MATE/language/fr/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: fr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#. Output controls
+#: ../backends/alsa/alsa-constants.c:40
+msgid "Master"
+msgstr "Maître"
+
+#: ../backends/alsa/alsa-constants.c:41
+msgid "Hardware Master"
+msgstr "Maître matériel"
+
+#: ../backends/alsa/alsa-constants.c:42 ../backends/oss/oss-device.c:92
+msgid "PCM"
+msgstr "PCM"
+
+#: ../backends/alsa/alsa-constants.c:43
+msgid "Desktop Speaker"
+msgstr "Haut-parleur de bureau"
+
+#. OSS manual says this should be the beeper, but Linux OSS seems to assign it
+#. to
+#. * regular volume control
+#: ../backends/alsa/alsa-constants.c:44 ../backends/oss/oss-device.c:95
+msgid "Speaker"
+msgstr "Haut-parleur"
+
+#: ../backends/alsa/alsa-constants.c:45 ../backends/alsa/alsa-constants.c:46
+#: ../backends/alsa/alsa-constants.c:47
+msgid "Front Speaker"
+msgstr "Haut-parleur de face"
+
+#: ../backends/alsa/alsa-constants.c:48
+msgid "Headphone"
+msgstr "Écouteur"
+
+#: ../backends/alsa/alsa-constants.c:49
+msgid "Headphone 2"
+msgstr "Écouteur 2"
+
+#: ../backends/alsa/alsa-constants.c:50
+msgid "Headset"
+msgstr "Casque"
+
+#: ../backends/alsa/alsa-constants.c:51 ../backends/alsa/alsa-constants.c:52
+#: ../backends/alsa/alsa-constants.c:53 ../backends/alsa/alsa-constants.c:54
+msgid "Surround Speaker"
+msgstr "Haut-parleur d'ambiance"
+
+#: ../backends/alsa/alsa-constants.c:55 ../backends/alsa/alsa-constants.c:56
+msgid "Center Speaker"
+msgstr "Haut-parleur du centre"
+
+#: ../backends/alsa/alsa-constants.c:57 ../backends/alsa/alsa-constants.c:58
+msgid "CLFE Speaker"
+msgstr "Haut-parleur CLFE"
+
+#: ../backends/alsa/alsa-constants.c:59
+msgid "Master Mono"
+msgstr "Maître mono"
+
+#: ../backends/alsa/alsa-constants.c:60
+msgid "Master Digital"
+msgstr "Maître numérique"
+
+#: ../backends/alsa/alsa-constants.c:61 ../backends/alsa/alsa-constants.c:132
+msgid "Digital"
+msgstr "Numérique"
+
+#: ../backends/alsa/alsa-constants.c:62 ../backends/alsa/alsa-constants.c:63
+msgid "Side Speaker"
+msgstr "Haut-parleur latéral"
+
+#: ../backends/alsa/alsa-constants.c:64
+msgid "Rear Speaker"
+msgstr "Haut-parleur arrière"
+
+#: ../backends/alsa/alsa-constants.c:65
+msgid "Wave"
+msgstr "Wave"
+
+#: ../backends/alsa/alsa-constants.c:66
+msgid "Phone"
+msgstr "Téléphone"
+
+#: ../backends/alsa/alsa-constants.c:67 ../backends/oss/oss-device.c:98
+msgid "CD"
+msgstr "CD"
+
+#: ../backends/alsa/alsa-constants.c:68
+msgid "Music"
+msgstr "Musique"
+
+#: ../backends/alsa/alsa-constants.c:69
+msgid "AC97"
+msgstr "AC97"
+
+#: ../backends/alsa/alsa-constants.c:70 ../backends/alsa/alsa-constants.c:71
+msgid "LFE Speaker"
+msgstr "Haut-parleur LFE"
+
+#: ../backends/alsa/alsa-constants.c:72
+msgid "Bass Speaker"
+msgstr "Haut-parleur de basse"
+
+#: ../backends/alsa/alsa-constants.c:73
+msgid "PC Speaker"
+msgstr "Haut-parleur d'ordinateur"
+
+#: ../backends/alsa/alsa-constants.c:74 ../backends/oss/oss-device.c:91
+msgid "Synth"
+msgstr "Synthé"
+
+#: ../backends/alsa/alsa-constants.c:75
+msgid "MIDI"
+msgstr "MIDI"
+
+#: ../backends/alsa/alsa-constants.c:76
+msgid "Synth/MIDI"
+msgstr "Synthé/MIDI"
+
+#: ../backends/alsa/alsa-constants.c:77 ../backends/oss/oss-device.c:89
+msgid "Bass"
+msgstr "Basses"
+
+#: ../backends/alsa/alsa-constants.c:78 ../backends/oss/oss-device.c:90
+msgid "Treble"
+msgstr "Aigus"
+
+#. Input controls
+#: ../backends/alsa/alsa-constants.c:81
+msgid "Capture"
+msgstr "Capture"
+
+#. Microphone options
+#: ../backends/alsa/alsa-constants.c:82 ../backends/alsa/alsa-constants.c:152
+#: ../backends/alsa/alsa-constants.c:153 ../backends/oss/oss-device.c:97
+msgid "Microphone"
+msgstr "Microphone"
+
+#: ../backends/alsa/alsa-constants.c:83 ../backends/alsa/alsa-constants.c:188
+msgid "Microphone/Line In"
+msgstr "Microphone/Line In"
+
+#: ../backends/alsa/alsa-constants.c:84 ../backends/alsa/alsa-constants.c:85
+#: ../backends/alsa/alsa-constants.c:163 ../backends/alsa/alsa-constants.c:164
+#: ../backends/alsa/alsa-constants.c:166 ../backends/alsa/alsa-constants.c:167
+#: ../backends/alsa/alsa-constants.c:168
+msgid "Internal Microphone"
+msgstr "Microphone interne"
+
+#: ../backends/alsa/alsa-constants.c:86 ../backends/alsa/alsa-constants.c:158
+#: ../backends/alsa/alsa-constants.c:159
+msgid "Front Microphone"
+msgstr "Microphone avant"
+
+#: ../backends/alsa/alsa-constants.c:87 ../backends/alsa/alsa-constants.c:178
+msgid "Rear Microphone"
+msgstr "Microphone arrière"
+
+#: ../backends/alsa/alsa-constants.c:88 ../backends/alsa/alsa-constants.c:162
+msgid "Dock Microphone"
+msgstr "Microphone dock"
+
+#: ../backends/alsa/alsa-constants.c:89 ../backends/alsa/alsa-constants.c:160
+msgid "Headphone Microphone"
+msgstr "Microphone d'écouteur"
+
+#: ../backends/alsa/alsa-constants.c:90 ../backends/alsa/alsa-constants.c:161
+msgid "Headset Microphone"
+msgstr "Microphone de casque"
+
+#: ../backends/alsa/alsa-constants.c:91
+msgid "Inverted Internal Microphone"
+msgstr "Microphone interne inversé"
+
+#: ../backends/alsa/alsa-constants.c:92 ../backends/alsa/alsa-constants.c:185
+#: ../backends/alsa/alsa-constants.c:186 ../backends/alsa/alsa-constants.c:187
+#: ../backends/alsa/alsa-constants.c:190 ../backends/alsa/alsa-constants.c:191
+#: ../backends/oss/oss-device.c:96
+msgid "Line In"
+msgstr "Line In"
+
+#: ../backends/alsa/alsa-constants.c:93 ../backends/alsa/alsa-constants.c:197
+#: ../backends/alsa/alsa-constants.c:200
+msgid "Auxiliary"
+msgstr "Auxiliaire"
+
+#: ../backends/alsa/alsa-constants.c:94 ../backends/oss/oss-device.c:115
+msgid "Video"
+msgstr "Vidéo"
+
+#: ../backends/alsa/alsa-constants.c:95 ../backends/alsa/alsa-constants.c:195
+msgid "TV Tuner"
+msgstr "Tuner TV"
+
+#: ../backends/alsa/alsa-constants.c:96 ../backends/alsa/alsa-constants.c:196
+msgid "FM"
+msgstr "FM"
+
+#: ../backends/alsa/alsa-constants.c:97
+msgid "Microphone Boost"
+msgstr "Amplificateur micro"
+
+#: ../backends/alsa/alsa-constants.c:98
+msgid "Microphone Boost (+20dB)"
+msgstr "Amplificateur micro (+20dB)"
+
+#: ../backends/alsa/alsa-constants.c:99 ../backends/alsa/alsa-constants.c:100
+msgid "Internal Microphone Boost"
+msgstr "Amplificateur micro interne"
+
+#: ../backends/alsa/alsa-constants.c:101
+msgid "Front Microphone Boost"
+msgstr "Amplificateur micro avant"
+
+#: ../backends/alsa/alsa-constants.c:102
+msgid "Rear Microphone Boost"
+msgstr "Amplificateur micro arrière"
+
+#: ../backends/alsa/alsa-constants.c:103
+msgid "Dock Microphone Boost"
+msgstr "Amplificateur micro dock"
+
+#: ../backends/alsa/alsa-constants.c:104
+msgid "Headphone Microphone Boost"
+msgstr "Amplificateur micro d'écouteur"
+
+#: ../backends/alsa/alsa-constants.c:105
+msgid "Headset Microphone Boost"
+msgstr "Amplificateur micro de casque"
+
+#: ../backends/alsa/alsa-constants.c:106
+msgid "Line In Boost"
+msgstr "Amplificateur Line In"
+
+#: ../backends/alsa/alsa-constants.c:113
+msgid "Analog Output"
+msgstr "Sortie analogue"
+
+#: ../backends/alsa/alsa-constants.c:114
+msgid "Analog Source"
+msgstr "Source analogue"
+
+#: ../backends/alsa/alsa-constants.c:115 ../backends/oss/oss-stream.c:207
+msgid "Capture Source"
+msgstr "Source de capture"
+
+#: ../backends/alsa/alsa-constants.c:116
+msgid "Input Source"
+msgstr "Source d'entrée"
+
+#: ../backends/alsa/alsa-constants.c:117
+msgid "Input Source Select"
+msgstr "Sélection de la source d'entrée"
+
+#: ../backends/alsa/alsa-constants.c:118
+msgid "Digital Input Source"
+msgstr "Source d'entrée numérique"
+
+#: ../backends/alsa/alsa-constants.c:119
+msgid "PCM Capture Source"
+msgstr "Source de capture PCM"
+
+#: ../backends/alsa/alsa-constants.c:120
+msgid "Digital Playback Source"
+msgstr "Source de lecture numérique"
+
+#: ../backends/alsa/alsa-constants.c:121
+msgid "Mono Output Select"
+msgstr "Sélection de sortie mono"
+
+#: ../backends/alsa/alsa-constants.c:122
+msgid "Shared Mic/Line In"
+msgstr "Mic/Line In partagés"
+
+#: ../backends/alsa/alsa-constants.c:123
+msgid "Microphone Select"
+msgstr "Sélection de microphone"
+
+#: ../backends/alsa/alsa-constants.c:124
+msgid "Microphone Jack Mode"
+msgstr "Mode Jack microphone"
+
+#: ../backends/alsa/alsa-constants.c:125
+msgid "Surround Jack Mode"
+msgstr "Mode Jack ambiance"
+
+#: ../backends/alsa/alsa-constants.c:126
+msgid "Auto-Mute Mode"
+msgstr "Mode auto-sourdine"
+
+#. (Probably) toggles
+#: ../backends/alsa/alsa-constants.c:129
+msgid "External Amplifier"
+msgstr "Amplificateur externe"
+
+#: ../backends/alsa/alsa-constants.c:130
+msgid "Bass Boost"
+msgstr "Amplificateur de basses"
+
+#: ../backends/alsa/alsa-constants.c:131
+msgid "Capture Boost"
+msgstr "Amplificateur de capture"
+
+#: ../backends/alsa/alsa-constants.c:133 ../backends/alsa/alsa-constants.c:194
+msgid "Digital In"
+msgstr "Entrée numérique"
+
+#: ../backends/alsa/alsa-constants.c:134
+msgid "Optical"
+msgstr "Optique"
+
+#: ../backends/alsa/alsa-constants.c:135
+msgid "Auto Gain Control"
+msgstr "Contrôle automatique de gain"
+
+#: ../backends/alsa/alsa-constants.c:136
+msgid "Mix"
+msgstr "Mix"
+
+#: ../backends/alsa/alsa-constants.c:137
+msgid "Mix Mono"
+msgstr "Mix Mono"
+
+#: ../backends/alsa/alsa-constants.c:138
+msgid "Mic Capture"
+msgstr "Capture Mic"
+
+#: ../backends/alsa/alsa-constants.c:139 ../backends/alsa/alsa-constants.c:192
+msgid "Input 1"
+msgstr "Entrée 1"
+
+#: ../backends/alsa/alsa-constants.c:140 ../backends/alsa/alsa-constants.c:193
+msgid "Input 2"
+msgstr "Entrée 2"
+
+#. Output options
+#: ../backends/alsa/alsa-constants.c:147
+msgid "Speakers"
+msgstr "Haut-parleurs"
+
+#: ../backends/alsa/alsa-constants.c:148
+msgid "Headphones"
+msgstr "Écouteurs"
+
+#: ../backends/alsa/alsa-constants.c:149
+msgid "Front Panel Headphones"
+msgstr "Écouteurs sur panneau avant"
+
+#: ../backends/alsa/alsa-constants.c:154
+msgid "Microphone 1"
+msgstr "Microphone 1"
+
+#: ../backends/alsa/alsa-constants.c:155
+msgid "Microphone 2"
+msgstr "Microphone 2"
+
+#: ../backends/alsa/alsa-constants.c:156 ../backends/alsa/alsa-constants.c:157
+msgid "Microphone In"
+msgstr "Entrée microphone"
+
+#: ../backends/alsa/alsa-constants.c:165
+msgid "Internal Microphone 1"
+msgstr "Microphone interne 1"
+
+#: ../backends/alsa/alsa-constants.c:169
+msgid "Internal Digital Microphone"
+msgstr "Microphone interne numérique"
+
+#: ../backends/alsa/alsa-constants.c:170 ../backends/alsa/alsa-constants.c:173
+msgid "Digital Microphone"
+msgstr "Microphone numérique"
+
+#: ../backends/alsa/alsa-constants.c:171
+msgid "Digital Microphone 1"
+msgstr "Microphone numérique 1"
+
+#: ../backends/alsa/alsa-constants.c:172
+msgid "Digital Microphone 2"
+msgstr "Microphone numérique 2"
+
+#: ../backends/alsa/alsa-constants.c:174 ../backends/alsa/alsa-constants.c:175
+#: ../backends/alsa/alsa-constants.c:176 ../backends/alsa/alsa-constants.c:177
+msgid "External Microphone"
+msgstr "Microphone externe"
+
+#: ../backends/alsa/alsa-constants.c:179
+msgid "Camera Microphone"
+msgstr "Microphone de caméra"
+
+#. Other options
+#: ../backends/alsa/alsa-constants.c:182
+msgid "Analog"
+msgstr "Analogue"
+
+#: ../backends/alsa/alsa-constants.c:183
+msgid "Analog In"
+msgstr "Entrée analogue"
+
+#: ../backends/alsa/alsa-constants.c:184
+msgid "Analog Inputs"
+msgstr "Entrées analogues"
+
+#: ../backends/alsa/alsa-constants.c:189
+msgid "Line In/Microphone"
+msgstr "Line In/Microphone"
+
+#: ../backends/alsa/alsa-constants.c:198 ../backends/alsa/alsa-constants.c:199
+msgid "Auxiliary In"
+msgstr "Entrée auxiliaire"
+
+#: ../backends/alsa/alsa-constants.c:201
+msgid "Auxiliary 0"
+msgstr "Auxiliaire 0"
+
+#: ../backends/alsa/alsa-constants.c:202
+msgid "Auxiliary 1"
+msgstr "Auxiliaire 1"
+
+#: ../backends/alsa/alsa-constants.c:203
+msgid "Auxiliary 2"
+msgstr "Auxiliaire 2"
+
+#: ../backends/alsa/alsa-constants.c:204
+msgid "Auxiliary 3"
+msgstr "Auxiliaire 3"
+
+#: ../backends/alsa/alsa-constants.c:205
+msgid "Docking Station"
+msgstr "Docking Station"
+
+#. Recording monitor
+#: ../backends/alsa/alsa-constants.c:206 ../backends/oss/oss-device.c:100
+msgid "Mixer"
+msgstr "Mixeur"
+
+#: ../backends/alsa/alsa-constants.c:207
+msgid "Unknown 1"
+msgstr "Inconnu 1"
+
+#: ../backends/alsa/alsa-constants.c:208
+msgid "Unknown 2"
+msgstr "Inconnu 2"
+
+#: ../backends/alsa/alsa-device.c:610
+msgid "On"
+msgstr "Allumé"
+
+#: ../backends/alsa/alsa-device.c:611
+msgid "Off"
+msgstr "Éteint"
+
+#: ../backends/oss/oss-backend.c:401
+#, c-format
+msgid "OSS Mixer %d"
+msgstr "Mixeur OSS %d"
+
+#: ../backends/oss/oss-device.c:88
+msgid "Volume"
+msgstr "Volume"
+
+#: ../backends/oss/oss-device.c:101
+msgid "PCM 2"
+msgstr "PCM 2"
+
+#. Recording level (master input)
+#: ../backends/oss/oss-device.c:103
+msgid "Record"
+msgstr "Enregistrement"
+
+#: ../backends/oss/oss-device.c:104
+msgid "Input Gain"
+msgstr "Gain d'entrée"
+
+#: ../backends/oss/oss-device.c:105
+msgid "Output Gain"
+msgstr "Gain de sortie"
+
+#: ../backends/oss/oss-device.c:106
+msgid "Line In 1"
+msgstr "Line In 1"
+
+#: ../backends/oss/oss-device.c:107
+msgid "Line In 2"
+msgstr "Line In 2"
+
+#: ../backends/oss/oss-device.c:108
+msgid "Line In 3"
+msgstr "Line In 3"
+
+#. These 3 can be attached to either digital input or output
+#: ../backends/oss/oss-device.c:110
+msgid "Digital 1"
+msgstr "Numérique 1"
+
+#: ../backends/oss/oss-device.c:111
+msgid "Digital 2"
+msgstr "Numérique 2"
+
+#: ../backends/oss/oss-device.c:112
+msgid "Digital 3"
+msgstr "Numérique 3"
+
+#: ../backends/oss/oss-device.c:113
+msgid "Phone In"
+msgstr "Entrée téléphone"
+
+#: ../backends/oss/oss-device.c:114
+msgid "Phone Out"
+msgstr "Sortie téléphone"
+
+#: ../backends/oss/oss-device.c:116
+msgid "Radio"
+msgstr "Radio"
+
+#: ../backends/pulse/pulse-device.c:392
+msgid "Profile"
+msgstr "Profil"
+
+#: ../backends/pulse/pulse-monitor.c:282
+msgid "Peak detect"
+msgstr "Détection de crête"
+
+#. Create the port switch
+#: ../backends/pulse/pulse-sink.c:141 ../backends/pulse/pulse-source.c:136
+msgid "Port"
+msgstr "Port"
