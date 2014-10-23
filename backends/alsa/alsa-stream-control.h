@@ -95,10 +95,10 @@ struct _AlsaStreamControlClass
 
 GType              alsa_stream_control_get_type        (void) G_GNUC_CONST;
 
-AlsaControlData *  alsa_stream_control_get_data        (AlsaStreamControl         *control);
+AlsaControlData *  alsa_stream_control_get_data        (AlsaStreamControl *control);
 
-void               alsa_stream_control_set_data        (AlsaStreamControl         *control,
-                                                        AlsaControlData           *data);
+void               alsa_stream_control_set_data        (AlsaStreamControl *control,
+                                                        AlsaControlData   *data);
 
 G_END_DECLS
 

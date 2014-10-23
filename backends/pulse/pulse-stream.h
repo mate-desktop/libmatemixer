@@ -59,10 +59,10 @@ struct _PulseStreamClass
 
 GType            pulse_stream_get_type        (void) G_GNUC_CONST;
 
-guint32          pulse_stream_get_index       (PulseStream      *stream);
-PulseConnection *pulse_stream_get_connection  (PulseStream      *stream);
+guint32          pulse_stream_get_index       (PulseStream *stream);
+PulseConnection *pulse_stream_get_connection  (PulseStream *stream);
 
-PulseDevice *    pulse_stream_get_device      (PulseStream      *stream);
+PulseDevice *    pulse_stream_get_device      (PulseStream *stream);
 
 G_END_DECLS
 
