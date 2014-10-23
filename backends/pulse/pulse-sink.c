@@ -229,6 +229,8 @@ pulse_sink_update (PulseSink *sink, const pa_sink_info *info)
                                                    info->active_port->name);
 
     sink->priv->monitor = info->monitor_source;
+
+    pulse_sink_control_update (sink->priv->control, info);
 }
 
 guint32

@@ -223,6 +223,8 @@ pulse_source_update (PulseSource          *source,
     if (info->active_port != NULL)
         pulse_port_switch_set_active_port_by_name (source->priv->pswitch,
                                                    info->active_port->name);
+
+    pulse_source_control_update (source->priv->control, info);
 }
 
 static const GList *
