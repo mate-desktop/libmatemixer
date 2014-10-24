@@ -8,7 +8,7 @@ SUBDIRS =                               \
         examples                        \
         po
 
-EXTRA_DIST = build-aux/config.rpath autogen.sh
+EXTRA_DIST = autogen.sh
 
 MAINTAINERCLEANFILES =                  \
     $(srcdir)/aclocal.m4                \
