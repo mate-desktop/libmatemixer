@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-10-09 15:53+0200\n"
-"PO-Revision-Date: 2014-10-23 05:55+0000\n"
+"PO-Revision-Date: 2014-10-24 04:53+0000\n"
 "Last-Translator: Микола Ткач <Stuartlittle1970@gmail.com>\n"
 "Language-Team: Ukrainian (http://www.transifex.com/projects/p/MATE/language/uk/)\n"
 "MIME-Version: 1.0\n"
@@ -233,7 +233,7 @@ msgstr "Підсилення Фронтального Мікрофону"
 
 #: ../backends/alsa/alsa-constants.c:102
 msgid "Rear Microphone Boost"
-msgstr ""
+msgstr "Підсилення Заднього Мікрофону"
 
 #: ../backends/alsa/alsa-constants.c:103
 msgid "Dock Microphone Boost"
