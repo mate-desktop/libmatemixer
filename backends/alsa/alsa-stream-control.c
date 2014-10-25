@@ -454,6 +454,8 @@ alsa_stream_control_set_channel_volume (MateMixerStreamControl *mmsc, guint chan
     if (control->priv->data.volume_joined == TRUE)
         return alsa_stream_control_set_volume (mmsc, volume);
 
+    volume = CLAMP (volume, control->priv->data.min, control->priv->data.max);
+
     if (volume != control->priv->data.v[channel]) {
         AlsaStreamControlClass *klass;
 
@@ -468,8 +470,10 @@ alsa_stream_control_set_channel_volume (MateMixerStreamControl *mmsc, guint chan
         if (klass->set_channel_volume (control, c, volume) == FALSE)
             return FALSE;
 
-        // XXX recalc total volume
         control->priv->data.v[channel] = volume;
+
+        /* The global volume is always set to the highest channel volume */
+        control->priv->data.volume = MAX (control->priv->data.volume, volume);
 
         g_object_notify (G_OBJECT (control), "volume");
     }
