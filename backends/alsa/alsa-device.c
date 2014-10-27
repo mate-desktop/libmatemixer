@@ -79,26 +79,30 @@ G_DEFINE_TYPE (AlsaDevice, alsa_device, MATE_MIXER_TYPE_DEVICE)
 static const GList *      alsa_device_list_streams  (MateMixerDevice            *mmd);
 static const GList *      alsa_device_list_switches (MateMixerDevice            *mmd);
 
-static gboolean           add_stream_input_control  (AlsaDevice                 *device,
+static void               add_element               (AlsaDevice                 *device,
+                                                     AlsaStream                 *stream,
+                                                     AlsaElement                *element);
+
+static void               add_stream_input_control  (AlsaDevice                 *device,
                                                      snd_mixer_elem_t           *el);
-static gboolean           add_stream_output_control (AlsaDevice                 *device,
+static void               add_stream_output_control (AlsaDevice                 *device,
                                                      snd_mixer_elem_t           *el);
 
-static gboolean           add_switch                (AlsaDevice                 *device,
+static void               add_switch                (AlsaDevice                 *device,
                                                      AlsaStream                 *stream,
                                                      snd_mixer_elem_t           *el);
 
-static gboolean           add_device_switch         (AlsaDevice                 *device,
+static void               add_device_switch         (AlsaDevice                 *device,
                                                      snd_mixer_elem_t           *el);
 
-static gboolean           add_stream_input_switch   (AlsaDevice                 *device,
+static void               add_stream_input_switch   (AlsaDevice                 *device,
                                                      snd_mixer_elem_t           *el);
-static gboolean           add_stream_output_switch  (AlsaDevice                 *device,
+static void               add_stream_output_switch  (AlsaDevice                 *device,
                                                      snd_mixer_elem_t           *el);
 
-static gboolean           add_stream_input_toggle   (AlsaDevice                 *device,
+static void               add_stream_input_toggle   (AlsaDevice                 *device,
                                                      snd_mixer_elem_t           *el);
-static gboolean           add_stream_output_toggle  (AlsaDevice                 *device,
+static void               add_stream_output_toggle  (AlsaDevice                 *device,
                                                      snd_mixer_elem_t           *el);
 
 static void               load_element              (AlsaDevice                 *device,
@@ -451,13 +455,41 @@ alsa_device_get_output_stream (AlsaDevice *device)
     return NULL;
 }
 
-static gboolean
+static const GList *
+alsa_device_list_streams (MateMixerDevice *mmd)
+{
+    AlsaDevice *device;
+
+    g_return_val_if_fail (ALSA_IS_DEVICE (mmd), NULL);
+
+    device = ALSA_DEVICE (mmd);
+
+    if (device->priv->streams == NULL) {
+        if (device->priv->output != NULL)
+            device->priv->streams = g_list_prepend (device->priv->streams,
+                                                    g_object_ref (device->priv->output));
+        if (device->priv->input != NULL)
+            device->priv->streams = g_list_prepend (device->priv->streams,
+                                                    g_object_ref (device->priv->input));
+    }
+    return device->priv->streams;
+}
+
+static const GList *
+alsa_device_list_switches (MateMixerDevice *mmd)
+{
+    g_return_val_if_fail (ALSA_IS_DEVICE (mmd), NULL);
+
+    return ALSA_DEVICE (mmd)->priv->switches;
+}
+
+static void
 add_element (AlsaDevice *device, AlsaStream *stream, AlsaElement *element)
 {
     gboolean added = FALSE;
 
     if (alsa_element_load (element) == FALSE)
-        return FALSE;
+        return;
 
     if (stream != NULL) {
         if (alsa_stream_has_controls_or_switches (stream) == FALSE) {
@@ -505,45 +537,16 @@ add_element (AlsaDevice *device, AlsaStream *stream, AlsaElement *element)
 
         snd_mixer_elem_set_callback (el, handle_element_callback);
         snd_mixer_elem_set_callback_private (el, device);
-    }
-    return added;
+    } else
+        g_warn_if_reached ();
 }
 
-static const GList *
-alsa_device_list_streams (MateMixerDevice *mmd)
-{
-    AlsaDevice *device;
-
-    g_return_val_if_fail (ALSA_IS_DEVICE (mmd), NULL);
-
-    device = ALSA_DEVICE (mmd);
-
-    if (device->priv->streams == NULL) {
-        if (device->priv->output != NULL)
-            device->priv->streams = g_list_prepend (device->priv->streams,
-                                                    g_object_ref (device->priv->output));
-        if (device->priv->input != NULL)
-            device->priv->streams = g_list_prepend (device->priv->streams,
-                                                    g_object_ref (device->priv->input));
-    }
-    return device->priv->streams;
-}
-
-static const GList *
-alsa_device_list_switches (MateMixerDevice *mmd)
-{
-    g_return_val_if_fail (ALSA_IS_DEVICE (mmd), NULL);
-
-    return ALSA_DEVICE (mmd)->priv->switches;
-}
-
-static gboolean
+static void
 add_stream_input_control (AlsaDevice *device, snd_mixer_elem_t *el)
 {
     AlsaStreamControl         *control;
     gchar                     *name;
     gchar                     *label;
-    gboolean                   ret;
     gint                       score;
     MateMixerStreamControlRole role;
 
@@ -561,19 +564,17 @@ add_stream_input_control (AlsaDevice *device, snd_mixer_elem_t *el)
 
     alsa_element_set_snd_element (ALSA_ELEMENT (control), el);
 
-    ret = add_element (device, device->priv->input, ALSA_ELEMENT (control));
+    add_element (device, device->priv->input, ALSA_ELEMENT (control));
 
     g_object_unref (control);
-    return ret;
 }
 
-static gboolean
+static void
 add_stream_output_control (AlsaDevice *device, snd_mixer_elem_t *el)
 {
     AlsaStreamControl         *control;
     gchar                     *label;
     gchar                     *name;
-    gboolean                   ret;
     gint                       score;
     MateMixerStreamControlRole role;
 
@@ -591,10 +592,9 @@ add_stream_output_control (AlsaDevice *device, snd_mixer_elem_t *el)
 
     alsa_element_set_snd_element (ALSA_ELEMENT (control), el);
 
-    ret = add_element (device, device->priv->output, ALSA_ELEMENT (control));
+    add_element (device, device->priv->output, ALSA_ELEMENT (control));
 
     g_object_unref (control);
-    return ret;
 }
 
 static AlsaToggle *
@@ -624,7 +624,7 @@ create_toggle (AlsaDevice *device, snd_mixer_elem_t *el, AlsaToggleType type)
     return toggle;
 }
 
-static gboolean
+static void
 add_switch (AlsaDevice *device, AlsaStream *stream, snd_mixer_elem_t *el)
 {
     AlsaElement        *element = NULL;
@@ -634,7 +634,6 @@ add_switch (AlsaDevice *device, AlsaStream *stream, snd_mixer_elem_t *el)
     gchar               item[128];
     guint               i;
     gint                count;
-    gboolean            ret;
     MateMixerSwitchRole role;
 
     count = snd_mixer_selem_get_enum_items (el);
@@ -642,7 +641,7 @@ add_switch (AlsaDevice *device, AlsaStream *stream, snd_mixer_elem_t *el)
         g_debug ("Skipping mixer switch %s with %d items",
                  snd_mixer_selem_get_name (el),
                  count);
-        return FALSE;
+        return;
     }
 
     for (i = 0; i < count; i++) {
@@ -670,7 +669,7 @@ add_switch (AlsaDevice *device, AlsaStream *stream, snd_mixer_elem_t *el)
     }
 
     if G_UNLIKELY (options == NULL)
-        return FALSE;
+        return;
 
     get_switch_info (el, &name, &label, &role);
 
@@ -683,13 +682,12 @@ add_switch (AlsaDevice *device, AlsaStream *stream, snd_mixer_elem_t *el)
 
     alsa_element_set_snd_element (element, el);
 
-    ret = add_element (device, stream, element);
+    add_element (device, stream, element);
 
     g_object_unref (element);
-    return ret;
 }
 
-static gboolean
+static void
 add_device_switch (AlsaDevice *device, snd_mixer_elem_t *el)
 {
     g_debug ("Reading device %s switch %s (%d items)",
@@ -697,10 +695,10 @@ add_device_switch (AlsaDevice *device, snd_mixer_elem_t *el)
              snd_mixer_selem_get_name (el),
              snd_mixer_selem_get_enum_items (el));
 
-    return add_switch (device, NULL, el);
+    add_switch (device, NULL, el);
 }
 
-static gboolean
+static void
 add_stream_input_switch (AlsaDevice *device, snd_mixer_elem_t *el)
 {
     g_debug ("Reading device %s input switch %s (%d items)",
@@ -708,10 +706,10 @@ add_stream_input_switch (AlsaDevice *device, snd_mixer_elem_t *el)
              snd_mixer_selem_get_name (el),
              snd_mixer_selem_get_enum_items (el));
 
-    return add_switch (device, device->priv->input, el);
+    add_switch (device, device->priv->input, el);
 }
 
-static gboolean
+static void
 add_stream_output_switch (AlsaDevice *device, snd_mixer_elem_t *el)
 {
     g_debug ("Reading device %s output switch %s (%d items)",
@@ -719,14 +717,13 @@ add_stream_output_switch (AlsaDevice *device, snd_mixer_elem_t *el)
              snd_mixer_selem_get_name (el),
              snd_mixer_selem_get_enum_items (el));
 
-    return add_switch (device, device->priv->output, el);
+    add_switch (device, device->priv->output, el);
 }
 
-static gboolean
+static void
 add_stream_input_toggle (AlsaDevice *device, snd_mixer_elem_t *el)
 {
     AlsaToggle *toggle;
-    gboolean    ret;
 
     g_debug ("Reading device %s input toggle %s",
              mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)),
@@ -734,17 +731,15 @@ add_stream_input_toggle (AlsaDevice *device, snd_mixer_elem_t *el)
 
     toggle = create_toggle (device, el, ALSA_TOGGLE_CAPTURE);
 
-    ret = add_element (device, device->priv->input, ALSA_ELEMENT (toggle));
+    add_element (device, device->priv->input, ALSA_ELEMENT (toggle));
 
     g_object_unref (toggle);
-    return ret;
 }
 
-static gboolean
+static void
 add_stream_output_toggle (AlsaDevice *device, snd_mixer_elem_t *el)
 {
     AlsaToggle *toggle;
-    gboolean    ret;
 
     g_debug ("Reading device %s output toggle %s",
              mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)),
@@ -752,10 +747,9 @@ add_stream_output_toggle (AlsaDevice *device, snd_mixer_elem_t *el)
 
     toggle = create_toggle (device, el, ALSA_TOGGLE_PLAYBACK);
 
-    ret = add_element (device, device->priv->output, ALSA_ELEMENT (toggle));
+    add_element (device, device->priv->output, ALSA_ELEMENT (toggle));
 
     g_object_unref (toggle);
-    return ret;
 }
 
 static void
