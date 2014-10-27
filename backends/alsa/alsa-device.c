@@ -669,6 +669,9 @@ add_switch (AlsaDevice *device, AlsaStream *stream, snd_mixer_elem_t *el)
             g_warning ("Failed to read switch item name: %s", snd_strerror (ret));
     }
 
+    if G_UNLIKELY (options == NULL)
+        return FALSE;
+
     get_switch_info (el, &name, &label, &role);
 
     /* Takes ownership of options */
