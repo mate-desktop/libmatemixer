@@ -90,10 +90,13 @@ const AlsaControlInfo alsa_controls[] =
     { "Headset Mic",            N_("Headset Microphone"),           MATE_MIXER_STREAM_CONTROL_ROLE_MICROPHONE,  TRUE, FALSE },
     { "Inverted Internal Mic",  N_("Inverted Internal Microphone"), MATE_MIXER_STREAM_CONTROL_ROLE_MICROPHONE,  TRUE, FALSE },
     { "Line",                   N_("Line In"),                      MATE_MIXER_STREAM_CONTROL_ROLE_PORT,        TRUE, FALSE },
+    { "Line in",                N_("Line In"),                      MATE_MIXER_STREAM_CONTROL_ROLE_PORT,        TRUE, FALSE },
+    { "Line In",                N_("Line In"),                      MATE_MIXER_STREAM_CONTROL_ROLE_PORT,        TRUE, FALSE },
     { "Aux",                    N_("Auxiliary"),                    MATE_MIXER_STREAM_CONTROL_ROLE_PORT,        TRUE, FALSE },
     { "Video",                  N_("Video"),                        MATE_MIXER_STREAM_CONTROL_ROLE_VIDEO,       TRUE, FALSE },
     { "TV Tuner",               N_("TV Tuner"),                     MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN,     TRUE, FALSE },
     { "FM",                     N_("FM"),                           MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN,     TRUE, FALSE },
+    { "Phone",                  N_("Phone"),                        MATE_MIXER_STREAM_CONTROL_ROLE_UNKNOWN,     TRUE, FALSE },
     { "Mic Boost",              N_("Microphone Boost"),             MATE_MIXER_STREAM_CONTROL_ROLE_BOOST,       FALSE, FALSE },
     { "Mic Boost (+20dB)",      N_("Microphone Boost (+20dB)"),     MATE_MIXER_STREAM_CONTROL_ROLE_BOOST,       FALSE, FALSE },
     { "Int Mic Boost",          N_("Internal Microphone Boost"),    MATE_MIXER_STREAM_CONTROL_ROLE_BOOST,       FALSE, FALSE },
@@ -131,6 +134,7 @@ const AlsaSwitchInfo alsa_switches[] =
     { "Capture Boost",          N_("Capture Boost"),            MATE_MIXER_SWITCH_ROLE_BOOST },
     { "IEC958",                 N_("Digital"),                  MATE_MIXER_SWITCH_ROLE_PORT },
     { "IEC958 In",              N_("Digital In"),               MATE_MIXER_SWITCH_ROLE_PORT },
+    { "IEC958 Default PCM",     N_("Digital Default PCM"),      MATE_MIXER_SWITCH_ROLE_UNKNOWN },
     { "IEC958 Optical Raw",     N_("Optical"),                  MATE_MIXER_SWITCH_ROLE_PORT },
     { "Auto Gain Control",      N_("Auto Gain Control"),        MATE_MIXER_SWITCH_ROLE_UNKNOWN },
     { "Mix",                    N_("Mix"),                      MATE_MIXER_SWITCH_ROLE_UNKNOWN },
@@ -155,6 +159,7 @@ const AlsaSwitchOptionInfo alsa_switch_options[] =
     { "Mic2",               N_("Microphone 2"),                 "audio-input-microphone" },
     { "Mic in",             N_("Microphone In"),                "audio-input-microphone" },
     { "Mic In",             N_("Microphone In"),                "audio-input-microphone" },
+    { "Microphone In",      N_("Microphone In"),                "audio-input-microphone" },
     { "Front Mic",          N_("Front Microphone"),             "audio-input-microphone" },
     { "Front Microphone",   N_("Front Microphone"),             "audio-input-microphone" },
     { "Headphone Mic",      N_("Headphone Microphone"),         "audio-input-microphone" },
@@ -176,6 +181,7 @@ const AlsaSwitchOptionInfo alsa_switch_options[] =
     { "E-Mic",              N_("External Microphone"),          "audio-input-microphone" },
     { "e-Mic",              N_("External Microphone"),          "audio-input-microphone" },
     { "Rear Mic",           N_("Rear Microphone"),              "audio-input-microphone" },
+    { "Rear Microphone",    N_("Rear Microphone"),              "audio-input-microphone" },
     { "Cam Mic",            N_("Camera Microphone"),            "audio-input-microphone" },
 
     /* Other options */
@@ -204,8 +210,11 @@ const AlsaSwitchOptionInfo alsa_switch_options[] =
     { "Aux3",               N_("Auxiliary 3"),                  NULL },
     { "Docking-Station",    N_("Docking Station"),              NULL },
     { "Mixer",              N_("Mixer"),                        NULL },
+    { "Phone",              N_("Phone"),                        NULL },
     { "Unknown1",           N_("Unknown 1"),                    NULL },
     { "Unknown2",           N_("Unknown 2"),                    NULL },
+    { "Enabled",            N_("Enabled"),                      NULL },
+    { "Disabled",           N_("Disabled"),                     NULL },
     { NULL }
 };
 
