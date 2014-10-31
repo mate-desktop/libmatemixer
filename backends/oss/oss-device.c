@@ -278,7 +278,6 @@ oss_device_new (const gchar *name,
                 gint         fd)
 {
     OssDevice *device;
-    gchar     *stream_name;
 
     g_return_val_if_fail (name  != NULL, NULL);
     g_return_val_if_fail (label != NULL, NULL);
@@ -292,18 +291,6 @@ oss_device_new (const gchar *name,
 
     device->priv->fd   = dup (fd);
     device->priv->path = g_strdup (path);
-
-    stream_name = g_strdup_printf ("oss-input-%s", name);
-    device->priv->input = oss_stream_new (stream_name,
-                                          MATE_MIXER_DEVICE (device),
-                                          MATE_MIXER_DIRECTION_INPUT);
-    g_free (stream_name);
-
-    stream_name = g_strdup_printf ("oss-output-%s", name);
-    device->priv->output = oss_stream_new (stream_name,
-                                           MATE_MIXER_DEVICE (device),
-                                           MATE_MIXER_DIRECTION_OUTPUT);
-    g_free (stream_name);
 
     return device;
 }
@@ -370,7 +357,7 @@ oss_device_close (OssDevice *device)
         return;
 
     /* Make each stream remove its controls and switch */
-    if (oss_stream_has_controls (device->priv->input) == TRUE) {
+    if (device->priv->input != NULL) {
         const gchar *name =
             mate_mixer_stream_get_name (MATE_MIXER_STREAM (device->priv->input));
 
@@ -380,9 +367,11 @@ oss_device_close (OssDevice *device)
         g_signal_emit_by_name (G_OBJECT (device),
                                "stream-removed",
                                name);
+
+        g_clear_object (&device->priv->input);
     }
 
-    if (oss_stream_has_controls (device->priv->output) == TRUE) {
+    if (device->priv->output != NULL) {
         const gchar *name =
             mate_mixer_stream_get_name (MATE_MIXER_STREAM (device->priv->output));
 
@@ -392,6 +381,8 @@ oss_device_close (OssDevice *device)
         g_signal_emit_by_name (G_OBJECT (device),
                                "stream-removed",
                                name);
+
+        g_clear_object (&device->priv->output);
     }
 
     if (device->priv->poll_tag != 0)
@@ -410,9 +401,25 @@ void
 oss_device_load (OssDevice *device)
 {
     const GList *controls;
+    const gchar *name;
+    gchar       *stream_name;
     guint        i;
 
     g_return_if_fail (OSS_IS_DEVICE (device));
+
+    name = mate_mixer_device_get_name (MATE_MIXER_DEVICE (device));
+
+    stream_name = g_strdup_printf ("oss-input-%s", name);
+    device->priv->input = oss_stream_new (stream_name,
+                                          MATE_MIXER_DEVICE (device),
+                                          MATE_MIXER_DIRECTION_INPUT);
+    g_free (stream_name);
+
+    stream_name = g_strdup_printf ("oss-output-%s", name);
+    device->priv->output = oss_stream_new (stream_name,
+                                           MATE_MIXER_DEVICE (device),
+                                           MATE_MIXER_DIRECTION_OUTPUT);
+    g_free (stream_name);
 
     read_mixer_devices (device);
 
@@ -431,7 +438,12 @@ oss_device_load (OssDevice *device)
                                             OSS_STREAM_CONTROL (item->data));
             break;
         }
-    }
+
+        /* Create an input switch for recording sources */
+        if (device->priv->recmask != 0)
+            read_mixer_switch (device);
+    } else
+        g_clear_object (&device->priv->input);
 
     /* Set default output control */
     if (oss_stream_has_controls (device->priv->output) == TRUE) {
@@ -448,10 +460,8 @@ oss_device_load (OssDevice *device)
                                             OSS_STREAM_CONTROL (item->data));
             break;
         }
-    }
-
-    if (device->priv->recmask != 0)
-        read_mixer_switch (device);
+    } else
+        g_clear_object (&device->priv->output);
 
     /* See if we can use the modify_counter field to optimize polling */
 #ifdef SOUND_MIXER_INFO
@@ -519,6 +529,7 @@ oss_device_list_streams (MateMixerDevice *mmd)
         if (device->priv->output != NULL)
             device->priv->streams = g_list_prepend (device->priv->streams,
                                                     g_object_ref (device->priv->output));
+
         if (device->priv->input != NULL)
             device->priv->streams = g_list_prepend (device->priv->streams,
                                                     g_object_ref (device->priv->input));
@@ -551,7 +562,8 @@ read_mixer_devices (OssDevice *device)
             stream = device->priv->output;
 
         stereo  = OSS_MASK_HAS_DEVICE (device->priv->stereodevs, i);
-        control = oss_stream_control_new (oss_devices[i].name, gettext (oss_devices[i].label),
+        control = oss_stream_control_new (oss_devices[i].name,
+                                          gettext (oss_devices[i].label),
                                           oss_devices[i].role,
                                           stream,
                                           device->priv->fd,
@@ -591,7 +603,8 @@ read_mixer_switch (OssDevice *device)
     for (i = 0; i < OSS_N_DEVICES; i++) {
         OssSwitchOption *option;
 
-        if (OSS_MASK_HAS_DEVICE (device->priv->recmask, i) == FALSE)
+        if (OSS_MASK_HAS_DEVICE (device->priv->devmask, i) == FALSE ||
+            OSS_MASK_HAS_DEVICE (device->priv->recmask, i) == FALSE)
             continue;
 
         option = oss_switch_option_new (oss_devices[i].name,
@@ -642,17 +655,18 @@ poll_mixer (OssDevice *device)
             return G_SOURCE_REMOVE;
         }
 
-        if (device->priv->poll_counter < info.modify_counter) {
+        if (device->priv->poll_counter < info.modify_counter)
             device->priv->poll_counter = info.modify_counter;
-        } else {
+        else
             load = FALSE;
-        }
     }
 #endif
 
     if (load == TRUE) {
-        oss_stream_load (device->priv->input);
-        oss_stream_load (device->priv->output);
+        if (device->priv->input != NULL)
+            oss_stream_load (device->priv->input);
+        if (device->priv->output != NULL)
+            oss_stream_load (device->priv->output);
 
         if (device->priv->poll_use_counter == TRUE &&
             device->priv->poll_mode == OSS_POLL_NORMAL) {

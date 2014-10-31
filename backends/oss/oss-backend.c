@@ -268,23 +268,23 @@ oss_backend_list_streams (MateMixerBackend *backend)
 
         /* Walk through the list of devices and create the stream list, each
          * device has at most one input and one output stream */
-        list = oss->priv->devices;
+        list = g_list_last (oss->priv->devices);
 
         while (list != NULL) {
             OssDevice *device = OSS_DEVICE (list->data);
             OssStream *stream;
 
-            stream = oss_device_get_input_stream (device);
-            if (stream != NULL) {
-                oss->priv->streams =
-                    g_list_append (oss->priv->streams, g_object_ref (stream));
-            }
             stream = oss_device_get_output_stream (device);
-            if (stream != NULL) {
+            if (stream != NULL)
                 oss->priv->streams =
-                    g_list_append (oss->priv->streams, g_object_ref (stream));
-            }
-            list = list->next;
+                    g_list_prepend (oss->priv->streams, g_object_ref (stream));
+
+            stream = oss_device_get_input_stream (device);
+            if (stream != NULL)
+                oss->priv->streams =
+                    g_list_prepend (oss->priv->streams, g_object_ref (stream));
+
+            list = list->prev;
         }
     }
     return oss->priv->streams;
