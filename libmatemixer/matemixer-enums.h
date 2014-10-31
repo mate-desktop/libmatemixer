@@ -266,9 +266,8 @@ typedef enum {
  *     The switch is a #MateMixerToggle.
  */
 typedef enum { /*< flags >*/
-    MATE_MIXER_SWITCH_NO_FLAGS                = 0,
-    MATE_MIXER_SWITCH_TOGGLE                  = 1 << 0,
-    MATE_MIXER_SWITCH_ALLOWS_NO_ACTIVE_OPTION = 1 << 1
+    MATE_MIXER_SWITCH_NO_FLAGS = 0,
+    MATE_MIXER_SWITCH_TOGGLE   = 1 << 0,
 } MateMixerSwitchFlags;
 
 /**

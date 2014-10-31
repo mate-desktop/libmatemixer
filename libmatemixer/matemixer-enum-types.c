@@ -198,7 +198,6 @@ mate_mixer_switch_flags_get_type (void)
         static const GFlagsValue values[] = {
             { MATE_MIXER_SWITCH_NO_FLAGS, "MATE_MIXER_SWITCH_NO_FLAGS", "no-flags" },
             { MATE_MIXER_SWITCH_TOGGLE, "MATE_MIXER_SWITCH_TOGGLE", "toggle" },
-            { MATE_MIXER_SWITCH_ALLOWS_NO_ACTIVE_OPTION, "MATE_MIXER_SWITCH_ALLOWS_NO_ACTIVE_OPTION", "allows-no-active-option" },
             { 0, NULL, NULL }
         };
         etype = g_flags_register_static (

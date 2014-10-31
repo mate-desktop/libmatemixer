@@ -38,10 +38,12 @@ static void oss_switch_finalize        (GObject             *object);
 
 G_DEFINE_TYPE (OssSwitch, oss_switch, MATE_MIXER_TYPE_SWITCH)
 
-static gboolean     oss_switch_set_active_option (MateMixerSwitch       *mms,
-                                                  MateMixerSwitchOption *mmso);
+static gboolean         oss_switch_set_active_option (MateMixerSwitch       *mms,
+                                                      MateMixerSwitchOption *mmso);
 
-static const GList *oss_switch_list_options      (MateMixerSwitch       *mms);
+static const GList *    oss_switch_list_options      (MateMixerSwitch       *mms);
+
+static OssSwitchOption *choose_default_option        (OssSwitch             *swtch);
 
 static void
 oss_switch_class_init (OssSwitchClass *klass)
@@ -104,10 +106,14 @@ oss_switch_new (const gchar *name,
 {
     OssSwitch *swtch;
 
+    g_return_val_if_fail (name != NULL, NULL);
+    g_return_val_if_fail (label != NULL, NULL);
+    g_return_val_if_fail (fd != -1, NULL);
+    g_return_val_if_fail (options != NULL, NULL);
+
     swtch = g_object_new (OSS_TYPE_SWITCH,
                           "name", name,
                           "label", label,
-                          "flags", MATE_MIXER_SWITCH_ALLOWS_NO_ACTIVE_OPTION,
                           "role", MATE_MIXER_SWITCH_ROLE_PORT,
                           NULL);
 
@@ -121,39 +127,70 @@ oss_switch_new (const gchar *name,
 void
 oss_switch_load (OssSwitch *swtch)
 {
-    GList *list;
-    gint   recsrc;
-    gint   ret;
+    OssSwitchOption *option;
+    gint             recsrc;
+    gint             devnum;
+    gint             ret;
 
     g_return_if_fail (OSS_IS_SWITCH (swtch));
 
     if G_UNLIKELY (swtch->priv->fd == -1)
         return;
 
+    /* Recsrc contains a bitmask of currently enabled recording sources */
     ret = ioctl (swtch->priv->fd, MIXER_READ (SOUND_MIXER_RECSRC), &recsrc);
     if (ret == -1)
         return;
-    if (recsrc == 0) {
-        _mate_mixer_switch_set_active_option (MATE_MIXER_SWITCH (swtch), NULL);
-        return;
-    }
 
-    list = swtch->priv->options;
-    while (list != NULL) {
-        OssSwitchOption *option = OSS_SWITCH_OPTION (list->data);
-        gint             devnum = oss_switch_option_get_devnum (option);
+    if (recsrc != 0) {
+        GList *list = swtch->priv->options;
 
-        /* Mark the selected option when we find it */
-        if (recsrc & (1 << devnum)) {
-            _mate_mixer_switch_set_active_option (MATE_MIXER_SWITCH (swtch),
-                                                  MATE_MIXER_SWITCH_OPTION (option));
-            return;
+        /* Find out which option is currently selected */
+        while (list != NULL) {
+            gint devnum;
+
+            option = OSS_SWITCH_OPTION (list->data);
+            devnum = oss_switch_option_get_devnum (option);
+
+            if (recsrc & (1 << devnum)) {
+                /* It is possible that some hardware might allow and have more recording
+                 * sources active at the same time, but we only support one active
+                 * source at a time */
+                _mate_mixer_switch_set_active_option (MATE_MIXER_SWITCH (swtch),
+                                                      MATE_MIXER_SWITCH_OPTION (option));
+                return;
+            }
+            list = list->next;
         }
-        list = list->next;
+
+        g_debug ("Switch %s has unknown device %d as the active option",
+                 mate_mixer_switch_get_name (MATE_MIXER_SWITCH (swtch)),
+                 devnum);
+
+        /* OSS shouldn't let a non-record device be selected, let's step in and select
+         * something reasonable instead... */
+    } else {
+         g_debug ("Switch %s has no active device",
+                  mate_mixer_switch_get_name (MATE_MIXER_SWITCH (swtch)));
+
+        /* According to the OSS Programmer's Guide, if the recsrc value is 0, the
+         * microphone will be selected implicitly.
+         * Let's not assume that's true everywhere and select something explicitly... */
     }
 
-    g_warning ("Unknown active option of switch %s",
-               mate_mixer_switch_get_name (MATE_MIXER_SWITCH (swtch)));
+    option = choose_default_option (swtch);
+
+    g_debug ("Selecting default device %s as active for switch %s",
+             mate_mixer_switch_option_get_name (MATE_MIXER_SWITCH_OPTION (option)),
+             mate_mixer_switch_get_name (MATE_MIXER_SWITCH (swtch)));
+
+    if (mate_mixer_switch_set_active_option (MATE_MIXER_SWITCH (swtch),
+                                             MATE_MIXER_SWITCH_OPTION (option)) == FALSE) {
+        g_debug ("Failed to set the default device, assuming it is selected anyway");
+
+        _mate_mixer_switch_set_active_option (MATE_MIXER_SWITCH (swtch),
+                                              MATE_MIXER_SWITCH_OPTION (option));
+    }
 }
 
 void
@@ -174,7 +211,6 @@ oss_switch_set_active_option (MateMixerSwitch *mms, MateMixerSwitchOption *mmso)
     OssSwitch *swtch;
     gint       ret;
     gint       recsrc;
-    gint       devnum;
 
     g_return_val_if_fail (OSS_IS_SWITCH (mms), FALSE);
     g_return_val_if_fail (OSS_IS_SWITCH_OPTION (mmso), FALSE);
@@ -184,8 +220,7 @@ oss_switch_set_active_option (MateMixerSwitch *mms, MateMixerSwitchOption *mmso)
     if G_UNLIKELY (swtch->priv->fd == -1)
         return FALSE;
 
-    devnum = oss_switch_option_get_devnum (OSS_SWITCH_OPTION (mmso));
-    recsrc = 1 << devnum;
+    recsrc = 1 << oss_switch_option_get_devnum (OSS_SWITCH_OPTION (mmso));
 
     ret = ioctl (swtch->priv->fd, MIXER_WRITE (SOUND_MIXER_RECSRC), &recsrc);
     if (ret == -1)
@@ -200,4 +235,28 @@ oss_switch_list_options (MateMixerSwitch *mms)
     g_return_val_if_fail (OSS_IS_SWITCH (mms), NULL);
 
     return OSS_SWITCH (mms)->priv->options;
+}
+
+#define OSS_SWITCH_PREFERRED_DEFAULT_DEVNUM 7 /* Microphone */
+
+static OssSwitchOption *
+choose_default_option (OssSwitch *swtch)
+{
+    GList *list = swtch->priv->options;
+
+    /* Search for the preferred device */
+    while (list != NULL) {
+        OssSwitchOption *option;
+        gint             devnum;
+
+        option = OSS_SWITCH_OPTION (list->data);
+        devnum = oss_switch_option_get_devnum (option);
+
+        if (devnum == OSS_SWITCH_PREFERRED_DEFAULT_DEVNUM)
+            return option;
+
+        list = list->next;
+    }
+    /* If the preferred device is not present, use the first available one */
+    return OSS_SWITCH_OPTION (swtch->priv->options->data);
 }
