@@ -129,7 +129,6 @@ oss_switch_load (OssSwitch *swtch)
 {
     OssSwitchOption *option;
     gint             recsrc;
-    gint             devnum;
     gint             ret;
 
     g_return_if_fail (OSS_IS_SWITCH (swtch));
@@ -163,9 +162,8 @@ oss_switch_load (OssSwitch *swtch)
             list = list->next;
         }
 
-        g_debug ("Switch %s has unknown device %d as the active option",
-                 mate_mixer_switch_get_name (MATE_MIXER_SWITCH (swtch)),
-                 devnum);
+        g_debug ("Switch %s has an unknown device as the active option",
+                 mate_mixer_switch_get_name (MATE_MIXER_SWITCH (swtch)));
 
         /* OSS shouldn't let a non-record device be selected, let's step in and select
          * something reasonable instead... */
