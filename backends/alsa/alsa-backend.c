@@ -248,23 +248,23 @@ alsa_backend_list_streams (MateMixerBackend *backend)
 
         /* Walk through the list of devices and create the stream list, each
          * device has at most one input and one output stream */
-        list = alsa->priv->devices;
+        list = g_list_last (alsa->priv->devices);
 
         while (list != NULL) {
             AlsaDevice *device = ALSA_DEVICE (list->data);
             AlsaStream *stream;
 
-            stream = alsa_device_get_input_stream (device);
-            if (stream != NULL) {
-                alsa->priv->streams =
-                    g_list_append (alsa->priv->streams, g_object_ref (stream));
-            }
             stream = alsa_device_get_output_stream (device);
-            if (stream != NULL) {
+            if (stream != NULL)
                 alsa->priv->streams =
-                    g_list_append (alsa->priv->streams, g_object_ref (stream));
-            }
-            list = list->next;
+                    g_list_prepend (alsa->priv->streams, g_object_ref (stream));
+
+            stream = alsa_device_get_input_stream (device);
+            if (stream != NULL)
+                alsa->priv->streams =
+                    g_list_prepend (alsa->priv->streams, g_object_ref (stream));
+
+            list = list->prev;
         }
     }
     return alsa->priv->streams;

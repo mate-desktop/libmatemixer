@@ -465,12 +465,17 @@ alsa_device_list_streams (MateMixerDevice *mmd)
     device = ALSA_DEVICE (mmd);
 
     if (device->priv->streams == NULL) {
-        if (device->priv->output != NULL)
-            device->priv->streams = g_list_prepend (device->priv->streams,
-                                                    g_object_ref (device->priv->output));
-        if (device->priv->input != NULL)
-            device->priv->streams = g_list_prepend (device->priv->streams,
-                                                    g_object_ref (device->priv->input));
+        AlsaStream *stream;
+
+        stream = alsa_device_get_output_stream (device);
+        if (stream != NULL)
+            device->priv->streams =
+                g_list_prepend (device->priv->streams, g_object_ref (stream));
+
+        stream = alsa_device_get_input_stream (device);
+        if (stream != NULL)
+            device->priv->streams =
+                g_list_prepend (device->priv->streams, g_object_ref (stream));
     }
     return device->priv->streams;
 }
