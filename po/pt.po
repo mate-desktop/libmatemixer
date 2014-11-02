@@ -3,19 +3,20 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Rezső Páder <rezso@rezso.net>, 2014
+# Carlos Moreira <crolidge@gmail.com>, 2014
+# Hugo Carvalho <hugokarvalho@hotmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-10-28 09:27+0100\n"
-"PO-Revision-Date: 2014-10-28 08:28+0000\n"
-"Last-Translator: Stefano Karapetsas <stefano@karapetsas.com>\n"
-"Language-Team: Hungarian (http://www.transifex.com/projects/p/MATE/language/hu/)\n"
+"PO-Revision-Date: 2014-11-02 14:14+0000\n"
+"Last-Translator: Hugo Carvalho <hugokarvalho@hotmail.com>\n"
+"Language-Team: Portuguese (http://www.transifex.com/projects/p/MATE/language/pt/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: hu\n"
+"Language: pt\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. Output controls
@@ -40,7 +41,7 @@ msgstr ""
 #. * regular volume control
 #: ../backends/alsa/alsa-constants.c:44 ../backends/oss/oss-device.c:95
 msgid "Speaker"
-msgstr "Hangszóró"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:45 ../backends/alsa/alsa-constants.c:46
 #: ../backends/alsa/alsa-constants.c:47
@@ -49,15 +50,15 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:48
 msgid "Headphone"
-msgstr "Fülhallgató"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:49
 msgid "Headphone 2"
-msgstr "Fülhallgató 2"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:50
 msgid "Headset"
-msgstr "Fejhallgató"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:51 ../backends/alsa/alsa-constants.c:52
 #: ../backends/alsa/alsa-constants.c:53 ../backends/alsa/alsa-constants.c:54
@@ -82,7 +83,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:61 ../backends/alsa/alsa-constants.c:135
 msgid "Digital"
-msgstr "Digitális"
+msgstr "Digital"
 
 #: ../backends/alsa/alsa-constants.c:62 ../backends/alsa/alsa-constants.c:63
 msgid "Side Speaker"
@@ -99,7 +100,7 @@ msgstr ""
 #: ../backends/alsa/alsa-constants.c:66 ../backends/alsa/alsa-constants.c:99
 #: ../backends/alsa/alsa-constants.c:213
 msgid "Phone"
-msgstr "Telefon"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:67 ../backends/oss/oss-device.c:98
 msgid "CD"
@@ -107,7 +108,7 @@ msgstr "CD"
 
 #: ../backends/alsa/alsa-constants.c:68
 msgid "Music"
-msgstr "Zene"
+msgstr "Música"
 
 #: ../backends/alsa/alsa-constants.c:69
 msgid "AC97"
@@ -123,11 +124,11 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:73
 msgid "PC Speaker"
-msgstr "PC hangszóró"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:74 ../backends/oss/oss-device.c:91
 msgid "Synth"
-msgstr "Szintetizátor"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:75
 msgid "MIDI"
@@ -135,7 +136,7 @@ msgstr "MIDI"
 
 #: ../backends/alsa/alsa-constants.c:76
 msgid "Synth/MIDI"
-msgstr "Szintetizátor/MIDI"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:77 ../backends/oss/oss-device.c:89
 msgid "Bass"
@@ -154,28 +155,28 @@ msgstr ""
 #: ../backends/alsa/alsa-constants.c:82 ../backends/alsa/alsa-constants.c:156
 #: ../backends/alsa/alsa-constants.c:157 ../backends/oss/oss-device.c:97
 msgid "Microphone"
-msgstr "Mikrofon"
+msgstr "Microfone"
 
 #: ../backends/alsa/alsa-constants.c:83 ../backends/alsa/alsa-constants.c:194
 msgid "Microphone/Line In"
-msgstr "Mikrofon/Vonal bemenet"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:84 ../backends/alsa/alsa-constants.c:85
 #: ../backends/alsa/alsa-constants.c:168 ../backends/alsa/alsa-constants.c:169
 #: ../backends/alsa/alsa-constants.c:171 ../backends/alsa/alsa-constants.c:172
 #: ../backends/alsa/alsa-constants.c:173
 msgid "Internal Microphone"
-msgstr "Belső mikrofon"
+msgstr "Microfone interno"
 
 #: ../backends/alsa/alsa-constants.c:86 ../backends/alsa/alsa-constants.c:163
 #: ../backends/alsa/alsa-constants.c:164
 msgid "Front Microphone"
-msgstr "Első mikrofon"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:87 ../backends/alsa/alsa-constants.c:183
 #: ../backends/alsa/alsa-constants.c:184
 msgid "Rear Microphone"
-msgstr "Hátsó mikrofon"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:88 ../backends/alsa/alsa-constants.c:167
 msgid "Dock Microphone"
@@ -199,12 +200,12 @@ msgstr ""
 #: ../backends/alsa/alsa-constants.c:196 ../backends/alsa/alsa-constants.c:197
 #: ../backends/oss/oss-device.c:96
 msgid "Line In"
-msgstr "Vonalbemenet"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:95 ../backends/alsa/alsa-constants.c:203
 #: ../backends/alsa/alsa-constants.c:206
 msgid "Auxiliary"
-msgstr ""
+msgstr "Auxiliar"
 
 #: ../backends/alsa/alsa-constants.c:96 ../backends/oss/oss-device.c:115
 msgid "Video"
@@ -212,7 +213,7 @@ msgstr "Video"
 
 #: ../backends/alsa/alsa-constants.c:97 ../backends/alsa/alsa-constants.c:201
 msgid "TV Tuner"
-msgstr "TV Tuner"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:98 ../backends/alsa/alsa-constants.c:202
 msgid "FM"
@@ -333,7 +334,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:138
 msgid "Optical"
-msgstr "Optikai"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:139
 msgid "Auto Gain Control"
@@ -417,15 +418,15 @@ msgstr ""
 #. Other options
 #: ../backends/alsa/alsa-constants.c:188
 msgid "Analog"
-msgstr "Analóg"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:189
 msgid "Analog In"
-msgstr "Analóg be"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:190
 msgid "Analog Inputs"
-msgstr "Analóg bemenetek"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:195
 msgid "Line In/Microphone"
@@ -458,31 +459,31 @@ msgstr ""
 #. Recording monitor
 #: ../backends/alsa/alsa-constants.c:212 ../backends/oss/oss-device.c:100
 msgid "Mixer"
-msgstr "Mixer"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:214
 msgid "Unknown 1"
-msgstr "Ismeretlen 1"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:215
 msgid "Unknown 2"
-msgstr "Ismeretlen 2"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:216
 msgid "Enabled"
-msgstr ""
+msgstr "Activo"
 
 #: ../backends/alsa/alsa-constants.c:217
 msgid "Disabled"
-msgstr ""
+msgstr "Inativo"
 
 #: ../backends/alsa/alsa-device.c:610
 msgid "On"
-msgstr "Be"
+msgstr ""
 
 #: ../backends/alsa/alsa-device.c:611
 msgid "Off"
-msgstr "Ki"
+msgstr ""
 
 #: ../backends/oss/oss-backend.c:403
 #, c-format
@@ -491,7 +492,7 @@ msgstr ""
 
 #: ../backends/oss/oss-device.c:88
 msgid "Volume"
-msgstr "Hangerő"
+msgstr "Volume"
 
 #: ../backends/oss/oss-device.c:101
 msgid "PCM 2"
@@ -500,7 +501,7 @@ msgstr ""
 #. Recording level (master input)
 #: ../backends/oss/oss-device.c:103
 msgid "Record"
-msgstr "Felvétel"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:104
 msgid "Input Gain"
@@ -525,37 +526,37 @@ msgstr ""
 #. These 3 can be attached to either digital input or output
 #: ../backends/oss/oss-device.c:110
 msgid "Digital 1"
-msgstr "Digitális 1"
+msgstr "Digital 1"
 
 #: ../backends/oss/oss-device.c:111
 msgid "Digital 2"
-msgstr "Digitális 2"
+msgstr "Digital 2"
 
 #: ../backends/oss/oss-device.c:112
 msgid "Digital 3"
-msgstr "Digitális 3"
+msgstr "Digital 3"
 
 #: ../backends/oss/oss-device.c:113
 msgid "Phone In"
-msgstr "Telefon be"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:114
 msgid "Phone Out"
-msgstr "Telefon kimenet"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:116
 msgid "Radio"
-msgstr "Rádió"
+msgstr ""
 
 #: ../backends/pulse/pulse-device.c:399
 msgid "Profile"
-msgstr "Profil"
+msgstr "Perfil"
 
 #: ../backends/pulse/pulse-monitor.c:282
 msgid "Peak detect"
-msgstr "Csúcsérzékelés"
+msgstr ""
 
 #. Create the port switch
 #: ../backends/pulse/pulse-sink.c:149 ../backends/pulse/pulse-source.c:146
 msgid "Port"
-msgstr "Port"
+msgstr ""
