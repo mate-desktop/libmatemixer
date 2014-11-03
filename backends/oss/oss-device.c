@@ -137,8 +137,7 @@ static const gint oss_input_priority[] = {
     8,  /* cd */
     22, /* video */
     23, /* radio */
-    3,  /* synth */
-    27  /* midi */
+    3   /* synth */
 };
 
 static const gint oss_output_priority[] = {
@@ -149,12 +148,9 @@ static const gint oss_output_priority[] = {
     17, /* dig1 */
     18, /* dig2 */
     19, /* dig3 */
-    25, /* depth */
-    26, /* center */
     21, /* phone out */
     13, /* ogain */
     9,  /* mix */
-    24, /* monitor */
     1,  /* bass */
     2   /* treble */
 };
@@ -615,28 +611,27 @@ read_mixer_switch (OssDevice *device)
     GList *options = NULL;
     guint  i;
 
-    for (i = 0; i < OSS_N_DEVICES; i++) {
+    /* This is always an input recording source switch */
+    for (i = 0; i < G_N_ELEMENTS (oss_input_priority); i++) {
+        gint             devnum = oss_input_priority[i];
         OssSwitchOption *option;
 
-        /* Exclude output controls as this is always a recording
-         * source switch */
-        if (oss_devices[i].type == OSS_DEV_OUTPUT)
-            continue;
-        if (OSS_MASK_HAS_DEVICE (device->priv->devmask, i) == FALSE ||
-            OSS_MASK_HAS_DEVICE (device->priv->recmask, i) == FALSE)
+        /* Avoid devices that are not present or not recordable */
+        if (OSS_MASK_HAS_DEVICE (device->priv->devmask, devnum) == FALSE ||
+            OSS_MASK_HAS_DEVICE (device->priv->recmask, devnum) == FALSE)
             continue;
 
-        option = oss_switch_option_new (oss_devices[i].name,
-                                        gettext (oss_devices[i].label),
-                                        oss_devices[i].icon,
-                                        i);
+        option = oss_switch_option_new (oss_devices[devnum].name,
+                                        gettext (oss_devices[devnum].label),
+                                        oss_devices[devnum].icon,
+                                        devnum);
         options = g_list_prepend (options, option);
     }
 
     if G_LIKELY (options != NULL)
         oss_stream_set_switch_data (device->priv->input,
                                     device->priv->fd,
-                                    options);
+                                    g_list_reverse (options));
 }
 
 static gboolean
