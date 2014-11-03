@@ -556,10 +556,25 @@ read_mixer_devices (OssDevice *device)
         if (OSS_MASK_HAS_DEVICE (device->priv->devmask, i) == FALSE)
             continue;
 
-        if (OSS_MASK_HAS_DEVICE (device->priv->recmask, i) == TRUE)
+        /* The control is assigned to a stream according to the predefined type.
+         *
+         * OSS may allow some controls to be both input and output, but the API
+         * is too simple to tell what exactly is a control capable of. Here we
+         * simplify things a bit and assign each control to exactly one stream. */
+        switch (oss_devices[i].type) {
+        case OSS_DEV_INPUT:
             stream = device->priv->input;
-        else
+            break;
+        case OSS_DEV_OUTPUT:
             stream = device->priv->output;
+            break;
+        case OSS_DEV_ANY:
+            if (OSS_MASK_HAS_DEVICE (device->priv->recmask, i) == TRUE)
+                stream = device->priv->input;
+            else
+                stream = device->priv->output;
+            break;
+        }
 
         stereo  = OSS_MASK_HAS_DEVICE (device->priv->stereodevs, i);
         control = oss_stream_control_new (oss_devices[i].name,
@@ -603,6 +618,10 @@ read_mixer_switch (OssDevice *device)
     for (i = 0; i < OSS_N_DEVICES; i++) {
         OssSwitchOption *option;
 
+        /* Exclude output controls as this is always a recording
+         * source switch */
+        if (oss_devices[i].type == OSS_DEV_OUTPUT)
+            continue;
         if (OSS_MASK_HAS_DEVICE (device->priv->devmask, i) == FALSE ||
             OSS_MASK_HAS_DEVICE (device->priv->recmask, i) == FALSE)
             continue;
