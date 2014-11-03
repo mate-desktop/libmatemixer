@@ -568,7 +568,7 @@ read_mixer_devices (OssDevice *device)
         case OSS_DEV_OUTPUT:
             stream = device->priv->output;
             break;
-        case OSS_DEV_ANY:
+        default:
             if (OSS_MASK_HAS_DEVICE (device->priv->recmask, i) == TRUE)
                 stream = device->priv->input;
             else
