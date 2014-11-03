@@ -146,7 +146,7 @@ pulse_sink_new (PulseConnection    *connection,
         pa_sink_port_info **ports = info->ports;
 
         /* Create the port switch */
-        sink->priv->pswitch = pulse_sink_switch_new ("port", _("Port"), sink);
+        sink->priv->pswitch = pulse_sink_switch_new ("port", _("Connector"), sink);
 
         while (*ports != NULL) {
             pa_sink_port_info *p = *ports++;

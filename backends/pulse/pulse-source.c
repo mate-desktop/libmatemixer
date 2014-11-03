@@ -143,7 +143,7 @@ pulse_source_new (PulseConnection      *connection,
         pa_source_port_info **ports = info->ports;
 
         /* Create the port switch */
-        source->priv->pswitch = pulse_source_switch_new ("port", _("Port"), source);
+        source->priv->pswitch = pulse_source_switch_new ("port", _("Connector"), source);
 
         while (*ports != NULL) {
             pa_source_port_info *p = *ports++;
