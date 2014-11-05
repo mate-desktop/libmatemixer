@@ -3,104 +3,102 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# 박정규(Jung Kyu Park) <bagjunggyu@gmail.com>, 2014
-# Seong-ho Cho <darkcircle.0426@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-10-28 09:27+0100\n"
-"PO-Revision-Date: 2014-11-04 12:40+0000\n"
-"Last-Translator: 박정규(Jung Kyu Park) <bagjunggyu@gmail.com>\n"
-"Language-Team: Korean (http://www.transifex.com/projects/p/MATE/language/ko/)\n"
+"PO-Revision-Date: 2014-11-04 14:31+0000\n"
+"Last-Translator: mauron\n"
+"Language-Team: Turkish (http://www.transifex.com/projects/p/MATE/language/tr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: ko\n"
-"Plural-Forms: nplurals=1; plural=0;\n"
+"Language: tr\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #. Output controls
 #: ../backends/alsa/alsa-constants.c:40
 msgid "Master"
-msgstr "마스터"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:41
 msgid "Hardware Master"
-msgstr "하드웨어 마스터"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:42 ../backends/oss/oss-device.c:92
 msgid "PCM"
-msgstr "PCM"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:43
 msgid "Desktop Speaker"
-msgstr "데스크톱 스피커"
+msgstr "Masaüstü Hoparlör"
 
 #. OSS manual says this should be the beeper, but Linux OSS seems to assign it
 #. to
 #. * regular volume control
 #: ../backends/alsa/alsa-constants.c:44 ../backends/oss/oss-device.c:95
 msgid "Speaker"
-msgstr "스피커"
+msgstr "Hoparlör"
 
 #: ../backends/alsa/alsa-constants.c:45 ../backends/alsa/alsa-constants.c:46
 #: ../backends/alsa/alsa-constants.c:47
 msgid "Front Speaker"
-msgstr "전면 스피커"
+msgstr "Ön Hoparlör"
 
 #: ../backends/alsa/alsa-constants.c:48
 msgid "Headphone"
-msgstr "헤드폰"
+msgstr "Kulaklık"
 
 #: ../backends/alsa/alsa-constants.c:49
 msgid "Headphone 2"
-msgstr "헤드폰 2"
+msgstr "Kulaklık 2"
 
 #: ../backends/alsa/alsa-constants.c:50
 msgid "Headset"
-msgstr "헤드셋"
+msgstr "Kulaklık"
 
 #: ../backends/alsa/alsa-constants.c:51 ../backends/alsa/alsa-constants.c:52
 #: ../backends/alsa/alsa-constants.c:53 ../backends/alsa/alsa-constants.c:54
 msgid "Surround Speaker"
-msgstr "서라운드 스피커"
+msgstr "Üç Boyutlu Ses Hoparlörü"
 
 #: ../backends/alsa/alsa-constants.c:55 ../backends/alsa/alsa-constants.c:56
 msgid "Center Speaker"
-msgstr "중앙 스피커"
+msgstr "Merkez Hoparlör"
 
 #: ../backends/alsa/alsa-constants.c:57 ../backends/alsa/alsa-constants.c:58
 msgid "CLFE Speaker"
-msgstr "CLFE 스피커"
+msgstr "CLFE Hoparlör"
 
 #: ../backends/alsa/alsa-constants.c:59
 msgid "Master Mono"
-msgstr "마스터 모노"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:60
 msgid "Master Digital"
-msgstr "마스터 디지털"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:61 ../backends/alsa/alsa-constants.c:135
 msgid "Digital"
-msgstr "디지털"
+msgstr "Sayısal"
 
 #: ../backends/alsa/alsa-constants.c:62 ../backends/alsa/alsa-constants.c:63
 msgid "Side Speaker"
-msgstr "측면 스피커"
+msgstr "Yan Hoparlör"
 
 #: ../backends/alsa/alsa-constants.c:64
 msgid "Rear Speaker"
-msgstr "후면 스피커"
+msgstr "Arka Hoparlör"
 
 #: ../backends/alsa/alsa-constants.c:65
 msgid "Wave"
-msgstr "웨이브 음원"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:66 ../backends/alsa/alsa-constants.c:99
 #: ../backends/alsa/alsa-constants.c:213
 msgid "Phone"
-msgstr "폰"
+msgstr "Telefon"
 
 #: ../backends/alsa/alsa-constants.c:67 ../backends/oss/oss-device.c:98
 msgid "CD"
@@ -108,7 +106,7 @@ msgstr "CD"
 
 #: ../backends/alsa/alsa-constants.c:68
 msgid "Music"
-msgstr "뮤직"
+msgstr "Müzik"
 
 #: ../backends/alsa/alsa-constants.c:69
 msgid "AC97"
@@ -116,83 +114,83 @@ msgstr "AC97"
 
 #: ../backends/alsa/alsa-constants.c:70 ../backends/alsa/alsa-constants.c:71
 msgid "LFE Speaker"
-msgstr "LFE 스피커"
+msgstr "LFE Hoparlörü"
 
 #: ../backends/alsa/alsa-constants.c:72
 msgid "Bass Speaker"
-msgstr "저음부 스피커"
+msgstr "Bas Hoparlörü"
 
 #: ../backends/alsa/alsa-constants.c:73
 msgid "PC Speaker"
-msgstr "PC 스피커"
+msgstr "PC Hoparlörü"
 
 #: ../backends/alsa/alsa-constants.c:74 ../backends/oss/oss-device.c:91
 msgid "Synth"
-msgstr "신디사이저"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:75
 msgid "MIDI"
-msgstr "미디"
+msgstr "MIDI"
 
 #: ../backends/alsa/alsa-constants.c:76
 msgid "Synth/MIDI"
-msgstr "신디사이저/미디"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:77 ../backends/oss/oss-device.c:89
 msgid "Bass"
-msgstr "저음부"
+msgstr "Bas"
 
 #: ../backends/alsa/alsa-constants.c:78 ../backends/oss/oss-device.c:90
 msgid "Treble"
-msgstr "고음부"
+msgstr "Tiz"
 
 #. Input controls
 #: ../backends/alsa/alsa-constants.c:81
 msgid "Capture"
-msgstr "캡처"
+msgstr ""
 
 #. Microphone options
 #: ../backends/alsa/alsa-constants.c:82 ../backends/alsa/alsa-constants.c:156
 #: ../backends/alsa/alsa-constants.c:157 ../backends/oss/oss-device.c:97
 msgid "Microphone"
-msgstr "마이크로폰"
+msgstr "Mikrofon"
 
 #: ../backends/alsa/alsa-constants.c:83 ../backends/alsa/alsa-constants.c:194
 msgid "Microphone/Line In"
-msgstr "마이크로폰/입력 단자"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:84 ../backends/alsa/alsa-constants.c:85
 #: ../backends/alsa/alsa-constants.c:168 ../backends/alsa/alsa-constants.c:169
 #: ../backends/alsa/alsa-constants.c:171 ../backends/alsa/alsa-constants.c:172
 #: ../backends/alsa/alsa-constants.c:173
 msgid "Internal Microphone"
-msgstr "내부 마이크로폰"
+msgstr "Dahili Mikrofon"
 
 #: ../backends/alsa/alsa-constants.c:86 ../backends/alsa/alsa-constants.c:163
 #: ../backends/alsa/alsa-constants.c:164
 msgid "Front Microphone"
-msgstr "전면 마이크로폰"
+msgstr "Ön Mikrofon"
 
 #: ../backends/alsa/alsa-constants.c:87 ../backends/alsa/alsa-constants.c:183
 #: ../backends/alsa/alsa-constants.c:184
 msgid "Rear Microphone"
-msgstr "후면 마이크로폰"
+msgstr "Arka Mikrofon"
 
 #: ../backends/alsa/alsa-constants.c:88 ../backends/alsa/alsa-constants.c:167
 msgid "Dock Microphone"
-msgstr "도크 마이크로폰"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:89 ../backends/alsa/alsa-constants.c:165
 msgid "Headphone Microphone"
-msgstr "헤드폰 마이크로폰"
+msgstr "Kulaklık Mikrofonu"
 
 #: ../backends/alsa/alsa-constants.c:90 ../backends/alsa/alsa-constants.c:166
 msgid "Headset Microphone"
-msgstr "헤드셋 마이크로폰"
+msgstr "Kulaklık Mikrofonu"
 
 #: ../backends/alsa/alsa-constants.c:91
 msgid "Inverted Internal Microphone"
-msgstr "내부 반전 마이크로폰"
+msgstr "Devrik Dahili Mikrofon"
 
 #: ../backends/alsa/alsa-constants.c:92 ../backends/alsa/alsa-constants.c:93
 #: ../backends/alsa/alsa-constants.c:94 ../backends/alsa/alsa-constants.c:191
@@ -200,20 +198,20 @@ msgstr "내부 반전 마이크로폰"
 #: ../backends/alsa/alsa-constants.c:196 ../backends/alsa/alsa-constants.c:197
 #: ../backends/oss/oss-device.c:96
 msgid "Line In"
-msgstr "입력 단자"
+msgstr "Hat"
 
 #: ../backends/alsa/alsa-constants.c:95 ../backends/alsa/alsa-constants.c:203
 #: ../backends/alsa/alsa-constants.c:206
 msgid "Auxiliary"
-msgstr "외부 입력"
+msgstr "Yardımcı"
 
 #: ../backends/alsa/alsa-constants.c:96 ../backends/oss/oss-device.c:115
 msgid "Video"
-msgstr "비디오"
+msgstr "Video"
 
 #: ../backends/alsa/alsa-constants.c:97 ../backends/alsa/alsa-constants.c:201
 msgid "TV Tuner"
-msgstr "TV 튜너"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:98 ../backends/alsa/alsa-constants.c:202
 msgid "FM"
@@ -221,278 +219,278 @@ msgstr "FM"
 
 #: ../backends/alsa/alsa-constants.c:100
 msgid "Microphone Boost"
-msgstr "마이크로폰 증폭"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:101
 msgid "Microphone Boost (+20dB)"
-msgstr "마이크로폰 증폭(+20dB)"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:102 ../backends/alsa/alsa-constants.c:103
 msgid "Internal Microphone Boost"
-msgstr "내부 마이크로폰 증폭"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:104
 msgid "Front Microphone Boost"
-msgstr "전면 마이크로폰 증폭"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:105
 msgid "Rear Microphone Boost"
-msgstr "후면 마이크로폰 증폭"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:106
 msgid "Dock Microphone Boost"
-msgstr "도크 마이크로폰 증폭"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:107
 msgid "Headphone Microphone Boost"
-msgstr "헤드폰 마이크로폰 증폭"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:108
 msgid "Headset Microphone Boost"
-msgstr "헤드셋 마이크로폰 증폭"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:109
 msgid "Line In Boost"
-msgstr "입력 증폭"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:116
 msgid "Analog Output"
-msgstr "아날로그 출력"
+msgstr "Analog Çıktı"
 
 #: ../backends/alsa/alsa-constants.c:117
 msgid "Analog Source"
-msgstr "아날로그 소스"
+msgstr "Analog Kaynak"
 
 #: ../backends/alsa/alsa-constants.c:118 ../backends/oss/oss-stream.c:207
 msgid "Capture Source"
-msgstr "캡처 소스"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:119
 msgid "Input Source"
-msgstr "입력 소스"
+msgstr "Girdi Kaynağı"
 
 #: ../backends/alsa/alsa-constants.c:120
 msgid "Input Source Select"
-msgstr "입력 소스 선택"
+msgstr "Girdi Kaynağı Seç"
 
 #: ../backends/alsa/alsa-constants.c:121
 msgid "Digital Input Source"
-msgstr "디지털 입력 소스"
+msgstr "Sayısal Girdi Kaynağı"
 
 #: ../backends/alsa/alsa-constants.c:122
 msgid "PCM Capture Source"
-msgstr "PCM 캡처 소스"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:123
 msgid "Digital Playback Source"
-msgstr "디지털 재생 소스"
+msgstr "Sayısal Çalma Kaynağı"
 
 #: ../backends/alsa/alsa-constants.c:124
 msgid "Mono Output Select"
-msgstr "모노 출력 선택"
+msgstr "Mono Çıktı Seç"
 
 #: ../backends/alsa/alsa-constants.c:125
 msgid "Shared Mic/Line In"
-msgstr "공유 마이크/입력 단자"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:126
 msgid "Microphone Select"
-msgstr "마이크로폰 선택"
+msgstr "Mikrofon Seç"
 
 #: ../backends/alsa/alsa-constants.c:127
 msgid "Microphone Jack Mode"
-msgstr "마이크로폰 잭 모드"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:128
 msgid "Surround Jack Mode"
-msgstr "서라운드 잭 모드"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:129
 msgid "Auto-Mute Mode"
-msgstr "자동 음소거 모드"
+msgstr ""
 
 #. (Probably) toggles
 #: ../backends/alsa/alsa-constants.c:132
 msgid "External Amplifier"
-msgstr "외부 앰프"
+msgstr "Harici Amplifikatör"
 
 #: ../backends/alsa/alsa-constants.c:133
 msgid "Bass Boost"
-msgstr "저음부 증폭"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:134
 msgid "Capture Boost"
-msgstr "캡처 증폭"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:136 ../backends/alsa/alsa-constants.c:200
 msgid "Digital In"
-msgstr "디지털 입력"
+msgstr "Sayısal Girdi"
 
 #: ../backends/alsa/alsa-constants.c:137
 msgid "Digital Default PCM"
-msgstr "디지털 기본 PCM"
+msgstr "Sayısal Varsayılan PCM"
 
 #: ../backends/alsa/alsa-constants.c:138
 msgid "Optical"
-msgstr "광 단자"
+msgstr "Optik"
 
 #: ../backends/alsa/alsa-constants.c:139
 msgid "Auto Gain Control"
-msgstr "자동 게인 조절"
+msgstr "Otomatik Kazanç Kontrolü"
 
 #: ../backends/alsa/alsa-constants.c:140
 msgid "Mix"
-msgstr "믹서"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:141
 msgid "Mix Mono"
-msgstr "믹서 모노"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:142
 msgid "Mic Capture"
-msgstr "마이크로폰 캡처"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:143 ../backends/alsa/alsa-constants.c:198
 msgid "Input 1"
-msgstr "입력단자 1"
+msgstr "Girdi 1"
 
 #: ../backends/alsa/alsa-constants.c:144 ../backends/alsa/alsa-constants.c:199
 msgid "Input 2"
-msgstr "입력단자 2"
+msgstr "Girdi 2"
 
 #. Output options
 #: ../backends/alsa/alsa-constants.c:151
 msgid "Speakers"
-msgstr "스피커"
+msgstr "Hoparlörler"
 
 #: ../backends/alsa/alsa-constants.c:152
 msgid "Headphones"
-msgstr "헤드폰"
+msgstr "Kulaklıklar"
 
 #: ../backends/alsa/alsa-constants.c:153
 msgid "Front Panel Headphones"
-msgstr "전면 패널 헤드폰"
+msgstr "Ön Panel Kulaklıklar"
 
 #: ../backends/alsa/alsa-constants.c:158
 msgid "Microphone 1"
-msgstr "마이크로폰 1"
+msgstr "Mikrofon 1"
 
 #: ../backends/alsa/alsa-constants.c:159
 msgid "Microphone 2"
-msgstr "마이크로폰 2"
+msgstr "Mikrofon 2"
 
 #: ../backends/alsa/alsa-constants.c:160 ../backends/alsa/alsa-constants.c:161
 #: ../backends/alsa/alsa-constants.c:162
 msgid "Microphone In"
-msgstr "마이크로폰 입력"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:170
 msgid "Internal Microphone 1"
-msgstr "내부 마이크로폰 1"
+msgstr "Dahili Mikrofon 1"
 
 #: ../backends/alsa/alsa-constants.c:174
 msgid "Internal Digital Microphone"
-msgstr "내부 디지털 마이크로폰"
+msgstr "Dahili Sayısal Mikrofon"
 
 #: ../backends/alsa/alsa-constants.c:175 ../backends/alsa/alsa-constants.c:178
 msgid "Digital Microphone"
-msgstr "디지털 마이크로폰"
+msgstr "Sayısal Mikrofon"
 
 #: ../backends/alsa/alsa-constants.c:176
 msgid "Digital Microphone 1"
-msgstr "디지털 마이크로폰 1"
+msgstr "Sayısal Mikrofon 1"
 
 #: ../backends/alsa/alsa-constants.c:177
 msgid "Digital Microphone 2"
-msgstr "디지털 마이크로폰 2"
+msgstr "Sayısal Mikrofon 2"
 
 #: ../backends/alsa/alsa-constants.c:179 ../backends/alsa/alsa-constants.c:180
 #: ../backends/alsa/alsa-constants.c:181 ../backends/alsa/alsa-constants.c:182
 msgid "External Microphone"
-msgstr "외부 마이크로폰"
+msgstr "Harici Mikrofon"
 
 #: ../backends/alsa/alsa-constants.c:185
 msgid "Camera Microphone"
-msgstr "카메라 마이크로폰"
+msgstr "Kamera Mikrofonu"
 
 #. Other options
 #: ../backends/alsa/alsa-constants.c:188
 msgid "Analog"
-msgstr "아날로그"
+msgstr "Analog"
 
 #: ../backends/alsa/alsa-constants.c:189
 msgid "Analog In"
-msgstr "아날로그 입력"
+msgstr "Analog Girdi"
 
 #: ../backends/alsa/alsa-constants.c:190
 msgid "Analog Inputs"
-msgstr "아날로그 입력"
+msgstr "Analog Girdiler"
 
 #: ../backends/alsa/alsa-constants.c:195
 msgid "Line In/Microphone"
-msgstr "입력 단자/마이크로폰"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:204 ../backends/alsa/alsa-constants.c:205
 msgid "Auxiliary In"
-msgstr "외부 입력"
+msgstr "Yardımcı Girdi"
 
 #: ../backends/alsa/alsa-constants.c:207
 msgid "Auxiliary 0"
-msgstr "외부 입력 0"
+msgstr "Yardımcı 0"
 
 #: ../backends/alsa/alsa-constants.c:208
 msgid "Auxiliary 1"
-msgstr "외부 입력 1"
+msgstr "Yardımcı 1"
 
 #: ../backends/alsa/alsa-constants.c:209
 msgid "Auxiliary 2"
-msgstr "외부 입력 2"
+msgstr "Yardımcı 2"
 
 #: ../backends/alsa/alsa-constants.c:210
 msgid "Auxiliary 3"
-msgstr "외부 입력 3"
+msgstr "Yardımcı 3"
 
 #: ../backends/alsa/alsa-constants.c:211
 msgid "Docking Station"
-msgstr "도킹 스테이션"
+msgstr ""
 
 #. Recording monitor
 #: ../backends/alsa/alsa-constants.c:212 ../backends/oss/oss-device.c:100
 msgid "Mixer"
-msgstr "믹서"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:214
 msgid "Unknown 1"
-msgstr "알 수 없음 1"
+msgstr "Bilinmeyen 1"
 
 #: ../backends/alsa/alsa-constants.c:215
 msgid "Unknown 2"
-msgstr "알 수 없음 2"
+msgstr "Bilinmeyen 2"
 
 #: ../backends/alsa/alsa-constants.c:216
 msgid "Enabled"
-msgstr "사용중"
+msgstr "Etkin"
 
 #: ../backends/alsa/alsa-constants.c:217
 msgid "Disabled"
-msgstr "사용하지 않음"
+msgstr "Devre dışı"
 
 #: ../backends/alsa/alsa-device.c:610
 msgid "On"
-msgstr "켜짐"
+msgstr "Açık"
 
 #: ../backends/alsa/alsa-device.c:611
 msgid "Off"
-msgstr "꺼짐"
+msgstr "Kapalı"
 
 #: ../backends/oss/oss-backend.c:403
 #, c-format
 msgid "OSS Mixer %d"
-msgstr "OSS 믹서 %d"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:88
 msgid "Volume"
-msgstr "음량"
+msgstr "Ses Hacmi"
 
 #: ../backends/oss/oss-device.c:101
 msgid "PCM 2"
@@ -501,62 +499,62 @@ msgstr "PCM 2"
 #. Recording level (master input)
 #: ../backends/oss/oss-device.c:103
 msgid "Record"
-msgstr "녹음"
+msgstr "Kayıt"
 
 #: ../backends/oss/oss-device.c:104
 msgid "Input Gain"
-msgstr "입력 게인"
+msgstr "Girdi Kazancı"
 
 #: ../backends/oss/oss-device.c:105
 msgid "Output Gain"
-msgstr "출력 게인"
+msgstr "Çıktı Kazancı"
 
 #: ../backends/oss/oss-device.c:106
 msgid "Line In 1"
-msgstr "입력 단자 1"
+msgstr "Hat 1"
 
 #: ../backends/oss/oss-device.c:107
 msgid "Line In 2"
-msgstr "입력 단자 2"
+msgstr "Hat 2"
 
 #: ../backends/oss/oss-device.c:108
 msgid "Line In 3"
-msgstr "입력 단자 3"
+msgstr "Hat 3"
 
 #. These 3 can be attached to either digital input or output
 #: ../backends/oss/oss-device.c:110
 msgid "Digital 1"
-msgstr "디지털 1"
+msgstr "Sayısal 1"
 
 #: ../backends/oss/oss-device.c:111
 msgid "Digital 2"
-msgstr "디지털 2"
+msgstr "Sayısal 2"
 
 #: ../backends/oss/oss-device.c:112
 msgid "Digital 3"
-msgstr "디지털 3"
+msgstr "Saysıal 3"
 
 #: ../backends/oss/oss-device.c:113
 msgid "Phone In"
-msgstr "폰 입력"
+msgstr "Telefon Girdi"
 
 #: ../backends/oss/oss-device.c:114
 msgid "Phone Out"
-msgstr "폰 출력"
+msgstr "Telefon Çıktı"
 
 #: ../backends/oss/oss-device.c:116
 msgid "Radio"
-msgstr "라디오"
+msgstr "Radyo"
 
 #: ../backends/pulse/pulse-device.c:399
 msgid "Profile"
-msgstr "프로파일"
+msgstr "Profil"
 
 #: ../backends/pulse/pulse-monitor.c:282
 msgid "Peak detect"
-msgstr "피크 감지"
+msgstr ""
 
 #. Create the port switch
 #: ../backends/pulse/pulse-sink.c:149 ../backends/pulse/pulse-source.c:146
 msgid "Port"
-msgstr "포트"
+msgstr ""

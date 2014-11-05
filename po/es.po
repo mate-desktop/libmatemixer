@@ -3,14 +3,15 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Andres Sanchez <blackatze93@gmail.com>, 2014
 # difusion, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-10-28 09:27+0100\n"
-"PO-Revision-Date: 2014-11-02 02:51+0000\n"
-"Last-Translator: difusion\n"
+"PO-Revision-Date: 2014-11-02 20:32+0000\n"
+"Last-Translator: Andres Sanchez <blackatze93@gmail.com>\n"
 "Language-Team: Spanish (http://www.transifex.com/projects/p/MATE/language/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -66,7 +67,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:55 ../backends/alsa/alsa-constants.c:56
 msgid "Center Speaker"
-msgstr ""
+msgstr "Altavoz Central"
 
 #: ../backends/alsa/alsa-constants.c:57 ../backends/alsa/alsa-constants.c:58
 msgid "CLFE Speaker"
@@ -139,7 +140,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:77 ../backends/oss/oss-device.c:89
 msgid "Bass"
-msgstr ""
+msgstr "Bajo"
 
 #: ../backends/alsa/alsa-constants.c:78 ../backends/oss/oss-device.c:90
 msgid "Treble"
@@ -170,12 +171,12 @@ msgstr "Micrófono Interno"
 #: ../backends/alsa/alsa-constants.c:86 ../backends/alsa/alsa-constants.c:163
 #: ../backends/alsa/alsa-constants.c:164
 msgid "Front Microphone"
-msgstr ""
+msgstr "Micrófono Frontal"
 
 #: ../backends/alsa/alsa-constants.c:87 ../backends/alsa/alsa-constants.c:183
 #: ../backends/alsa/alsa-constants.c:184
 msgid "Rear Microphone"
-msgstr ""
+msgstr "Micrófono Trasero"
 
 #: ../backends/alsa/alsa-constants.c:88 ../backends/alsa/alsa-constants.c:167
 msgid "Dock Microphone"
@@ -183,7 +184,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:89 ../backends/alsa/alsa-constants.c:165
 msgid "Headphone Microphone"
-msgstr ""
+msgstr "Micrófono de los Auriculares"
 
 #: ../backends/alsa/alsa-constants.c:90 ../backends/alsa/alsa-constants.c:166
 msgid "Headset Microphone"
@@ -204,7 +205,7 @@ msgstr ""
 #: ../backends/alsa/alsa-constants.c:95 ../backends/alsa/alsa-constants.c:203
 #: ../backends/alsa/alsa-constants.c:206
 msgid "Auxiliary"
-msgstr ""
+msgstr "Auxiliar"
 
 #: ../backends/alsa/alsa-constants.c:96 ../backends/oss/oss-device.c:115
 msgid "Video"
@@ -366,7 +367,7 @@ msgstr "Altavoces"
 
 #: ../backends/alsa/alsa-constants.c:152
 msgid "Headphones"
-msgstr ""
+msgstr "Auriculares"
 
 #: ../backends/alsa/alsa-constants.c:153
 msgid "Front Panel Headphones"
@@ -374,11 +375,11 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:158
 msgid "Microphone 1"
-msgstr ""
+msgstr "Micrófono 1"
 
 #: ../backends/alsa/alsa-constants.c:159
 msgid "Microphone 2"
-msgstr ""
+msgstr "Micrófono 2"
 
 #: ../backends/alsa/alsa-constants.c:160 ../backends/alsa/alsa-constants.c:161
 #: ../backends/alsa/alsa-constants.c:162
@@ -387,7 +388,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:170
 msgid "Internal Microphone 1"
-msgstr ""
+msgstr "Micrófono Interno 1"
 
 #: ../backends/alsa/alsa-constants.c:174
 msgid "Internal Digital Microphone"
@@ -395,24 +396,24 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:175 ../backends/alsa/alsa-constants.c:178
 msgid "Digital Microphone"
-msgstr ""
+msgstr "Micrófono Digital"
 
 #: ../backends/alsa/alsa-constants.c:176
 msgid "Digital Microphone 1"
-msgstr ""
+msgstr "Micrófono Digital 1"
 
 #: ../backends/alsa/alsa-constants.c:177
 msgid "Digital Microphone 2"
-msgstr ""
+msgstr "Micrófono Digital 2"
 
 #: ../backends/alsa/alsa-constants.c:179 ../backends/alsa/alsa-constants.c:180
 #: ../backends/alsa/alsa-constants.c:181 ../backends/alsa/alsa-constants.c:182
 msgid "External Microphone"
-msgstr ""
+msgstr "Micrófono Externo"
 
 #: ../backends/alsa/alsa-constants.c:185
 msgid "Camera Microphone"
-msgstr ""
+msgstr "Micrófono de la Cámara"
 
 #. Other options
 #: ../backends/alsa/alsa-constants.c:188
@@ -433,23 +434,23 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:204 ../backends/alsa/alsa-constants.c:205
 msgid "Auxiliary In"
-msgstr ""
+msgstr "Entrada Auxiliar"
 
 #: ../backends/alsa/alsa-constants.c:207
 msgid "Auxiliary 0"
-msgstr ""
+msgstr "Auxiliar 0"
 
 #: ../backends/alsa/alsa-constants.c:208
 msgid "Auxiliary 1"
-msgstr ""
+msgstr "Auxiliar 1"
 
 #: ../backends/alsa/alsa-constants.c:209
 msgid "Auxiliary 2"
-msgstr ""
+msgstr "Auxiliar 2"
 
 #: ../backends/alsa/alsa-constants.c:210
 msgid "Auxiliary 3"
-msgstr ""
+msgstr "Auxiliar 3"
 
 #: ../backends/alsa/alsa-constants.c:211
 msgid "Docking Station"
@@ -462,7 +463,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:214
 msgid "Unknown 1"
-msgstr ""
+msgstr "Desconocido 1"
 
 #: ../backends/alsa/alsa-constants.c:215
 msgid "Unknown 2"
