@@ -20,6 +20,7 @@
 #include <glib-object.h>
 
 #include "matemixer-device.h"
+#include "matemixer-device-switch.h"
 #include "matemixer-stream.h"
 #include "matemixer-switch.h"
 
@@ -76,10 +77,10 @@ static void mate_mixer_device_finalize     (GObject              *object);
 
 G_DEFINE_ABSTRACT_TYPE (MateMixerDevice, mate_mixer_device, G_TYPE_OBJECT)
 
-static MateMixerStream *mate_mixer_device_real_get_stream (MateMixerDevice *device,
-                                                           const gchar     *name);
-static MateMixerSwitch *mate_mixer_device_real_get_switch (MateMixerDevice *device,
-                                                           const gchar     *name);
+static MateMixerStream *      mate_mixer_device_real_get_stream (MateMixerDevice *device,
+                                                                 const gchar     *name);
+static MateMixerDeviceSwitch *mate_mixer_device_real_get_switch (MateMixerDevice *device,
+                                                                 const gchar     *name);
 
 static void
 mate_mixer_device_class_init (MateMixerDeviceClass *klass)
@@ -398,9 +399,9 @@ mate_mixer_device_get_stream (MateMixerDevice *device, const gchar *name)
  * To get a stream switch, rather than a device switch, use
  * mate_mixer_stream_get_switch().
  *
- * Returns: a #MateMixerSwitch or %NULL if there is no such device switch.
+ * Returns: a #MateMixerDeviceSwitch or %NULL if there is no such device switch.
  */
-MateMixerSwitch *
+MateMixerDeviceSwitch *
 mate_mixer_device_get_switch (MateMixerDevice *device, const gchar *name)
 {
     return MATE_MIXER_DEVICE_GET_CLASS (device)->get_switch (device, name);
@@ -487,7 +488,7 @@ mate_mixer_device_real_get_stream (MateMixerDevice *device, const gchar *name)
     return NULL;
 }
 
-static MateMixerSwitch *
+static MateMixerDeviceSwitch *
 mate_mixer_device_real_get_switch (MateMixerDevice *device, const gchar *name)
 {
     const GList *list;
@@ -500,7 +501,7 @@ mate_mixer_device_real_get_switch (MateMixerDevice *device, const gchar *name)
         MateMixerSwitch *swtch = MATE_MIXER_SWITCH (list->data);
 
         if (strcmp (name, mate_mixer_switch_get_name (swtch)) == 0)
-            return swtch;
+            return MATE_MIXER_DEVICE_SWITCH (swtch);
 
         list = list->next;
     }

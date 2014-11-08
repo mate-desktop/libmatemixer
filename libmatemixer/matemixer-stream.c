@@ -25,6 +25,7 @@
 #include "matemixer-stream.h"
 #include "matemixer-stream-control.h"
 #include "matemixer-stream-private.h"
+#include "matemixer-stream-switch.h"
 #include "matemixer-switch.h"
 
 /**
@@ -82,7 +83,7 @@ G_DEFINE_ABSTRACT_TYPE (MateMixerStream, mate_mixer_stream, G_TYPE_OBJECT)
 
 static MateMixerStreamControl *mate_mixer_stream_real_get_control (MateMixerStream *stream,
                                                                    const gchar     *name);
-static MateMixerSwitch *       mate_mixer_stream_real_get_switch  (MateMixerStream *stream,
+static MateMixerStreamSwitch * mate_mixer_stream_real_get_switch  (MateMixerStream *stream,
                                                                    const gchar     *name);
 
 static void
@@ -371,8 +372,12 @@ mate_mixer_stream_get_control (MateMixerStream *stream, const gchar *name)
  * mate_mixer_stream_get_switch:
  * @stream: a #MateMixerStream
  * @name: the name of a stream switch
+ *
+ * Gets the switch with the given name.
+ *
+ * Returns: a #MateMixerStreamSwitch or %NULL if there is no such switch.
  */
-MateMixerSwitch *
+MateMixerStreamSwitch *
 mate_mixer_stream_get_switch (MateMixerStream *stream, const gchar *name)
 {
     g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), NULL);
@@ -451,7 +456,7 @@ mate_mixer_stream_real_get_control (MateMixerStream *stream, const gchar *name)
     return NULL;
 }
 
-static MateMixerSwitch *
+static MateMixerStreamSwitch *
 mate_mixer_stream_real_get_switch (MateMixerStream *stream, const gchar *name)
 {
     const GList *list;
@@ -464,7 +469,7 @@ mate_mixer_stream_real_get_switch (MateMixerStream *stream, const gchar *name)
         MateMixerSwitch *swtch = MATE_MIXER_SWITCH (list->data);
 
         if (strcmp (name, mate_mixer_switch_get_name (swtch)) == 0)
-            return swtch;
+            return MATE_MIXER_STREAM_SWITCH (swtch);
 
         list = list->next;
     }

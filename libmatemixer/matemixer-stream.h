@@ -69,7 +69,7 @@ struct _MateMixerStreamClass
     /*< private >*/
     MateMixerStreamControl *(*get_control)   (MateMixerStream *stream,
                                               const gchar     *name);
-    MateMixerSwitch        *(*get_switch)    (MateMixerStream *stream,
+    MateMixerStreamSwitch  *(*get_switch)    (MateMixerStream *stream,
                                               const gchar     *name);
 
     const GList            *(*list_controls) (MateMixerStream *stream);
@@ -97,7 +97,7 @@ MateMixerDirection      mate_mixer_stream_get_direction       (MateMixerStream *
 MateMixerDevice *       mate_mixer_stream_get_device          (MateMixerStream *stream);
 MateMixerStreamControl *mate_mixer_stream_get_control         (MateMixerStream *stream,
                                                                const gchar     *name);
-MateMixerSwitch *       mate_mixer_stream_get_switch          (MateMixerStream *stream,
+MateMixerStreamSwitch * mate_mixer_stream_get_switch          (MateMixerStream *stream,
                                                                const gchar     *name);
 
 MateMixerStreamControl *mate_mixer_stream_get_default_control (MateMixerStream *stream);
