@@ -22,6 +22,8 @@
 #include <glib-object.h>
 #include <libmatemixer/matemixer.h>
 
+#include "alsa-types.h"
+
 G_BEGIN_DECLS
 
 #define ALSA_TYPE_SWITCH                        \
@@ -37,13 +39,12 @@ G_BEGIN_DECLS
 #define ALSA_SWITCH_GET_CLASS(o)                \
         (G_TYPE_INSTANCE_GET_CLASS ((o), ALSA_TYPE_SWITCH, AlsaSwitchClass))
 
-typedef struct _AlsaSwitch         AlsaSwitch;
 typedef struct _AlsaSwitchClass    AlsaSwitchClass;
 typedef struct _AlsaSwitchPrivate  AlsaSwitchPrivate;
 
 struct _AlsaSwitch
 {
-    MateMixerSwitch parent;
+    MateMixerStreamSwitch parent;
 
     /*< private >*/
     AlsaSwitchPrivate *priv;
@@ -51,12 +52,13 @@ struct _AlsaSwitch
 
 struct _AlsaSwitchClass
 {
-    MateMixerSwitchClass parent_class;
+    MateMixerStreamSwitchClass parent_class;
 };
 
 GType       alsa_switch_get_type (void) G_GNUC_CONST;
 
-AlsaSwitch *alsa_switch_new      (const gchar        *name,
+AlsaSwitch *alsa_switch_new      (AlsaStream         *stream,
+                                  const gchar        *name,
                                   const gchar        *label,
                                   MateMixerSwitchRole role,
                                   GList              *options);

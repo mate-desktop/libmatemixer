@@ -22,7 +22,7 @@
 #include <glib-object.h>
 #include <libmatemixer/matemixer.h>
 
-#include "alsa-stream.h"
+#include "alsa-types.h"
 
 G_BEGIN_DECLS
 
@@ -39,7 +39,6 @@ G_BEGIN_DECLS
 #define ALSA_DEVICE_GET_CLASS(o)                \
         (G_TYPE_INSTANCE_GET_CLASS ((o), ALSA_TYPE_DEVICE, AlsaDeviceClass))
 
-typedef struct _AlsaDevice         AlsaDevice;
 typedef struct _AlsaDeviceClass    AlsaDeviceClass;
 typedef struct _AlsaDevicePrivate  AlsaDevicePrivate;
 

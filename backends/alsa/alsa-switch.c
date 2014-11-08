@@ -23,6 +23,7 @@
 #include <libmatemixer/matemixer-private.h>
 
 #include "alsa-element.h"
+#include "alsa-stream.h"
 #include "alsa-switch.h"
 #include "alsa-switch-option.h"
 
@@ -40,7 +41,7 @@ static void alsa_switch_init            (AlsaSwitch           *swtch);
 static void alsa_switch_dispose         (GObject              *object);
 
 G_DEFINE_TYPE_WITH_CODE (AlsaSwitch, alsa_switch,
-                         MATE_MIXER_TYPE_SWITCH,
+                         MATE_MIXER_TYPE_STREAM_SWITCH,
                          G_IMPLEMENT_INTERFACE (ALSA_TYPE_ELEMENT,
                                                 alsa_element_interface_init))
 
@@ -102,17 +103,24 @@ alsa_switch_init (AlsaSwitch *swtch)
 }
 
 AlsaSwitch *
-alsa_switch_new (const gchar        *name,
+alsa_switch_new (AlsaStream         *stream,
+                 const gchar        *name,
                  const gchar        *label,
                  MateMixerSwitchRole role,
                  GList              *options)
 {
     AlsaSwitch *swtch;
 
+    g_return_val_if_fail (ALSA_IS_STREAM (stream), NULL);
+    g_return_val_if_fail (name != NULL, NULL);
+    g_return_val_if_fail (label != NULL, NULL);
+    g_return_val_if_fail (options != NULL, NULL);
+
     swtch = g_object_new (ALSA_TYPE_SWITCH,
                           "name", name,
                           "label", label,
                           "role", role,
+                          "stream", stream,
                           NULL);
 
     /* Takes ownership of options */

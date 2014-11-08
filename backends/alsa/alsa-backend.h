@@ -23,6 +23,8 @@
 #include <libmatemixer/matemixer.h>
 #include <libmatemixer/matemixer-private.h>
 
+#include "alsa-types.h"
+
 #define ALSA_TYPE_BACKEND                       \
         (alsa_backend_get_type ())
 #define ALSA_BACKEND(o)                         \
@@ -36,7 +38,6 @@
 #define ALSA_BACKEND_GET_CLASS(o)               \
         (G_TYPE_INSTANCE_GET_CLASS ((o), ALSA_TYPE_BACKEND, AlsaBackendClass))
 
-typedef struct _AlsaBackend         AlsaBackend;
 typedef struct _AlsaBackendClass    AlsaBackendClass;
 typedef struct _AlsaBackendPrivate  AlsaBackendPrivate;
 

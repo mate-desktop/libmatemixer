@@ -22,6 +22,8 @@
 #include <glib-object.h>
 #include <libmatemixer/matemixer.h>
 
+#include "alsa-types.h"
+
 G_BEGIN_DECLS
 
 #define ALSA_TYPE_SWITCH_OPTION                 \
@@ -37,7 +39,6 @@ G_BEGIN_DECLS
 #define ALSA_SWITCH_OPTION_GET_CLASS(o)         \
         (G_TYPE_INSTANCE_GET_CLASS ((o), ALSA_TYPE_SWITCH_OPTION, AlsaSwitchOptionClass))
 
-typedef struct _AlsaSwitchOption         AlsaSwitchOption;
 typedef struct _AlsaSwitchOptionClass    AlsaSwitchOptionClass;
 typedef struct _AlsaSwitchOptionPrivate  AlsaSwitchOptionPrivate;
 

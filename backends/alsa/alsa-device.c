@@ -659,7 +659,8 @@ add_switch (AlsaDevice *device, AlsaStream *stream, snd_mixer_elem_t *el)
     get_switch_info (el, &name, &label, &role);
 
     /* Takes ownership of options */
-    element = ALSA_ELEMENT (alsa_switch_new (name, label,
+    element = ALSA_ELEMENT (alsa_switch_new (stream,
+                                             name, label,
                                              role,
                                              g_list_reverse (options)));
     g_free (name);

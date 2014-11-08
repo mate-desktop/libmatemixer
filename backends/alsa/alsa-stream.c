@@ -24,6 +24,7 @@
 #include "alsa-stream.h"
 #include "alsa-stream-control.h"
 #include "alsa-switch.h"
+#include "alsa-toggle.h"
 
 struct _AlsaStreamPrivate
 {
@@ -37,13 +38,13 @@ static void alsa_stream_dispose    (GObject         *object);
 
 G_DEFINE_TYPE (AlsaStream, alsa_stream, MATE_MIXER_TYPE_STREAM)
 
-static const GList *alsa_stream_list_controls       (MateMixerStream *mms);
-static const GList *alsa_stream_list_switches       (MateMixerStream *mms);
+static const GList *alsa_stream_list_controls (MateMixerStream *mms);
+static const GList *alsa_stream_list_switches (MateMixerStream *mms);
 
-static gint         compare_control_name            (gconstpointer    a,
-                                                     gconstpointer    b);
-static gint         compare_switch_name             (gconstpointer    a,
-                                                     gconstpointer    b);
+static gint         compare_control_name      (gconstpointer    a,
+                                               gconstpointer    b);
+static gint         compare_switch_name       (gconstpointer    a,
+                                               gconstpointer    b);
 
 static void
 alsa_stream_class_init (AlsaStreamClass *klass)

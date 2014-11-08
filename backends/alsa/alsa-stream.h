@@ -22,9 +22,7 @@
 #include <glib-object.h>
 #include <libmatemixer/matemixer.h>
 
-#include "alsa-stream-control.h"
-#include "alsa-switch.h"
-#include "alsa-toggle.h"
+#include "alsa-types.h"
 
 G_BEGIN_DECLS
 
@@ -41,7 +39,6 @@ G_BEGIN_DECLS
 #define ALSA_STREAM_GET_CLASS(o)                \
         (G_TYPE_INSTANCE_GET_CLASS ((o), ALSA_TYPE_STREAM, AlsaStreamClass))
 
-typedef struct _AlsaStream         AlsaStream;
 typedef struct _AlsaStreamClass    AlsaStreamClass;
 typedef struct _AlsaStreamPrivate  AlsaStreamPrivate;
 

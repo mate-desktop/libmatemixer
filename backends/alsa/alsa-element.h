@@ -22,6 +22,8 @@
 #include <glib-object.h>
 #include <alsa/asoundlib.h>
 
+#include "alsa-types.h"
+
 G_BEGIN_DECLS
 
 #define ALSA_TYPE_ELEMENT                       \
@@ -33,7 +35,6 @@ G_BEGIN_DECLS
 #define ALSA_ELEMENT_GET_INTERFACE(o)           \
         (G_TYPE_INSTANCE_GET_INTERFACE ((o), ALSA_TYPE_ELEMENT, AlsaElementInterface))
 
-typedef struct _AlsaElement           AlsaElement; /* dummy object */
 typedef struct _AlsaElementInterface  AlsaElementInterface;
 
 struct _AlsaElementInterface

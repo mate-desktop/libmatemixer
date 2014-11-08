@@ -22,7 +22,7 @@
 #include <glib-object.h>
 #include <libmatemixer/matemixer.h>
 
-#include "alsa-switch-option.h"
+#include "alsa-types.h"
 
 G_BEGIN_DECLS
 
@@ -44,7 +44,6 @@ typedef enum {
 #define ALSA_TOGGLE_GET_CLASS(o)                \
         (G_TYPE_INSTANCE_GET_CLASS ((o), ALSA_TYPE_TOGGLE, AlsaToggleClass))
 
-typedef struct _AlsaToggle         AlsaToggle;
 typedef struct _AlsaToggleClass    AlsaToggleClass;
 typedef struct _AlsaTogglePrivate  AlsaTogglePrivate;
 

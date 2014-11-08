@@ -23,6 +23,8 @@
 #include <alsa/asoundlib.h>
 #include <libmatemixer/matemixer.h>
 
+#include "alsa-types.h"
+
 G_BEGIN_DECLS
 
 typedef struct {
@@ -54,7 +56,6 @@ typedef struct {
 #define ALSA_STREAM_CONTROL_GET_CLASS(o)        \
         (G_TYPE_INSTANCE_GET_CLASS ((o), ALSA_TYPE_STREAM_CONTROL, AlsaStreamControlClass))
 
-typedef struct _AlsaStreamControl         AlsaStreamControl;
 typedef struct _AlsaStreamControlClass    AlsaStreamControlClass;
 typedef struct _AlsaStreamControlPrivate  AlsaStreamControlPrivate;
 

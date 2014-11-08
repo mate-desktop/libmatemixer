@@ -33,7 +33,8 @@ libmatemixer_alsa_la_SOURCES =                                  \
         alsa-switch-option.c                                    \
         alsa-switch-option.h                                    \
         alsa-toggle.c                                           \
-        alsa-toggle.h
+        alsa-toggle.h                                           \
+        alsa-types.h
 
 libmatemixer_alsa_la_LIBADD =                                   \
         $(GLIB_LIBS)                                            \
