@@ -31,8 +31,8 @@
  * indicate whether we prefer the element to be used as a default input or output
  * control.
  *
- * Of course the lists are very incomplete and it would be great if users validated and
- * refreshed them from time to time.
+ * Of course the lists are very incomplete and it would be great if users validated
+ * and refreshed them from time to time.
  */
 const AlsaControlInfo alsa_controls[] =
 {
@@ -40,8 +40,8 @@ const AlsaControlInfo alsa_controls[] =
     { "Master",                 N_("Master"),               MATE_MIXER_STREAM_CONTROL_ROLE_MASTER,  FALSE, TRUE },
     { "Hardware Master",        N_("Hardware Master"),      MATE_MIXER_STREAM_CONTROL_ROLE_MASTER,  FALSE, TRUE },
     { "PCM",                    N_("PCM"),                  MATE_MIXER_STREAM_CONTROL_ROLE_PCM,     FALSE, TRUE },
-    { "Desktop Speaker",        N_("Desktop Speaker"),      MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER, FALSE, TRUE },
     { "Speaker",                N_("Speaker"),              MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER, FALSE, TRUE },
+    { "Desktop Speaker",        N_("Desktop Speaker"),      MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER, FALSE, TRUE },
     { "Front",                  N_("Front Speaker"),        MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER, FALSE, TRUE },
     { "Front Speaker",          N_("Front Speaker"),        MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER, FALSE, TRUE },
     { "Speaker Front",          N_("Front Speaker"),        MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER, FALSE, TRUE },
@@ -56,9 +56,9 @@ const AlsaControlInfo alsa_controls[] =
     { "Center Speaker",         N_("Center Speaker"),       MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER, FALSE, TRUE },
     { "CLFE",                   N_("CLFE Speaker"),         MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER, FALSE, TRUE },
     { "Speaker CLFE",           N_("CLFE Speaker"),         MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER, FALSE, TRUE },
+    { "Digital/SPDIF",          N_("Digital"),              MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    FALSE, TRUE },
     { "Master Mono",            N_("Master Mono"),          MATE_MIXER_STREAM_CONTROL_ROLE_MASTER,  FALSE, TRUE },
     { "Master Digital",         N_("Master Digital"),       MATE_MIXER_STREAM_CONTROL_ROLE_MASTER,  FALSE, TRUE },
-    { "Digital/SPDIF",          N_("Digital"),              MATE_MIXER_STREAM_CONTROL_ROLE_PORT,    FALSE, TRUE },
     { "Speaker Side",           N_("Side Speaker"),         MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER, FALSE, TRUE },
     { "Side",                   N_("Side Speaker"),         MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER, FALSE, TRUE },
     { "Rear",                   N_("Rear Speaker"),         MATE_MIXER_STREAM_CONTROL_ROLE_SPEAKER, FALSE, TRUE },
@@ -110,36 +110,36 @@ const AlsaControlInfo alsa_controls[] =
     { NULL }
 };
 
-/* Switches and toggles */
 const AlsaSwitchInfo alsa_switches[] =
 {
-    { "Analog Output",          N_("Analog Output"),            MATE_MIXER_SWITCH_ROLE_PORT },
-    { "Analog Source",          N_("Analog Source"),            MATE_MIXER_SWITCH_ROLE_PORT },
-    { "Capture Source",         N_("Capture Source"),           MATE_MIXER_SWITCH_ROLE_PORT },
-    { "Input Source",           N_("Input Source"),             MATE_MIXER_SWITCH_ROLE_PORT },
-    { "Input Source Select",    N_("Input Source Select"),      MATE_MIXER_SWITCH_ROLE_PORT },
-    { "Digital Input Source",   N_("Digital Input Source"),     MATE_MIXER_SWITCH_ROLE_PORT },
-    { "PCM Capture Source",     N_("PCM Capture Source"),       MATE_MIXER_SWITCH_ROLE_PORT },
-    { "IEC958 Playback Source", N_("Digital Playback Source"),  MATE_MIXER_SWITCH_ROLE_PORT },
-    { "Mono Output Select",     N_("Mono Output Select"),       MATE_MIXER_SWITCH_ROLE_PORT },
-    { "Shared Mic/Line in",     N_("Shared Mic/Line In"),       MATE_MIXER_SWITCH_ROLE_PORT },
-    { "Mic Select",             N_("Microphone Select"),        MATE_MIXER_SWITCH_ROLE_PORT },
-    { "Mic Jack Mode",          N_("Microphone Jack Mode"),     MATE_MIXER_SWITCH_ROLE_PORT },
-    { "Surround Jack Mode",     N_("Surround Jack Mode"),       MATE_MIXER_SWITCH_ROLE_UNKNOWN },
-    { "Auto-Mute Mode",         N_("Auto-Mute Mode"),           MATE_MIXER_SWITCH_ROLE_UNKNOWN },
+    /* Switches */
+    { "Analog Output",          N_("Analog Output"),                MATE_MIXER_SWITCH_ROLE_PORT },
+    { "Analog Source",          N_("Analog Source"),                MATE_MIXER_SWITCH_ROLE_PORT },
+    { "Capture Source",         N_("Capture Source"),               MATE_MIXER_SWITCH_ROLE_PORT },
+    { "Input Source",           N_("Input Source"),                 MATE_MIXER_SWITCH_ROLE_PORT },
+    { "Input Source Select",    N_("Input Source"),                 MATE_MIXER_SWITCH_ROLE_PORT },
+    { "Digital Input Source",   N_("Digital Input Source"),         MATE_MIXER_SWITCH_ROLE_PORT },
+    { "PCM Capture Source",     N_("PCM Capture Source"),           MATE_MIXER_SWITCH_ROLE_PORT },
+    { "IEC958 Playback Source", N_("Digital Playback Source"),      MATE_MIXER_SWITCH_ROLE_PORT },
+    { "Mono Output Select",     N_("Mono Output"),                  MATE_MIXER_SWITCH_ROLE_PORT },
+    { "Shared Mic/Line in",     N_("Shared Microphone/Line In"),    MATE_MIXER_SWITCH_ROLE_PORT },
+    { "Mic Select",             N_("Microphone"),                   MATE_MIXER_SWITCH_ROLE_PORT },
+    { "Mic Jack Mode",          N_("Microphone Jack Mode"),         MATE_MIXER_SWITCH_ROLE_PORT },
+    { "Surround Jack Mode",     N_("Surround Jack Mode"),           MATE_MIXER_SWITCH_ROLE_UNKNOWN },
+    { "Auto-Mute Mode",         N_("Auto-Mute Mode"),               MATE_MIXER_SWITCH_ROLE_UNKNOWN },
 
-    /* (Probably) toggles */
+    /* Toggles */
     { "External Amplifier",     N_("External Amplifier"),       MATE_MIXER_SWITCH_ROLE_UNKNOWN },
     { "Bass Boost",             N_("Bass Boost"),               MATE_MIXER_SWITCH_ROLE_BOOST },
     { "Capture Boost",          N_("Capture Boost"),            MATE_MIXER_SWITCH_ROLE_BOOST },
     { "IEC958",                 N_("Digital"),                  MATE_MIXER_SWITCH_ROLE_PORT },
     { "IEC958 In",              N_("Digital In"),               MATE_MIXER_SWITCH_ROLE_PORT },
     { "IEC958 Default PCM",     N_("Digital Default PCM"),      MATE_MIXER_SWITCH_ROLE_UNKNOWN },
-    { "IEC958 Optical Raw",     N_("Optical"),                  MATE_MIXER_SWITCH_ROLE_PORT },
+    { "IEC958 Optical",         N_("Optical"),                  MATE_MIXER_SWITCH_ROLE_PORT },
     { "Auto Gain Control",      N_("Auto Gain Control"),        MATE_MIXER_SWITCH_ROLE_UNKNOWN },
     { "Mix",                    N_("Mix"),                      MATE_MIXER_SWITCH_ROLE_UNKNOWN },
     { "Mix Mono",               N_("Mix Mono"),                 MATE_MIXER_SWITCH_ROLE_UNKNOWN },
-    { "Mic Capture",            N_("Mic Capture"),              MATE_MIXER_SWITCH_ROLE_PORT },
+    { "Mic Capture",            N_("Microphone Capture"),       MATE_MIXER_SWITCH_ROLE_PORT },
     { "Input 1",                N_("Input 1"),                  MATE_MIXER_SWITCH_ROLE_PORT },
     { "Input 2",                N_("Input 2"),                  MATE_MIXER_SWITCH_ROLE_PORT },
     { NULL }
@@ -210,6 +210,8 @@ const AlsaSwitchOptionInfo alsa_switch_options[] =
     { "Aux3",               N_("Auxiliary 3"),                  NULL },
     { "Docking-Station",    N_("Docking Station"),              NULL },
     { "Mixer",              N_("Mixer"),                        NULL },
+    { "CD",                 N_("CD"),                           NULL },
+    { "Video",              N_("Video"),                        NULL },
     { "Phone",              N_("Phone"),                        NULL },
     { "Unknown1",           N_("Unknown 1"),                    NULL },
     { "Unknown2",           N_("Unknown 2"),                    NULL },
