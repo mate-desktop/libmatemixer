@@ -44,7 +44,7 @@ typedef struct _PulseDeviceSwitchPrivate  PulseDeviceSwitchPrivate;
 
 struct _PulseDeviceSwitch
 {
-    MateMixerSwitch parent;
+    MateMixerDeviceSwitch parent;
 
     /*< private >*/
     PulseDeviceSwitchPrivate *priv;
@@ -52,7 +52,7 @@ struct _PulseDeviceSwitch
 
 struct _PulseDeviceSwitchClass
 {
-    MateMixerSwitchClass parent_class;
+    MateMixerDeviceSwitchClass parent_class;
 };
 
 GType              pulse_device_switch_get_type                   (void) G_GNUC_CONST;
@@ -60,8 +60,6 @@ GType              pulse_device_switch_get_type                   (void) G_GNUC_
 PulseDeviceSwitch *pulse_device_switch_new                        (const gchar        *name,
                                                                    const gchar        *label,
                                                                    PulseDevice        *device);
-
-PulseDevice *      pulse_device_switch_get_device                 (PulseDeviceSwitch  *swtch);
 
 void               pulse_device_switch_add_profile                (PulseDeviceSwitch  *swtch,
                                                                    PulseDeviceProfile *profile);

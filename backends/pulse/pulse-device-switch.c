@@ -29,33 +29,14 @@
 
 struct _PulseDeviceSwitchPrivate
 {
-    GList       *profiles;
-    PulseDevice *device;
+    GList *profiles;
 };
-
-enum {
-    PROP_0,
-    PROP_DEVICE,
-    N_PROPERTIES
-};
-
-static GParamSpec *properties[N_PROPERTIES] = { NULL, };
 
 static void pulse_device_switch_class_init   (PulseDeviceSwitchClass *klass);
-
-static void pulse_device_switch_get_property (GObject                *object,
-                                              guint                   param_id,
-                                              GValue                 *value,
-                                              GParamSpec             *pspec);
-static void pulse_device_switch_set_property (GObject                *object,
-                                              guint                   param_id,
-                                              const GValue           *value,
-                                              GParamSpec             *pspec);
-
 static void pulse_device_switch_init         (PulseDeviceSwitch      *swtch);
 static void pulse_device_switch_dispose      (GObject                *object);
 
-G_DEFINE_TYPE (PulseDeviceSwitch, pulse_device_switch, MATE_MIXER_TYPE_SWITCH)
+G_DEFINE_TYPE (PulseDeviceSwitch, pulse_device_switch, MATE_MIXER_TYPE_DEVICE_SWITCH)
 
 static gboolean     pulse_device_switch_set_active_option (MateMixerSwitch       *mms,
                                                            MateMixerSwitchOption *mmso);
@@ -74,71 +55,13 @@ pulse_device_switch_class_init (PulseDeviceSwitchClass *klass)
     MateMixerSwitchClass *switch_class;
 
     object_class = G_OBJECT_CLASS (klass);
-    object_class->dispose      = pulse_device_switch_dispose;
-    object_class->get_property = pulse_device_switch_get_property;
-    object_class->set_property = pulse_device_switch_set_property;
+    object_class->dispose = pulse_device_switch_dispose;
 
     switch_class = MATE_MIXER_SWITCH_CLASS (klass);
     switch_class->set_active_option = pulse_device_switch_set_active_option;
     switch_class->list_options      = pulse_device_switch_list_options;
 
-    properties[PROP_DEVICE] =
-        g_param_spec_object ("device",
-                             "Device",
-                             "PulseAudio device",
-                             PULSE_TYPE_DEVICE,
-                             G_PARAM_READWRITE |
-                             G_PARAM_CONSTRUCT_ONLY |
-                             G_PARAM_STATIC_STRINGS);
-
-    g_object_class_install_properties (object_class, N_PROPERTIES, properties);
-
     g_type_class_add_private (G_OBJECT_CLASS (klass), sizeof (PulseDeviceSwitchPrivate));
-}
-
-static void
-pulse_device_switch_get_property (GObject    *object,
-                                  guint       param_id,
-                                  GValue     *value,
-                                  GParamSpec *pspec)
-{
-    PulseDeviceSwitch *swtch;
-
-    swtch = PULSE_DEVICE_SWITCH (object);
-
-    switch (param_id) {
-    case PROP_DEVICE:
-        g_value_set_object (value, swtch->priv->device);
-        break;
-    default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
-        break;
-    }
-}
-
-static void
-pulse_device_switch_set_property (GObject      *object,
-                                  guint         param_id,
-                                  const GValue *value,
-                                  GParamSpec   *pspec)
-{
-    PulseDeviceSwitch *swtch;
-
-    swtch = PULSE_DEVICE_SWITCH (object);
-
-    switch (param_id) {
-    case PROP_DEVICE:
-        /* Construct-only object */
-        swtch->priv->device = g_value_get_object (value);
-
-        if (swtch->priv->device != NULL)
-            g_object_add_weak_pointer (G_OBJECT (swtch->priv->device),
-                                       (gpointer *) &swtch->priv->device);
-        break;
-    default:
-        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
-        break;
-    }
 }
 
 static void
@@ -172,14 +95,6 @@ pulse_device_switch_new (const gchar *name, const gchar *label, PulseDevice *dev
                          "role", MATE_MIXER_SWITCH_ROLE_DEVICE_PROFILE,
                          "device", device,
                          NULL);
-}
-
-PulseDevice *
-pulse_device_switch_get_device (PulseDeviceSwitch *swtch)
-{
-    g_return_val_if_fail (PULSE_IS_DEVICE_SWITCH (swtch), NULL);
-
-    return swtch->priv->device;
 }
 
 void
@@ -223,21 +138,21 @@ pulse_device_switch_set_active_profile_by_name (PulseDeviceSwitch *swtch, const 
 static gboolean
 pulse_device_switch_set_active_option (MateMixerSwitch *mms, MateMixerSwitchOption *mmso)
 {
-    PulseDevice *device;
-    const gchar *device_name;
-    const gchar *profile_name;
+    MateMixerDevice *device;
+    const gchar     *device_name;
+    const gchar     *profile_name;
 
     g_return_val_if_fail (PULSE_IS_DEVICE_SWITCH (mms), FALSE);
     g_return_val_if_fail (PULSE_IS_DEVICE_PROFILE (mmso), FALSE);
 
-    device = pulse_device_switch_get_device (PULSE_DEVICE_SWITCH (mms));
+    device = mate_mixer_device_switch_get_device (MATE_MIXER_DEVICE_SWITCH (mms));
     if G_UNLIKELY (device == NULL)
         return FALSE;
 
-    device_name  = mate_mixer_device_get_name (MATE_MIXER_DEVICE (device));
+    device_name  = mate_mixer_device_get_name (device);
     profile_name = mate_mixer_switch_option_get_name (mmso);
 
-    return pulse_connection_set_card_profile (pulse_device_get_connection (device),
+    return pulse_connection_set_card_profile (pulse_device_get_connection (PULSE_DEVICE (device)),
                                               device_name,
                                               profile_name);
 }

@@ -44,7 +44,7 @@ typedef struct _PulsePortSwitchPrivate  PulsePortSwitchPrivate;
 
 struct _PulsePortSwitch
 {
-    MateMixerSwitch parent;
+    MateMixerStreamSwitch parent;
 
     /*< private >*/
     PulsePortSwitchPrivate *priv;
@@ -52,7 +52,7 @@ struct _PulsePortSwitch
 
 struct _PulsePortSwitchClass
 {
-    MateMixerSwitchClass parent_class;
+    MateMixerStreamSwitchClass parent_class;
 
     /*< private >*/
     gboolean (*set_active_port) (PulsePortSwitch *swtch,
