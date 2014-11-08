@@ -92,9 +92,6 @@ static void               add_switch                (AlsaDevice                 
                                                      AlsaStream                 *stream,
                                                      snd_mixer_elem_t           *el);
 
-static void               add_device_switch         (AlsaDevice                 *device,
-                                                     snd_mixer_elem_t           *el);
-
 static void               add_stream_input_switch   (AlsaDevice                 *device,
                                                      snd_mixer_elem_t           *el);
 static void               add_stream_output_switch  (AlsaDevice                 *device,
@@ -146,6 +143,7 @@ static void               get_output_control_info   (snd_mixer_elem_t           
                                                      MateMixerStreamControlRole *role,
                                                      gint                       *score);
 
+static MateMixerDirection get_switch_direction      (snd_mixer_elem_t           *el);
 static void               get_switch_info           (snd_mixer_elem_t           *el,
                                                      gchar                     **name,
                                                      gchar                     **label,
@@ -491,59 +489,41 @@ alsa_device_list_switches (MateMixerDevice *mmd)
 static void
 add_element (AlsaDevice *device, AlsaStream *stream, AlsaElement *element)
 {
-    gboolean added = FALSE;
+    snd_mixer_elem_t *el;
 
     if (alsa_element_load (element) == FALSE)
         return;
 
-    if (stream != NULL) {
-        if (alsa_stream_has_controls_or_switches (stream) == FALSE) {
-            const gchar *name =
-                mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream));
-
-            free_stream_list (device);
-
-            /* Pretend the stream has just been created now that we are adding
-             * the first control */
-            g_signal_emit_by_name (G_OBJECT (device),
-                                   "stream-added",
-                                   name);
-        }
-
-        if (ALSA_IS_STREAM_CONTROL (element)) {
-            /* Stream control */
-            alsa_stream_add_control (stream, ALSA_STREAM_CONTROL (element));
-            added = TRUE;
-        } else if (ALSA_IS_SWITCH (element)) {
-            /* Switch belonging to a stream */
-            alsa_stream_add_switch (stream, ALSA_SWITCH (element));
-            added = TRUE;
-        } else if (ALSA_IS_TOGGLE (element)) {
-            /* Toggle belonging to a stream */
-            alsa_stream_add_toggle (stream, ALSA_TOGGLE (element));
-            added = TRUE;
-        }
-    } else if (ALSA_IS_SWITCH (element) || ALSA_IS_TOGGLE (element)) {
-        /* Switch belonging to the device */
+    if (alsa_stream_has_controls_or_switches (stream) == FALSE) {
         const gchar *name =
-            mate_mixer_switch_get_name (MATE_MIXER_SWITCH (element));
+            mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream));
 
-        device->priv->switches =
-            g_list_append (device->priv->switches, g_object_ref (element));
+        free_stream_list (device);
 
+        /* Pretend the stream has just been created now that we are adding
+         * the first control */
         g_signal_emit_by_name (G_OBJECT (device),
-                               "switch-added",
+                               "stream-added",
                                name);
-        added = TRUE;
     }
 
-    if G_LIKELY (added == TRUE) {
-        snd_mixer_elem_t *el = alsa_element_get_snd_element (element);
-
-        snd_mixer_elem_set_callback (el, handle_element_callback);
-        snd_mixer_elem_set_callback_private (el, device);
-    } else
+    /* Add element to the stream depending on its type */
+    if (ALSA_IS_STREAM_CONTROL (element))
+        alsa_stream_add_control (stream, ALSA_STREAM_CONTROL (element));
+    else if (ALSA_IS_SWITCH (element))
+        alsa_stream_add_switch (stream, ALSA_SWITCH (element));
+    else if (ALSA_IS_TOGGLE (element))
+        alsa_stream_add_toggle (stream, ALSA_TOGGLE (element));
+    else {
         g_warn_if_reached ();
+        return;
+    }
+
+    el = alsa_element_get_snd_element (element);
+
+    /* Register to receive callbacks for element changes */
+    snd_mixer_elem_set_callback (el, handle_element_callback);
+    snd_mixer_elem_set_callback_private (el, device);
 }
 
 static void
@@ -693,17 +673,6 @@ add_switch (AlsaDevice *device, AlsaStream *stream, snd_mixer_elem_t *el)
 }
 
 static void
-add_device_switch (AlsaDevice *device, snd_mixer_elem_t *el)
-{
-    g_debug ("Reading device %s switch %s (%d items)",
-             mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)),
-             snd_mixer_selem_get_name (el),
-             snd_mixer_selem_get_enum_items (el));
-
-    add_switch (device, NULL, el);
-}
-
-static void
 add_stream_input_switch (AlsaDevice *device, snd_mixer_elem_t *el)
 {
     g_debug ("Reading device %s input switch %s (%d items)",
@@ -764,22 +733,26 @@ load_element (AlsaDevice *device, snd_mixer_elem_t *el)
     gboolean pvolume = FALSE;
 
     if (snd_mixer_selem_is_enumerated (el) == 1) {
-        gboolean cenum = FALSE;
-        gboolean penum = FALSE;
+        MateMixerDirection direction;
+        gboolean           cenum = FALSE;
+        gboolean           penum = FALSE;
 
-        if (snd_mixer_selem_is_enum_capture (el) == 1)
-            cenum = TRUE;
-        if (snd_mixer_selem_is_enum_playback (el) == 1)
-            penum = TRUE;
+        /* The enumeration may have a capture or a playback capability.
+         * If it has either both or none, try to guess the more appropriate
+         * direction. */
+        cenum = snd_mixer_selem_is_enum_capture (el);
+        penum = snd_mixer_selem_is_enum_playback (el);
+        if (cenum ^ penum) {
+            if (cenum == TRUE)
+                direction = MATE_MIXER_DIRECTION_INPUT;
+            else
+                direction = MATE_MIXER_DIRECTION_OUTPUT;
+        } else
+            direction = get_switch_direction (el);
 
-        /* Enumerated controls which are not marked as capture or playback
-         * are considered to be a part of the whole device */
-        if (cenum == FALSE && penum == FALSE) {
-            add_device_switch (device, el);
-        }
-        else if (cenum == TRUE)
+        if (direction == MATE_MIXER_DIRECTION_INPUT)
             add_stream_input_switch (device, el);
-        else if (penum == TRUE)
+        else
             add_stream_output_switch (device, el);
     }
 
@@ -1140,6 +1113,27 @@ get_output_control_info (snd_mixer_elem_t           *el,
 
     if (*score > -1 && alsa_controls[*score].use_default_output == FALSE)
         *score = -1;
+}
+
+static MateMixerDirection
+get_switch_direction (snd_mixer_elem_t *el)
+{
+    MateMixerDirection direction;
+    gchar             *name;
+
+    name = g_ascii_strdown (snd_mixer_selem_get_name (el), -1);
+
+    /* Guess element direction by name, inspired by qasmixer */
+    if (strstr (name, "mic") != NULL ||
+        strstr (name, "adc") != NULL ||
+        strstr (name, "capture") != NULL ||
+        strstr (name, "input source") != NULL)
+        direction = MATE_MIXER_DIRECTION_INPUT;
+    else
+        direction = MATE_MIXER_DIRECTION_OUTPUT;
+
+    g_free (name);
+    return direction;
 }
 
 static void
