@@ -26,11 +26,13 @@
 #include <libmatemixer/matemixer-app-info.h>
 #include <libmatemixer/matemixer-context.h>
 #include <libmatemixer/matemixer-device.h>
+#include <libmatemixer/matemixer-device-switch.h>
 #include <libmatemixer/matemixer-enums.h>
 #include <libmatemixer/matemixer-enum-types.h>
 #include <libmatemixer/matemixer-stored-control.h>
 #include <libmatemixer/matemixer-stream.h>
 #include <libmatemixer/matemixer-stream-control.h>
+#include <libmatemixer/matemixer-stream-switch.h>
 #include <libmatemixer/matemixer-switch.h>
 #include <libmatemixer/matemixer-switch-option.h>
 #include <libmatemixer/matemixer-toggle.h>

@@ -13,11 +13,13 @@ libmatemixer_include_HEADERS =                                  \
         matemixer-app-info.h                                    \
         matemixer-context.h                                     \
         matemixer-device.h                                      \
+        matemixer-device-switch.h                               \
         matemixer-enums.h                                       \
         matemixer-enum-types.h                                  \
         matemixer-stored-control.h                              \
         matemixer-stream.h                                      \
         matemixer-stream-control.h                              \
+        matemixer-stream-switch.h                               \
         matemixer-switch.h                                      \
         matemixer-switch-option.h                               \
         matemixer-toggle.h                                      \
@@ -37,12 +39,14 @@ libmatemixer_la_SOURCES =                                       \
         matemixer-backend-module.h                              \
         matemixer-context.c                                     \
         matemixer-device.c                                      \
+        matemixer-device-switch.c                               \
         matemixer-enum-types.c                                  \
         matemixer-stored-control.c                              \
         matemixer-stream.c                                      \
         matemixer-stream-private.h                              \
         matemixer-stream-control.c                              \
         matemixer-stream-control-private.h                      \
+        matemixer-stream-switch.c                               \
         matemixer-switch.c                                      \
         matemixer-switch-private.h                              \
         matemixer-switch-option.c                               \
