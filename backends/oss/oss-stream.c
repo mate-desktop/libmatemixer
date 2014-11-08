@@ -203,7 +203,8 @@ oss_stream_set_switch_data (OssStream *stream, gint fd, GList *options)
     }
 
     /* Takes ownership of options */
-    stream->priv->swtch = oss_switch_new (OSS_STREAM_SWITCH_NAME,
+    stream->priv->swtch = oss_switch_new (stream,
+                                          OSS_STREAM_SWITCH_NAME,
                                           _("Connector"),
                                           fd,
                                           options);

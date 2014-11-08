@@ -22,6 +22,7 @@
 #include <libmatemixer/matemixer-private.h>
 
 #include "oss-common.h"
+#include "oss-stream.h"
 #include "oss-switch.h"
 #include "oss-switch-option.h"
 
@@ -31,12 +32,12 @@ struct _OssSwitchPrivate
     GList *options;
 };
 
-static void oss_switch_class_init      (OssSwitchClass      *klass);
-static void oss_switch_init            (OssSwitch           *swtch);
-static void oss_switch_dispose         (GObject             *object);
-static void oss_switch_finalize        (GObject             *object);
+static void oss_switch_class_init (OssSwitchClass *klass);
+static void oss_switch_init       (OssSwitch      *swtch);
+static void oss_switch_dispose    (GObject        *object);
+static void oss_switch_finalize   (GObject        *object);
 
-G_DEFINE_TYPE (OssSwitch, oss_switch, MATE_MIXER_TYPE_SWITCH)
+G_DEFINE_TYPE (OssSwitch, oss_switch, MATE_MIXER_TYPE_STREAM_SWITCH)
 
 static gboolean         oss_switch_set_active_option (MateMixerSwitch       *mms,
                                                       MateMixerSwitchOption *mmso);
@@ -99,13 +100,15 @@ oss_switch_finalize (GObject *object)
 }
 
 OssSwitch *
-oss_switch_new (const gchar *name,
+oss_switch_new (OssStream   *stream,
+                const gchar *name,
                 const gchar *label,
                 gint         fd,
                 GList       *options)
 {
     OssSwitch *swtch;
 
+    g_return_val_if_fail (OSS_IS_STREAM (stream), NULL);
     g_return_val_if_fail (name != NULL, NULL);
     g_return_val_if_fail (label != NULL, NULL);
     g_return_val_if_fail (fd != -1, NULL);
@@ -115,6 +118,7 @@ oss_switch_new (const gchar *name,
                           "name", name,
                           "label", label,
                           "role", MATE_MIXER_SWITCH_ROLE_PORT,
+                          "stream", stream,
                           NULL);
 
     /* Takes ownership of options */

@@ -44,7 +44,7 @@ typedef struct _OssSwitchPrivate  OssSwitchPrivate;
 
 struct _OssSwitch
 {
-    MateMixerSwitch parent;
+    MateMixerStreamSwitch parent;
 
     /*< private >*/
     OssSwitchPrivate *priv;
@@ -52,12 +52,13 @@ struct _OssSwitch
 
 struct _OssSwitchClass
 {
-    MateMixerSwitchClass parent_class;
+    MateMixerStreamSwitchClass parent_class;
 };
 
 GType      oss_switch_get_type (void) G_GNUC_CONST;
 
-OssSwitch *oss_switch_new      (const gchar *name,
+OssSwitch *oss_switch_new      (OssStream   *stream,
+                                const gchar *name,
                                 const gchar *label,
                                 gint         fd,
                                 GList       *options);
