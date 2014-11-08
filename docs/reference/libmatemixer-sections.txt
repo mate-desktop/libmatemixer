@@ -91,8 +91,10 @@ mate_mixer_device_get_type
 <SECTION>
 <FILE>matemixer-device-switch</FILE>
 <TITLE>MateMixerDeviceSwitch</TITLE>
+MateMixerDeviceSwitchRole
 MateMixerDeviceSwitch
 MateMixerDeviceSwitchClass
+mate_mixer_device_switch_get_role
 mate_mixer_device_switch_get_device
 <SUBSECTION Standard>
 MATE_MIXER_IS_DEVICE_SWITCH
@@ -207,8 +209,10 @@ mate_mixer_stream_control_get_type
 <SECTION>
 <FILE>matemixer-stream-switch</FILE>
 <TITLE>MateMixerStreamSwitch</TITLE>
+MateMixerStreamSwitchRole
 MateMixerStreamSwitch
 MateMixerStreamSwitchClass
+mate_mixer_stream_switch_get_role
 mate_mixer_stream_switch_get_stream
 <SUBSECTION Standard>
 MATE_MIXER_IS_STREAM_SWITCH
@@ -226,13 +230,11 @@ mate_mixer_stream_switch_get_type
 <FILE>matemixer-switch</FILE>
 <TITLE>MateMixerSwitch</TITLE>
 MateMixerSwitchFlags
-MateMixerSwitchRole
 MateMixerSwitch
 MateMixerSwitchClass
 mate_mixer_switch_get_name
 mate_mixer_switch_get_label
 mate_mixer_switch_get_flags
-mate_mixer_switch_get_role
 mate_mixer_switch_get_option
 mate_mixer_switch_list_options
 mate_mixer_switch_get_active_option

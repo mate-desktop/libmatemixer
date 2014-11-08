@@ -78,12 +78,12 @@ alsa_toggle_init (AlsaToggle *toggle)
 }
 
 AlsaToggle *
-alsa_toggle_new (const gchar        *name,
-                 const gchar        *label,
-                 MateMixerSwitchRole role,
-                 AlsaToggleType      type,
-                 AlsaSwitchOption   *on,
-                 AlsaSwitchOption   *off)
+alsa_toggle_new (const gchar              *name,
+                 const gchar              *label,
+                 MateMixerStreamSwitchRole role,
+                 AlsaToggleType            type,
+                 AlsaSwitchOption         *on,
+                 AlsaSwitchOption         *off)
 {
     AlsaToggle *toggle;
 

@@ -103,11 +103,11 @@ alsa_switch_init (AlsaSwitch *swtch)
 }
 
 AlsaSwitch *
-alsa_switch_new (AlsaStream         *stream,
-                 const gchar        *name,
-                 const gchar        *label,
-                 MateMixerSwitchRole role,
-                 GList              *options)
+alsa_switch_new (AlsaStream               *stream,
+                 const gchar              *name,
+                 const gchar              *label,
+                 MateMixerStreamSwitchRole role,
+                 GList                    *options)
 {
     AlsaSwitch *swtch;
 

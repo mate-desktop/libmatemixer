@@ -19,6 +19,8 @@
 #include <glib-object.h>
 
 #include "matemixer-device.h"
+#include "matemixer-enums.h"
+#include "matemixer-enum-types.h"
 #include "matemixer-switch.h"
 #include "matemixer-device-switch.h"
 
@@ -29,11 +31,13 @@
 
 struct _MateMixerDeviceSwitchPrivate
 {
-    MateMixerDevice *device;
+    MateMixerDevice          *device;
+    MateMixerDeviceSwitchRole role;
 };
 
 enum {
     PROP_0,
+    PROP_ROLE,
     PROP_DEVICE,
     N_PROPERTIES
 };
@@ -64,6 +68,16 @@ mate_mixer_device_switch_class_init (MateMixerDeviceSwitchClass *klass)
     object_class->get_property = mate_mixer_device_switch_get_property;
     object_class->set_property = mate_mixer_device_switch_set_property;
 
+    properties[PROP_ROLE] =
+        g_param_spec_enum ("role",
+                           "Role",
+                           "Role of the switch",
+                           MATE_MIXER_TYPE_DEVICE_SWITCH_ROLE,
+                           MATE_MIXER_DEVICE_SWITCH_ROLE_UNKNOWN,
+                           G_PARAM_READWRITE |
+                           G_PARAM_CONSTRUCT_ONLY |
+                           G_PARAM_STATIC_STRINGS);
+
     properties[PROP_DEVICE] =
         g_param_spec_object ("device",
                              "Device",
@@ -89,6 +103,9 @@ mate_mixer_device_switch_get_property (GObject    *object,
     swtch = MATE_MIXER_DEVICE_SWITCH (object);
 
     switch (param_id) {
+    case PROP_ROLE:
+        g_value_set_enum (value, swtch->priv->role);
+        break;
     case PROP_DEVICE:
         g_value_set_object (value, swtch->priv->device);
         break;
@@ -109,6 +126,9 @@ mate_mixer_device_switch_set_property (GObject      *object,
     swtch = MATE_MIXER_DEVICE_SWITCH (object);
 
     switch (param_id) {
+    case PROP_ROLE:
+        swtch->priv->role = g_value_get_enum (value);
+        break;
     case PROP_DEVICE:
         /* Construct-only object */
         swtch->priv->device = g_value_get_object (value);
@@ -129,6 +149,22 @@ mate_mixer_device_switch_init (MateMixerDeviceSwitch *swtch)
     swtch->priv = G_TYPE_INSTANCE_GET_PRIVATE (swtch,
                                                MATE_MIXER_TYPE_DEVICE_SWITCH,
                                                MateMixerDeviceSwitchPrivate);
+}
+
+/**
+ * mate_mixer_device_switch_get_role:
+ * @swtch: a #MateMixerDeviceSwitch
+ *
+ * Gets the role of the switch. The role identifies the purpose of the switch.
+ *
+ * Returns: the switch role.
+ */
+MateMixerDeviceSwitchRole
+mate_mixer_device_switch_get_role (MateMixerDeviceSwitch *swtch)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE_SWITCH (swtch), MATE_MIXER_DEVICE_SWITCH_ROLE_UNKNOWN);
+
+    return swtch->priv->role;
 }
 
 /**

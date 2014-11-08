@@ -117,7 +117,7 @@ oss_switch_new (OssStream   *stream,
     swtch = g_object_new (OSS_TYPE_SWITCH,
                           "name", name,
                           "label", label,
-                          "role", MATE_MIXER_SWITCH_ROLE_PORT,
+                          "role", MATE_MIXER_STREAM_SWITCH_ROLE_PORT,
                           "stream", stream,
                           NULL);
 

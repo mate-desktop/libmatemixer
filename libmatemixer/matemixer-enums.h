@@ -271,22 +271,31 @@ typedef enum { /*< flags >*/
 } MateMixerSwitchFlags;
 
 /**
- * MateMixerSwitchRole:
- * @MATE_MIXER_SWITCH_ROLE_UNKNOWN:
- *     Unknown switch role.
- * @MATE_MIXER_SWITCH_ROLE_DEVICE_PROFILE:
+ * MateMixerDeviceSwitchRole:
+ * @MATE_MIXER_DEVICE_SWITCH_ROLE_UNKNOWN:
+ *     Unknown device switch role.
+ * @MATE_MIXER_DEVICE_SWITCH_ROLE_PROFILE:
  *     The switch changes the active sound device profile.
- * @MATE_MIXER_SWITCH_ROLE_PORT:
+ */
+typedef enum {
+    MATE_MIXER_DEVICE_SWITCH_ROLE_UNKNOWN,
+    MATE_MIXER_DEVICE_SWITCH_ROLE_PROFILE,
+} MateMixerDeviceSwitchRole;
+
+/**
+ * MateMixerStreamSwitchRole:
+ * @MATE_MIXER_STREAM_SWITCH_ROLE_UNKNOWN:
+ *     Unknown stream switch role.
+ * @MATE_MIXER_STREAM_SWITCH_ROLE_PORT:
  *     The switch changes the active port.
- * @MATE_MIXER_SWITCH_ROLE_BOOST:
+ * @MATE_MIXER_STREAM_SWITCH_ROLE_BOOST:
  *     The switch changes the boost value.
  */
 typedef enum {
-    MATE_MIXER_SWITCH_ROLE_UNKNOWN,
-    MATE_MIXER_SWITCH_ROLE_DEVICE_PROFILE,
-    MATE_MIXER_SWITCH_ROLE_PORT,
-    MATE_MIXER_SWITCH_ROLE_BOOST
-} MateMixerSwitchRole;
+    MATE_MIXER_STREAM_SWITCH_ROLE_UNKNOWN,
+    MATE_MIXER_STREAM_SWITCH_ROLE_PORT,
+    MATE_MIXER_STREAM_SWITCH_ROLE_BOOST
+} MateMixerStreamSwitchRole;
 
 /**
  * MateMixerChannelPosition:

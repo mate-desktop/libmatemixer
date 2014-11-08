@@ -57,11 +57,11 @@ struct _AlsaSwitchClass
 
 GType       alsa_switch_get_type (void) G_GNUC_CONST;
 
-AlsaSwitch *alsa_switch_new      (AlsaStream         *stream,
-                                  const gchar        *name,
-                                  const gchar        *label,
-                                  MateMixerSwitchRole role,
-                                  GList              *options);
+AlsaSwitch *alsa_switch_new      (AlsaStream               *stream,
+                                  const gchar              *name,
+                                  const gchar              *label,
+                                  MateMixerStreamSwitchRole role,
+                                  GList                    *options);
 
 G_END_DECLS
 

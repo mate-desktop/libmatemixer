@@ -52,8 +52,11 @@ GType mate_mixer_stream_control_media_role_get_type (void) G_GNUC_CONST;
 #define MATE_MIXER_TYPE_SWITCH_FLAGS (mate_mixer_switch_flags_get_type ())
 GType mate_mixer_switch_flags_get_type (void) G_GNUC_CONST;
 
-#define MATE_MIXER_TYPE_SWITCH_ROLE (mate_mixer_switch_role_get_type ())
-GType mate_mixer_switch_role_get_type (void) G_GNUC_CONST;
+#define MATE_MIXER_TYPE_DEVICE_SWITCH_ROLE (mate_mixer_device_switch_role_get_type ())
+GType mate_mixer_device_switch_role_get_type (void) G_GNUC_CONST;
+
+#define MATE_MIXER_TYPE_STREAM_SWITCH_ROLE (mate_mixer_stream_switch_role_get_type ())
+GType mate_mixer_stream_switch_role_get_type (void) G_GNUC_CONST;
 
 #define MATE_MIXER_TYPE_CHANNEL_POSITION (mate_mixer_channel_position_get_type ())
 GType mate_mixer_channel_position_get_type (void) G_GNUC_CONST;

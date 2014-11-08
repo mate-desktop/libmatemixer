@@ -18,6 +18,8 @@
 #include <glib.h>
 #include <glib-object.h>
 
+#include "matemixer-enums.h"
+#include "matemixer-enum-types.h"
 #include "matemixer-stream.h"
 #include "matemixer-switch.h"
 #include "matemixer-stream-switch.h"
@@ -29,11 +31,13 @@
 
 struct _MateMixerStreamSwitchPrivate
 {
-    MateMixerStream *stream;
+    MateMixerStream          *stream;
+    MateMixerStreamSwitchRole role;
 };
 
 enum {
     PROP_0,
+    PROP_ROLE,
     PROP_STREAM,
     N_PROPERTIES
 };
@@ -64,6 +68,16 @@ mate_mixer_stream_switch_class_init (MateMixerStreamSwitchClass *klass)
     object_class->get_property = mate_mixer_stream_switch_get_property;
     object_class->set_property = mate_mixer_stream_switch_set_property;
 
+    properties[PROP_ROLE] =
+        g_param_spec_enum ("role",
+                           "Role",
+                           "Role of the switch",
+                           MATE_MIXER_TYPE_STREAM_SWITCH_ROLE,
+                           MATE_MIXER_STREAM_SWITCH_ROLE_UNKNOWN,
+                           G_PARAM_READWRITE |
+                           G_PARAM_CONSTRUCT_ONLY |
+                           G_PARAM_STATIC_STRINGS);
+
     properties[PROP_STREAM] =
         g_param_spec_object ("stream",
                              "Stream",
@@ -89,6 +103,9 @@ mate_mixer_stream_switch_get_property (GObject    *object,
     swtch = MATE_MIXER_STREAM_SWITCH (object);
 
     switch (param_id) {
+    case PROP_ROLE:
+        g_value_set_enum (value, swtch->priv->role);
+        break;
     case PROP_STREAM:
         g_value_set_object (value, swtch->priv->stream);
         break;
@@ -109,6 +126,9 @@ mate_mixer_stream_switch_set_property (GObject      *object,
     swtch = MATE_MIXER_STREAM_SWITCH (object);
 
     switch (param_id) {
+    case PROP_ROLE:
+        swtch->priv->role = g_value_get_enum (value);
+        break;
     case PROP_STREAM:
         /* Construct-only object */
         swtch->priv->stream = g_value_get_object (value);
@@ -129,6 +149,22 @@ mate_mixer_stream_switch_init (MateMixerStreamSwitch *swtch)
     swtch->priv = G_TYPE_INSTANCE_GET_PRIVATE (swtch,
                                                MATE_MIXER_TYPE_STREAM_SWITCH,
                                                MateMixerStreamSwitchPrivate);
+}
+
+/**
+ * mate_mixer_stream_switch_get_role:
+ * @swtch: a #MateMixerStreamSwitch
+ *
+ * Gets the role of the switch. The role identifies the purpose of the switch.
+ *
+ * Returns: the switch role.
+ */
+MateMixerStreamSwitchRole
+mate_mixer_stream_switch_get_role (MateMixerStreamSwitch *swtch)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_STREAM_SWITCH (swtch), MATE_MIXER_STREAM_SWITCH_ROLE_UNKNOWN);
+
+    return swtch->priv->role;
 }
 
 /**

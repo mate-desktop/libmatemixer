@@ -55,7 +55,7 @@ pulse_source_switch_new (const gchar *name, const gchar *label, PulseSource *sou
     return g_object_new (PULSE_TYPE_SOURCE_SWITCH,
                          "name", name,
                          "label", label,
-                         "role", MATE_MIXER_SWITCH_ROLE_PORT,
+                         "role", MATE_MIXER_STREAM_SWITCH_ROLE_PORT,
                          "stream", source,
                          NULL);
 }

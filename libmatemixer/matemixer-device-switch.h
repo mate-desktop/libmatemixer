@@ -67,9 +67,10 @@ struct _MateMixerDeviceSwitchClass
     MateMixerSwitchClass parent_class;
 };
 
-GType            mate_mixer_device_switch_get_type   (void) G_GNUC_CONST;
+GType                     mate_mixer_device_switch_get_type   (void) G_GNUC_CONST;
 
-MateMixerDevice *mate_mixer_device_switch_get_device (MateMixerDeviceSwitch *swtch);
+MateMixerDeviceSwitchRole mate_mixer_device_switch_get_role   (MateMixerDeviceSwitch *swtch);
+MateMixerDevice *         mate_mixer_device_switch_get_device (MateMixerDeviceSwitch *swtch);
 
 G_END_DECLS
 

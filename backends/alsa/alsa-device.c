@@ -147,7 +147,7 @@ static MateMixerDirection get_switch_direction      (snd_mixer_elem_t           
 static void               get_switch_info           (snd_mixer_elem_t           *el,
                                                      gchar                     **name,
                                                      gchar                     **label,
-                                                     MateMixerSwitchRole        *role);
+                                                     MateMixerStreamSwitchRole  *role);
 
 static void               close_mixer               (AlsaDevice                 *device);
 
@@ -585,12 +585,12 @@ add_stream_output_control (AlsaDevice *device, snd_mixer_elem_t *el)
 static AlsaToggle *
 create_toggle (AlsaDevice *device, snd_mixer_elem_t *el, AlsaToggleType type)
 {
-    AlsaToggle         *toggle;
-    AlsaSwitchOption   *on;
-    AlsaSwitchOption   *off;
-    gchar              *name;
-    gchar              *label;
-    MateMixerSwitchRole role;
+    AlsaToggle               *toggle;
+    AlsaSwitchOption         *on;
+    AlsaSwitchOption         *off;
+    gchar                    *name;
+    gchar                    *label;
+    MateMixerStreamSwitchRole role;
 
     on  = alsa_switch_option_new ("On", _("On"), NULL, 1);
     off = alsa_switch_option_new ("Off", _("Off"), NULL, 0);
@@ -612,14 +612,14 @@ create_toggle (AlsaDevice *device, snd_mixer_elem_t *el, AlsaToggleType type)
 static void
 add_switch (AlsaDevice *device, AlsaStream *stream, snd_mixer_elem_t *el)
 {
-    AlsaElement        *element = NULL;
-    GList              *options = NULL;
-    gchar              *name;
-    gchar              *label;
-    gchar               item[128];
-    guint               i;
-    gint                count;
-    MateMixerSwitchRole role;
+    AlsaElement              *element = NULL;
+    GList                    *options = NULL;
+    gchar                    *name;
+    gchar                    *label;
+    gchar                     item[128];
+    guint                     i;
+    gint                      count;
+    MateMixerStreamSwitchRole role;
 
     count = snd_mixer_selem_get_enum_items (el);
     if G_UNLIKELY (count <= 0) {
@@ -1138,15 +1138,15 @@ get_switch_direction (snd_mixer_elem_t *el)
 }
 
 static void
-get_switch_info (snd_mixer_elem_t    *el,
-                 gchar              **name,
-                 gchar              **label,
-                 MateMixerSwitchRole *role)
+get_switch_info (snd_mixer_elem_t          *el,
+                 gchar                    **name,
+                 gchar                    **label,
+                 MateMixerStreamSwitchRole *role)
 {
-    MateMixerSwitchRole r = MATE_MIXER_SWITCH_ROLE_UNKNOWN;
-    const gchar        *n;
-    const gchar        *l = NULL;
-    gint                i;
+    MateMixerStreamSwitchRole r = MATE_MIXER_STREAM_SWITCH_ROLE_UNKNOWN;
+    const gchar              *n;
+    const gchar              *l = NULL;
+    gint                      i;
 
     n = snd_mixer_selem_get_name (el);
 

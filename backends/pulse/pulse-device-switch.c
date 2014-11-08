@@ -92,7 +92,7 @@ pulse_device_switch_new (const gchar *name, const gchar *label, PulseDevice *dev
     return g_object_new (PULSE_TYPE_DEVICE_SWITCH,
                          "name", name,
                          "label", label,
-                         "role", MATE_MIXER_SWITCH_ROLE_DEVICE_PROFILE,
+                         "role", MATE_MIXER_DEVICE_SWITCH_ROLE_PROFILE,
                          "device", device,
                          NULL);
 }

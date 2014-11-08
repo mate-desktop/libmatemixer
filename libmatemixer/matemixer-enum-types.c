@@ -208,20 +208,37 @@ mate_mixer_switch_flags_get_type (void)
 }
 
 GType
-mate_mixer_switch_role_get_type (void)
+mate_mixer_device_switch_role_get_type (void)
 {
     static GType etype = 0;
 
     if (etype == 0) {
         static const GEnumValue values[] = {
-            { MATE_MIXER_SWITCH_ROLE_UNKNOWN, "MATE_MIXER_SWITCH_ROLE_UNKNOWN", "unknown" },
-            { MATE_MIXER_SWITCH_ROLE_DEVICE_PROFILE, "MATE_MIXER_SWITCH_ROLE_DEVICE_PROFILE", "device-profile" },
-            { MATE_MIXER_SWITCH_ROLE_PORT, "MATE_MIXER_SWITCH_ROLE_PORT", "port" },
-            { MATE_MIXER_SWITCH_ROLE_BOOST, "MATE_MIXER_SWITCH_ROLE_BOOST", "boost" },
+            { MATE_MIXER_DEVICE_SWITCH_ROLE_UNKNOWN, "MATE_MIXER_DEVICE_SWITCH_ROLE_UNKNOWN", "unknown" },
+            { MATE_MIXER_DEVICE_SWITCH_ROLE_PROFILE, "MATE_MIXER_DEVICE_SWITCH_ROLE_PROFILE", "profile" },
             { 0, NULL, NULL }
         };
         etype = g_enum_register_static (
-            g_intern_static_string ("MateMixerSwitchRole"),
+            g_intern_static_string ("MateMixerDeviceSwitchRole"),
+            values);
+    }
+    return etype;
+}
+
+GType
+mate_mixer_stream_switch_role_get_type (void)
+{
+    static GType etype = 0;
+
+    if (etype == 0) {
+        static const GEnumValue values[] = {
+            { MATE_MIXER_STREAM_SWITCH_ROLE_UNKNOWN, "MATE_MIXER_STREAM_SWITCH_ROLE_UNKNOWN", "unknown" },
+            { MATE_MIXER_STREAM_SWITCH_ROLE_PORT, "MATE_MIXER_STREAM_SWITCH_ROLE_PORT", "port" },
+            { MATE_MIXER_STREAM_SWITCH_ROLE_BOOST, "MATE_MIXER_STREAM_SWITCH_ROLE_BOOST", "boost" },
+            { 0, NULL, NULL }
+        };
+        etype = g_enum_register_static (
+            g_intern_static_string ("MateMixerStreamSwitchRole"),
             values);
     }
     return etype;

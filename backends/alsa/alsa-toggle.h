@@ -62,12 +62,12 @@ struct _AlsaToggleClass
 
 GType       alsa_toggle_get_type (void) G_GNUC_CONST;
 
-AlsaToggle *alsa_toggle_new      (const gchar        *name,
-                                  const gchar        *label,
-                                  MateMixerSwitchRole role,
-                                  AlsaToggleType      type,
-                                  AlsaSwitchOption   *on,
-                                  AlsaSwitchOption   *off);
+AlsaToggle *alsa_toggle_new      (const gchar              *name,
+                                  const gchar              *label,
+                                  MateMixerStreamSwitchRole role,
+                                  AlsaToggleType            type,
+                                  AlsaSwitchOption         *on,
+                                  AlsaSwitchOption         *off);
 
 G_END_DECLS
 

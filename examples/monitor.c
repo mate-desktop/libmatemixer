@@ -95,16 +95,26 @@ get_media_role_string (MateMixerStreamControlMediaRole role)
     }
 }
 
-/* Convert MateMixerSwitchRole constant to a string */
+/* Convert MateMixerDeviceSwitchRole constant to a string */
 static const gchar *
-get_switch_role_string (MateMixerSwitchRole role)
+get_device_switch_role_string (MateMixerDeviceSwitchRole role)
 {
     switch (role) {
-    case MATE_MIXER_SWITCH_ROLE_DEVICE_PROFILE:
+    case MATE_MIXER_DEVICE_SWITCH_ROLE_PROFILE:
         return "Device Profile";
-    case MATE_MIXER_SWITCH_ROLE_PORT:
+    default:
+        return "Unknown";
+    }
+}
+
+/* Convert MateMixerStreamSwitchRole constant to a string */
+static const gchar *
+get_stream_switch_role_string (MateMixerStreamSwitchRole role)
+{
+    switch (role) {
+    case MATE_MIXER_STREAM_SWITCH_ROLE_PORT:
         return "Port";
-    case MATE_MIXER_SWITCH_ROLE_BOOST:
+    case MATE_MIXER_STREAM_SWITCH_ROLE_BOOST:
         return "Boost";
     default:
         return "Unknown";
@@ -170,7 +180,7 @@ print_devices (void)
                      "\t\tRole  : %s\n",
                      mate_mixer_switch_get_name (swtch),
                      mate_mixer_switch_get_label (swtch),
-                     get_switch_role_string (mate_mixer_switch_get_role (swtch)));
+                     get_device_switch_role_string (mate_mixer_device_switch_get_role (MATE_MIXER_DEVICE_SWITCH (swtch))));
 
             g_print ("\tOptions:\n");
 
@@ -256,7 +266,7 @@ print_streams (void)
                      "\t\tRole       : %s\n",
                      mate_mixer_switch_get_name (swtch),
                      mate_mixer_switch_get_label (swtch),
-                     get_switch_role_string (mate_mixer_switch_get_role (swtch)));
+                     get_stream_switch_role_string (mate_mixer_stream_switch_get_role (MATE_MIXER_STREAM_SWITCH (swtch))));
 
             g_print ("\tOptions:\n");
 

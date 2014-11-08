@@ -33,9 +33,9 @@ typedef struct {
 } AlsaControlInfo;
 
 typedef struct {
-    gchar              *name;
-    gchar              *label;
-    MateMixerSwitchRole role;
+    gchar                     *name;
+    gchar                     *label;
+    MateMixerStreamSwitchRole  role;
 } AlsaSwitchInfo;
 
 typedef struct {

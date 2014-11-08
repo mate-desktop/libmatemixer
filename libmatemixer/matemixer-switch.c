@@ -35,7 +35,6 @@ struct _MateMixerSwitchPrivate
     gchar                 *name;
     gchar                 *label;
     MateMixerSwitchFlags   flags;
-    MateMixerSwitchRole    role;
     MateMixerSwitchOption *active;
 };
 
@@ -44,7 +43,6 @@ enum {
     PROP_NAME,
     PROP_LABEL,
     PROP_FLAGS,
-    PROP_ROLE,
     PROP_ACTIVE_OPTION,
     N_PROPERTIES
 };
@@ -102,16 +100,6 @@ mate_mixer_switch_class_init (MateMixerSwitchClass *klass)
                              G_PARAM_CONSTRUCT_ONLY |
                              G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_ROLE] =
-        g_param_spec_enum ("role",
-                           "Role",
-                           "Role of the switch",
-                           MATE_MIXER_TYPE_SWITCH_ROLE,
-                           MATE_MIXER_SWITCH_ROLE_UNKNOWN,
-                           G_PARAM_READWRITE |
-                           G_PARAM_CONSTRUCT_ONLY |
-                           G_PARAM_STATIC_STRINGS);
-
     properties[PROP_FLAGS] =
         g_param_spec_flags ("flags",
                             "Flags",
@@ -156,9 +144,6 @@ mate_mixer_switch_get_property (GObject    *object,
     case PROP_FLAGS:
         g_value_set_flags (value, swtch->priv->flags);
         break;
-    case PROP_ROLE:
-        g_value_set_enum (value, swtch->priv->role);
-        break;
     case PROP_ACTIVE_OPTION:
         g_value_set_object (value, swtch->priv->active);
         break;
@@ -190,9 +175,6 @@ mate_mixer_switch_set_property (GObject      *object,
         break;
     case PROP_FLAGS:
         swtch->priv->flags = g_value_get_flags (value);
-        break;
-    case PROP_ROLE:
-        swtch->priv->role = g_value_get_enum (value);
         break;
     case PROP_ACTIVE_OPTION:
         /* Construct-only object */
@@ -291,23 +273,6 @@ mate_mixer_switch_get_flags (MateMixerSwitch *swtch)
     g_return_val_if_fail (MATE_MIXER_IS_SWITCH (swtch), MATE_MIXER_SWITCH_NO_FLAGS);
 
     return swtch->priv->flags;
-}
-
-/**
- * mate_mixer_switch_get_role:
- * @swtch: a #MateMixerSwitch
- *
- * Gets the role of the switch. The role identifies the purpose of the switch.
-
- * Note that while the role identification should be reliable, it may be based on
- * looking for well-known switch names on some sound systems.
- */
-MateMixerSwitchRole
-mate_mixer_switch_get_role (MateMixerSwitch *swtch)
-{
-    g_return_val_if_fail (MATE_MIXER_IS_SWITCH (swtch), MATE_MIXER_SWITCH_ROLE_UNKNOWN);
-
-    return swtch->priv->role;
 }
 
 /**
