@@ -80,7 +80,6 @@ GType                  mate_mixer_switch_get_type          (void) G_GNUC_CONST;
 
 const gchar *          mate_mixer_switch_get_name          (MateMixerSwitch       *swtch);
 const gchar *          mate_mixer_switch_get_label         (MateMixerSwitch       *swtch);
-MateMixerSwitchFlags   mate_mixer_switch_get_flags         (MateMixerSwitch       *swtch);
 
 MateMixerSwitchOption *mate_mixer_switch_get_option        (MateMixerSwitch       *swtch,
                                                             const gchar           *name);

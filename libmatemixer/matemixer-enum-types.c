@@ -190,24 +190,6 @@ mate_mixer_stream_control_media_role_get_type (void)
 }
 
 GType
-mate_mixer_switch_flags_get_type (void)
-{
-    static GType etype = 0;
-
-    if (etype == 0) {
-        static const GFlagsValue values[] = {
-            { MATE_MIXER_SWITCH_NO_FLAGS, "MATE_MIXER_SWITCH_NO_FLAGS", "no-flags" },
-            { MATE_MIXER_SWITCH_TOGGLE, "MATE_MIXER_SWITCH_TOGGLE", "toggle" },
-            { 0, NULL, NULL }
-        };
-        etype = g_flags_register_static (
-            g_intern_static_string ("MateMixerSwitchFlags"),
-            values);
-    }
-    return etype;
-}
-
-GType
 mate_mixer_device_switch_role_get_type (void)
 {
     static GType etype = 0;
@@ -220,6 +202,24 @@ mate_mixer_device_switch_role_get_type (void)
         };
         etype = g_enum_register_static (
             g_intern_static_string ("MateMixerDeviceSwitchRole"),
+            values);
+    }
+    return etype;
+}
+
+GType
+mate_mixer_stream_switch_flags_get_type (void)
+{
+    static GType etype = 0;
+
+    if (etype == 0) {
+        static const GFlagsValue values[] = {
+            { MATE_MIXER_STREAM_SWITCH_NO_FLAGS, "MATE_MIXER_STREAM_SWITCH_NO_FLAGS", "no-flags" },
+            { MATE_MIXER_STREAM_SWITCH_TOGGLE, "MATE_MIXER_STREAM_SWITCH_TOGGLE", "toggle" },
+            { 0, NULL, NULL }
+        };
+        etype = g_flags_register_static (
+            g_intern_static_string ("MateMixerStreamSwitchFlags"),
             values);
     }
     return etype;

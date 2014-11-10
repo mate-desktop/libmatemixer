@@ -34,7 +34,6 @@ struct _MateMixerSwitchPrivate
 {
     gchar                 *name;
     gchar                 *label;
-    MateMixerSwitchFlags   flags;
     MateMixerSwitchOption *active;
 };
 
@@ -42,7 +41,6 @@ enum {
     PROP_0,
     PROP_NAME,
     PROP_LABEL,
-    PROP_FLAGS,
     PROP_ACTIVE_OPTION,
     N_PROPERTIES
 };
@@ -100,16 +98,6 @@ mate_mixer_switch_class_init (MateMixerSwitchClass *klass)
                              G_PARAM_CONSTRUCT_ONLY |
                              G_PARAM_STATIC_STRINGS);
 
-    properties[PROP_FLAGS] =
-        g_param_spec_flags ("flags",
-                            "Flags",
-                            "Flags of the switch",
-                            MATE_MIXER_TYPE_SWITCH_FLAGS,
-                            MATE_MIXER_SWITCH_NO_FLAGS,
-                            G_PARAM_READWRITE |
-                            G_PARAM_CONSTRUCT_ONLY |
-                            G_PARAM_STATIC_STRINGS);
-
     properties[PROP_ACTIVE_OPTION] =
         g_param_spec_object ("active-option",
                              "Active option",
@@ -141,9 +129,6 @@ mate_mixer_switch_get_property (GObject    *object,
     case PROP_LABEL:
         g_value_set_string (value, swtch->priv->label);
         break;
-    case PROP_FLAGS:
-        g_value_set_flags (value, swtch->priv->flags);
-        break;
     case PROP_ACTIVE_OPTION:
         g_value_set_object (value, swtch->priv->active);
         break;
@@ -172,9 +157,6 @@ mate_mixer_switch_set_property (GObject      *object,
     case PROP_LABEL:
         /* Construct-only string */
         swtch->priv->label = g_value_dup_string (value);
-        break;
-    case PROP_FLAGS:
-        swtch->priv->flags = g_value_get_flags (value);
         break;
     case PROP_ACTIVE_OPTION:
         /* Construct-only object */
@@ -256,23 +238,6 @@ mate_mixer_switch_get_label (MateMixerSwitch *swtch)
     g_return_val_if_fail (MATE_MIXER_IS_SWITCH (swtch), NULL);
 
     return swtch->priv->label;
-}
-
-/**
- * mate_mixer_switch_get_flags:
- * @swtch: a #MateMixerSwitch
- *
- * Gets the flags of the switch. See #MateMixerSwitchFlags for information about
- * the meaning of the individual flags.
- *
- * Returns: the flags of the switch.
- */
-MateMixerSwitchFlags
-mate_mixer_switch_get_flags (MateMixerSwitch *swtch)
-{
-    g_return_val_if_fail (MATE_MIXER_IS_SWITCH (swtch), MATE_MIXER_SWITCH_NO_FLAGS);
-
-    return swtch->priv->flags;
 }
 
 /**

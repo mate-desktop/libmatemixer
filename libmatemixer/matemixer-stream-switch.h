@@ -67,10 +67,11 @@ struct _MateMixerStreamSwitchClass
     MateMixerSwitchClass parent_class;
 };
 
-GType                     mate_mixer_stream_switch_get_type   (void) G_GNUC_CONST;
+GType                      mate_mixer_stream_switch_get_type   (void) G_GNUC_CONST;
 
-MateMixerStreamSwitchRole mate_mixer_stream_switch_get_role   (MateMixerStreamSwitch *swtch);
-MateMixerStream *         mate_mixer_stream_switch_get_stream (MateMixerStreamSwitch *swtch);
+MateMixerStreamSwitchFlags mate_mixer_stream_switch_get_flags  (MateMixerStreamSwitch *swtch);
+MateMixerStreamSwitchRole  mate_mixer_stream_switch_get_role   (MateMixerStreamSwitch *swtch);
+MateMixerStream *          mate_mixer_stream_switch_get_stream (MateMixerStreamSwitch *swtch);
 
 G_END_DECLS
 

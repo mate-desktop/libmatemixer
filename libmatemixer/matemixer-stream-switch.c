@@ -31,12 +31,14 @@
 
 struct _MateMixerStreamSwitchPrivate
 {
-    MateMixerStream          *stream;
-    MateMixerStreamSwitchRole role;
+    MateMixerStream           *stream;
+    MateMixerStreamSwitchFlags flags;
+    MateMixerStreamSwitchRole  role;
 };
 
 enum {
     PROP_0,
+    PROP_FLAGS,
     PROP_ROLE,
     PROP_STREAM,
     N_PROPERTIES
@@ -67,6 +69,16 @@ mate_mixer_stream_switch_class_init (MateMixerStreamSwitchClass *klass)
     object_class = G_OBJECT_CLASS (klass);
     object_class->get_property = mate_mixer_stream_switch_get_property;
     object_class->set_property = mate_mixer_stream_switch_set_property;
+
+    properties[PROP_FLAGS] =
+        g_param_spec_flags ("flags",
+                            "Flags",
+                            "Flags of the switch",
+                            MATE_MIXER_TYPE_STREAM_SWITCH_FLAGS,
+                            MATE_MIXER_STREAM_SWITCH_NO_FLAGS,
+                            G_PARAM_READWRITE |
+                            G_PARAM_CONSTRUCT_ONLY |
+                            G_PARAM_STATIC_STRINGS);
 
     properties[PROP_ROLE] =
         g_param_spec_enum ("role",
@@ -103,6 +115,9 @@ mate_mixer_stream_switch_get_property (GObject    *object,
     swtch = MATE_MIXER_STREAM_SWITCH (object);
 
     switch (param_id) {
+    case PROP_FLAGS:
+        g_value_set_flags (value, swtch->priv->flags);
+        break;
     case PROP_ROLE:
         g_value_set_enum (value, swtch->priv->role);
         break;
@@ -126,6 +141,9 @@ mate_mixer_stream_switch_set_property (GObject      *object,
     swtch = MATE_MIXER_STREAM_SWITCH (object);
 
     switch (param_id) {
+    case PROP_FLAGS:
+        swtch->priv->flags = g_value_get_flags (value);
+        break;
     case PROP_ROLE:
         swtch->priv->role = g_value_get_enum (value);
         break;
@@ -149,6 +167,23 @@ mate_mixer_stream_switch_init (MateMixerStreamSwitch *swtch)
     swtch->priv = G_TYPE_INSTANCE_GET_PRIVATE (swtch,
                                                MATE_MIXER_TYPE_STREAM_SWITCH,
                                                MateMixerStreamSwitchPrivate);
+}
+
+/**
+ * mate_mixer_stream_switch_get_flags:
+ * @swtch: a #MateMixerStreamSwitch
+ *
+ * Gets the flags of the switch. See #MateMixerStreamSwitchFlags for information
+ * about the meaning of the individual flags.
+ *
+ * Returns: the flags of the switch.
+ */
+MateMixerStreamSwitchFlags
+mate_mixer_stream_switch_get_flags (MateMixerStreamSwitch *swtch)
+{
+    g_return_val_if_fail (MATE_MIXER_IS_STREAM_SWITCH (swtch), MATE_MIXER_STREAM_SWITCH_NO_FLAGS);
+
+    return swtch->priv->flags;
 }
 
 /**

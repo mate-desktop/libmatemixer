@@ -259,18 +259,6 @@ typedef enum {
 } MateMixerStreamControlMediaRole;
 
 /**
- * MateMixerSwitchFlags:
- * @MATE_MIXER_SWITCH_NO_FLAGS:
- *     No flags.
- * @MATE_MIXER_SWITCH_TOGGLE:
- *     The switch is a #MateMixerToggle.
- */
-typedef enum { /*< flags >*/
-    MATE_MIXER_SWITCH_NO_FLAGS = 0,
-    MATE_MIXER_SWITCH_TOGGLE   = 1 << 0,
-} MateMixerSwitchFlags;
-
-/**
  * MateMixerDeviceSwitchRole:
  * @MATE_MIXER_DEVICE_SWITCH_ROLE_UNKNOWN:
  *     Unknown device switch role.
@@ -296,6 +284,18 @@ typedef enum {
     MATE_MIXER_STREAM_SWITCH_ROLE_PORT,
     MATE_MIXER_STREAM_SWITCH_ROLE_BOOST
 } MateMixerStreamSwitchRole;
+
+/**
+ * MateMixerStreamSwitchFlags:
+ * @MATE_MIXER_STREAM_SWITCH_NO_FLAGS:
+ *     No flags.
+ * @MATE_MIXER_STREAM_SWITCH_TOGGLE:
+ *     The switch is a #MateMixerStreamToggle.
+ */
+typedef enum { /*< flags >*/
+    MATE_MIXER_STREAM_SWITCH_NO_FLAGS = 0,
+    MATE_MIXER_STREAM_SWITCH_TOGGLE   = 1 << 0,
+} MateMixerStreamSwitchFlags;
 
 /**
  * MateMixerChannelPosition:
