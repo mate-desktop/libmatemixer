@@ -92,6 +92,11 @@ static void               add_switch                (AlsaDevice                 
                                                      AlsaStream                 *stream,
                                                      snd_mixer_elem_t           *el);
 
+static void               add_toggle                (AlsaDevice                 *device,
+                                                     AlsaStream                 *stream,
+                                                     AlsaToggleType              type,
+                                                     snd_mixer_elem_t           *el);
+
 static void               add_stream_input_switch   (AlsaDevice                 *device,
                                                      snd_mixer_elem_t           *el);
 static void               add_stream_output_switch  (AlsaDevice                 *device,
@@ -582,33 +587,6 @@ add_stream_output_control (AlsaDevice *device, snd_mixer_elem_t *el)
     g_object_unref (control);
 }
 
-static AlsaToggle *
-create_toggle (AlsaDevice *device, snd_mixer_elem_t *el, AlsaToggleType type)
-{
-    AlsaToggle               *toggle;
-    AlsaSwitchOption         *on;
-    AlsaSwitchOption         *off;
-    gchar                    *name;
-    gchar                    *label;
-    MateMixerStreamSwitchRole role;
-
-    on  = alsa_switch_option_new ("On", _("On"), NULL, 1);
-    off = alsa_switch_option_new ("Off", _("Off"), NULL, 0);
-
-    get_switch_info (el, &name, &label, &role);
-
-    toggle = alsa_toggle_new (name, label, role, type, on, off);
-
-    alsa_element_set_snd_element (ALSA_ELEMENT (toggle), el);
-
-    g_free (name);
-    g_free (label);
-    g_object_unref (on);
-    g_object_unref (off);
-
-    return toggle;
-}
-
 static void
 add_switch (AlsaDevice *device, AlsaStream *stream, snd_mixer_elem_t *el)
 {
@@ -674,6 +652,41 @@ add_switch (AlsaDevice *device, AlsaStream *stream, snd_mixer_elem_t *el)
 }
 
 static void
+add_toggle (AlsaDevice       *device,
+            AlsaStream       *stream,
+            AlsaToggleType    type,
+            snd_mixer_elem_t *el)
+{
+    AlsaElement              *element;
+    AlsaSwitchOption         *on;
+    AlsaSwitchOption         *off;
+    gchar                    *name;
+    gchar                    *label;
+    MateMixerStreamSwitchRole role;
+
+    on  = alsa_switch_option_new ("On", _("On"), NULL, 1);
+    off = alsa_switch_option_new ("Off", _("Off"), NULL, 0);
+
+    get_switch_info (el, &name, &label, &role);
+
+    element = ALSA_ELEMENT (alsa_toggle_new (stream,
+                                             name, label,
+                                             role,
+                                             type,
+                                             on, off));
+    g_free (name);
+    g_free (label);
+    g_object_unref (on);
+    g_object_unref (off);
+
+    alsa_element_set_snd_element (element, el);
+
+    add_element (device, stream, element);
+
+    g_object_unref (element);
+}
+
+static void
 add_stream_input_switch (AlsaDevice *device, snd_mixer_elem_t *el)
 {
     g_debug ("Reading device %s input switch %s (%d items)",
@@ -698,33 +711,21 @@ add_stream_output_switch (AlsaDevice *device, snd_mixer_elem_t *el)
 static void
 add_stream_input_toggle (AlsaDevice *device, snd_mixer_elem_t *el)
 {
-    AlsaToggle *toggle;
-
     g_debug ("Reading device %s input toggle %s",
              mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)),
              snd_mixer_selem_get_name (el));
 
-    toggle = create_toggle (device, el, ALSA_TOGGLE_CAPTURE);
-
-    add_element (device, device->priv->input, ALSA_ELEMENT (toggle));
-
-    g_object_unref (toggle);
+    add_toggle (device, device->priv->input, ALSA_TOGGLE_CAPTURE, el);
 }
 
 static void
 add_stream_output_toggle (AlsaDevice *device, snd_mixer_elem_t *el)
 {
-    AlsaToggle *toggle;
-
     g_debug ("Reading device %s output toggle %s",
              mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)),
              snd_mixer_selem_get_name (el));
 
-    toggle = create_toggle (device, el, ALSA_TOGGLE_PLAYBACK);
-
-    add_element (device, device->priv->output, ALSA_ELEMENT (toggle));
-
-    g_object_unref (toggle);
+    add_toggle (device, device->priv->output, ALSA_TOGGLE_PLAYBACK, el);
 }
 
 static void

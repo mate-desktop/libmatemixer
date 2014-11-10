@@ -23,6 +23,7 @@
 #include <libmatemixer/matemixer-private.h>
 
 #include "alsa-element.h"
+#include "alsa-stream.h"
 #include "alsa-switch-option.h"
 #include "alsa-toggle.h"
 
@@ -38,7 +39,7 @@ static void alsa_element_interface_init (AlsaElementInterface *iface);
 static void alsa_toggle_class_init      (AlsaToggleClass      *klass);
 static void alsa_toggle_init            (AlsaToggle           *toggle);
 
-G_DEFINE_TYPE_WITH_CODE (AlsaToggle, alsa_toggle, MATE_MIXER_TYPE_TOGGLE,
+G_DEFINE_TYPE_WITH_CODE (AlsaToggle, alsa_toggle, MATE_MIXER_TYPE_STREAM_TOGGLE,
                          G_IMPLEMENT_INTERFACE (ALSA_TYPE_ELEMENT,
                                                 alsa_element_interface_init))
 
@@ -78,7 +79,8 @@ alsa_toggle_init (AlsaToggle *toggle)
 }
 
 AlsaToggle *
-alsa_toggle_new (const gchar              *name,
+alsa_toggle_new (AlsaStream               *stream,
+                 const gchar              *name,
                  const gchar              *label,
                  MateMixerStreamSwitchRole role,
                  AlsaToggleType            type,
@@ -92,6 +94,7 @@ alsa_toggle_new (const gchar              *name,
                            "label", label,
                            "flags", MATE_MIXER_SWITCH_TOGGLE,
                            "role", role,
+                           "stream", stream,
                            "on-state-option", on,
                            "off-state-option", off,
                            NULL);
@@ -212,9 +215,11 @@ alsa_toggle_load (AlsaElement *element)
         MateMixerSwitchOption *active;
 
         if (value > 0)
-            active = mate_mixer_toggle_get_state_option (MATE_MIXER_TOGGLE (toggle), TRUE);
+            active = mate_mixer_stream_toggle_get_state_option (MATE_MIXER_STREAM_TOGGLE (toggle),
+                                                                TRUE);
         else
-            active = mate_mixer_toggle_get_state_option (MATE_MIXER_TOGGLE (toggle), FALSE);
+            active = mate_mixer_stream_toggle_get_state_option (MATE_MIXER_STREAM_TOGGLE (toggle),
+                                                                FALSE);
 
         _mate_mixer_switch_set_active_option (MATE_MIXER_SWITCH (toggle), active);
         return TRUE;

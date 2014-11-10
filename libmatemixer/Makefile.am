@@ -20,9 +20,9 @@ libmatemixer_include_HEADERS =                                  \
         matemixer-stream.h                                      \
         matemixer-stream-control.h                              \
         matemixer-stream-switch.h                               \
+        matemixer-stream-toggle.h                               \
         matemixer-switch.h                                      \
         matemixer-switch-option.h                               \
-        matemixer-toggle.h                                      \
         matemixer-types.h                                       \
         matemixer-version.h
 
@@ -47,11 +47,11 @@ libmatemixer_la_SOURCES =                                       \
         matemixer-stream-control.c                              \
         matemixer-stream-control-private.h                      \
         matemixer-stream-switch.c                               \
+        matemixer-stream-toggle.c                               \
         matemixer-switch.c                                      \
         matemixer-switch-private.h                              \
         matemixer-switch-option.c                               \
-        matemixer-switch-option-private.h                       \
-        matemixer-toggle.c
+        matemixer-switch-option-private.h
 
 libmatemixer_la_LIBADD = $(GLIB_LIBS)
 

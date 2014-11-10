@@ -33,9 +33,9 @@
 #include <libmatemixer/matemixer-stream.h>
 #include <libmatemixer/matemixer-stream-control.h>
 #include <libmatemixer/matemixer-stream-switch.h>
+#include <libmatemixer/matemixer-stream-toggle.h>
 #include <libmatemixer/matemixer-switch.h>
 #include <libmatemixer/matemixer-switch-option.h>
-#include <libmatemixer/matemixer-toggle.h>
 #include <libmatemixer/matemixer-version.h>
 
 G_BEGIN_DECLS

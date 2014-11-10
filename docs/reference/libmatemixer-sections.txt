@@ -227,6 +227,26 @@ mate_mixer_stream_switch_get_type
 </SECTION>
 
 <SECTION>
+<FILE>matemixer-stream-toggle</FILE>
+<TITLE>MateMixerStreamToggle</TITLE>
+MateMixerStreamToggle
+MateMixerStreamToggleClass
+mate_mixer_stream_toggle_get_state
+mate_mixer_stream_toggle_set_state
+mate_mixer_stream_toggle_get_state_option
+<SUBSECTION Standard>
+MATE_MIXER_IS_STREAM_TOGGLE
+MATE_MIXER_IS_STREAM_TOGGLE_CLASS
+MATE_MIXER_STREAM_TOGGLE
+MATE_MIXER_STREAM_TOGGLE_CLASS
+MATE_MIXER_STREAM_TOGGLE_GET_CLASS
+MATE_MIXER_TYPE_STREAM_TOGGLE
+<SUBSECTION Private>
+MateMixerStreamTogglePrivate
+mate_mixer_stream_toggle_get_type
+</SECTION>
+
+<SECTION>
 <FILE>matemixer-switch</FILE>
 <TITLE>MateMixerSwitch</TITLE>
 MateMixerSwitchFlags
@@ -269,24 +289,4 @@ MATE_MIXER_TYPE_SWITCH_OPTION
 <SUBSECTION Private>
 MateMixerSwitchOptionPrivate
 mate_mixer_switch_option_get_type
-</SECTION>
-
-<SECTION>
-<FILE>matemixer-toggle</FILE>
-<TITLE>MateMixerToggle</TITLE>
-MateMixerToggle
-MateMixerToggleClass
-mate_mixer_toggle_get_state
-mate_mixer_toggle_set_state
-mate_mixer_toggle_get_state_option
-<SUBSECTION Standard>
-MATE_MIXER_IS_TOGGLE
-MATE_MIXER_IS_TOGGLE_CLASS
-MATE_MIXER_TOGGLE
-MATE_MIXER_TOGGLE_CLASS
-MATE_MIXER_TOGGLE_GET_CLASS
-MATE_MIXER_TYPE_TOGGLE
-<SUBSECTION Private>
-MateMixerTogglePrivate
-mate_mixer_toggle_get_type
 </SECTION>

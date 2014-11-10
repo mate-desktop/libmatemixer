@@ -23,10 +23,10 @@
     <xi:include href="xml/matemixer-stream.xml"/>
     <xi:include href="xml/matemixer-stream-control.xml"/>
     <xi:include href="xml/matemixer-stream-switch.xml"/>
+    <xi:include href="xml/matemixer-stream-toggle.xml"/>
     <xi:include href="xml/matemixer-stored-control.xml"/>
     <xi:include href="xml/matemixer-switch.xml"/>
     <xi:include href="xml/matemixer-switch-option.xml"/>
-    <xi:include href="xml/matemixer-toggle.xml"/>
   </chapter>
   <index id="api-index-full">
     <title>API Index</title>
