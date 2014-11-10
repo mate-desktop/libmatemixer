@@ -364,11 +364,13 @@ int main (int argc, char *argv[])
 {
     MateMixerState  state;
     GOptionContext *ctx;
+    gboolean        debug   = FALSE;
     gchar          *backend = NULL;
     gchar          *server  = NULL;
     GError         *error   = NULL;
     GOptionEntry    entries[] = {
         { "backend", 'b', 0, G_OPTION_ARG_STRING, &backend, "Sound system to use (pulseaudio, alsa, oss, null)", NULL },
+        { "debug",   'd', 0, G_OPTION_ARG_NONE,   &debug,   "Enable debug", NULL },
         { "server",  's', 0, G_OPTION_ARG_STRING, &server,  "Sound server address", NULL },
         { NULL }
     };
@@ -385,6 +387,9 @@ int main (int argc, char *argv[])
     }
 
     g_option_context_free (ctx);
+
+    if (debug == TRUE)
+        g_setenv ("G_MESSAGES_DEBUG", "all", FALSE);
 
     /* Initialize the library.
      * If the function returns FALSE, the library is not usable. */
