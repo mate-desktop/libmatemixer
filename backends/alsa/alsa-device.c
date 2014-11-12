@@ -58,7 +58,6 @@ struct _AlsaDevicePrivate
     AlsaStream   *input;
     AlsaStream   *output;
     GList        *streams;
-    GList        *switches;
     gboolean      events_pending;
 };
 
@@ -77,7 +76,6 @@ static void alsa_device_finalize   (GObject         *object);
 G_DEFINE_TYPE (AlsaDevice, alsa_device, MATE_MIXER_TYPE_DEVICE)
 
 static const GList *      alsa_device_list_streams  (MateMixerDevice            *mmd);
-static const GList *      alsa_device_list_switches (MateMixerDevice            *mmd);
 
 static void               add_element               (AlsaDevice                 *device,
                                                      AlsaStream                 *stream,
@@ -158,9 +156,6 @@ static void               close_mixer               (AlsaDevice                 
 
 static void               free_stream_list          (AlsaDevice                 *device);
 
-static gint               compare_switch_name       (gconstpointer               a,
-                                                     gconstpointer               b);
-
 static void
 alsa_device_class_init (AlsaDeviceClass *klass)
 {
@@ -172,8 +167,7 @@ alsa_device_class_init (AlsaDeviceClass *klass)
     object_class->finalize = alsa_device_finalize;
 
     device_class = MATE_MIXER_DEVICE_CLASS (klass);
-    device_class->list_streams  = alsa_device_list_streams;
-    device_class->list_switches = alsa_device_list_switches;
+    device_class->list_streams = alsa_device_list_streams;
 
     signals[CLOSED] =
         g_signal_new ("closed",
@@ -212,11 +206,6 @@ alsa_device_dispose (GObject *object)
 
     g_clear_object (&device->priv->input);
     g_clear_object (&device->priv->output);
-
-    if (device->priv->switches != NULL) {
-        g_list_free_full (device->priv->switches, g_object_unref);
-        device->priv->switches = NULL;
-    }
 
     free_stream_list (device);
 
@@ -341,8 +330,6 @@ alsa_device_is_open (AlsaDevice *device)
 void
 alsa_device_close (AlsaDevice *device)
 {
-    GList *list;
-
     g_return_if_fail (ALSA_IS_DEVICE (device));
 
     if (device->priv->handle == NULL)
@@ -371,21 +358,6 @@ alsa_device_close (AlsaDevice *device)
         g_signal_emit_by_name (G_OBJECT (device),
                                "stream-removed",
                                name);
-    }
-
-    /* Remove device switches */
-    list = device->priv->switches;
-    while (list != NULL) {
-        MateMixerSwitch *swtch = MATE_MIXER_SWITCH (list->data);
-        GList *next = list->next;
-
-        device->priv->switches = g_list_delete_link (device->priv->switches, list);
-        g_signal_emit_by_name (G_OBJECT (device),
-                               "switch-removed",
-                               mate_mixer_switch_get_name (swtch));
-        g_object_unref (swtch);
-
-        list = next;
     }
 
     close_mixer (device);
@@ -481,14 +453,6 @@ alsa_device_list_streams (MateMixerDevice *mmd)
                 g_list_prepend (device->priv->streams, g_object_ref (stream));
     }
     return device->priv->streams;
-}
-
-static const GList *
-alsa_device_list_switches (MateMixerDevice *mmd)
-{
-    g_return_val_if_fail (ALSA_IS_DEVICE (mmd), NULL);
-
-    return ALSA_DEVICE (mmd)->priv->switches;
 }
 
 static void
@@ -783,21 +747,13 @@ load_element (AlsaDevice *device, snd_mixer_elem_t *el)
 static void
 load_elements_by_name (AlsaDevice *device, const gchar *name)
 {
-    GList *item;
-
     alsa_stream_load_elements (device->priv->input, name);
     alsa_stream_load_elements (device->priv->output, name);
-
-    item = g_list_find_custom (device->priv->switches, name, compare_switch_name);
-    if (item != NULL)
-        alsa_element_load (ALSA_ELEMENT (item->data));
 }
 
 static void
 remove_elements_by_name (AlsaDevice *device, const gchar *name)
 {
-    GList *item;
-
     if (alsa_stream_remove_elements (device->priv->input, name) == TRUE) {
         /* Removing last stream element "removes" the stream */
         if (alsa_stream_has_controls_or_switches (device->priv->input) == FALSE) {
@@ -822,18 +778,6 @@ remove_elements_by_name (AlsaDevice *device, const gchar *name)
                                    "stream-removed",
                                    stream_name);
         }
-    }
-
-    item = g_list_find_custom (device->priv->switches, name, compare_switch_name);
-    if (item != NULL) {
-        MateMixerSwitch *swtch = MATE_MIXER_SWITCH (item->data);
-
-        device->priv->switches = g_list_delete_link (device->priv->switches, item);
-        g_signal_emit_by_name (G_OBJECT (device),
-                               "switch-removed",
-                               mate_mixer_switch_get_name (swtch));
-
-        g_object_unref (swtch);
     }
 }
 
@@ -1197,13 +1141,4 @@ free_stream_list (AlsaDevice *device)
     g_list_free_full (device->priv->streams, g_object_unref);
 
     device->priv->streams = NULL;
-}
-
-static gint
-compare_switch_name (gconstpointer a, gconstpointer b)
-{
-    MateMixerSwitch *swtch = MATE_MIXER_SWITCH (a);
-    const gchar     *name  = (const gchar *) b;
-
-    return strcmp (mate_mixer_switch_get_name (swtch), name);
 }
