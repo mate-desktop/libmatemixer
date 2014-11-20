@@ -190,13 +190,13 @@ pulse_sink_add_input (PulseSink *sink, const pa_sink_input_info *info)
     PulseSinkInput *input;
 
     /* This function is used for both creating and refreshing sink inputs */
-    input = g_hash_table_lookup (sink->priv->inputs, GINT_TO_POINTER (info->index));
+    input = g_hash_table_lookup (sink->priv->inputs, GUINT_TO_POINTER (info->index));
     if (input == NULL) {
         const gchar *name;
 
         input = pulse_sink_input_new (sink, info);
         g_hash_table_insert (sink->priv->inputs,
-                             GINT_TO_POINTER (info->index),
+                             GUINT_TO_POINTER (info->index),
                              input);
 
         free_list_controls (sink);
@@ -218,13 +218,13 @@ pulse_sink_remove_input (PulseSink *sink, guint32 index)
     PulseSinkInput *input;
     gchar          *name;
 
-    input = g_hash_table_lookup (sink->priv->inputs, GINT_TO_POINTER (index));
+    input = g_hash_table_lookup (sink->priv->inputs, GUINT_TO_POINTER (index));
     if G_UNLIKELY (input == NULL)
         return;
 
     name = g_strdup (mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (input)));
 
-    g_hash_table_remove (sink->priv->inputs, GINT_TO_POINTER (index));
+    g_hash_table_remove (sink->priv->inputs, GUINT_TO_POINTER (index));
 
     free_list_controls (sink);
     g_signal_emit_by_name (G_OBJECT (sink),

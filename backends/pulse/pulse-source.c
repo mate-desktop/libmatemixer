@@ -187,13 +187,13 @@ pulse_source_add_output (PulseSource *source, const pa_source_output_info *info)
     PulseSourceOutput *output;
 
     /* This function is used for both creating and refreshing source outputs */
-    output = g_hash_table_lookup (source->priv->outputs, GINT_TO_POINTER (info->index));
+    output = g_hash_table_lookup (source->priv->outputs, GUINT_TO_POINTER (info->index));
     if (output == NULL) {
         const gchar *name;
 
         output = pulse_source_output_new (source, info);
         g_hash_table_insert (source->priv->outputs,
-                             GINT_TO_POINTER (info->index),
+                             GUINT_TO_POINTER (info->index),
                              output);
 
         free_list_controls (source);
@@ -215,13 +215,13 @@ pulse_source_remove_output (PulseSource *source, guint32 index)
     PulseSourceOutput *output;
     gchar             *name;
 
-    output = g_hash_table_lookup (source->priv->outputs, GINT_TO_POINTER (index));
+    output = g_hash_table_lookup (source->priv->outputs, GUINT_TO_POINTER (index));
     if G_UNLIKELY (output == NULL)
         return;
 
     name = g_strdup (mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (output)));
 
-    g_hash_table_remove (source->priv->outputs, GINT_TO_POINTER (index));
+    g_hash_table_remove (source->priv->outputs, GUINT_TO_POINTER (index));
 
     free_list_controls (source);
     g_signal_emit_by_name (G_OBJECT (source),
