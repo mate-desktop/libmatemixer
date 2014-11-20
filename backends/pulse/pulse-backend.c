@@ -191,7 +191,7 @@ static void             on_connection_ext_stream_info       (PulseConnection    
                                                              const pa_ext_stream_restore_info *info,
                                                              PulseBackend                     *pulse);
 
-static gboolean         connect_source_reconnect            (PulseBackend                     *pulse);
+static gboolean         source_try_connect                  (PulseBackend                     *pulse);
 
 static void             check_pending_sink                  (PulseBackend                     *pulse,
                                                              PulseStream                      *stream);
@@ -644,7 +644,7 @@ on_connection_state_notify (PulseConnection *connection,
 
                 source = g_timeout_source_new (200);
                 g_source_set_callback (source,
-                                       (GSourceFunc) connect_source_reconnect,
+                                       (GSourceFunc) source_try_connect,
                                        pulse,
                                        NULL);
                 pulse->priv->connect_tag =
@@ -1158,11 +1158,10 @@ on_connection_ext_stream_loaded (PulseConnection *connection, PulseBackend *puls
     }
 }
 
-// XXX rename
 static gboolean
-connect_source_reconnect (PulseBackend *pulse)
+source_try_connect (PulseBackend *pulse)
 {
-    /* When the connect call succeeds, return FALSE to remove the idle source
+    /* When the connect call succeeds, return FALSE to remove the source
      * and wait for the connection state notifications, otherwise this function
      * will be called again */
     if (pulse_connection_connect (pulse->priv->connection, TRUE) == TRUE) {
