@@ -885,14 +885,37 @@ on_connection_sink_input_info (PulseConnection          *connection,
                                const pa_sink_input_info *info,
                                PulseBackend             *pulse)
 {
-    PulseSink *sink;
+    PulseSink *sink = NULL;
+    PulseSink *prev;
 
-    if G_UNLIKELY (info->sink == PA_INVALID_INDEX)
-        return;
+    if G_LIKELY (info->sink != PA_INVALID_INDEX)
+        sink = g_hash_table_lookup (pulse->priv->sinks, GUINT_TO_POINTER (info->sink));
 
-    sink = g_hash_table_lookup (pulse->priv->sinks, GUINT_TO_POINTER (info->sink));
-    if G_UNLIKELY (sink == NULL)
+    if G_UNLIKELY (sink == NULL) {
+        prev = g_hash_table_lookup (pulse->priv->sink_inputs, GUINT_TO_POINTER (info->index));
+        if (prev != NULL) {
+            g_debug ("Sink input %u moved from sink %s to an unknown sink %u, removing",
+                     info->index,
+                     mate_mixer_stream_get_name (MATE_MIXER_STREAM (prev)),
+                     info->sink);
+
+            pulse_sink_remove_input (prev, info->index);
+        } else
+            g_debug ("Sink input %u created on an unknown sink %u",
+                     info->index,
+                     info->sink);
         return;
+    }
+
+    /* The sink input might have moved to a different sink */
+    prev = g_hash_table_lookup (pulse->priv->sink_inputs, GUINT_TO_POINTER (info->index));
+    if (prev != NULL && sink != prev) {
+        g_debug ("Sink input moved from sink %s to %s",
+                 mate_mixer_stream_get_name (MATE_MIXER_STREAM (prev)),
+                 mate_mixer_stream_get_name (MATE_MIXER_STREAM (sink)));
+
+        pulse_sink_remove_input (prev, info->index);
+    }
 
     if (pulse_sink_add_input (sink, info) == TRUE)
         g_hash_table_insert (pulse->priv->sink_inputs,
@@ -912,6 +935,8 @@ on_connection_sink_input_removed (PulseConnection *connection,
         return;
 
     pulse_sink_remove_input (sink, idx);
+
+    g_hash_table_remove (pulse->priv->sink_inputs, GUINT_TO_POINTER (idx));
 }
 
 static void
@@ -1003,14 +1028,37 @@ on_connection_source_output_info (PulseConnection             *connection,
                                   const pa_source_output_info *info,
                                   PulseBackend                *pulse)
 {
-    PulseSource *source;
+    PulseSource *source = NULL;
+    PulseSource *prev;
 
-    if G_UNLIKELY (info->source == PA_INVALID_INDEX)
-        return;
+    if G_LIKELY (info->source != PA_INVALID_INDEX)
+        source = g_hash_table_lookup (pulse->priv->sources, GUINT_TO_POINTER (info->source));
 
-    source = g_hash_table_lookup (pulse->priv->sources, GUINT_TO_POINTER (info->source));
-    if G_UNLIKELY (source == NULL)
+    if G_UNLIKELY (source == NULL) {
+        prev = g_hash_table_lookup (pulse->priv->source_outputs, GUINT_TO_POINTER (info->index));
+        if (prev != NULL) {
+            g_debug ("Source output %u moved from source %s to an unknown source %u, removing",
+                     info->index,
+                     mate_mixer_stream_get_name (MATE_MIXER_STREAM (prev)),
+                     info->source);
+
+            pulse_source_remove_output (prev, info->index);
+        } else
+            g_debug ("Source output %u created on an unknown source %u",
+                     info->index,
+                     info->source);
         return;
+    }
+
+    /* The source output might have moved to a different source */
+    prev = g_hash_table_lookup (pulse->priv->source_outputs, GUINT_TO_POINTER (info->index));
+    if (prev != NULL && source != prev) {
+        g_debug ("Source output moved from source %s to %s",
+                 mate_mixer_stream_get_name (MATE_MIXER_STREAM (prev)),
+                 mate_mixer_stream_get_name (MATE_MIXER_STREAM (source)));
+
+        pulse_source_remove_output (prev, info->index);
+    }
 
     if (pulse_source_add_output (source, info) == TRUE)
         g_hash_table_insert (pulse->priv->source_outputs,
@@ -1030,6 +1078,8 @@ on_connection_source_output_removed (PulseConnection *connection,
         return;
 
     pulse_source_remove_output (source, idx);
+
+    g_hash_table_remove (pulse->priv->source_outputs, GUINT_TO_POINTER (idx));
 }
 
 static void
