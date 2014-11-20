@@ -459,22 +459,13 @@ static void
 add_element (AlsaDevice *device, AlsaStream *stream, AlsaElement *element)
 {
     snd_mixer_elem_t *el;
+    gboolean          add_stream = FALSE;
 
     if (alsa_element_load (element) == FALSE)
         return;
 
-    if (alsa_stream_has_controls_or_switches (stream) == FALSE) {
-        const gchar *name =
-            mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream));
-
-        free_stream_list (device);
-
-        /* Pretend the stream has just been created now that we are adding
-         * the first control */
-        g_signal_emit_by_name (G_OBJECT (device),
-                               "stream-added",
-                               name);
-    }
+    if (alsa_stream_has_controls_or_switches (stream) == FALSE)
+        add_stream = TRUE;
 
     /* Add element to the stream depending on its type */
     if (ALSA_IS_STREAM_CONTROL (element))
@@ -486,6 +477,19 @@ add_element (AlsaDevice *device, AlsaStream *stream, AlsaElement *element)
     else {
         g_warn_if_reached ();
         return;
+    }
+
+    if (add_stream == TRUE) {
+        const gchar *name =
+            mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream));
+
+        free_stream_list (device);
+
+        /* Pretend the stream has just been created now that we have added
+         * the first control */
+        g_signal_emit_by_name (G_OBJECT (device),
+                               "stream-added",
+                               name);
     }
 
     el = alsa_element_get_snd_element (element);
