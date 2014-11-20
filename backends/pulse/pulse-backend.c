@@ -50,8 +50,8 @@ struct _PulseBackendPrivate
     GHashTable       *devices;
     GHashTable       *sinks;
     GHashTable       *sources;
-    GHashTable       *sink_inputs;
-    GHashTable       *source_outputs;
+    GHashTable       *sink_input_map;
+    GHashTable       *source_output_map;
     GHashTable       *ext_streams;
     GList            *devices_list;
     GList            *streams_list;
@@ -285,12 +285,12 @@ pulse_backend_init (PulseBackend *pulse)
                                g_free,
                                g_object_unref);
 
-    pulse->priv->sink_inputs =
+    pulse->priv->sink_input_map =
         g_hash_table_new_full (g_direct_hash,
                                g_direct_equal,
                                NULL,
                                g_object_unref);
-    pulse->priv->source_outputs =
+    pulse->priv->source_output_map =
         g_hash_table_new_full (g_direct_hash,
                                g_direct_equal,
                                NULL,
@@ -326,8 +326,8 @@ pulse_backend_finalize (GObject *object)
     g_hash_table_unref (pulse->priv->sinks);
     g_hash_table_unref (pulse->priv->sources);
     g_hash_table_unref (pulse->priv->ext_streams);
-    g_hash_table_unref (pulse->priv->sink_inputs);
-    g_hash_table_unref (pulse->priv->source_outputs);
+    g_hash_table_unref (pulse->priv->sink_input_map);
+    g_hash_table_unref (pulse->priv->source_output_map);
 
     G_OBJECT_CLASS (pulse_backend_parent_class)->finalize (object);
 }
@@ -470,8 +470,8 @@ pulse_backend_close (MateMixerBackend *backend)
     g_hash_table_remove_all (pulse->priv->sinks);
     g_hash_table_remove_all (pulse->priv->sources);
     g_hash_table_remove_all (pulse->priv->ext_streams);
-    g_hash_table_remove_all (pulse->priv->sink_inputs);
-    g_hash_table_remove_all (pulse->priv->source_outputs);
+    g_hash_table_remove_all (pulse->priv->sink_input_map);
+    g_hash_table_remove_all (pulse->priv->source_output_map);
 
     pulse->priv->connected_once = FALSE;
 
@@ -892,7 +892,7 @@ on_connection_sink_input_info (PulseConnection          *connection,
         sink = g_hash_table_lookup (pulse->priv->sinks, GUINT_TO_POINTER (info->sink));
 
     if G_UNLIKELY (sink == NULL) {
-        prev = g_hash_table_lookup (pulse->priv->sink_inputs, GUINT_TO_POINTER (info->index));
+        prev = g_hash_table_lookup (pulse->priv->sink_input_map, GUINT_TO_POINTER (info->index));
         if (prev != NULL) {
             g_debug ("Sink input %u moved from sink %s to an unknown sink %u, removing",
                      info->index,
@@ -908,7 +908,7 @@ on_connection_sink_input_info (PulseConnection          *connection,
     }
 
     /* The sink input might have moved to a different sink */
-    prev = g_hash_table_lookup (pulse->priv->sink_inputs, GUINT_TO_POINTER (info->index));
+    prev = g_hash_table_lookup (pulse->priv->sink_input_map, GUINT_TO_POINTER (info->index));
     if (prev != NULL && sink != prev) {
         g_debug ("Sink input moved from sink %s to %s",
                  mate_mixer_stream_get_name (MATE_MIXER_STREAM (prev)),
@@ -918,7 +918,7 @@ on_connection_sink_input_info (PulseConnection          *connection,
     }
 
     if (pulse_sink_add_input (sink, info) == TRUE)
-        g_hash_table_insert (pulse->priv->sink_inputs,
+        g_hash_table_insert (pulse->priv->sink_input_map,
                              GUINT_TO_POINTER (info->index),
                              g_object_ref (sink));
 }
@@ -930,13 +930,13 @@ on_connection_sink_input_removed (PulseConnection *connection,
 {
     PulseSink *sink;
 
-    sink = g_hash_table_lookup (pulse->priv->sink_inputs, GUINT_TO_POINTER (idx));
+    sink = g_hash_table_lookup (pulse->priv->sink_input_map, GUINT_TO_POINTER (idx));
     if G_UNLIKELY (sink == NULL)
         return;
 
     pulse_sink_remove_input (sink, idx);
 
-    g_hash_table_remove (pulse->priv->sink_inputs, GUINT_TO_POINTER (idx));
+    g_hash_table_remove (pulse->priv->sink_input_map, GUINT_TO_POINTER (idx));
 }
 
 static void
@@ -1035,7 +1035,7 @@ on_connection_source_output_info (PulseConnection             *connection,
         source = g_hash_table_lookup (pulse->priv->sources, GUINT_TO_POINTER (info->source));
 
     if G_UNLIKELY (source == NULL) {
-        prev = g_hash_table_lookup (pulse->priv->source_outputs, GUINT_TO_POINTER (info->index));
+        prev = g_hash_table_lookup (pulse->priv->source_output_map, GUINT_TO_POINTER (info->index));
         if (prev != NULL) {
             g_debug ("Source output %u moved from source %s to an unknown source %u, removing",
                      info->index,
@@ -1051,7 +1051,7 @@ on_connection_source_output_info (PulseConnection             *connection,
     }
 
     /* The source output might have moved to a different source */
-    prev = g_hash_table_lookup (pulse->priv->source_outputs, GUINT_TO_POINTER (info->index));
+    prev = g_hash_table_lookup (pulse->priv->source_output_map, GUINT_TO_POINTER (info->index));
     if (prev != NULL && source != prev) {
         g_debug ("Source output moved from source %s to %s",
                  mate_mixer_stream_get_name (MATE_MIXER_STREAM (prev)),
@@ -1061,7 +1061,7 @@ on_connection_source_output_info (PulseConnection             *connection,
     }
 
     if (pulse_source_add_output (source, info) == TRUE)
-        g_hash_table_insert (pulse->priv->source_outputs,
+        g_hash_table_insert (pulse->priv->source_output_map,
                              GUINT_TO_POINTER (info->index),
                              g_object_ref (source));
 }
@@ -1073,13 +1073,13 @@ on_connection_source_output_removed (PulseConnection *connection,
 {
     PulseSource *source;
 
-    source = g_hash_table_lookup (pulse->priv->source_outputs, GUINT_TO_POINTER (idx));
+    source = g_hash_table_lookup (pulse->priv->source_output_map, GUINT_TO_POINTER (idx));
     if G_UNLIKELY (source == NULL)
         return;
 
     pulse_source_remove_output (source, idx);
 
-    g_hash_table_remove (pulse->priv->source_outputs, GUINT_TO_POINTER (idx));
+    g_hash_table_remove (pulse->priv->source_output_map, GUINT_TO_POINTER (idx));
 }
 
 static void
