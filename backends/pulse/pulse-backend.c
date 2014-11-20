@@ -1103,7 +1103,6 @@ on_connection_ext_stream_loaded (PulseConnection *connection, PulseBackend *puls
                                "stored-control-removed",
                                name);
     }
-    g_debug ("Ext-streams refreshed");
 }
 
 // XXX rename
