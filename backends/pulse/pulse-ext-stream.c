@@ -524,15 +524,17 @@ pulse_ext_stream_get_channel_position (MateMixerStreamControl *mmsc, guint chann
     if (channel >= ext->priv->channel_map.channels)
         return MATE_MIXER_CHANNEL_UNKNOWN;
 
-    return pulse_convert_position_from_pulse (ext->priv->channel_map.map[channel]);
+    if (ext->priv->channel_map.map[channel] == PA_CHANNEL_POSITION_INVALID)
+        return MATE_MIXER_CHANNEL_UNKNOWN;
+
+    return pulse_channel_map_from[ext->priv->channel_map.map[channel]];
 }
 
 static gboolean
 pulse_ext_stream_has_channel_position (MateMixerStreamControl  *mmsc,
                                        MateMixerChannelPosition position)
 {
-    PulseExtStream       *ext;
-    pa_channel_position_t p;
+    PulseExtStream *ext;
 
     g_return_val_if_fail (PULSE_IS_EXT_STREAM (mmsc), FALSE);
 
@@ -540,12 +542,11 @@ pulse_ext_stream_has_channel_position (MateMixerStreamControl  *mmsc,
 
     /* Handle invalid position as a special case, otherwise this function would
      * return TRUE for e.g. unknown index in a default channel map */
-    p = pulse_convert_position_to_pulse (position);
-
-    if (p == PA_CHANNEL_POSITION_INVALID)
+    if (pulse_channel_map_to[position] == PA_CHANNEL_POSITION_INVALID)
         return FALSE;
 
-    if (pa_channel_map_has_position (&ext->priv->channel_map, p) != 0)
+    if (pa_channel_map_has_position (&ext->priv->channel_map,
+                                     pulse_channel_map_to[position]) != 0)
         return TRUE;
     else
         return FALSE;

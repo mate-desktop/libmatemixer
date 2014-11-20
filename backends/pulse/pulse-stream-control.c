@@ -550,15 +550,17 @@ pulse_stream_control_get_channel_position (MateMixerStreamControl *mmsc, guint c
     if (channel >= control->priv->channel_map.channels)
         return MATE_MIXER_CHANNEL_UNKNOWN;
 
-    return pulse_convert_position_from_pulse (control->priv->channel_map.map[channel]);
+    if (control->priv->channel_map.map[channel] == PA_CHANNEL_POSITION_INVALID)
+        return MATE_MIXER_CHANNEL_UNKNOWN;
+
+    return pulse_channel_map_from[control->priv->channel_map.map[channel]];
 }
 
 static gboolean
 pulse_stream_control_has_channel_position (MateMixerStreamControl  *mmsc,
                                            MateMixerChannelPosition position)
 {
-    PulseStreamControl   *control;
-    pa_channel_position_t p;
+    PulseStreamControl *control;
 
     g_return_val_if_fail (PULSE_IS_STREAM_CONTROL (mmsc), FALSE);
 
@@ -566,12 +568,11 @@ pulse_stream_control_has_channel_position (MateMixerStreamControl  *mmsc,
 
     /* Handle invalid position as a special case, otherwise this function would
      * return TRUE for e.g. unknown index in a default channel map */
-    p = pulse_convert_position_to_pulse (position);
-
-    if (p == PA_CHANNEL_POSITION_INVALID)
+    if (pulse_channel_map_to[position] == PA_CHANNEL_POSITION_INVALID)
         return FALSE;
 
-    if (pa_channel_map_has_position (&control->priv->channel_map, p) != 0)
+    if (pa_channel_map_has_position (&control->priv->channel_map,
+                                     pulse_channel_map_to[position]) != 0)
         return TRUE;
     else
         return FALSE;
