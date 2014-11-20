@@ -952,10 +952,6 @@ on_connection_source_info (PulseConnection      *connection,
     PulseDevice *device = NULL;
     PulseStream *stream;
 
-    /* Skip monitor streams */
-    if (info->monitor_of_sink != PA_INVALID_INDEX)
-        return;
-
     if (info->card != PA_INVALID_INDEX)
         device = g_hash_table_lookup (pulse->priv->devices,
                                       GUINT_TO_POINTER (info->card));
