@@ -43,6 +43,7 @@ struct _PulseExtStreamPrivate
 enum {
     PROP_0,
     PROP_CONNECTION,
+    PROP_APP_INFO,
     N_PROPERTIES
 };
 
@@ -148,6 +149,15 @@ pulse_ext_stream_class_init (PulseExtStreamClass *klass)
                              G_PARAM_CONSTRUCT_ONLY |
                              G_PARAM_STATIC_STRINGS);
 
+    properties[PROP_APP_INFO] =
+        g_param_spec_boxed ("app-info",
+                            "Application information",
+                            "Application information",
+                            MATE_MIXER_TYPE_APP_INFO,
+                            G_PARAM_READWRITE |
+                            G_PARAM_CONSTRUCT_ONLY |
+                            G_PARAM_STATIC_STRINGS);
+
     g_object_class_install_properties (object_class, N_PROPERTIES, properties);
 
     g_type_class_add_private (object_class, sizeof (PulseExtStreamPrivate));
@@ -166,6 +176,9 @@ pulse_ext_stream_get_property (GObject      *object,
     switch (param_id) {
     case PROP_CONNECTION:
         g_value_set_object (value, ext->priv->connection);
+        break;
+    case PROP_APP_INFO:
+        g_value_set_boxed (value, ext->priv->app_info);
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -187,6 +200,10 @@ pulse_ext_stream_set_property (GObject      *object,
     case PROP_CONNECTION:
         /* Construct-only object */
         ext->priv->connection = g_value_dup_object (value);
+        break;
+    case PROP_APP_INFO:
+        /* Construct-only boxed */
+        ext->priv->app_info = g_value_dup_boxed (value);
         break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, param_id, pspec);
@@ -302,13 +319,14 @@ pulse_ext_stream_new (PulseConnection                  *connection,
                         "role", role,
                         "media-role", media_role,
                         "name", info->name,
-                        "connection", connection,
                         "direction", direction,
                         "stream", parent,
+                        "connection", connection,
+                        "app-info", app_info,
                         NULL);
 
-    // XXX property?
-    ext->priv->app_info = app_info;
+    if (app_info != NULL)
+        _mate_mixer_app_info_free (app_info);
 
     /* Store values which are expected to be changed */
     pulse_ext_stream_update (ext, info, parent);
