@@ -198,6 +198,13 @@ static void             check_pending_sink                  (PulseBackend       
 static void             check_pending_source                (PulseBackend                     *pulse,
                                                              PulseStream                      *stream);
 
+static void             remove_sink_input                   (PulseBackend                     *backend,
+                                                             PulseSink                        *sink,
+                                                             guint                             index);
+static void             remove_source_output                (PulseBackend                     *backend,
+                                                             PulseSource                      *source,
+                                                             guint                             index);
+
 static void             free_list_devices                   (PulseBackend                     *pulse);
 static void             free_list_streams                   (PulseBackend                     *pulse);
 static void             free_list_ext_streams               (PulseBackend                     *pulse);
@@ -899,9 +906,9 @@ on_connection_sink_input_info (PulseConnection          *connection,
                      mate_mixer_stream_get_name (MATE_MIXER_STREAM (prev)),
                      info->sink);
 
-            pulse_sink_remove_input (prev, info->index);
+            remove_sink_input (pulse, prev, info->index);
         } else
-            g_debug ("Sink input %u created on an unknown sink %u",
+            g_debug ("Sink input %u created on an unknown sink %u, ignoring",
                      info->index,
                      info->sink);
         return;
@@ -914,7 +921,7 @@ on_connection_sink_input_info (PulseConnection          *connection,
                  mate_mixer_stream_get_name (MATE_MIXER_STREAM (prev)),
                  mate_mixer_stream_get_name (MATE_MIXER_STREAM (sink)));
 
-        pulse_sink_remove_input (prev, info->index);
+        remove_sink_input (pulse, prev, info->index);
     }
 
     if (pulse_sink_add_input (sink, info) == TRUE)
@@ -934,9 +941,7 @@ on_connection_sink_input_removed (PulseConnection *connection,
     if G_UNLIKELY (sink == NULL)
         return;
 
-    pulse_sink_remove_input (sink, idx);
-
-    g_hash_table_remove (pulse->priv->sink_input_map, GUINT_TO_POINTER (idx));
+    remove_sink_input (pulse, sink, idx);
 }
 
 static void
@@ -1042,9 +1047,9 @@ on_connection_source_output_info (PulseConnection             *connection,
                      mate_mixer_stream_get_name (MATE_MIXER_STREAM (prev)),
                      info->source);
 
-            pulse_source_remove_output (prev, info->index);
+            remove_source_output (pulse, prev, info->index);
         } else
-            g_debug ("Source output %u created on an unknown source %u",
+            g_debug ("Source output %u created on an unknown source %u, ignoring",
                      info->index,
                      info->source);
         return;
@@ -1057,7 +1062,7 @@ on_connection_source_output_info (PulseConnection             *connection,
                  mate_mixer_stream_get_name (MATE_MIXER_STREAM (prev)),
                  mate_mixer_stream_get_name (MATE_MIXER_STREAM (source)));
 
-        pulse_source_remove_output (prev, info->index);
+        remove_source_output (pulse, prev, info->index);
     }
 
     if (pulse_source_add_output (source, info) == TRUE)
@@ -1077,9 +1082,7 @@ on_connection_source_output_removed (PulseConnection *connection,
     if G_UNLIKELY (source == NULL)
         return;
 
-    pulse_source_remove_output (source, idx);
-
-    g_hash_table_remove (pulse->priv->source_output_map, GUINT_TO_POINTER (idx));
+    remove_source_output (pulse, source, idx);
 }
 
 static void
@@ -1211,6 +1214,22 @@ check_pending_source (PulseBackend *pulse, PulseStream *stream)
 
     PULSE_SET_PENDING_SOURCE_NULL (pulse);
     PULSE_SET_DEFAULT_SOURCE (pulse, stream);
+}
+
+static void
+remove_sink_input (PulseBackend *pulse, PulseSink *sink, guint index)
+{
+    pulse_sink_remove_input (sink, index);
+
+    g_hash_table_remove (pulse->priv->sink_input_map, GUINT_TO_POINTER (index));
+}
+
+static void
+remove_source_output (PulseBackend *pulse, PulseSource *source, guint index)
+{
+    pulse_source_remove_output (source, index);
+
+    g_hash_table_remove (pulse->priv->source_output_map, GUINT_TO_POINTER (index));
 }
 
 static void
