@@ -63,10 +63,6 @@ mate_mixer_init (void)
     if (initialized == TRUE)
         return TRUE;
 
-#if !GLIB_CHECK_VERSION (2, 36, 0)
-    g_type_init ();
-#endif
-
     load_modules ();
 
     if (modules != NULL) {
