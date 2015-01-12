@@ -72,7 +72,7 @@ AM_GLIB_GNU_GETTEXT
 # =======================================================================
 PKG_PROG_PKG_CONFIG
 
-GLIB_REQUIRED_VERSION=2.32.0
+GLIB_REQUIRED_VERSION=2.36.0
 
 PKG_CHECK_MODULES(GLIB, [
         glib-2.0 >= $GLIB_REQUIRED_VERSION
