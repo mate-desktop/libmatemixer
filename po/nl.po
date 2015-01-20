@@ -3,14 +3,15 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Falco Langeveld <falcolangeveld@gmail.com>, 2014
 # infirit <infirit@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-10-28 09:27+0100\n"
-"PO-Revision-Date: 2014-11-20 11:20+0000\n"
-"Last-Translator: infirit <infirit@gmail.com>\n"
+"PO-Revision-Date: 2014-12-03 11:45+0000\n"
+"Last-Translator: Falco Langeveld <falcolangeveld@gmail.com>\n"
 "Language-Team: Dutch (http://www.transifex.com/projects/p/MATE/language/nl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -204,7 +205,7 @@ msgstr "Lijn In"
 #: ../backends/alsa/alsa-constants.c:95 ../backends/alsa/alsa-constants.c:203
 #: ../backends/alsa/alsa-constants.c:206
 msgid "Auxiliary"
-msgstr ""
+msgstr "Audio"
 
 #: ../backends/alsa/alsa-constants.c:96 ../backends/oss/oss-device.c:115
 msgid "Video"
@@ -433,23 +434,23 @@ msgstr "Lijn In/Microfoon"
 
 #: ../backends/alsa/alsa-constants.c:204 ../backends/alsa/alsa-constants.c:205
 msgid "Auxiliary In"
-msgstr ""
+msgstr "Audio In"
 
 #: ../backends/alsa/alsa-constants.c:207
 msgid "Auxiliary 0"
-msgstr ""
+msgstr "Audio 0"
 
 #: ../backends/alsa/alsa-constants.c:208
 msgid "Auxiliary 1"
-msgstr ""
+msgstr "Audio 1"
 
 #: ../backends/alsa/alsa-constants.c:209
 msgid "Auxiliary 2"
-msgstr ""
+msgstr "Audio 2"
 
 #: ../backends/alsa/alsa-constants.c:210
 msgid "Auxiliary 3"
-msgstr ""
+msgstr "Audio 3"
 
 #: ../backends/alsa/alsa-constants.c:211
 msgid "Docking Station"

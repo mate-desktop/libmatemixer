@@ -3,13 +3,14 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Michael Findlay <keltoiboy@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-10-28 09:27+0100\n"
-"PO-Revision-Date: 2014-10-28 08:28+0000\n"
-"Last-Translator: Stefano Karapetsas <stefano@karapetsas.com>\n"
+"PO-Revision-Date: 2014-11-23 23:21+0000\n"
+"Last-Translator: Michael Findlay <keltoiboy@gmail.com>\n"
 "Language-Team: English (Australia) (http://www.transifex.com/projects/p/MATE/language/en_AU/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -328,7 +329,7 @@ msgstr "Digital In"
 
 #: ../backends/alsa/alsa-constants.c:137
 msgid "Digital Default PCM"
-msgstr ""
+msgstr "Digital Default PCM"
 
 #: ../backends/alsa/alsa-constants.c:138
 msgid "Optical"
@@ -469,11 +470,11 @@ msgstr "Unknown 2"
 
 #: ../backends/alsa/alsa-constants.c:216
 msgid "Enabled"
-msgstr ""
+msgstr "Enabled"
 
 #: ../backends/alsa/alsa-constants.c:217
 msgid "Disabled"
-msgstr ""
+msgstr "Disabled"
 
 #: ../backends/alsa/alsa-device.c:610
 msgid "On"

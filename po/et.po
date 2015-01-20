@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-10-28 09:27+0100\n"
-"PO-Revision-Date: 2014-11-05 21:57+0000\n"
+"PO-Revision-Date: 2014-11-22 16:52+0000\n"
 "Last-Translator: Ivar Smolin <okul@linux.ee>\n"
 "Language-Team: Estonian (http://www.transifex.com/projects/p/MATE/language/et/)\n"
 "MIME-Version: 1.0\n"
@@ -545,7 +545,7 @@ msgstr ""
 
 #: ../backends/oss/oss-device.c:116
 msgid "Radio"
-msgstr ""
+msgstr "Raadio"
 
 #: ../backends/pulse/pulse-device.c:399
 msgid "Profile"

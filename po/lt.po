@@ -4,13 +4,14 @@
 # 
 # Translators:
 # Mantas Kriaučiūnas <mantas@akl.lt>, 2014
+# Moo, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-10-28 09:27+0100\n"
-"PO-Revision-Date: 2014-11-14 10:06+0000\n"
-"Last-Translator: Mantas Kriaučiūnas <mantas@akl.lt>\n"
+"PO-Revision-Date: 2014-12-02 12:56+0000\n"
+"Last-Translator: Moo\n"
 "Language-Team: Lithuanian (http://www.transifex.com/projects/p/MATE/language/lt/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -33,7 +34,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:43
 msgid "Desktop Speaker"
-msgstr ""
+msgstr "Darbastalio Garsiakalbis"
 
 #. OSS manual says this should be the beeper, but Linux OSS seems to assign it
 #. to
@@ -45,11 +46,11 @@ msgstr "Garsiakalbis"
 #: ../backends/alsa/alsa-constants.c:45 ../backends/alsa/alsa-constants.c:46
 #: ../backends/alsa/alsa-constants.c:47
 msgid "Front Speaker"
-msgstr ""
+msgstr "Priekinis Garsiakalbis"
 
 #: ../backends/alsa/alsa-constants.c:48
 msgid "Headphone"
-msgstr "Ausinės"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:49
 msgid "Headphone 2"
@@ -62,11 +63,11 @@ msgstr ""
 #: ../backends/alsa/alsa-constants.c:51 ../backends/alsa/alsa-constants.c:52
 #: ../backends/alsa/alsa-constants.c:53 ../backends/alsa/alsa-constants.c:54
 msgid "Surround Speaker"
-msgstr ""
+msgstr "Surround Garsiakalbis"
 
 #: ../backends/alsa/alsa-constants.c:55 ../backends/alsa/alsa-constants.c:56
 msgid "Center Speaker"
-msgstr ""
+msgstr "Centrinis Garsiakalbis"
 
 #: ../backends/alsa/alsa-constants.c:57 ../backends/alsa/alsa-constants.c:58
 msgid "CLFE Speaker"
@@ -86,11 +87,11 @@ msgstr "Skaitmeninis"
 
 #: ../backends/alsa/alsa-constants.c:62 ../backends/alsa/alsa-constants.c:63
 msgid "Side Speaker"
-msgstr ""
+msgstr "Šoninis Garsiakalbis"
 
 #: ../backends/alsa/alsa-constants.c:64
 msgid "Rear Speaker"
-msgstr ""
+msgstr "Galinis Garsiakalbis"
 
 #: ../backends/alsa/alsa-constants.c:65
 msgid "Wave"
@@ -103,11 +104,11 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:67 ../backends/oss/oss-device.c:98
 msgid "CD"
-msgstr ""
+msgstr "CD"
 
 #: ../backends/alsa/alsa-constants.c:68
 msgid "Music"
-msgstr ""
+msgstr "Muzika"
 
 #: ../backends/alsa/alsa-constants.c:69
 msgid "AC97"
@@ -175,7 +176,7 @@ msgstr "Priekinis mikrofonas"
 #: ../backends/alsa/alsa-constants.c:87 ../backends/alsa/alsa-constants.c:183
 #: ../backends/alsa/alsa-constants.c:184
 msgid "Rear Microphone"
-msgstr ""
+msgstr "Galinis Mikrofonas"
 
 #: ../backends/alsa/alsa-constants.c:88 ../backends/alsa/alsa-constants.c:167
 msgid "Dock Microphone"
@@ -212,11 +213,11 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:97 ../backends/alsa/alsa-constants.c:201
 msgid "TV Tuner"
-msgstr ""
+msgstr "TV Imtuvas"
 
 #: ../backends/alsa/alsa-constants.c:98 ../backends/alsa/alsa-constants.c:202
 msgid "FM"
-msgstr ""
+msgstr "FM"
 
 #: ../backends/alsa/alsa-constants.c:100
 msgid "Microphone Boost"
@@ -260,7 +261,7 @@ msgstr "Analoginė išvestis"
 
 #: ../backends/alsa/alsa-constants.c:117
 msgid "Analog Source"
-msgstr ""
+msgstr "Analoginis Šaltinis"
 
 #: ../backends/alsa/alsa-constants.c:118 ../backends/oss/oss-stream.c:207
 msgid "Capture Source"
@@ -276,7 +277,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:121
 msgid "Digital Input Source"
-msgstr ""
+msgstr "Skaitmeninis Įvesties Šaltinis"
 
 #: ../backends/alsa/alsa-constants.c:122
 msgid "PCM Capture Source"
@@ -284,7 +285,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:123
 msgid "Digital Playback Source"
-msgstr ""
+msgstr "Skaitmeninio Grojimo Šaltinis"
 
 #: ../backends/alsa/alsa-constants.c:124
 msgid "Mono Output Select"
@@ -308,7 +309,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:129
 msgid "Auto-Mute Mode"
-msgstr ""
+msgstr "Automatinio Nutildinimo Veiksena"
 
 #. (Probably) toggles
 #: ../backends/alsa/alsa-constants.c:132
@@ -462,11 +463,11 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:214
 msgid "Unknown 1"
-msgstr ""
+msgstr "Nežinoma 1"
 
 #: ../backends/alsa/alsa-constants.c:215
 msgid "Unknown 2"
-msgstr ""
+msgstr "Nežinoma 2"
 
 #: ../backends/alsa/alsa-constants.c:216
 msgid "Enabled"
@@ -545,7 +546,7 @@ msgstr ""
 
 #: ../backends/oss/oss-device.c:116
 msgid "Radio"
-msgstr ""
+msgstr "Radijas"
 
 #: ../backends/pulse/pulse-device.c:399
 msgid "Profile"
