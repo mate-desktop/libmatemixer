@@ -4,13 +4,14 @@
 # 
 # Translators:
 # BALLOON a.k.a. Fu-sen., 2014
+# Mika Kobayashi, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-10-28 09:27+0100\n"
-"PO-Revision-Date: 2014-10-28 08:28+0000\n"
-"Last-Translator: Stefano Karapetsas <stefano@karapetsas.com>\n"
+"PO-Revision-Date: 2015-02-23 23:42+0000\n"
+"Last-Translator: Mika Kobayashi\n"
 "Language-Team: Japanese (http://www.transifex.com/projects/p/MATE/language/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -139,16 +140,16 @@ msgstr "シンセ/MIDI"
 
 #: ../backends/alsa/alsa-constants.c:77 ../backends/oss/oss-device.c:89
 msgid "Bass"
-msgstr ""
+msgstr "低音"
 
 #: ../backends/alsa/alsa-constants.c:78 ../backends/oss/oss-device.c:90
 msgid "Treble"
-msgstr ""
+msgstr "高音"
 
 #. Input controls
 #: ../backends/alsa/alsa-constants.c:81
 msgid "Capture"
-msgstr ""
+msgstr "キャプチャー"
 
 #. Microphone options
 #: ../backends/alsa/alsa-constants.c:82 ../backends/alsa/alsa-constants.c:156
@@ -220,39 +221,39 @@ msgstr "FM"
 
 #: ../backends/alsa/alsa-constants.c:100
 msgid "Microphone Boost"
-msgstr ""
+msgstr "マイクロフォン入力のブースト"
 
 #: ../backends/alsa/alsa-constants.c:101
 msgid "Microphone Boost (+20dB)"
-msgstr ""
+msgstr "マイクロフォン入力のブースト (+20dB)"
 
 #: ../backends/alsa/alsa-constants.c:102 ../backends/alsa/alsa-constants.c:103
 msgid "Internal Microphone Boost"
-msgstr ""
+msgstr "内部マイクのブースト"
 
 #: ../backends/alsa/alsa-constants.c:104
 msgid "Front Microphone Boost"
-msgstr ""
+msgstr "フロントマイクのブースト"
 
 #: ../backends/alsa/alsa-constants.c:105
 msgid "Rear Microphone Boost"
-msgstr ""
+msgstr "リアマイクのブースト"
 
 #: ../backends/alsa/alsa-constants.c:106
 msgid "Dock Microphone Boost"
-msgstr ""
+msgstr "ドックマイクのブースト"
 
 #: ../backends/alsa/alsa-constants.c:107
 msgid "Headphone Microphone Boost"
-msgstr ""
+msgstr "ヘッドフォンマイクのブースト"
 
 #: ../backends/alsa/alsa-constants.c:108
 msgid "Headset Microphone Boost"
-msgstr ""
+msgstr "ヘッドセットマイクのブースト"
 
 #: ../backends/alsa/alsa-constants.c:109
 msgid "Line In Boost"
-msgstr ""
+msgstr "ライン入力のブースト"
 
 #: ../backends/alsa/alsa-constants.c:116
 msgid "Analog Output"
@@ -292,7 +293,7 @@ msgstr "モノクロ出力の選択"
 
 #: ../backends/alsa/alsa-constants.c:125
 msgid "Shared Mic/Line In"
-msgstr ""
+msgstr "共有済マイク・ライン入力"
 
 #: ../backends/alsa/alsa-constants.c:126
 msgid "Microphone Select"
@@ -313,35 +314,35 @@ msgstr "自動消音モード"
 #. (Probably) toggles
 #: ../backends/alsa/alsa-constants.c:132
 msgid "External Amplifier"
-msgstr ""
+msgstr "外部アンプ"
 
 #: ../backends/alsa/alsa-constants.c:133
 msgid "Bass Boost"
-msgstr ""
+msgstr "低音のブースト"
 
 #: ../backends/alsa/alsa-constants.c:134
 msgid "Capture Boost"
-msgstr ""
+msgstr "キャプチャーのブースト"
 
 #: ../backends/alsa/alsa-constants.c:136 ../backends/alsa/alsa-constants.c:200
 msgid "Digital In"
-msgstr ""
+msgstr "デジタル入力"
 
 #: ../backends/alsa/alsa-constants.c:137
 msgid "Digital Default PCM"
-msgstr ""
+msgstr "デジタルのデフォルトPCM"
 
 #: ../backends/alsa/alsa-constants.c:138
 msgid "Optical"
-msgstr ""
+msgstr "光端子"
 
 #: ../backends/alsa/alsa-constants.c:139
 msgid "Auto Gain Control"
-msgstr ""
+msgstr "自動ゲイン調整"
 
 #: ../backends/alsa/alsa-constants.c:140
 msgid "Mix"
-msgstr ""
+msgstr "ミックス"
 
 #: ../backends/alsa/alsa-constants.c:141
 msgid "Mix Mono"
@@ -349,7 +350,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:142
 msgid "Mic Capture"
-msgstr ""
+msgstr "マイクキャプチャー"
 
 #: ../backends/alsa/alsa-constants.c:143 ../backends/alsa/alsa-constants.c:198
 msgid "Input 1"
@@ -387,11 +388,11 @@ msgstr "マイク入力"
 
 #: ../backends/alsa/alsa-constants.c:170
 msgid "Internal Microphone 1"
-msgstr ""
+msgstr "内部マイク 1"
 
 #: ../backends/alsa/alsa-constants.c:174
 msgid "Internal Digital Microphone"
-msgstr ""
+msgstr "内部デジタルマイク"
 
 #: ../backends/alsa/alsa-constants.c:175 ../backends/alsa/alsa-constants.c:178
 msgid "Digital Microphone"
@@ -408,11 +409,11 @@ msgstr "デジタルマイク2"
 #: ../backends/alsa/alsa-constants.c:179 ../backends/alsa/alsa-constants.c:180
 #: ../backends/alsa/alsa-constants.c:181 ../backends/alsa/alsa-constants.c:182
 msgid "External Microphone"
-msgstr ""
+msgstr "外部マイク"
 
 #: ../backends/alsa/alsa-constants.c:185
 msgid "Camera Microphone"
-msgstr ""
+msgstr "カメラのマイク"
 
 #. Other options
 #: ../backends/alsa/alsa-constants.c:188
@@ -462,19 +463,19 @@ msgstr "ミキサー"
 
 #: ../backends/alsa/alsa-constants.c:214
 msgid "Unknown 1"
-msgstr ""
+msgstr "不明 1"
 
 #: ../backends/alsa/alsa-constants.c:215
 msgid "Unknown 2"
-msgstr ""
+msgstr "不明 2"
 
 #: ../backends/alsa/alsa-constants.c:216
 msgid "Enabled"
-msgstr ""
+msgstr "有効"
 
 #: ../backends/alsa/alsa-constants.c:217
 msgid "Disabled"
-msgstr ""
+msgstr "無効"
 
 #: ../backends/alsa/alsa-device.c:610
 msgid "On"
@@ -500,7 +501,7 @@ msgstr "PCM 2"
 #. Recording level (master input)
 #: ../backends/oss/oss-device.c:103
 msgid "Record"
-msgstr ""
+msgstr "録音"
 
 #: ../backends/oss/oss-device.c:104
 msgid "Input Gain"
@@ -537,11 +538,11 @@ msgstr "デジタル3"
 
 #: ../backends/oss/oss-device.c:113
 msgid "Phone In"
-msgstr ""
+msgstr "電話入力"
 
 #: ../backends/oss/oss-device.c:114
 msgid "Phone Out"
-msgstr ""
+msgstr "電話出力"
 
 #: ../backends/oss/oss-device.c:116
 msgid "Radio"
@@ -549,11 +550,11 @@ msgstr "ラジオ"
 
 #: ../backends/pulse/pulse-device.c:399
 msgid "Profile"
-msgstr ""
+msgstr "プロファイル"
 
 #: ../backends/pulse/pulse-monitor.c:282
 msgid "Peak detect"
-msgstr ""
+msgstr "ピークの検出"
 
 #. Create the port switch
 #: ../backends/pulse/pulse-sink.c:149 ../backends/pulse/pulse-source.c:146

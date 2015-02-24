@@ -3,13 +3,13 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# samson <sambelet@yahoo.com>, 2014
+# samson <sambelet@yahoo.com>, 2014-2015
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-10-28 09:27+0100\n"
-"PO-Revision-Date: 2014-11-02 22:49+0000\n"
+"PO-Revision-Date: 2015-02-02 04:34+0000\n"
 "Last-Translator: samson <sambelet@yahoo.com>\n"
 "Language-Team: Amharic (http://www.transifex.com/projects/p/MATE/language/am/)\n"
 "MIME-Version: 1.0\n"
@@ -21,7 +21,7 @@ msgstr ""
 #. Output controls
 #: ../backends/alsa/alsa-constants.c:40
 msgid "Master"
-msgstr ""
+msgstr "ዋናው"
 
 #: ../backends/alsa/alsa-constants.c:41
 msgid "Hardware Master"
@@ -353,16 +353,16 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:143 ../backends/alsa/alsa-constants.c:198
 msgid "Input 1"
-msgstr ""
+msgstr "ማስገቢያ 1"
 
 #: ../backends/alsa/alsa-constants.c:144 ../backends/alsa/alsa-constants.c:199
 msgid "Input 2"
-msgstr ""
+msgstr "ማስገቢያ 2"
 
 #. Output options
 #: ../backends/alsa/alsa-constants.c:151
 msgid "Speakers"
-msgstr ""
+msgstr "ስፒከሮች"
 
 #: ../backends/alsa/alsa-constants.c:152
 msgid "Headphones"
@@ -374,11 +374,11 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:158
 msgid "Microphone 1"
-msgstr ""
+msgstr "ማይክሮፎን 1"
 
 #: ../backends/alsa/alsa-constants.c:159
 msgid "Microphone 2"
-msgstr ""
+msgstr "ማይክሮፎን 2"
 
 #: ../backends/alsa/alsa-constants.c:160 ../backends/alsa/alsa-constants.c:161
 #: ../backends/alsa/alsa-constants.c:162
@@ -525,15 +525,15 @@ msgstr ""
 #. These 3 can be attached to either digital input or output
 #: ../backends/oss/oss-device.c:110
 msgid "Digital 1"
-msgstr ""
+msgstr "ዲጂታል 1"
 
 #: ../backends/oss/oss-device.c:111
 msgid "Digital 2"
-msgstr ""
+msgstr "ዲጂታል 2"
 
 #: ../backends/oss/oss-device.c:112
 msgid "Digital 3"
-msgstr ""
+msgstr "ዲጂታል 3"
 
 #: ../backends/oss/oss-device.c:113
 msgid "Phone In"
