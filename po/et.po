@@ -3,13 +3,13 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Ivar Smolin <okul@linux.ee>, 2014
+# Ivar Smolin <okul@linux.ee>, 2014-2015
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-10-28 09:27+0100\n"
-"PO-Revision-Date: 2014-11-22 16:52+0000\n"
+"PO-Revision-Date: 2015-03-18 19:06+0000\n"
 "Last-Translator: Ivar Smolin <okul@linux.ee>\n"
 "Language-Team: Estonian (http://www.transifex.com/projects/p/MATE/language/et/)\n"
 "MIME-Version: 1.0\n"
@@ -33,7 +33,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:43
 msgid "Desktop Speaker"
-msgstr ""
+msgstr "Arvutikõlar"
 
 #. OSS manual says this should be the beeper, but Linux OSS seems to assign it
 #. to
@@ -62,7 +62,7 @@ msgstr "Peakomplekt"
 #: ../backends/alsa/alsa-constants.c:51 ../backends/alsa/alsa-constants.c:52
 #: ../backends/alsa/alsa-constants.c:53 ../backends/alsa/alsa-constants.c:54
 msgid "Surround Speaker"
-msgstr ""
+msgstr "Surroundikõlar"
 
 #: ../backends/alsa/alsa-constants.c:55 ../backends/alsa/alsa-constants.c:56
 msgid "Center Speaker"
@@ -70,7 +70,7 @@ msgstr "Keskmine kõlar"
 
 #: ../backends/alsa/alsa-constants.c:57 ../backends/alsa/alsa-constants.c:58
 msgid "CLFE Speaker"
-msgstr ""
+msgstr "CLFE-kõlar"
 
 #: ../backends/alsa/alsa-constants.c:59
 msgid "Master Mono"
@@ -86,7 +86,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:62 ../backends/alsa/alsa-constants.c:63
 msgid "Side Speaker"
-msgstr ""
+msgstr "Külgkõlar"
 
 #: ../backends/alsa/alsa-constants.c:64
 msgid "Rear Speaker"
@@ -115,7 +115,7 @@ msgstr "AC97"
 
 #: ../backends/alsa/alsa-constants.c:70 ../backends/alsa/alsa-constants.c:71
 msgid "LFE Speaker"
-msgstr ""
+msgstr "LFE-kõlar"
 
 #: ../backends/alsa/alsa-constants.c:72
 msgid "Bass Speaker"
@@ -453,7 +453,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:211
 msgid "Docking Station"
-msgstr ""
+msgstr "Dokkimisalgus"
 
 #. Recording monitor
 #: ../backends/alsa/alsa-constants.c:212 ../backends/oss/oss-device.c:100

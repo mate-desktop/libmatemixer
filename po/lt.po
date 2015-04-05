@@ -4,13 +4,13 @@
 # 
 # Translators:
 # Mantas Kriaučiūnas <mantas@akl.lt>, 2014
-# Moo, 2014
+# Moo, 2014-2015
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-10-28 09:27+0100\n"
-"PO-Revision-Date: 2014-12-02 12:56+0000\n"
+"PO-Revision-Date: 2015-04-03 22:03+0000\n"
 "Last-Translator: Moo\n"
 "Language-Team: Lithuanian (http://www.transifex.com/projects/p/MATE/language/lt/)\n"
 "MIME-Version: 1.0\n"
@@ -30,7 +30,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:42 ../backends/oss/oss-device.c:92
 msgid "PCM"
-msgstr ""
+msgstr "PCM"
 
 #: ../backends/alsa/alsa-constants.c:43
 msgid "Desktop Speaker"
@@ -50,11 +50,11 @@ msgstr "Priekinis Garsiakalbis"
 
 #: ../backends/alsa/alsa-constants.c:48
 msgid "Headphone"
-msgstr ""
+msgstr "Ausinės"
 
 #: ../backends/alsa/alsa-constants.c:49
 msgid "Headphone 2"
-msgstr ""
+msgstr "Ausinės 2"
 
 #: ../backends/alsa/alsa-constants.c:50
 msgid "Headset"
@@ -71,7 +71,7 @@ msgstr "Centrinis Garsiakalbis"
 
 #: ../backends/alsa/alsa-constants.c:57 ../backends/alsa/alsa-constants.c:58
 msgid "CLFE Speaker"
-msgstr ""
+msgstr "CLFE Garsiakalbis"
 
 #: ../backends/alsa/alsa-constants.c:59
 msgid "Master Mono"
@@ -112,19 +112,19 @@ msgstr "Muzika"
 
 #: ../backends/alsa/alsa-constants.c:69
 msgid "AC97"
-msgstr ""
+msgstr "AC97"
 
 #: ../backends/alsa/alsa-constants.c:70 ../backends/alsa/alsa-constants.c:71
 msgid "LFE Speaker"
-msgstr ""
+msgstr "LFE Garsiakalbis"
 
 #: ../backends/alsa/alsa-constants.c:72
 msgid "Bass Speaker"
-msgstr ""
+msgstr "Žemų tonų garsiakalbis"
 
 #: ../backends/alsa/alsa-constants.c:73
 msgid "PC Speaker"
-msgstr ""
+msgstr "PC Garsiakalbis"
 
 #: ../backends/alsa/alsa-constants.c:74 ../backends/oss/oss-device.c:91
 msgid "Synth"
@@ -140,11 +140,11 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:77 ../backends/oss/oss-device.c:89
 msgid "Bass"
-msgstr ""
+msgstr "Žemi tonai"
 
 #: ../backends/alsa/alsa-constants.c:78 ../backends/oss/oss-device.c:90
 msgid "Treble"
-msgstr ""
+msgstr "Aukšti tonai"
 
 #. Input controls
 #: ../backends/alsa/alsa-constants.c:81
@@ -176,7 +176,7 @@ msgstr "Priekinis mikrofonas"
 #: ../backends/alsa/alsa-constants.c:87 ../backends/alsa/alsa-constants.c:183
 #: ../backends/alsa/alsa-constants.c:184
 msgid "Rear Microphone"
-msgstr "Galinis Mikrofonas"
+msgstr "Galinis mikrofonas"
 
 #: ../backends/alsa/alsa-constants.c:88 ../backends/alsa/alsa-constants.c:167
 msgid "Dock Microphone"
@@ -184,7 +184,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:89 ../backends/alsa/alsa-constants.c:165
 msgid "Headphone Microphone"
-msgstr ""
+msgstr "Ausinių mikrofonas"
 
 #: ../backends/alsa/alsa-constants.c:90 ../backends/alsa/alsa-constants.c:166
 msgid "Headset Microphone"
@@ -192,7 +192,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:91
 msgid "Inverted Internal Microphone"
-msgstr ""
+msgstr "Invertuotas vidinis mikrofonas"
 
 #: ../backends/alsa/alsa-constants.c:92 ../backends/alsa/alsa-constants.c:93
 #: ../backends/alsa/alsa-constants.c:94 ../backends/alsa/alsa-constants.c:191
@@ -237,7 +237,7 @@ msgstr "Priekinio mikrofono pagarsinimas"
 
 #: ../backends/alsa/alsa-constants.c:105
 msgid "Rear Microphone Boost"
-msgstr ""
+msgstr "Galinio mikrofono pagarsinimas"
 
 #: ../backends/alsa/alsa-constants.c:106
 msgid "Dock Microphone Boost"
@@ -318,7 +318,7 @@ msgstr "Išorinis stiprintuvas"
 
 #: ../backends/alsa/alsa-constants.c:133
 msgid "Bass Boost"
-msgstr ""
+msgstr "Žemų tonų pagarsinimas"
 
 #: ../backends/alsa/alsa-constants.c:134
 msgid "Capture Boost"

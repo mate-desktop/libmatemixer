@@ -1,7 +1,9 @@
 # please keep this list sorted alphabetically
 #
 am
+ar
 be
+cs
 da
 de
 el
@@ -9,6 +11,7 @@ en_AU
 en_GB
 es
 et
+eu
 fr
 hr
 hu
@@ -25,6 +28,7 @@ pt_BR
 ro
 ru
 sk
+sl
 sr
 sv
 tr
