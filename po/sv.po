@@ -4,13 +4,14 @@
 # 
 # Translators:
 # Erik, 2015
+# Kristoffer Grundström <kristoffer.grundstrom1983@gmail.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-10-28 09:27+0100\n"
-"PO-Revision-Date: 2015-01-10 17:29+0000\n"
-"Last-Translator: Erik\n"
+"PO-Revision-Date: 2015-05-29 15:56+0000\n"
+"Last-Translator: Kristoffer Grundström <kristoffer.grundstrom1983@gmail.com>\n"
 "Language-Team: Swedish (http://www.transifex.com/projects/p/MATE/language/sv/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -21,11 +22,11 @@ msgstr ""
 #. Output controls
 #: ../backends/alsa/alsa-constants.c:40
 msgid "Master"
-msgstr ""
+msgstr "Master"
 
 #: ../backends/alsa/alsa-constants.c:41
 msgid "Hardware Master"
-msgstr ""
+msgstr "Hårdvaru-master"
 
 #: ../backends/alsa/alsa-constants.c:42 ../backends/oss/oss-device.c:92
 msgid "PCM"
@@ -70,7 +71,7 @@ msgstr "Högtalare center"
 
 #: ../backends/alsa/alsa-constants.c:57 ../backends/alsa/alsa-constants.c:58
 msgid "CLFE Speaker"
-msgstr ""
+msgstr "CLFE-högtalare"
 
 #: ../backends/alsa/alsa-constants.c:59
 msgid "Master Mono"
@@ -94,12 +95,12 @@ msgstr "Högtalare bakre"
 
 #: ../backends/alsa/alsa-constants.c:65
 msgid "Wave"
-msgstr ""
+msgstr "Våg"
 
 #: ../backends/alsa/alsa-constants.c:66 ../backends/alsa/alsa-constants.c:99
 #: ../backends/alsa/alsa-constants.c:213
 msgid "Phone"
-msgstr ""
+msgstr "Telefon"
 
 #: ../backends/alsa/alsa-constants.c:67 ../backends/oss/oss-device.c:98
 msgid "CD"
@@ -111,11 +112,11 @@ msgstr "Musik"
 
 #: ../backends/alsa/alsa-constants.c:69
 msgid "AC97"
-msgstr ""
+msgstr "AC97"
 
 #: ../backends/alsa/alsa-constants.c:70 ../backends/alsa/alsa-constants.c:71
 msgid "LFE Speaker"
-msgstr ""
+msgstr "LFE-högtalare"
 
 #: ../backends/alsa/alsa-constants.c:72
 msgid "Bass Speaker"
@@ -179,7 +180,7 @@ msgstr "Mikrofon bakre"
 
 #: ../backends/alsa/alsa-constants.c:88 ../backends/alsa/alsa-constants.c:167
 msgid "Dock Microphone"
-msgstr ""
+msgstr "Docka mikrofonen"
 
 #: ../backends/alsa/alsa-constants.c:89 ../backends/alsa/alsa-constants.c:165
 msgid "Headphone Microphone"
@@ -191,7 +192,7 @@ msgstr "Headsetmikrofon"
 
 #: ../backends/alsa/alsa-constants.c:91
 msgid "Inverted Internal Microphone"
-msgstr ""
+msgstr "Inåtvänd intern mikrofon"
 
 #: ../backends/alsa/alsa-constants.c:92 ../backends/alsa/alsa-constants.c:93
 #: ../backends/alsa/alsa-constants.c:94 ../backends/alsa/alsa-constants.c:191
@@ -268,27 +269,27 @@ msgstr "Källa för inspelning"
 
 #: ../backends/alsa/alsa-constants.c:119
 msgid "Input Source"
-msgstr ""
+msgstr "Inmatningskälla"
 
 #: ../backends/alsa/alsa-constants.c:120
 msgid "Input Source Select"
-msgstr ""
+msgstr "Val av inmatningskälla"
 
 #: ../backends/alsa/alsa-constants.c:121
 msgid "Digital Input Source"
-msgstr ""
+msgstr "Källa för digital inmatning"
 
 #: ../backends/alsa/alsa-constants.c:122
 msgid "PCM Capture Source"
-msgstr ""
+msgstr "Källa för PCM-fångst"
 
 #: ../backends/alsa/alsa-constants.c:123
 msgid "Digital Playback Source"
-msgstr ""
+msgstr "Källa för digital uppspelning"
 
 #: ../backends/alsa/alsa-constants.c:124
 msgid "Mono Output Select"
-msgstr ""
+msgstr "Val av mono-utmatning"
 
 #: ../backends/alsa/alsa-constants.c:125
 msgid "Shared Mic/Line In"
@@ -296,7 +297,7 @@ msgstr "Delad mikrofon/ljudingång"
 
 #: ../backends/alsa/alsa-constants.c:126
 msgid "Microphone Select"
-msgstr ""
+msgstr "Val av mikrofon"
 
 #: ../backends/alsa/alsa-constants.c:127
 msgid "Microphone Jack Mode"
@@ -308,7 +309,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:129
 msgid "Auto-Mute Mode"
-msgstr ""
+msgstr "Automatiskt tyst läge"
 
 #. (Probably) toggles
 #: ../backends/alsa/alsa-constants.c:132
@@ -321,11 +322,11 @@ msgstr "Basförstärkning"
 
 #: ../backends/alsa/alsa-constants.c:134
 msgid "Capture Boost"
-msgstr ""
+msgstr "Fånga upp förstärkning"
 
 #: ../backends/alsa/alsa-constants.c:136 ../backends/alsa/alsa-constants.c:200
 msgid "Digital In"
-msgstr ""
+msgstr "Digital In"
 
 #: ../backends/alsa/alsa-constants.c:137
 msgid "Digital Default PCM"
@@ -341,7 +342,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:140
 msgid "Mix"
-msgstr ""
+msgstr "Blanda"
 
 #: ../backends/alsa/alsa-constants.c:141
 msgid "Mix Mono"
