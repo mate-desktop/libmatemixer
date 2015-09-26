@@ -24,6 +24,7 @@
 #include <alsa/asoundlib.h>
 #include <libmatemixer/matemixer.h>
 
+#include "alsa-compat.h"
 #include "alsa-constants.h"
 #include "alsa-device.h"
 #include "alsa-element.h"
@@ -707,11 +708,13 @@ load_element (AlsaDevice *device, snd_mixer_elem_t *el)
         gboolean           cenum = FALSE;
         gboolean           penum = FALSE;
 
+#if SND_LIB_VERSION >= ALSA_PACK_VERSION (1, 0, 10)
         /* The enumeration may have a capture or a playback capability.
          * If it has either both or none, try to guess the more appropriate
          * direction. */
         cenum = snd_mixer_selem_is_enum_capture (el);
         penum = snd_mixer_selem_is_enum_playback (el);
+#endif
         if (cenum ^ penum) {
             if (cenum == TRUE)
                 direction = MATE_MIXER_DIRECTION_INPUT;

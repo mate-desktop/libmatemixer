@@ -22,6 +22,7 @@
 #include <libmatemixer/matemixer.h>
 #include <libmatemixer/matemixer-private.h>
 
+#include "alsa-compat.h"
 #include "alsa-constants.h"
 #include "alsa-element.h"
 #include "alsa-stream-control.h"
@@ -52,7 +53,8 @@ static gboolean alsa_stream_input_control_get_decibel_from_volume (AlsaStreamCon
                                                                    guint                        volume,
                                                                    gdouble                     *decibel);
 
-static void read_volume_data (snd_mixer_elem_t *el, AlsaControlData  *data);
+static void     read_volume_data                                  (snd_mixer_elem_t            *el,
+                                                                   AlsaControlData             *data);
 
 static void
 alsa_stream_input_control_class_init (AlsaStreamInputControlClass *klass)
@@ -195,6 +197,7 @@ alsa_stream_input_control_get_volume_from_decibel (AlsaStreamControl *control,
                                                    gdouble            decibel,
                                                    guint             *volume)
 {
+#if SND_LIB_VERSION >= ALSA_PACK_VERSION (1, 0, 17)
     snd_mixer_elem_t *el;
     glong             value;
     gint              ret;
@@ -213,6 +216,9 @@ alsa_stream_input_control_get_volume_from_decibel (AlsaStreamControl *control,
 
     *volume = value;
     return TRUE;
+#else
+    return FALSE;
+#endif
 }
 
 static gboolean
@@ -220,6 +226,7 @@ alsa_stream_input_control_get_decibel_from_volume (AlsaStreamControl *control,
                                                    guint              volume,
                                                    gdouble           *decibel)
 {
+#if SND_LIB_VERSION >= ALSA_PACK_VERSION (1, 0, 17)
     snd_mixer_elem_t *el;
     glong             value;
     gint              ret;
@@ -238,6 +245,9 @@ alsa_stream_input_control_get_decibel_from_volume (AlsaStreamControl *control,
 
     *decibel = value / 100.0;
     return TRUE;
+#else
+    return FALSE;
+#endif
 }
 
 static void
@@ -249,14 +259,19 @@ read_volume_data (snd_mixer_elem_t *el, AlsaControlData *data)
     gint  i;
 
     /* Read volume ranges, this call should never fail on valid input */
+#if SND_LIB_VERSION >= ALSA_PACK_VERSION (1, 0, 10)
     ret = snd_mixer_selem_get_capture_volume_range (el, &min, &max);
     if G_UNLIKELY (ret < 0) {
         g_warning ("Failed to read capture volume range: %s", snd_strerror (ret));
         return;
     }
+#else
+    snd_mixer_selem_get_capture_volume_range (el, &min, &max);
+#endif
     data->min = (guint) min;
     data->max = (guint) max;
 
+#if SND_LIB_VERSION >= ALSA_PACK_VERSION (1, 0, 10)
     /* This fails when decibels are not supported */
     ret = snd_mixer_selem_get_capture_dB_range (el, &min, &max);
     if (ret == 0) {
@@ -264,6 +279,9 @@ read_volume_data (snd_mixer_elem_t *el, AlsaControlData *data)
         data->max_decibel = max / 100.0;
     } else
         data->min_decibel = data->max_decibel = -MATE_MIXER_INFINITY;
+#else
+    data->min_decibel = data->max_decibel = -MATE_MIXER_INFINITY;
+#endif
 
     for (i = 0; i < MATE_MIXER_CHANNEL_MAX; i++)
         data->v[i] = data->min;
@@ -299,7 +317,7 @@ read_volume_data (snd_mixer_elem_t *el, AlsaControlData *data)
         /* We use numeric channel indices, but ALSA only works with channel
          * positions, go over all the positions supported by ALSA and create
          * a list of channels */
-         for (channel = 0; channel < SND_MIXER_SCHN_LAST; channel++) {
+        for (channel = 0; channel < SND_MIXER_SCHN_LAST; channel++) {
             if (snd_mixer_selem_has_capture_channel (el, channel) == 0)
                 continue;
 

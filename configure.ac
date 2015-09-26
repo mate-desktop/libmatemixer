@@ -140,7 +140,8 @@ AC_SUBST(PULSEAUDIO_LIBS)
 # -----------------------------------------------------------------------
 # ALSA
 # -----------------------------------------------------------------------
-ALSA_REQUIRED_VERSION=1.0.0
+# This is set accordingly to the version reported by liboss4-salsa
+ALSA_REQUIRED_VERSION=1.0.5
 
 AC_ARG_ENABLE([alsa],
               AS_HELP_STRING([--enable-alsa],

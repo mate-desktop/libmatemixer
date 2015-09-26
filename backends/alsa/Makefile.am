@@ -14,6 +14,7 @@ libmatemixer_alsa_la_CFLAGS =                                   \
 libmatemixer_alsa_la_SOURCES =                                  \
         alsa-backend.c                                          \
         alsa-backend.h                                          \
+        alsa-compat.h                                           \
         alsa-constants.c                                        \
         alsa-constants.h                                        \
         alsa-device.c                                           \
