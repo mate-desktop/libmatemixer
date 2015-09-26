@@ -707,7 +707,7 @@ control_data_get_average_front_back (AlsaControlData *data, guint *front, guint 
             f += data->v[channel];
             nf++;
         }
-        else if MATE_MIXER_IS_RIGHT_CHANNEL (data->c[channel]) {
+        else if MATE_MIXER_IS_BACK_CHANNEL (data->c[channel]) {
             b += data->v[channel];
             nb++;
         }
