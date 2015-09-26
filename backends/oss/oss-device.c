@@ -459,8 +459,12 @@ oss_device_load (OssDevice *device)
     } else
         g_clear_object (&device->priv->output);
 
-    /* See if we can use the modify_counter field to optimize polling */
-#ifdef SOUND_MIXER_INFO
+    /*
+     * See if we can use the modify_counter field to optimize polling.
+     *
+     * Only do this on Linux for now as the counter doesn't update on BSDs.
+     */
+#if defined(SOUND_MIXER_INFO) && defined(__linux__)
     do {
         struct mixer_info info;
         gint   ret;
@@ -476,12 +480,12 @@ oss_device_load (OssDevice *device)
     /*
      * Use a polling strategy inspired by KMix:
      *
-     * Poll for changes with the OSS_POLL_TIMEOUT_NORMAL interval, when we
+     * Poll for changes with the OSS_POLL_TIMEOUT_NORMAL interval. When we
      * encounter a change in modify_counter, decrease the interval to
      * OSS_POLL_TIMEOUT_RAPID for a few seconds to allow for smoother
      * adjustments, for example when user drags a slider.
      *
-     * This way is not used on systems which don't support the modify_counter
+     * This is not used on systems which don't support the modify_counter
      * field, because there is no way to find out whether anything has
      * changed and therefore when to start the rapid polling.
      */
@@ -648,17 +652,13 @@ poll_mixer (OssDevice *device)
         struct mixer_info info;
 
         /*
-         * The modify_counter field increases each time a change happens on
+         * The modify_counter field increases each time a change occurs on
          * the device.
          *
          * If this ioctl() works, we use the field to only poll the controls
          * if a change actually occured and we can also adjust the poll interval.
          *
-         * This works well at least on Linux, NetBSD and OpenBSD. This call is
-         * not supported on FreeBSD as of version 10.
-         *
-         * The call is also used to detect unplugged devices early, when not
-         * supported, the unplug is still caught in the backend.
+         * The call is also used to detect unplugged devices early.
          */
         ret = ioctl (device->priv->fd, SOUND_MIXER_INFO, &info);
         if (ret == -1) {
