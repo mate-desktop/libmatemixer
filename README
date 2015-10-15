@@ -11,8 +11,6 @@ Documentation for the API is provided with gtk-doc.
 Installation and packaging
 ==========================
 
-See the INSTALL file for general instructions about the build process.
-
 The library includes dynamically loaded modules which provide access to each
 of the supported sound systems.
 
