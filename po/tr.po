@@ -9,10 +9,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-28 09:27+0100\n"
-"PO-Revision-Date: 2014-11-19 15:55+0000\n"
-"Last-Translator: Kudret Emre <kudretemre@hotmail.com.tr>\n"
-"Language-Team: Turkish (http://www.transifex.com/projects/p/MATE/language/tr/)\n"
+"POT-Creation-Date: 2015-09-09 12:55+0200\n"
+"PO-Revision-Date: 2015-09-09 10:54+0000\n"
+"Last-Translator: infirit <inactive+infirit@transifex.com>\n"
+"Language-Team: Turkish (http://www.transifex.com/mate/MATE/language/tr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -32,16 +32,16 @@ msgstr "Donanım Ana"
 msgid "PCM"
 msgstr "PCM"
 
-#: ../backends/alsa/alsa-constants.c:43
-msgid "Desktop Speaker"
-msgstr "Masaüstü Hoparlör"
-
 #. OSS manual says this should be the beeper, but Linux OSS seems to assign it
 #. to
 #. * regular volume control
-#: ../backends/alsa/alsa-constants.c:44 ../backends/oss/oss-device.c:95
+#: ../backends/alsa/alsa-constants.c:43 ../backends/oss/oss-device.c:95
 msgid "Speaker"
 msgstr "Hoparlör"
+
+#: ../backends/alsa/alsa-constants.c:44
+msgid "Desktop Speaker"
+msgstr "Masaüstü Hoparlör"
 
 #: ../backends/alsa/alsa-constants.c:45 ../backends/alsa/alsa-constants.c:46
 #: ../backends/alsa/alsa-constants.c:47
@@ -73,17 +73,17 @@ msgstr "Merkez Hoparlör"
 msgid "CLFE Speaker"
 msgstr "CLFE Hoparlör"
 
-#: ../backends/alsa/alsa-constants.c:59
+#: ../backends/alsa/alsa-constants.c:59 ../backends/alsa/alsa-constants.c:135
+msgid "Digital"
+msgstr "Sayısal"
+
+#: ../backends/alsa/alsa-constants.c:60
 msgid "Master Mono"
 msgstr "Ana Mono"
 
-#: ../backends/alsa/alsa-constants.c:60
+#: ../backends/alsa/alsa-constants.c:61
 msgid "Master Digital"
 msgstr "Ana Dijital"
-
-#: ../backends/alsa/alsa-constants.c:61 ../backends/alsa/alsa-constants.c:135
-msgid "Digital"
-msgstr "Sayısal"
 
 #: ../backends/alsa/alsa-constants.c:62 ../backends/alsa/alsa-constants.c:63
 msgid "Side Speaker"
@@ -98,11 +98,12 @@ msgid "Wave"
 msgstr "Dalga"
 
 #: ../backends/alsa/alsa-constants.c:66 ../backends/alsa/alsa-constants.c:99
-#: ../backends/alsa/alsa-constants.c:213
+#: ../backends/alsa/alsa-constants.c:215
 msgid "Phone"
 msgstr "Telefon"
 
-#: ../backends/alsa/alsa-constants.c:67 ../backends/oss/oss-device.c:98
+#: ../backends/alsa/alsa-constants.c:67 ../backends/alsa/alsa-constants.c:213
+#: ../backends/oss/oss-device.c:98
 msgid "CD"
 msgstr "CD"
 
@@ -152,8 +153,9 @@ msgid "Capture"
 msgstr "Yakalama"
 
 #. Microphone options
-#: ../backends/alsa/alsa-constants.c:82 ../backends/alsa/alsa-constants.c:156
-#: ../backends/alsa/alsa-constants.c:157 ../backends/oss/oss-device.c:97
+#: ../backends/alsa/alsa-constants.c:82 ../backends/alsa/alsa-constants.c:126
+#: ../backends/alsa/alsa-constants.c:156 ../backends/alsa/alsa-constants.c:157
+#: ../backends/oss/oss-device.c:97
 msgid "Microphone"
 msgstr "Mikrofon"
 
@@ -207,7 +209,8 @@ msgstr "Hat"
 msgid "Auxiliary"
 msgstr "Yardımcı"
 
-#: ../backends/alsa/alsa-constants.c:96 ../backends/oss/oss-device.c:115
+#: ../backends/alsa/alsa-constants.c:96 ../backends/alsa/alsa-constants.c:214
+#: ../backends/oss/oss-device.c:115
 msgid "Video"
 msgstr "Video"
 
@@ -255,6 +258,7 @@ msgstr "Kulaklık Mikrofonu Yükselteç"
 msgid "Line In Boost"
 msgstr "Hat Yükselteç"
 
+#. Switches
 #: ../backends/alsa/alsa-constants.c:116
 msgid "Analog Output"
 msgstr "Analog Çıktı"
@@ -263,17 +267,13 @@ msgstr "Analog Çıktı"
 msgid "Analog Source"
 msgstr "Analog Kaynak"
 
-#: ../backends/alsa/alsa-constants.c:118 ../backends/oss/oss-stream.c:207
+#: ../backends/alsa/alsa-constants.c:118
 msgid "Capture Source"
 msgstr "Yakalama Kaynağı"
 
-#: ../backends/alsa/alsa-constants.c:119
+#: ../backends/alsa/alsa-constants.c:119 ../backends/alsa/alsa-constants.c:120
 msgid "Input Source"
 msgstr "Girdi Kaynağı"
-
-#: ../backends/alsa/alsa-constants.c:120
-msgid "Input Source Select"
-msgstr "Girdi Kaynağı Seç"
 
 #: ../backends/alsa/alsa-constants.c:121
 msgid "Digital Input Source"
@@ -288,16 +288,12 @@ msgid "Digital Playback Source"
 msgstr "Sayısal Çalma Kaynağı"
 
 #: ../backends/alsa/alsa-constants.c:124
-msgid "Mono Output Select"
-msgstr "Mono Çıktı Seç"
+msgid "Mono Output"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:125
-msgid "Shared Mic/Line In"
-msgstr "Paylaşılan Mikrofon/Hat Girişi"
-
-#: ../backends/alsa/alsa-constants.c:126
-msgid "Microphone Select"
-msgstr "Mikrofon Seç"
+msgid "Shared Microphone/Line In"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:127
 msgid "Microphone Jack Mode"
@@ -311,7 +307,7 @@ msgstr "Üç Boyutlu Jak Modu"
 msgid "Auto-Mute Mode"
 msgstr "Otomatik Ses Kısma Modu"
 
-#. (Probably) toggles
+#. Toggles
 #: ../backends/alsa/alsa-constants.c:132
 msgid "External Amplifier"
 msgstr "Harici Amplifikatör"
@@ -349,8 +345,8 @@ msgid "Mix Mono"
 msgstr "Karıştırma Mono"
 
 #: ../backends/alsa/alsa-constants.c:142
-msgid "Mic Capture"
-msgstr "Mikrofon Yakalama"
+msgid "Microphone Capture"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:143 ../backends/alsa/alsa-constants.c:198
 msgid "Input 1"
@@ -461,27 +457,27 @@ msgstr "Dok İstasyonu"
 msgid "Mixer"
 msgstr "Karıştırıcı"
 
-#: ../backends/alsa/alsa-constants.c:214
+#: ../backends/alsa/alsa-constants.c:216
 msgid "Unknown 1"
 msgstr "Bilinmeyen 1"
 
-#: ../backends/alsa/alsa-constants.c:215
+#: ../backends/alsa/alsa-constants.c:217
 msgid "Unknown 2"
 msgstr "Bilinmeyen 2"
 
-#: ../backends/alsa/alsa-constants.c:216
+#: ../backends/alsa/alsa-constants.c:218
 msgid "Enabled"
 msgstr "Etkin"
 
-#: ../backends/alsa/alsa-constants.c:217
+#: ../backends/alsa/alsa-constants.c:219
 msgid "Disabled"
 msgstr "Devre dışı"
 
-#: ../backends/alsa/alsa-device.c:610
+#: ../backends/alsa/alsa-device.c:635
 msgid "On"
 msgstr "Açık"
 
-#: ../backends/alsa/alsa-device.c:611
+#: ../backends/alsa/alsa-device.c:636
 msgid "Off"
 msgstr "Kapalı"
 
@@ -548,6 +544,12 @@ msgstr "Telefon Çıktı"
 msgid "Radio"
 msgstr "Radyo"
 
+#. Create the port switch
+#: ../backends/oss/oss-stream.c:208 ../backends/pulse/pulse-sink.c:149
+#: ../backends/pulse/pulse-source.c:146
+msgid "Connector"
+msgstr ""
+
 #: ../backends/pulse/pulse-device.c:399
 msgid "Profile"
 msgstr "Profil"
@@ -555,8 +557,3 @@ msgstr "Profil"
 #: ../backends/pulse/pulse-monitor.c:282
 msgid "Peak detect"
 msgstr "Tepe tespiti"
-
-#. Create the port switch
-#: ../backends/pulse/pulse-sink.c:149 ../backends/pulse/pulse-source.c:146
-msgid "Port"
-msgstr "Kapı"

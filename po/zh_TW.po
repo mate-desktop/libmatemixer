@@ -3,15 +3,15 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Jeff Huang <s8321414@gmail.com>, 2014
+# Jeff Huang <s8321414@gmail.com>, 2014-2015
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-28 09:27+0100\n"
-"PO-Revision-Date: 2014-10-28 13:29+0000\n"
+"POT-Creation-Date: 2015-09-09 12:55+0200\n"
+"PO-Revision-Date: 2015-09-09 12:29+0000\n"
 "Last-Translator: Jeff Huang <s8321414@gmail.com>\n"
-"Language-Team: Chinese (Taiwan) (http://www.transifex.com/projects/p/MATE/language/zh_TW/)\n"
+"Language-Team: Chinese (Taiwan) (http://www.transifex.com/mate/MATE/language/zh_TW/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -31,16 +31,16 @@ msgstr "硬體主音量"
 msgid "PCM"
 msgstr "PCM"
 
-#: ../backends/alsa/alsa-constants.c:43
-msgid "Desktop Speaker"
-msgstr "桌面喇叭"
-
 #. OSS manual says this should be the beeper, but Linux OSS seems to assign it
 #. to
 #. * regular volume control
-#: ../backends/alsa/alsa-constants.c:44 ../backends/oss/oss-device.c:95
+#: ../backends/alsa/alsa-constants.c:43 ../backends/oss/oss-device.c:95
 msgid "Speaker"
 msgstr "喇叭"
+
+#: ../backends/alsa/alsa-constants.c:44
+msgid "Desktop Speaker"
+msgstr "桌面喇叭"
 
 #: ../backends/alsa/alsa-constants.c:45 ../backends/alsa/alsa-constants.c:46
 #: ../backends/alsa/alsa-constants.c:47
@@ -72,17 +72,17 @@ msgstr "中央喇叭"
 msgid "CLFE Speaker"
 msgstr "CLFE 喇叭"
 
-#: ../backends/alsa/alsa-constants.c:59
+#: ../backends/alsa/alsa-constants.c:59 ../backends/alsa/alsa-constants.c:135
+msgid "Digital"
+msgstr "數位"
+
+#: ../backends/alsa/alsa-constants.c:60
 msgid "Master Mono"
 msgstr "單聲道主音量"
 
-#: ../backends/alsa/alsa-constants.c:60
+#: ../backends/alsa/alsa-constants.c:61
 msgid "Master Digital"
 msgstr "數位主音量"
-
-#: ../backends/alsa/alsa-constants.c:61 ../backends/alsa/alsa-constants.c:135
-msgid "Digital"
-msgstr "數位"
 
 #: ../backends/alsa/alsa-constants.c:62 ../backends/alsa/alsa-constants.c:63
 msgid "Side Speaker"
@@ -97,11 +97,12 @@ msgid "Wave"
 msgstr "振動"
 
 #: ../backends/alsa/alsa-constants.c:66 ../backends/alsa/alsa-constants.c:99
-#: ../backends/alsa/alsa-constants.c:213
+#: ../backends/alsa/alsa-constants.c:215
 msgid "Phone"
 msgstr "耳機"
 
-#: ../backends/alsa/alsa-constants.c:67 ../backends/oss/oss-device.c:98
+#: ../backends/alsa/alsa-constants.c:67 ../backends/alsa/alsa-constants.c:213
+#: ../backends/oss/oss-device.c:98
 msgid "CD"
 msgstr "CD"
 
@@ -151,8 +152,9 @@ msgid "Capture"
 msgstr "拍攝"
 
 #. Microphone options
-#: ../backends/alsa/alsa-constants.c:82 ../backends/alsa/alsa-constants.c:156
-#: ../backends/alsa/alsa-constants.c:157 ../backends/oss/oss-device.c:97
+#: ../backends/alsa/alsa-constants.c:82 ../backends/alsa/alsa-constants.c:126
+#: ../backends/alsa/alsa-constants.c:156 ../backends/alsa/alsa-constants.c:157
+#: ../backends/oss/oss-device.c:97
 msgid "Microphone"
 msgstr "麥克風"
 
@@ -206,7 +208,8 @@ msgstr "線路輸入"
 msgid "Auxiliary"
 msgstr "輔助"
 
-#: ../backends/alsa/alsa-constants.c:96 ../backends/oss/oss-device.c:115
+#: ../backends/alsa/alsa-constants.c:96 ../backends/alsa/alsa-constants.c:214
+#: ../backends/oss/oss-device.c:115
 msgid "Video"
 msgstr "視訊"
 
@@ -254,6 +257,7 @@ msgstr "耳機麥克風增強"
 msgid "Line In Boost"
 msgstr "線路輸入增強"
 
+#. Switches
 #: ../backends/alsa/alsa-constants.c:116
 msgid "Analog Output"
 msgstr "類比輸出"
@@ -262,17 +266,13 @@ msgstr "類比輸出"
 msgid "Analog Source"
 msgstr "類比來源"
 
-#: ../backends/alsa/alsa-constants.c:118 ../backends/oss/oss-stream.c:207
+#: ../backends/alsa/alsa-constants.c:118
 msgid "Capture Source"
 msgstr "拍攝來源"
 
-#: ../backends/alsa/alsa-constants.c:119
+#: ../backends/alsa/alsa-constants.c:119 ../backends/alsa/alsa-constants.c:120
 msgid "Input Source"
 msgstr "輸入來源"
-
-#: ../backends/alsa/alsa-constants.c:120
-msgid "Input Source Select"
-msgstr "輸入來源選擇"
 
 #: ../backends/alsa/alsa-constants.c:121
 msgid "Digital Input Source"
@@ -287,16 +287,12 @@ msgid "Digital Playback Source"
 msgstr "數位錄放來源"
 
 #: ../backends/alsa/alsa-constants.c:124
-msgid "Mono Output Select"
-msgstr "單聲道輸出選擇"
+msgid "Mono Output"
+msgstr "單聲道輸出"
 
 #: ../backends/alsa/alsa-constants.c:125
-msgid "Shared Mic/Line In"
+msgid "Shared Microphone/Line In"
 msgstr "共享的麥克風／線路輸入"
-
-#: ../backends/alsa/alsa-constants.c:126
-msgid "Microphone Select"
-msgstr "麥克風選擇"
 
 #: ../backends/alsa/alsa-constants.c:127
 msgid "Microphone Jack Mode"
@@ -310,7 +306,7 @@ msgstr "環繞 Jack 模式"
 msgid "Auto-Mute Mode"
 msgstr "自動靜音模式"
 
-#. (Probably) toggles
+#. Toggles
 #: ../backends/alsa/alsa-constants.c:132
 msgid "External Amplifier"
 msgstr "外部揚聲器"
@@ -348,7 +344,7 @@ msgid "Mix Mono"
 msgstr "單聲道混音"
 
 #: ../backends/alsa/alsa-constants.c:142
-msgid "Mic Capture"
+msgid "Microphone Capture"
 msgstr "麥克風錄音"
 
 #: ../backends/alsa/alsa-constants.c:143 ../backends/alsa/alsa-constants.c:198
@@ -460,27 +456,27 @@ msgstr "迷你音樂站"
 msgid "Mixer"
 msgstr "混音器"
 
-#: ../backends/alsa/alsa-constants.c:214
+#: ../backends/alsa/alsa-constants.c:216
 msgid "Unknown 1"
 msgstr "未知 1"
 
-#: ../backends/alsa/alsa-constants.c:215
+#: ../backends/alsa/alsa-constants.c:217
 msgid "Unknown 2"
 msgstr "未知 2"
 
-#: ../backends/alsa/alsa-constants.c:216
+#: ../backends/alsa/alsa-constants.c:218
 msgid "Enabled"
 msgstr "已啟用"
 
-#: ../backends/alsa/alsa-constants.c:217
+#: ../backends/alsa/alsa-constants.c:219
 msgid "Disabled"
 msgstr "已停用"
 
-#: ../backends/alsa/alsa-device.c:610
+#: ../backends/alsa/alsa-device.c:635
 msgid "On"
 msgstr "開啟"
 
-#: ../backends/alsa/alsa-device.c:611
+#: ../backends/alsa/alsa-device.c:636
 msgid "Off"
 msgstr "關閉"
 
@@ -547,6 +543,12 @@ msgstr "耳機輸出"
 msgid "Radio"
 msgstr "廣播"
 
+#. Create the port switch
+#: ../backends/oss/oss-stream.c:208 ../backends/pulse/pulse-sink.c:149
+#: ../backends/pulse/pulse-source.c:146
+msgid "Connector"
+msgstr "連接器"
+
 #: ../backends/pulse/pulse-device.c:399
 msgid "Profile"
 msgstr "設定檔"
@@ -554,8 +556,3 @@ msgstr "設定檔"
 #: ../backends/pulse/pulse-monitor.c:282
 msgid "Peak detect"
 msgstr "峰值偵測"
-
-#. Create the port switch
-#: ../backends/pulse/pulse-sink.c:149 ../backends/pulse/pulse-source.c:146
-msgid "Port"
-msgstr "連接埠"

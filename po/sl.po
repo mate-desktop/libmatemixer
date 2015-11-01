@@ -8,10 +8,10 @@ msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-28 09:27+0100\n"
-"PO-Revision-Date: 2015-03-11 21:06+0000\n"
-"Last-Translator: worm <thewormhole@gmail.com>\n"
-"Language-Team: Slovenian (http://www.transifex.com/projects/p/MATE/language/sl/)\n"
+"POT-Creation-Date: 2015-09-09 12:55+0200\n"
+"PO-Revision-Date: 2015-09-09 10:54+0000\n"
+"Last-Translator: infirit <inactive+infirit@transifex.com>\n"
+"Language-Team: Slovenian (http://www.transifex.com/mate/MATE/language/sl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -31,16 +31,16 @@ msgstr "Glavna strojna oprema"
 msgid "PCM"
 msgstr "PCM"
 
-#: ../backends/alsa/alsa-constants.c:43
-msgid "Desktop Speaker"
-msgstr "Namizni Zvočnik"
-
 #. OSS manual says this should be the beeper, but Linux OSS seems to assign it
 #. to
 #. * regular volume control
-#: ../backends/alsa/alsa-constants.c:44 ../backends/oss/oss-device.c:95
+#: ../backends/alsa/alsa-constants.c:43 ../backends/oss/oss-device.c:95
 msgid "Speaker"
 msgstr "Zvočnik"
+
+#: ../backends/alsa/alsa-constants.c:44
+msgid "Desktop Speaker"
+msgstr "Namizni Zvočnik"
 
 #: ../backends/alsa/alsa-constants.c:45 ../backends/alsa/alsa-constants.c:46
 #: ../backends/alsa/alsa-constants.c:47
@@ -72,17 +72,17 @@ msgstr "Sredinski zvočnik"
 msgid "CLFE Speaker"
 msgstr "CLFE Zvočnik"
 
-#: ../backends/alsa/alsa-constants.c:59
+#: ../backends/alsa/alsa-constants.c:59 ../backends/alsa/alsa-constants.c:135
+msgid "Digital"
+msgstr "Digitalni"
+
+#: ../backends/alsa/alsa-constants.c:60
 msgid "Master Mono"
 msgstr "Glavni mono"
 
-#: ../backends/alsa/alsa-constants.c:60
+#: ../backends/alsa/alsa-constants.c:61
 msgid "Master Digital"
 msgstr "Glavni Digitalni izhod"
-
-#: ../backends/alsa/alsa-constants.c:61 ../backends/alsa/alsa-constants.c:135
-msgid "Digital"
-msgstr "Digitalni"
 
 #: ../backends/alsa/alsa-constants.c:62 ../backends/alsa/alsa-constants.c:63
 msgid "Side Speaker"
@@ -97,11 +97,12 @@ msgid "Wave"
 msgstr "Val"
 
 #: ../backends/alsa/alsa-constants.c:66 ../backends/alsa/alsa-constants.c:99
-#: ../backends/alsa/alsa-constants.c:213
+#: ../backends/alsa/alsa-constants.c:215
 msgid "Phone"
 msgstr "Telefon"
 
-#: ../backends/alsa/alsa-constants.c:67 ../backends/oss/oss-device.c:98
+#: ../backends/alsa/alsa-constants.c:67 ../backends/alsa/alsa-constants.c:213
+#: ../backends/oss/oss-device.c:98
 msgid "CD"
 msgstr "CD"
 
@@ -151,8 +152,9 @@ msgid "Capture"
 msgstr "zajem"
 
 #. Microphone options
-#: ../backends/alsa/alsa-constants.c:82 ../backends/alsa/alsa-constants.c:156
-#: ../backends/alsa/alsa-constants.c:157 ../backends/oss/oss-device.c:97
+#: ../backends/alsa/alsa-constants.c:82 ../backends/alsa/alsa-constants.c:126
+#: ../backends/alsa/alsa-constants.c:156 ../backends/alsa/alsa-constants.c:157
+#: ../backends/oss/oss-device.c:97
 msgid "Microphone"
 msgstr "Mikrofon"
 
@@ -206,7 +208,8 @@ msgstr "Vhodna linija"
 msgid "Auxiliary"
 msgstr "Auxiliary"
 
-#: ../backends/alsa/alsa-constants.c:96 ../backends/oss/oss-device.c:115
+#: ../backends/alsa/alsa-constants.c:96 ../backends/alsa/alsa-constants.c:214
+#: ../backends/oss/oss-device.c:115
 msgid "Video"
 msgstr "Video"
 
@@ -254,6 +257,7 @@ msgstr "Ojačanje Naglavnega Mikrofona"
 msgid "Line In Boost"
 msgstr "Ojačanje Vhodne Linije"
 
+#. Switches
 #: ../backends/alsa/alsa-constants.c:116
 msgid "Analog Output"
 msgstr "Analogni Izhod"
@@ -262,17 +266,13 @@ msgstr "Analogni Izhod"
 msgid "Analog Source"
 msgstr "Analogni Vhod"
 
-#: ../backends/alsa/alsa-constants.c:118 ../backends/oss/oss-stream.c:207
+#: ../backends/alsa/alsa-constants.c:118
 msgid "Capture Source"
 msgstr "Zajem Vira"
 
-#: ../backends/alsa/alsa-constants.c:119
+#: ../backends/alsa/alsa-constants.c:119 ../backends/alsa/alsa-constants.c:120
 msgid "Input Source"
 msgstr "Vhodni Vir"
-
-#: ../backends/alsa/alsa-constants.c:120
-msgid "Input Source Select"
-msgstr "Izbira Vhodnega Vira"
 
 #: ../backends/alsa/alsa-constants.c:121
 msgid "Digital Input Source"
@@ -287,16 +287,12 @@ msgid "Digital Playback Source"
 msgstr "Vir Digitalnega Predvajanja"
 
 #: ../backends/alsa/alsa-constants.c:124
-msgid "Mono Output Select"
+msgid "Mono Output"
 msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:125
-msgid "Shared Mic/Line In"
-msgstr "Deljen Mikrofon/Linijski Vhod"
-
-#: ../backends/alsa/alsa-constants.c:126
-msgid "Microphone Select"
-msgstr "Izbor Mikrofona"
+msgid "Shared Microphone/Line In"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:127
 msgid "Microphone Jack Mode"
@@ -310,7 +306,7 @@ msgstr ""
 msgid "Auto-Mute Mode"
 msgstr ""
 
-#. (Probably) toggles
+#. Toggles
 #: ../backends/alsa/alsa-constants.c:132
 msgid "External Amplifier"
 msgstr "Zunanji Ojačevalnik"
@@ -348,8 +344,8 @@ msgid "Mix Mono"
 msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:142
-msgid "Mic Capture"
-msgstr "Zajem Mikrofona"
+msgid "Microphone Capture"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:143 ../backends/alsa/alsa-constants.c:198
 msgid "Input 1"
@@ -460,27 +456,27 @@ msgstr "Priklopna Postaja"
 msgid "Mixer"
 msgstr "Mešalnik"
 
-#: ../backends/alsa/alsa-constants.c:214
+#: ../backends/alsa/alsa-constants.c:216
 msgid "Unknown 1"
 msgstr "Neznano 1"
 
-#: ../backends/alsa/alsa-constants.c:215
+#: ../backends/alsa/alsa-constants.c:217
 msgid "Unknown 2"
 msgstr "Neznano 2"
 
-#: ../backends/alsa/alsa-constants.c:216
+#: ../backends/alsa/alsa-constants.c:218
 msgid "Enabled"
 msgstr "Omogočeno"
 
-#: ../backends/alsa/alsa-constants.c:217
+#: ../backends/alsa/alsa-constants.c:219
 msgid "Disabled"
 msgstr "Neomogočeno"
 
-#: ../backends/alsa/alsa-device.c:610
+#: ../backends/alsa/alsa-device.c:635
 msgid "On"
 msgstr "Vklopljeno"
 
-#: ../backends/alsa/alsa-device.c:611
+#: ../backends/alsa/alsa-device.c:636
 msgid "Off"
 msgstr "Izklopljeno"
 
@@ -547,6 +543,12 @@ msgstr "Telefonski Izhod"
 msgid "Radio"
 msgstr "Radio"
 
+#. Create the port switch
+#: ../backends/oss/oss-stream.c:208 ../backends/pulse/pulse-sink.c:149
+#: ../backends/pulse/pulse-source.c:146
+msgid "Connector"
+msgstr ""
+
 #: ../backends/pulse/pulse-device.c:399
 msgid "Profile"
 msgstr "Profil"
@@ -554,8 +556,3 @@ msgstr "Profil"
 #: ../backends/pulse/pulse-monitor.c:282
 msgid "Peak detect"
 msgstr "Detekcija konice"
-
-#. Create the port switch
-#: ../backends/pulse/pulse-sink.c:149 ../backends/pulse/pulse-source.c:146
-msgid "Port"
-msgstr "Vrata"

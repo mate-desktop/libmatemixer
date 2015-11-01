@@ -4,15 +4,15 @@
 # 
 # Translators:
 # 박정규(Jung Kyu Park) <bagjunggyu@gmail.com>, 2014
-# Seong-ho Cho <darkcircle.0426@gmail.com>, 2014
+# Seong-ho Cho <darkcircle.0426@gmail.com>, 2014-2015
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-28 09:27+0100\n"
-"PO-Revision-Date: 2014-11-04 12:40+0000\n"
-"Last-Translator: 박정규(Jung Kyu Park) <bagjunggyu@gmail.com>\n"
-"Language-Team: Korean (http://www.transifex.com/projects/p/MATE/language/ko/)\n"
+"POT-Creation-Date: 2015-09-09 12:55+0200\n"
+"PO-Revision-Date: 2015-10-27 21:36+0000\n"
+"Last-Translator: Seong-ho Cho <darkcircle.0426@gmail.com>\n"
+"Language-Team: Korean (http://www.transifex.com/mate/MATE/language/ko/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -32,16 +32,16 @@ msgstr "하드웨어 마스터"
 msgid "PCM"
 msgstr "PCM"
 
-#: ../backends/alsa/alsa-constants.c:43
-msgid "Desktop Speaker"
-msgstr "데스크톱 스피커"
-
 #. OSS manual says this should be the beeper, but Linux OSS seems to assign it
 #. to
 #. * regular volume control
-#: ../backends/alsa/alsa-constants.c:44 ../backends/oss/oss-device.c:95
+#: ../backends/alsa/alsa-constants.c:43 ../backends/oss/oss-device.c:95
 msgid "Speaker"
 msgstr "스피커"
+
+#: ../backends/alsa/alsa-constants.c:44
+msgid "Desktop Speaker"
+msgstr "데스크톱 스피커"
 
 #: ../backends/alsa/alsa-constants.c:45 ../backends/alsa/alsa-constants.c:46
 #: ../backends/alsa/alsa-constants.c:47
@@ -73,17 +73,17 @@ msgstr "중앙 스피커"
 msgid "CLFE Speaker"
 msgstr "CLFE 스피커"
 
-#: ../backends/alsa/alsa-constants.c:59
+#: ../backends/alsa/alsa-constants.c:59 ../backends/alsa/alsa-constants.c:135
+msgid "Digital"
+msgstr "디지털"
+
+#: ../backends/alsa/alsa-constants.c:60
 msgid "Master Mono"
 msgstr "마스터 모노"
 
-#: ../backends/alsa/alsa-constants.c:60
+#: ../backends/alsa/alsa-constants.c:61
 msgid "Master Digital"
 msgstr "마스터 디지털"
-
-#: ../backends/alsa/alsa-constants.c:61 ../backends/alsa/alsa-constants.c:135
-msgid "Digital"
-msgstr "디지털"
 
 #: ../backends/alsa/alsa-constants.c:62 ../backends/alsa/alsa-constants.c:63
 msgid "Side Speaker"
@@ -98,11 +98,12 @@ msgid "Wave"
 msgstr "웨이브 음원"
 
 #: ../backends/alsa/alsa-constants.c:66 ../backends/alsa/alsa-constants.c:99
-#: ../backends/alsa/alsa-constants.c:213
+#: ../backends/alsa/alsa-constants.c:215
 msgid "Phone"
 msgstr "폰"
 
-#: ../backends/alsa/alsa-constants.c:67 ../backends/oss/oss-device.c:98
+#: ../backends/alsa/alsa-constants.c:67 ../backends/alsa/alsa-constants.c:213
+#: ../backends/oss/oss-device.c:98
 msgid "CD"
 msgstr "CD"
 
@@ -152,8 +153,9 @@ msgid "Capture"
 msgstr "캡처"
 
 #. Microphone options
-#: ../backends/alsa/alsa-constants.c:82 ../backends/alsa/alsa-constants.c:156
-#: ../backends/alsa/alsa-constants.c:157 ../backends/oss/oss-device.c:97
+#: ../backends/alsa/alsa-constants.c:82 ../backends/alsa/alsa-constants.c:126
+#: ../backends/alsa/alsa-constants.c:156 ../backends/alsa/alsa-constants.c:157
+#: ../backends/oss/oss-device.c:97
 msgid "Microphone"
 msgstr "마이크로폰"
 
@@ -207,7 +209,8 @@ msgstr "입력 단자"
 msgid "Auxiliary"
 msgstr "외부 입력"
 
-#: ../backends/alsa/alsa-constants.c:96 ../backends/oss/oss-device.c:115
+#: ../backends/alsa/alsa-constants.c:96 ../backends/alsa/alsa-constants.c:214
+#: ../backends/oss/oss-device.c:115
 msgid "Video"
 msgstr "비디오"
 
@@ -255,6 +258,7 @@ msgstr "헤드셋 마이크로폰 증폭"
 msgid "Line In Boost"
 msgstr "입력 증폭"
 
+#. Switches
 #: ../backends/alsa/alsa-constants.c:116
 msgid "Analog Output"
 msgstr "아날로그 출력"
@@ -263,17 +267,13 @@ msgstr "아날로그 출력"
 msgid "Analog Source"
 msgstr "아날로그 소스"
 
-#: ../backends/alsa/alsa-constants.c:118 ../backends/oss/oss-stream.c:207
+#: ../backends/alsa/alsa-constants.c:118
 msgid "Capture Source"
 msgstr "캡처 소스"
 
-#: ../backends/alsa/alsa-constants.c:119
+#: ../backends/alsa/alsa-constants.c:119 ../backends/alsa/alsa-constants.c:120
 msgid "Input Source"
 msgstr "입력 소스"
-
-#: ../backends/alsa/alsa-constants.c:120
-msgid "Input Source Select"
-msgstr "입력 소스 선택"
 
 #: ../backends/alsa/alsa-constants.c:121
 msgid "Digital Input Source"
@@ -288,16 +288,12 @@ msgid "Digital Playback Source"
 msgstr "디지털 재생 소스"
 
 #: ../backends/alsa/alsa-constants.c:124
-msgid "Mono Output Select"
-msgstr "모노 출력 선택"
+msgid "Mono Output"
+msgstr "모노 출력"
 
 #: ../backends/alsa/alsa-constants.c:125
-msgid "Shared Mic/Line In"
-msgstr "공유 마이크/입력 단자"
-
-#: ../backends/alsa/alsa-constants.c:126
-msgid "Microphone Select"
-msgstr "마이크로폰 선택"
+msgid "Shared Microphone/Line In"
+msgstr "공유 마이크/입력 라인"
 
 #: ../backends/alsa/alsa-constants.c:127
 msgid "Microphone Jack Mode"
@@ -311,7 +307,7 @@ msgstr "서라운드 잭 모드"
 msgid "Auto-Mute Mode"
 msgstr "자동 음소거 모드"
 
-#. (Probably) toggles
+#. Toggles
 #: ../backends/alsa/alsa-constants.c:132
 msgid "External Amplifier"
 msgstr "외부 앰프"
@@ -349,8 +345,8 @@ msgid "Mix Mono"
 msgstr "믹서 모노"
 
 #: ../backends/alsa/alsa-constants.c:142
-msgid "Mic Capture"
-msgstr "마이크로폰 캡처"
+msgid "Microphone Capture"
+msgstr "마이크 캡처"
 
 #: ../backends/alsa/alsa-constants.c:143 ../backends/alsa/alsa-constants.c:198
 msgid "Input 1"
@@ -461,27 +457,27 @@ msgstr "도킹 스테이션"
 msgid "Mixer"
 msgstr "믹서"
 
-#: ../backends/alsa/alsa-constants.c:214
+#: ../backends/alsa/alsa-constants.c:216
 msgid "Unknown 1"
 msgstr "알 수 없음 1"
 
-#: ../backends/alsa/alsa-constants.c:215
+#: ../backends/alsa/alsa-constants.c:217
 msgid "Unknown 2"
 msgstr "알 수 없음 2"
 
-#: ../backends/alsa/alsa-constants.c:216
+#: ../backends/alsa/alsa-constants.c:218
 msgid "Enabled"
 msgstr "사용중"
 
-#: ../backends/alsa/alsa-constants.c:217
+#: ../backends/alsa/alsa-constants.c:219
 msgid "Disabled"
 msgstr "사용하지 않음"
 
-#: ../backends/alsa/alsa-device.c:610
+#: ../backends/alsa/alsa-device.c:635
 msgid "On"
 msgstr "켜짐"
 
-#: ../backends/alsa/alsa-device.c:611
+#: ../backends/alsa/alsa-device.c:636
 msgid "Off"
 msgstr "꺼짐"
 
@@ -548,6 +544,12 @@ msgstr "폰 출력"
 msgid "Radio"
 msgstr "라디오"
 
+#. Create the port switch
+#: ../backends/oss/oss-stream.c:208 ../backends/pulse/pulse-sink.c:149
+#: ../backends/pulse/pulse-source.c:146
+msgid "Connector"
+msgstr "커넥터"
+
 #: ../backends/pulse/pulse-device.c:399
 msgid "Profile"
 msgstr "프로파일"
@@ -555,8 +557,3 @@ msgstr "프로파일"
 #: ../backends/pulse/pulse-monitor.c:282
 msgid "Peak detect"
 msgstr "피크 감지"
-
-#. Create the port switch
-#: ../backends/pulse/pulse-sink.c:149 ../backends/pulse/pulse-source.c:146
-msgid "Port"
-msgstr "포트"

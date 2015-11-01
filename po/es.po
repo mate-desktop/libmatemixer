@@ -4,16 +4,17 @@
 # 
 # Translators:
 # Andres Sanchez <blackatze93@gmail.com>, 2014
+# Benjamin Perez Carrillo <benperezc@gmail.com>, 2015
 # difusion, 2014
 # Emiliano Fascetti, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-10-28 09:27+0100\n"
-"PO-Revision-Date: 2014-12-21 01:47+0000\n"
-"Last-Translator: Emiliano Fascetti\n"
-"Language-Team: Spanish (http://www.transifex.com/projects/p/MATE/language/es/)\n"
+"POT-Creation-Date: 2015-09-09 12:55+0200\n"
+"PO-Revision-Date: 2015-09-30 01:00+0000\n"
+"Last-Translator: Benjamin Perez Carrillo <benperezc@gmail.com>\n"
+"Language-Team: Spanish (http://www.transifex.com/mate/MATE/language/es/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -33,16 +34,16 @@ msgstr "Maestro hardware"
 msgid "PCM"
 msgstr "PCM"
 
-#: ../backends/alsa/alsa-constants.c:43
-msgid "Desktop Speaker"
-msgstr "Altavoz de escritorio"
-
 #. OSS manual says this should be the beeper, but Linux OSS seems to assign it
 #. to
 #. * regular volume control
-#: ../backends/alsa/alsa-constants.c:44 ../backends/oss/oss-device.c:95
+#: ../backends/alsa/alsa-constants.c:43 ../backends/oss/oss-device.c:95
 msgid "Speaker"
 msgstr "Altavoz"
+
+#: ../backends/alsa/alsa-constants.c:44
+msgid "Desktop Speaker"
+msgstr "Altavoz de escritorio"
 
 #: ../backends/alsa/alsa-constants.c:45 ../backends/alsa/alsa-constants.c:46
 #: ../backends/alsa/alsa-constants.c:47
@@ -74,17 +75,17 @@ msgstr "Altavoz central"
 msgid "CLFE Speaker"
 msgstr "Altavoz CLFE"
 
-#: ../backends/alsa/alsa-constants.c:59
+#: ../backends/alsa/alsa-constants.c:59 ../backends/alsa/alsa-constants.c:135
+msgid "Digital"
+msgstr "Digital"
+
+#: ../backends/alsa/alsa-constants.c:60
 msgid "Master Mono"
 msgstr "Maestro mono"
 
-#: ../backends/alsa/alsa-constants.c:60
+#: ../backends/alsa/alsa-constants.c:61
 msgid "Master Digital"
 msgstr "Maestro digital"
-
-#: ../backends/alsa/alsa-constants.c:61 ../backends/alsa/alsa-constants.c:135
-msgid "Digital"
-msgstr "Digital"
 
 #: ../backends/alsa/alsa-constants.c:62 ../backends/alsa/alsa-constants.c:63
 msgid "Side Speaker"
@@ -99,11 +100,12 @@ msgid "Wave"
 msgstr "Onda"
 
 #: ../backends/alsa/alsa-constants.c:66 ../backends/alsa/alsa-constants.c:99
-#: ../backends/alsa/alsa-constants.c:213
+#: ../backends/alsa/alsa-constants.c:215
 msgid "Phone"
 msgstr "Teléfono"
 
-#: ../backends/alsa/alsa-constants.c:67 ../backends/oss/oss-device.c:98
+#: ../backends/alsa/alsa-constants.c:67 ../backends/alsa/alsa-constants.c:213
+#: ../backends/oss/oss-device.c:98
 msgid "CD"
 msgstr "CD"
 
@@ -153,8 +155,9 @@ msgid "Capture"
 msgstr "Captura"
 
 #. Microphone options
-#: ../backends/alsa/alsa-constants.c:82 ../backends/alsa/alsa-constants.c:156
-#: ../backends/alsa/alsa-constants.c:157 ../backends/oss/oss-device.c:97
+#: ../backends/alsa/alsa-constants.c:82 ../backends/alsa/alsa-constants.c:126
+#: ../backends/alsa/alsa-constants.c:156 ../backends/alsa/alsa-constants.c:157
+#: ../backends/oss/oss-device.c:97
 msgid "Microphone"
 msgstr "Micrófono"
 
@@ -208,7 +211,8 @@ msgstr "Entrada de línea"
 msgid "Auxiliary"
 msgstr "Auxiliar"
 
-#: ../backends/alsa/alsa-constants.c:96 ../backends/oss/oss-device.c:115
+#: ../backends/alsa/alsa-constants.c:96 ../backends/alsa/alsa-constants.c:214
+#: ../backends/oss/oss-device.c:115
 msgid "Video"
 msgstr "Vídeo"
 
@@ -256,6 +260,7 @@ msgstr "Aumento del micrófono de casco"
 msgid "Line In Boost"
 msgstr "Aumento de entrada de línea"
 
+#. Switches
 #: ../backends/alsa/alsa-constants.c:116
 msgid "Analog Output"
 msgstr "Salida analógica"
@@ -264,17 +269,13 @@ msgstr "Salida analógica"
 msgid "Analog Source"
 msgstr "Origen de analógica"
 
-#: ../backends/alsa/alsa-constants.c:118 ../backends/oss/oss-stream.c:207
+#: ../backends/alsa/alsa-constants.c:118
 msgid "Capture Source"
 msgstr "Origen de captura"
 
-#: ../backends/alsa/alsa-constants.c:119
+#: ../backends/alsa/alsa-constants.c:119 ../backends/alsa/alsa-constants.c:120
 msgid "Input Source"
 msgstr "Origen de entrada"
-
-#: ../backends/alsa/alsa-constants.c:120
-msgid "Input Source Select"
-msgstr "Selección de origen de entrada"
 
 #: ../backends/alsa/alsa-constants.c:121
 msgid "Digital Input Source"
@@ -289,16 +290,12 @@ msgid "Digital Playback Source"
 msgstr "Origen de reproducción digital"
 
 #: ../backends/alsa/alsa-constants.c:124
-msgid "Mono Output Select"
-msgstr "Selección de salida mono"
+msgid "Mono Output"
+msgstr "Salida de audio monofónica"
 
 #: ../backends/alsa/alsa-constants.c:125
-msgid "Shared Mic/Line In"
-msgstr "Mic compartido/Entrada de línea"
-
-#: ../backends/alsa/alsa-constants.c:126
-msgid "Microphone Select"
-msgstr "Selección de micrófono"
+msgid "Shared Microphone/Line In"
+msgstr "Micrófono compartido/Entrada de línea"
 
 #: ../backends/alsa/alsa-constants.c:127
 msgid "Microphone Jack Mode"
@@ -312,7 +309,7 @@ msgstr "Modo Jack surround"
 msgid "Auto-Mute Mode"
 msgstr "Modo silencioso automático"
 
-#. (Probably) toggles
+#. Toggles
 #: ../backends/alsa/alsa-constants.c:132
 msgid "External Amplifier"
 msgstr "Amplificador externo"
@@ -350,8 +347,8 @@ msgid "Mix Mono"
 msgstr "Mezcla mono"
 
 #: ../backends/alsa/alsa-constants.c:142
-msgid "Mic Capture"
-msgstr "Captura de micrófono"
+msgid "Microphone Capture"
+msgstr "Control de micrófono"
 
 #: ../backends/alsa/alsa-constants.c:143 ../backends/alsa/alsa-constants.c:198
 msgid "Input 1"
@@ -462,27 +459,27 @@ msgstr "Replicador de puertos"
 msgid "Mixer"
 msgstr "Mezclador"
 
-#: ../backends/alsa/alsa-constants.c:214
+#: ../backends/alsa/alsa-constants.c:216
 msgid "Unknown 1"
 msgstr "Desconocido 1"
 
-#: ../backends/alsa/alsa-constants.c:215
+#: ../backends/alsa/alsa-constants.c:217
 msgid "Unknown 2"
 msgstr "Desconocido 2"
 
-#: ../backends/alsa/alsa-constants.c:216
+#: ../backends/alsa/alsa-constants.c:218
 msgid "Enabled"
 msgstr "Habilitado"
 
-#: ../backends/alsa/alsa-constants.c:217
+#: ../backends/alsa/alsa-constants.c:219
 msgid "Disabled"
 msgstr "Deshabilitado"
 
-#: ../backends/alsa/alsa-device.c:610
+#: ../backends/alsa/alsa-device.c:635
 msgid "On"
 msgstr "Encendido"
 
-#: ../backends/alsa/alsa-device.c:611
+#: ../backends/alsa/alsa-device.c:636
 msgid "Off"
 msgstr "Apagado"
 
@@ -549,6 +546,12 @@ msgstr "Salida de teléfono"
 msgid "Radio"
 msgstr "Radio"
 
+#. Create the port switch
+#: ../backends/oss/oss-stream.c:208 ../backends/pulse/pulse-sink.c:149
+#: ../backends/pulse/pulse-source.c:146
+msgid "Connector"
+msgstr "Conector"
+
 #: ../backends/pulse/pulse-device.c:399
 msgid "Profile"
 msgstr "Perfil"
@@ -556,8 +559,3 @@ msgstr "Perfil"
 #: ../backends/pulse/pulse-monitor.c:282
 msgid "Peak detect"
 msgstr "Detección de picos"
-
-#. Create the port switch
-#: ../backends/pulse/pulse-sink.c:149 ../backends/pulse/pulse-source.c:146
-msgid "Port"
-msgstr "Puerto"
