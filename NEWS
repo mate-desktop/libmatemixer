@@ -1,4 +1,12 @@
 ==============
+Version 1.10.1
+==============
+
+- alsa: Fix fade
+- alsa: Fix FTBFS with old versions of ALSA
+- oss: Only use modify counter for polling on Linux, it is broken on BSDs
+
+==============
 Version 1.10.0
 ==============
 
