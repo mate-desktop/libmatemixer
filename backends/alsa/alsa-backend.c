@@ -314,14 +314,16 @@ read_device (AlsaBackend *alsa, const gchar *card)
     const gchar         *id;
     gint                 ret;
 
-    /* The device may be already known, remove it if it's known and fails
-     * to be read, this happens for example when PulseAudio is killed */
+    /*
+     * The device may be already known.
+     *
+     * Make sure it is removed from the list of devices if it fails to be
+     * read. This commonly happens with the "default" device, which is not
+     * reassigned by ALSA when the sound card is removed or the sound mixer
+     * quits.
+    */
     ret = snd_ctl_open (&ctl, card, 0);
     if (ret < 0) {
-        g_warning ("Failed to open ALSA control for %s: %s",
-                   card,
-                   snd_strerror (ret));
-
         remove_device_by_name (alsa, card);
         return FALSE;
     }
