@@ -373,7 +373,6 @@ pulse_device_load (PulseDevice *device, const pa_card_info *info)
 {
     guint i;
 
-#if PA_CHECK_VERSION (2, 0, 0)
     for (i = 0; i < info->n_ports; i++) {
         PulsePort   *port;
         const gchar *name;
@@ -391,7 +390,6 @@ pulse_device_load (PulseDevice *device, const pa_card_info *info)
                              g_strdup (name),
                              port);
     }
-#endif
 
     /* Create the device profile switch */
     if (info->n_profiles > 0) {

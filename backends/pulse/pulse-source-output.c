@@ -82,7 +82,6 @@ pulse_source_output_new (PulseSource                 *source,
      * Also make sure to make the name unique by including the PulseAudio index. */
     name = g_strdup_printf ("pulse-input-control-%lu", (gulong) info->index);
 
-#if PA_CHECK_VERSION(1, 0, 0)
     if (info->has_volume) {
         flags |=
             MATE_MIXER_STREAM_CONTROL_VOLUME_READABLE |
@@ -91,14 +90,6 @@ pulse_source_output_new (PulseSource                 *source,
         if (info->volume_writable)
             flags |= MATE_MIXER_STREAM_CONTROL_VOLUME_WRITABLE;
     }
-#else
-    /* Pre-1.0 PulseAudio does not include the has_volume and volume_writable
-     * fields, but does include the volume info, so let's give it a try */
-    flags |=
-        MATE_MIXER_STREAM_CONTROL_VOLUME_READABLE |
-        MATE_MIXER_STREAM_CONTROL_VOLUME_WRITABLE |
-        MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL;
-#endif
 
     if (info->client != PA_INVALID_INDEX) {
         app_info = _mate_mixer_app_info_new ();
@@ -157,10 +148,8 @@ pulse_source_output_update (PulseSourceOutput           *output,
     _mate_mixer_stream_control_set_mute (MATE_MIXER_STREAM_CONTROL (output),
                                          info->mute ? TRUE : FALSE);
 
-#if PA_CHECK_VERSION(1, 0, 0)
     pulse_stream_control_set_channel_map (PULSE_STREAM_CONTROL (output),
                                           &info->channel_map);
-
     if (info->has_volume)
         pulse_stream_control_set_cvolume (PULSE_STREAM_CONTROL (output),
                                           &info->volume,
@@ -169,14 +158,6 @@ pulse_source_output_update (PulseSourceOutput           *output,
         pulse_stream_control_set_cvolume (PULSE_STREAM_CONTROL (output),
                                           NULL,
                                           0);
-#else
-    pulse_stream_control_set_channel_map (PULSE_STREAM_CONTROL (output),
-                                          &info->channel_map);
-
-    pulse_stream_control_set_volume (PULSE_STREAM_CONTROL (output),
-                                     &info->volume,
-                                     0);
-#endif
 
     g_object_thaw_notify (G_OBJECT (output));
 }

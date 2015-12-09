@@ -1000,7 +1000,6 @@ pulse_connection_set_source_output_mute (PulseConnection *connection,
                                          guint32          index,
                                          gboolean         mute)
 {
-#if PA_CHECK_VERSION(1, 0, 0)
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
@@ -1014,9 +1013,6 @@ pulse_connection_set_source_output_mute (PulseConnection *connection,
                                             NULL, NULL);
 
     return process_pulse_operation (connection, op);
-#else
-    return FALSE;
-#endif
 }
 
 gboolean
@@ -1024,7 +1020,6 @@ pulse_connection_set_source_output_volume (PulseConnection  *connection,
                                            guint32           index,
                                            const pa_cvolume *volume)
 {
-#if PA_CHECK_VERSION(1, 0, 0)
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
@@ -1038,9 +1033,6 @@ pulse_connection_set_source_output_volume (PulseConnection  *connection,
                                               NULL, NULL);
 
     return process_pulse_operation (connection, op);
-#else
-    return FALSE;
-#endif
 }
 
 gboolean
