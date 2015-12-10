@@ -56,7 +56,7 @@ libmatemixer_la_SOURCES =                                       \
 libmatemixer_la_LIBADD = $(GLIB_LIBS)
 
 libmatemixer_la_LDFLAGS =                                       \
-        -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)    \
+        -version-info $(LT_VERSION)                             \
         -no-undefined                                           \
         -export-dynamic
 
