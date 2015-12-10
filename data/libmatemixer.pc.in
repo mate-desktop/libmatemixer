@@ -4,7 +4,7 @@ libdir=@libdir@
 includedir=@includedir@
 
 Name: libmatemixer
-Description:
+Description: Mixer library for MATE Desktop
 Version: @VERSION@
 Requires: glib-2.0 gobject-2.0 gmodule-2.0
 Libs: -L${libdir} -lmatemixer
