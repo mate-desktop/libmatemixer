@@ -537,11 +537,11 @@ remove_device_by_list_item (OssBackend *oss, GList *item)
                                           G_CALLBACK (remove_device),
                                           oss);
 
+    /* May emit removed signals */
     if (oss_device_is_open (device) == TRUE)
         oss_device_close (device);
 
-    g_signal_handlers_disconnect_by_func (G_OBJECT (device),
-                                          G_CALLBACK (remove_stream),
+    g_signal_handlers_disconnect_by_data (G_OBJECT (device),
                                           oss);
 
     oss->priv->devices = g_list_delete_link (oss->priv->devices, item);
@@ -554,7 +554,7 @@ remove_device_by_list_item (OssBackend *oss, GList *item)
         oss->priv->default_device = NULL;
     }
 
-    /* The list may and may not have been invalidate by device signals */
+    /* The list may have been invalidated by device signals */
     free_stream_list (oss);
 
     g_signal_emit_by_name (G_OBJECT (oss),

@@ -435,17 +435,23 @@ remove_device_by_list_item (AlsaBackend *alsa, GList *item)
 
     device = ALSA_DEVICE (item->data);
 
-    g_signal_handlers_disconnect_by_data (G_OBJECT (device), alsa);
+    g_signal_handlers_disconnect_by_func (G_OBJECT (device),
+                                          G_CALLBACK (remove_device),
+                                          alsa);
 
+    /* May emit removed signals */
     if (alsa_device_is_open (device) == TRUE)
         alsa_device_close (device);
+
+    g_signal_handlers_disconnect_by_data (G_OBJECT (device),
+                                          alsa);
 
     alsa->priv->devices = g_list_delete_link (alsa->priv->devices, item);
 
     g_hash_table_remove (alsa->priv->devices_ids,
                          ALSA_DEVICE_GET_ID (device));
 
-    /* The list may and may not have been invalidate by device signals */
+    /* The list may have been invalidated by device signals */
     free_stream_list (alsa);
 
     g_signal_emit_by_name (G_OBJECT (alsa),
