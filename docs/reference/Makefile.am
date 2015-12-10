@@ -53,15 +53,15 @@ EXTRA_HFILES=
 # Header files or dirs to ignore when scanning. Use base file/dir names
 # e.g. IGNORE_HFILES=gtkdebug.h gtkintl.h private_code
 IGNORE_HFILES=                                          \
-        matemixer-app-info-private.h                    \
-        matemixer-backend.h                             \
-        matemixer-backend-module.h                      \
-        matemixer-enum-types.h                          \
-        matemixer-stream-control-private.h              \
-        matemixer-stream-private.h                      \
-        matemixer-switch-option-private.h               \
-        matemixer-switch-private.h                      \
-        matemixer-private.h
+	matemixer-app-info-private.h                    \
+	matemixer-backend.h                             \
+	matemixer-backend-module.h                      \
+	matemixer-enum-types.h                          \
+	matemixer-stream-control-private.h              \
+	matemixer-stream-private.h                      \
+	matemixer-switch-option-private.h               \
+	matemixer-switch-private.h                      \
+	matemixer-private.h
 
 # Images to copy into HTML directory.
 # e.g. HTML_IMAGES=$(top_srcdir)/gtk/stock-icons/stock_about_24.png
@@ -82,13 +82,13 @@ expand_content_files=
 # e.g. GTKDOC_CFLAGS=-I$(top_srcdir) -I$(top_builddir) $(GTK_DEBUG_FLAGS)
 # e.g. GTKDOC_LIBS=$(top_builddir)/gtk/$(gtktargetlib)
 GTKDOC_CFLAGS=                                          \
-        -I$(top_srcdir)                                 \
-        -I$(top_builddir)                               \
-        $(GLIB_CFLAGS)
+	-I$(top_srcdir)                                 \
+	-I$(top_builddir)                               \
+	$(GLIB_CFLAGS)
 
 GTKDOC_LIBS=                                            \
-        $(top_builddir)/libmatemixer/libmatemixer.la    \
-        $(GLIB_LIBS)
+	$(top_builddir)/libmatemixer/libmatemixer.la    \
+	$(GLIB_LIBS)
 
 # This includes the standard gtk-doc make rules, copied by gtkdocize.
 include $(top_srcdir)/gtk-doc.make
@@ -106,8 +106,8 @@ EXTRA_DIST += version.xml.in
 # and run some sanity checks
 if ENABLE_GTK_DOC
 TESTS_ENVIRONMENT = \
-  DOC_MODULE=$(DOC_MODULE) DOC_MAIN_SGML_FILE=$(DOC_MAIN_SGML_FILE) \
-  SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir)
+	DOC_MODULE=$(DOC_MODULE) DOC_MAIN_SGML_FILE=$(DOC_MAIN_SGML_FILE) \
+	SRCDIR=$(abs_srcdir) BUILDDIR=$(abs_builddir)
 #TESTS = $(GTKDOC_CHECK)
 endif
 
