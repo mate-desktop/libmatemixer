@@ -665,9 +665,24 @@ pulse_stream_control_get_min_volume (MateMixerStreamControl *mmsc)
 static guint
 pulse_stream_control_get_max_volume (MateMixerStreamControl *mmsc)
 {
+    MateMixerStreamControlFlags flags;
+
     g_return_val_if_fail (PULSE_IS_STREAM_CONTROL (mmsc), (guint) PA_VOLUME_MUTED);
 
-    return (guint) PA_VOLUME_UI_MAX;
+    flags = mate_mixer_stream_control_get_flags (mmsc);
+
+    /*
+     * From PulseAudio wiki:
+     * For all volumes that are > PA_VOLUME_NORM (i.e. beyond the maximum volume
+     * setting of the hw) PA will do digital amplification. This works only for
+     * devices that have PA_SINK_DECIBEL_VOLUME/PA_SOURCE_DECIBEL_VOLUME set. For
+     * devices that lack this flag do not extend the volume slider like this, it
+     * will not have any effect.
+     */
+    if (flags & MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL)
+        return (guint) PA_VOLUME_UI_MAX;
+    else
+        return (guint) PA_VOLUME_NORM;
 }
 
 static guint
@@ -688,7 +703,7 @@ pulse_stream_control_get_base_volume (MateMixerStreamControl *mmsc)
     control = PULSE_STREAM_CONTROL (mmsc);
 
     if (control->priv->base_volume > 0)
-        return control->priv->base_volume;
+        return (guint) control->priv->base_volume;
     else
         return (guint) PA_VOLUME_NORM;
 }

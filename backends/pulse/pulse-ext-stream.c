@@ -599,7 +599,7 @@ pulse_ext_stream_get_max_volume (MateMixerStreamControl *mmsc)
 {
     g_return_val_if_fail (PULSE_IS_EXT_STREAM (mmsc), (guint) PA_VOLUME_MUTED);
 
-    return (guint) PA_VOLUME_UI_MAX;
+    return (guint) PA_VOLUME_NORM;
 }
 
 static guint

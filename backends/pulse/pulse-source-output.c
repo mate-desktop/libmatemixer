@@ -35,16 +35,22 @@ static void pulse_source_output_init       (PulseSourceOutput      *output);
 
 G_DEFINE_TYPE (PulseSourceOutput, pulse_source_output, PULSE_TYPE_STREAM_CONTROL);
 
-static gboolean      pulse_source_output_set_mute       (PulseStreamControl *psc,
-                                                         gboolean            mute);
-static gboolean      pulse_source_output_set_volume     (PulseStreamControl *psc,
-                                                         pa_cvolume         *cvolume);
-static PulseMonitor *pulse_source_output_create_monitor (PulseStreamControl *psc);
+static guint         pulse_source_output_get_max_volume (MateMixerStreamControl *mmsc);
+
+static gboolean      pulse_source_output_set_mute       (PulseStreamControl     *psc,
+                                                         gboolean                mute);
+static gboolean      pulse_source_output_set_volume     (PulseStreamControl     *psc,
+                                                         pa_cvolume             *cvolume);
+static PulseMonitor *pulse_source_output_create_monitor (PulseStreamControl     *psc);
 
 static void
 pulse_source_output_class_init (PulseSourceOutputClass *klass)
 {
-    PulseStreamControlClass *control_class;
+    MateMixerStreamControlClass *mmsc_class;
+    PulseStreamControlClass     *control_class;
+
+    mmsc_class = MATE_MIXER_STREAM_CONTROL_CLASS (klass);
+    mmsc_class->get_max_volume    = pulse_source_output_get_max_volume;
 
     control_class = PULSE_STREAM_CONTROL_CLASS (klass);
     control_class->set_mute       = pulse_source_output_set_mute;
@@ -160,6 +166,15 @@ pulse_source_output_update (PulseSourceOutput           *output,
                                           0);
 
     g_object_thaw_notify (G_OBJECT (output));
+}
+
+static guint
+pulse_source_output_get_max_volume (MateMixerStreamControl *mmsc)
+{
+    g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (mmsc), (guint) PA_VOLUME_MUTED);
+
+    /* Do not extend the volume to PA_VOLUME_UI_MAX as PulseStreamControl does */
+    return (guint) PA_VOLUME_NORM;
 }
 
 static gboolean

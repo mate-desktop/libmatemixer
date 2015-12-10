@@ -35,16 +35,22 @@ static void pulse_sink_input_init       (PulseSinkInput      *input);
 
 G_DEFINE_TYPE (PulseSinkInput, pulse_sink_input, PULSE_TYPE_STREAM_CONTROL);
 
-static gboolean      pulse_sink_input_set_mute       (PulseStreamControl *psc,
-                                                      gboolean            mute);
-static gboolean      pulse_sink_input_set_volume     (PulseStreamControl *psc,
-                                                      pa_cvolume         *cvolume);
-static PulseMonitor *pulse_sink_input_create_monitor (PulseStreamControl *psc);
+static guint         pulse_sink_input_get_max_volume (MateMixerStreamControl *mmsc);
+
+static gboolean      pulse_sink_input_set_mute       (PulseStreamControl     *psc,
+                                                      gboolean                mute);
+static gboolean      pulse_sink_input_set_volume     (PulseStreamControl     *psc,
+                                                      pa_cvolume             *cvolume);
+static PulseMonitor *pulse_sink_input_create_monitor (PulseStreamControl     *psc);
 
 static void
 pulse_sink_input_class_init (PulseSinkInputClass *klass)
 {
-    PulseStreamControlClass *control_class;
+    MateMixerStreamControlClass *mmsc_class;
+    PulseStreamControlClass     *control_class;
+
+    mmsc_class = MATE_MIXER_STREAM_CONTROL_CLASS (klass);
+    mmsc_class->get_max_volume    = pulse_sink_input_get_max_volume;
 
     control_class = PULSE_STREAM_CONTROL_CLASS (klass);
     control_class->set_mute       = pulse_sink_input_set_mute;
@@ -171,6 +177,15 @@ pulse_sink_input_update (PulseSinkInput *input, const pa_sink_input_info *info)
                                           0);
 
     g_object_thaw_notify (G_OBJECT (input));
+}
+
+static guint
+pulse_sink_input_get_max_volume (MateMixerStreamControl *mmsc)
+{
+    g_return_val_if_fail (PULSE_IS_SINK_INPUT (mmsc), (guint) PA_VOLUME_MUTED);
+
+    /* Do not extend the volume to PA_VOLUME_UI_MAX as PulseStreamControl does */
+    return (guint) PA_VOLUME_NORM;
 }
 
 static gboolean
