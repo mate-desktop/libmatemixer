@@ -27,10 +27,14 @@
 #include "oss-stream.h"
 #include "oss-stream-control.h"
 
+#define LEFT_CHANNEL  0
+#define RIGHT_CHANNEL 1
+
 #define OSS_VOLUME_JOIN(left,right)   (((left) & 0xFF) | (((right) & 0xFF) << 8))
 
 #define OSS_VOLUME_JOIN_SAME(volume)  (OSS_VOLUME_JOIN ((volume), (volume)))
-#define OSS_VOLUME_JOIN_ARRAY(volume) (OSS_VOLUME_JOIN ((volume[0]), (volume[1])))
+#define OSS_VOLUME_JOIN_ARRAY(volume) (OSS_VOLUME_JOIN ((volume[LEFT_CHANNEL]), \
+                                                        (volume[RIGHT_CHANNEL])))
 
 #define OSS_VOLUME_TAKE_LEFT(volume)  ((volume) & 0xFF)
 #define OSS_VOLUME_TAKE_RIGHT(volume) (((volume) >> 8) & 0xFF)
@@ -75,9 +79,12 @@ static guint                    oss_stream_control_get_max_volume       (MateMix
 static guint                    oss_stream_control_get_normal_volume    (MateMixerStreamControl  *mmsc);
 static guint                    oss_stream_control_get_base_volume      (MateMixerStreamControl  *mmsc);
 
-static void                     read_balance                            (OssStreamControl        *control);
+static void                     store_volume                            (OssStreamControl        *control,
+                                                                         gint                     volume);
 
-static gboolean                 write_and_set_volume                    (OssStreamControl        *control,
+static void                     update_balance                          (OssStreamControl        *control);
+
+static gboolean                 write_and_store_volume                  (OssStreamControl        *control,
                                                                          gint                     volume);
 
 static void
@@ -192,16 +199,7 @@ oss_stream_control_load (OssStreamControl *control)
     if (ret == -1)
         return;
 
-    if (v != OSS_VOLUME_JOIN_ARRAY (control->priv->volume)) {
-        control->priv->volume[0] = OSS_VOLUME_TAKE_LEFT (v);
-        if (control->priv->stereo == TRUE)
-            control->priv->volume[1] = OSS_VOLUME_TAKE_RIGHT (v);
-
-        g_object_notify (G_OBJECT (control), "volume");
-    }
-
-    if (control->priv->stereo == TRUE)
-        read_balance (control);
+    store_volume (control, v);
 }
 
 void
@@ -234,9 +232,10 @@ oss_stream_control_get_volume (MateMixerStreamControl *mmsc)
     control = OSS_STREAM_CONTROL (mmsc);
 
     if (control->priv->stereo == TRUE)
-        return MAX (control->priv->volume[0], control->priv->volume[1]);
+        return MAX (control->priv->volume[LEFT_CHANNEL],
+                    control->priv->volume[RIGHT_CHANNEL]);
     else
-        return control->priv->volume[0];
+        return control->priv->volume[LEFT_CHANNEL];
 }
 
 static gboolean
@@ -251,7 +250,7 @@ oss_stream_control_set_volume (MateMixerStreamControl *mmsc, guint volume)
     if G_UNLIKELY (control->priv->fd == -1)
         return FALSE;
 
-    return write_and_set_volume (control, OSS_VOLUME_JOIN_SAME (CLAMP (volume, 0, 100)));
+    return write_and_store_volume (control, OSS_VOLUME_JOIN_SAME (CLAMP (volume, 0, 100)));
 }
 
 static guint
@@ -264,11 +263,11 @@ oss_stream_control_get_channel_volume (MateMixerStreamControl *mmsc, guint chann
     control = OSS_STREAM_CONTROL (mmsc);
 
     if (control->priv->stereo == TRUE) {
-        if (channel == 0 || channel == 1)
+        if (channel == LEFT_CHANNEL || channel == RIGHT_CHANNEL)
             return control->priv->volume[channel];
     } else {
-        if (channel == 0)
-            return control->priv->volume[0];
+        if (channel == LEFT_CHANNEL)
+            return control->priv->volume[LEFT_CHANNEL];
     }
     return 0;
 }
@@ -287,23 +286,18 @@ oss_stream_control_set_channel_volume (MateMixerStreamControl *mmsc,
 
     if G_UNLIKELY (control->priv->fd == -1)
         return FALSE;
-    if (channel > 1 || (control->priv->stereo == FALSE && channel > 0))
+
+    if (channel != LEFT_CHANNEL &&
+        (control->priv->stereo == FALSE || channel != RIGHT_CHANNEL))
         return FALSE;
 
     volume = CLAMP (volume, 0, 100);
+    if (channel == LEFT_CHANNEL)
+        v = OSS_VOLUME_JOIN (volume, control->priv->volume[RIGHT_CHANNEL]);
+    else
+        v = OSS_VOLUME_JOIN (control->priv->volume[LEFT_CHANNEL], volume);
 
-    if (control->priv->stereo == TRUE) {
-        /* Stereo channel volume - left channel is in the lower 8 bits and
-         * right channel is in the higher 8 bits */
-        if (channel == 0)
-            v = OSS_VOLUME_JOIN (volume, control->priv->volume[1]);
-        else
-            v = OSS_VOLUME_JOIN (control->priv->volume[0], volume);
-    } else {
-        /* Single channel volume - only lower 8 bits are used */
-        v = volume;
-    }
-    return write_and_set_volume (control, v);
+    return write_and_store_volume (control, v);
 }
 
 static MateMixerChannelPosition
@@ -316,12 +310,12 @@ oss_stream_control_get_channel_position (MateMixerStreamControl *mmsc, guint cha
     control = OSS_STREAM_CONTROL (mmsc);
 
     if (control->priv->stereo == TRUE) {
-        if (channel == 0)
+        if (channel == LEFT_CHANNEL)
             return MATE_MIXER_CHANNEL_FRONT_LEFT;
-        else if (channel == 1)
+        else if (channel == RIGHT_CHANNEL)
             return MATE_MIXER_CHANNEL_FRONT_RIGHT;
     } else {
-        if (channel == 0)
+        if (channel == LEFT_CHANNEL)
             return MATE_MIXER_CHANNEL_MONO;
     }
     return MATE_MIXER_CHANNEL_UNKNOWN;
@@ -357,15 +351,16 @@ oss_stream_control_set_balance (MateMixerStreamControl *mmsc, gfloat balance)
     if G_UNLIKELY (control->priv->fd == -1)
         return FALSE;
 
-    max = MAX (control->priv->volume[0], control->priv->volume[1]);
+    max = MAX (control->priv->volume[LEFT_CHANNEL],
+               control->priv->volume[RIGHT_CHANNEL]);
     if (balance <= 0) {
-        volume[1] = (balance + 1.0f) * max;
-        volume[0] = max;
+        volume[RIGHT_CHANNEL] = (balance + 1.0f) * max;
+        volume[LEFT_CHANNEL]  = max;
     } else {
-        volume[0] = (1.0f - balance) * max;
-        volume[1] = max;
+        volume[LEFT_CHANNEL]  = (1.0f - balance) * max;
+        volume[RIGHT_CHANNEL] = max;
     }
-    return write_and_set_volume (control, OSS_VOLUME_JOIN_ARRAY (volume));
+    return write_and_store_volume (control, OSS_VOLUME_JOIN_ARRAY (volume));
 }
 
 static guint
@@ -399,11 +394,43 @@ oss_stream_control_get_base_volume (MateMixerStreamControl *mmsc)
 }
 
 static void
-read_balance (OssStreamControl *control)
+store_volume (OssStreamControl *control, gint volume)
+{
+    if (control->priv->stereo == TRUE) {
+        if (volume == OSS_VOLUME_JOIN_ARRAY (control->priv->volume))
+            return;
+
+        control->priv->volume[LEFT_CHANNEL]  = OSS_VOLUME_TAKE_LEFT (volume);
+        control->priv->volume[RIGHT_CHANNEL] = OSS_VOLUME_TAKE_RIGHT (volume);
+
+        g_object_freeze_notify (G_OBJECT (control));
+
+        g_object_notify (G_OBJECT (control), "volume");
+
+        /* Emits signal if balance has changed */
+        update_balance (control);
+
+        g_object_thaw_notify (G_OBJECT (control));
+    } else {
+        volume = OSS_VOLUME_TAKE_LEFT (volume);
+        if (volume == control->priv->volume[LEFT_CHANNEL])
+            return;
+
+        control->priv->volume[LEFT_CHANNEL] = volume;
+
+        g_object_notify (G_OBJECT (control), "volume");
+    }
+}
+
+static void
+update_balance (OssStreamControl *control)
 {
     gfloat balance;
-    guint  left  = control->priv->volume[0];
-    guint  right = control->priv->volume[1];
+    guint  left;
+    guint  right;
+
+    left  = control->priv->volume[LEFT_CHANNEL];
+    right = control->priv->volume[RIGHT_CHANNEL];
 
     if (left == right)
         balance = 0.0f;
@@ -417,7 +444,7 @@ read_balance (OssStreamControl *control)
 }
 
 static gboolean
-write_and_set_volume (OssStreamControl *control, gint volume)
+write_and_store_volume (OssStreamControl *control, gint volume)
 {
     gint ret;
 
@@ -425,18 +452,11 @@ write_and_set_volume (OssStreamControl *control, gint volume)
     if (volume == OSS_VOLUME_JOIN_ARRAY (control->priv->volume))
         return TRUE;
 
+    /* The ioctl might also change the passed volume */
     ret = ioctl (control->priv->fd, MIXER_WRITE (control->priv->devnum), &volume);
     if (ret == -1)
         return FALSE;
 
-    oss_stream_control_load (control);
-    return TRUE;
-
-    /* The ioctl may make adjustments to the passed volume, so make sure we have
-     * the correct value saved */
-    control->priv->volume[0] = OSS_VOLUME_TAKE_LEFT (volume);
-    control->priv->volume[1] = OSS_VOLUME_TAKE_RIGHT (volume);
-
-    g_object_notify (G_OBJECT (control), "volume");
+    store_volume (control, volume & 0xFFFF);
     return TRUE;
 }
