@@ -393,9 +393,19 @@ mate_mixer_stream_get_switch (MateMixerStream *stream, const gchar *name)
 MateMixerStreamControl *
 mate_mixer_stream_get_default_control (MateMixerStream *stream)
 {
+    const GList *list;
+
     g_return_val_if_fail (MATE_MIXER_IS_STREAM (stream), NULL);
 
-    return stream->priv->control;
+    if (stream->priv->control != NULL)
+        return stream->priv->control;
+
+    /* If the stream does not have a default control, just return the first one */
+    list = mate_mixer_stream_list_controls (stream);
+    if (list != NULL)
+        return MATE_MIXER_STREAM_CONTROL (list->data);
+
+    return NULL;
 }
 
 /**
