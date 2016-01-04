@@ -56,8 +56,9 @@ struct _PulseSinkControlClass
 
 GType             pulse_sink_control_get_type (void) G_GNUC_CONST;
 
-PulseSinkControl *pulse_sink_control_new      (PulseSink          *sink,
-                                               const pa_sink_info *info);
+PulseSinkControl *pulse_sink_control_new      (PulseConnection    *connection,
+                                               const pa_sink_info *info,
+                                               PulseSink          *sink);
 
 void              pulse_sink_control_update   (PulseSinkControl   *control,
                                                const pa_sink_info *info);

@@ -55,8 +55,9 @@ struct _PulseSourceOutputClass
 
 GType              pulse_source_output_get_type (void) G_GNUC_CONST;
 
-PulseSourceOutput *pulse_source_output_new      (PulseSource                 *source,
-                                                 const pa_source_output_info *info);
+PulseSourceOutput *pulse_source_output_new      (PulseConnection             *connection,
+                                                 const pa_source_output_info *info,
+                                                 PulseSource                 *source);
 
 void               pulse_source_output_update   (PulseSourceOutput           *output,
                                                  const pa_source_output_info *info);

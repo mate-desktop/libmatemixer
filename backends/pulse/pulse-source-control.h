@@ -56,8 +56,9 @@ struct _PulseSourceControlClass
 
 GType               pulse_source_control_get_type (void) G_GNUC_CONST;
 
-PulseSourceControl *pulse_source_control_new      (PulseSource          *source,
-                                                   const pa_source_info *info);
+PulseSourceControl *pulse_source_control_new      (PulseConnection      *connection,
+                                                   const pa_source_info *info,
+                                                   PulseSource          *source);
 
 void                pulse_source_control_update   (PulseSourceControl   *control,
                                                    const pa_source_info *info);

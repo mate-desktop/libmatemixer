@@ -64,7 +64,9 @@ pulse_sink_input_init (PulseSinkInput *input)
 }
 
 PulseSinkInput *
-pulse_sink_input_new (PulseSink *sink, const pa_sink_input_info *info)
+pulse_sink_input_new (PulseConnection          *connection,
+                      const pa_sink_input_info *info,
+                      PulseSink                *parent)
 {
     PulseSinkInput   *input;
     gchar            *name;
@@ -79,8 +81,9 @@ pulse_sink_input_new (PulseSink *sink, const pa_sink_input_info *info)
 
     MateMixerStreamControlMediaRole media_role = MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_UNKNOWN;
 
-    g_return_val_if_fail (PULSE_IS_SINK (sink), NULL);
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), NULL);
     g_return_val_if_fail (info != NULL, NULL);
+    g_return_val_if_fail (PULSE_IS_SINK (parent), NULL);
 
     /* Many mixer applications query the Pulse client list and use the client
      * name here, but we use the name only as an identifier, so let's avoid
@@ -141,8 +144,9 @@ pulse_sink_input_new (PulseSink *sink, const pa_sink_input_info *info)
                           "flags", flags,
                           "role", role,
                           "media-role", media_role,
+                          "stream", parent,
+                          "connection", connection,
                           "index", info->index,
-                          "stream", sink,
                           NULL);
     g_free (name);
 
@@ -197,7 +201,7 @@ pulse_sink_input_set_mute (PulseStreamControl *psc, gboolean mute)
 {
     g_return_val_if_fail (PULSE_IS_SINK_INPUT (psc), FALSE);
 
-    return pulse_connection_set_sink_input_mute (PULSE_STREAM_CONTROL_GET_CONNECTION (psc),
+    return pulse_connection_set_sink_input_mute (pulse_stream_control_get_connection (psc),
                                                  pulse_stream_control_get_index (psc),
                                                  mute);
 }
@@ -208,7 +212,7 @@ pulse_sink_input_set_volume (PulseStreamControl *psc, pa_cvolume *cvolume)
     g_return_val_if_fail (PULSE_IS_SINK_INPUT (psc), FALSE);
     g_return_val_if_fail (cvolume != NULL, FALSE);
 
-    return pulse_connection_set_sink_input_volume (PULSE_STREAM_CONTROL_GET_CONNECTION (psc),
+    return pulse_connection_set_sink_input_volume (pulse_stream_control_get_connection (psc),
                                                    pulse_stream_control_get_index (psc),
                                                    cvolume);
 }
@@ -230,7 +234,7 @@ pulse_sink_input_create_monitor (PulseStreamControl *psc)
         return NULL;
     }
 
-    return pulse_connection_create_monitor (PULSE_STREAM_CONTROL_GET_CONNECTION (psc),
+    return pulse_connection_create_monitor (pulse_stream_control_get_connection (psc),
                                             index,
                                             pulse_stream_control_get_index (psc));
 }

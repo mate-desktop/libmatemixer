@@ -55,8 +55,9 @@ struct _PulseSinkInputClass
 
 GType           pulse_sink_input_get_type (void) G_GNUC_CONST;
 
-PulseSinkInput *pulse_sink_input_new      (PulseSink                *sink,
-                                           const pa_sink_input_info *info);
+PulseSinkInput *pulse_sink_input_new      (PulseConnection          *connection,
+                                           const pa_sink_input_info *info,
+                                           PulseSink                *sink);
 
 void            pulse_sink_input_update   (PulseSinkInput           *input,
                                            const pa_sink_input_info *info);

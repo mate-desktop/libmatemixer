@@ -138,7 +138,7 @@ pulse_source_new (PulseConnection      *connection,
                            "index", info->index,
                            NULL);
 
-    source->priv->control = pulse_source_control_new (source, info);
+    source->priv->control = pulse_source_control_new (connection, info, source);
 
     if (info->n_ports > 0) {
         pa_source_port_info **ports = info->ports;
@@ -194,8 +194,12 @@ pulse_source_add_output (PulseSource *source, const pa_source_output_info *info)
     output = g_hash_table_lookup (source->priv->outputs, GUINT_TO_POINTER (info->index));
     if (output == NULL) {
         const gchar *name;
+        PulseConnection *connection;
 
-        output = pulse_source_output_new (source, info);
+        connection = pulse_stream_get_connection (PULSE_STREAM (source));
+        output = pulse_source_output_new (connection,
+                                          info,
+                                          source);
         g_hash_table_insert (source->priv->outputs,
                              GUINT_TO_POINTER (info->index),
                              output);

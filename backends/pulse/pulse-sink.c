@@ -141,7 +141,7 @@ pulse_sink_new (PulseConnection    *connection,
                          "index", info->index,
                          NULL);
 
-    sink->priv->control = pulse_sink_control_new (sink, info);
+    sink->priv->control = pulse_sink_control_new (connection, info, sink);
 
     if (info->n_ports > 0) {
         pa_sink_port_info **ports = info->ports;
@@ -197,8 +197,13 @@ pulse_sink_add_input (PulseSink *sink, const pa_sink_input_info *info)
     input = g_hash_table_lookup (sink->priv->inputs, GUINT_TO_POINTER (info->index));
     if (input == NULL) {
         const gchar *name;
+        PulseConnection *connection;
 
-        input = pulse_sink_input_new (sink, info);
+        connection = pulse_stream_get_connection (PULSE_STREAM (sink));
+        input = pulse_sink_input_new (connection,
+                                      info,
+                                      sink);
+
         g_hash_table_insert (sink->priv->inputs,
                              GUINT_TO_POINTER (info->index),
                              input);

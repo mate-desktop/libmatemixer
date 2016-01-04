@@ -64,8 +64,9 @@ pulse_source_output_init (PulseSourceOutput *output)
 }
 
 PulseSourceOutput *
-pulse_source_output_new (PulseSource                 *source,
-                         const pa_source_output_info *info)
+pulse_source_output_new (PulseConnection             *connection,
+                         const pa_source_output_info *info,
+                         PulseSource                 *parent)
 {
     PulseSourceOutput *output;
     gchar             *name;
@@ -79,8 +80,9 @@ pulse_source_output_new (PulseSource                 *source,
 
     MateMixerStreamControlMediaRole media_role = MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_UNKNOWN;
 
-    g_return_val_if_fail (PULSE_IS_SOURCE (source), NULL);
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), NULL);
     g_return_val_if_fail (info != NULL, NULL);
+    g_return_val_if_fail (PULSE_IS_SOURCE (parent), NULL);
 
     /* Many mixer applications query the Pulse client list and use the client
      * name here, but we use the name only as an identifier, so let's avoid
@@ -129,8 +131,9 @@ pulse_source_output_new (PulseSource                 *source,
                           "flags", flags,
                           "role", role,
                           "media-role", media_role,
+                          "stream", parent,
+                          "connection", connection,
                           "index", info->index,
-                          "stream", source,
                           NULL);
     g_free (name);
 
@@ -186,7 +189,7 @@ pulse_source_output_set_mute (PulseStreamControl *psc, gboolean mute)
 {
     g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (psc), FALSE);
 
-    return pulse_connection_set_source_output_mute (PULSE_STREAM_CONTROL_GET_CONNECTION (psc),
+    return pulse_connection_set_source_output_mute (pulse_stream_control_get_connection (psc),
                                                     pulse_stream_control_get_index (psc),
                                                     mute);
 }
@@ -197,7 +200,7 @@ pulse_source_output_set_volume (PulseStreamControl *psc, pa_cvolume *cvolume)
     g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (psc), FALSE);
     g_return_val_if_fail (cvolume != NULL, FALSE);
 
-    return pulse_connection_set_source_output_volume (PULSE_STREAM_CONTROL_GET_CONNECTION (psc),
+    return pulse_connection_set_source_output_volume (pulse_stream_control_get_connection (psc),
                                                       pulse_stream_control_get_index (psc),
                                                       cvolume);
 }
@@ -207,7 +210,7 @@ pulse_source_output_create_monitor (PulseStreamControl *psc)
 {
     g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (psc), NULL);
 
-    return pulse_connection_create_monitor (PULSE_STREAM_CONTROL_GET_CONNECTION (psc),
+    return pulse_connection_create_monitor (pulse_stream_control_get_connection (psc),
                                             PULSE_STREAM_CONTROL_GET_STREAM_INDEX (psc),
                                             PA_INVALID_INDEX);
 }

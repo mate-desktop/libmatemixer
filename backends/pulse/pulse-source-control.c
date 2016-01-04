@@ -56,8 +56,9 @@ pulse_source_control_init (PulseSourceControl *control)
 }
 
 PulseSourceControl *
-pulse_source_control_new (PulseSource          *source,
-                          const pa_source_info *info)
+pulse_source_control_new (PulseConnection      *connection,
+                          const pa_source_info *info,
+                          PulseSource          *parent)
 {
     PulseSourceControl         *control;
     MateMixerStreamControlFlags flags = MATE_MIXER_STREAM_CONTROL_MUTE_READABLE |
@@ -67,8 +68,9 @@ pulse_source_control_new (PulseSource          *source,
                                         MATE_MIXER_STREAM_CONTROL_HAS_MONITOR;
     MateMixerStreamControlRole  role;
 
-    g_return_val_if_fail (PULSE_IS_SOURCE (source), NULL);
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), NULL);
     g_return_val_if_fail (info != NULL, NULL);
+    g_return_val_if_fail (PULSE_IS_SOURCE (parent), NULL);
 
     if (info->active_port != NULL)
         role = MATE_MIXER_STREAM_CONTROL_ROLE_PORT;
@@ -84,7 +86,8 @@ pulse_source_control_new (PulseSource          *source,
                             "label", info->description,
                             "flags", flags,
                             "role", role,
-                            "stream", source,
+                            "stream", parent,
+                            "connection", connection,
                             NULL);
 
     pulse_source_control_update (control, info);
@@ -118,7 +121,7 @@ pulse_source_control_set_mute (PulseStreamControl *psc, gboolean mute)
 {
     g_return_val_if_fail (PULSE_IS_SOURCE_CONTROL (psc), FALSE);
 
-    return pulse_connection_set_source_mute (PULSE_STREAM_CONTROL_GET_CONNECTION (psc),
+    return pulse_connection_set_source_mute (pulse_stream_control_get_connection (psc),
                                              PULSE_STREAM_CONTROL_GET_STREAM_INDEX (psc),
                                              mute);
 }
@@ -129,7 +132,7 @@ pulse_source_control_set_volume (PulseStreamControl *psc, pa_cvolume *cvolume)
     g_return_val_if_fail (PULSE_IS_SOURCE_CONTROL (psc), FALSE);
     g_return_val_if_fail (cvolume != NULL, FALSE);
 
-    return pulse_connection_set_source_volume (PULSE_STREAM_CONTROL_GET_CONNECTION (psc),
+    return pulse_connection_set_source_volume (pulse_stream_control_get_connection (psc),
                                                PULSE_STREAM_CONTROL_GET_STREAM_INDEX (psc),
                                                cvolume);
 }
@@ -148,7 +151,7 @@ pulse_source_control_create_monitor (PulseStreamControl *psc)
         return NULL;
     }
 
-    return pulse_connection_create_monitor (PULSE_STREAM_CONTROL_GET_CONNECTION (psc),
+    return pulse_connection_create_monitor (pulse_stream_control_get_connection (psc),
                                             index,
                                             PA_INVALID_INDEX);
 }

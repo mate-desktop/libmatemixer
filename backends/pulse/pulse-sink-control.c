@@ -56,8 +56,9 @@ pulse_sink_control_init (PulseSinkControl *control)
 }
 
 PulseSinkControl *
-pulse_sink_control_new (PulseSink          *sink,
-                        const pa_sink_info *info)
+pulse_sink_control_new (PulseConnection    *connection,
+                        const pa_sink_info *info,
+                        PulseSink          *parent)
 {
     PulseSinkControl           *control;
     MateMixerStreamControlFlags flags = MATE_MIXER_STREAM_CONTROL_MUTE_READABLE |
@@ -67,8 +68,9 @@ pulse_sink_control_new (PulseSink          *sink,
     MateMixerStreamControlRole  role;
     guint32                     index;
 
-    g_return_val_if_fail (PULSE_IS_SINK (sink), NULL);
+    g_return_val_if_fail (PULSE_IS_CONNECTION (connection), NULL);
     g_return_val_if_fail (info != NULL, NULL);
+    g_return_val_if_fail (PULSE_IS_SINK (parent), NULL);
 
     if (info->active_port != NULL)
         role = MATE_MIXER_STREAM_CONTROL_ROLE_PORT;
@@ -79,7 +81,7 @@ pulse_sink_control_new (PulseSink          *sink,
     if (info->flags & PA_SINK_DECIBEL_VOLUME)
         flags |= MATE_MIXER_STREAM_CONTROL_HAS_DECIBEL;
 
-    index = pulse_sink_get_index_monitor (sink);
+    index = pulse_sink_get_index_monitor (parent);
     if (index != PA_INVALID_INDEX)
         flags |= MATE_MIXER_STREAM_CONTROL_HAS_MONITOR;
 
@@ -88,7 +90,8 @@ pulse_sink_control_new (PulseSink          *sink,
                             "label", info->description,
                             "flags", flags,
                             "role", role,
-                            "stream", sink,
+                            "stream", parent,
+                            "connection", connection,
                             NULL);
 
     pulse_sink_control_update (control, info);
@@ -122,7 +125,7 @@ pulse_sink_control_set_mute (PulseStreamControl *psc, gboolean mute)
 {
     g_return_val_if_fail (PULSE_IS_SINK_CONTROL (psc), FALSE);
 
-    return pulse_connection_set_sink_mute (PULSE_STREAM_CONTROL_GET_CONNECTION (psc),
+    return pulse_connection_set_sink_mute (pulse_stream_control_get_connection (psc),
                                            PULSE_STREAM_CONTROL_GET_STREAM_INDEX (psc),
                                            mute);
 }
@@ -133,7 +136,7 @@ pulse_sink_control_set_volume (PulseStreamControl *psc, pa_cvolume *cvolume)
     g_return_val_if_fail (PULSE_IS_SINK_CONTROL (psc), FALSE);
     g_return_val_if_fail (cvolume != NULL, FALSE);
 
-    return pulse_connection_set_sink_volume (PULSE_STREAM_CONTROL_GET_CONNECTION (psc),
+    return pulse_connection_set_sink_volume (pulse_stream_control_get_connection (psc),
                                              PULSE_STREAM_CONTROL_GET_STREAM_INDEX (psc),
                                              cvolume);
 }
@@ -155,7 +158,7 @@ pulse_sink_control_create_monitor (PulseStreamControl *psc)
         return NULL;
     }
 
-    return pulse_connection_create_monitor (PULSE_STREAM_CONTROL_GET_CONNECTION (psc),
+    return pulse_connection_create_monitor (pulse_stream_control_get_connection (psc),
                                             index,
                                             PA_INVALID_INDEX);
 }

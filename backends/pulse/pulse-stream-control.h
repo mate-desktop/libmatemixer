@@ -41,8 +41,6 @@ G_BEGIN_DECLS
 #define PULSE_STREAM_CONTROL_GET_CLASS(o)       \
         (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_TYPE_STREAM_CONTROL, PulseStreamControlClass))
 
-#define PULSE_STREAM_CONTROL_GET_CONNECTION(psc)    \
-        (pulse_stream_get_connection (PULSE_STREAM (mate_mixer_stream_control_get_stream (MATE_MIXER_STREAM_CONTROL (psc)))))
 #define PULSE_STREAM_CONTROL_GET_STREAM_INDEX(psc)  \
         (pulse_stream_get_index (PULSE_STREAM (mate_mixer_stream_control_get_stream (MATE_MIXER_STREAM_CONTROL (psc)))))
 
