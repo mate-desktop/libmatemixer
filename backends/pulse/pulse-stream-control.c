@@ -308,14 +308,19 @@ pulse_stream_control_get_channel_map (PulseStreamControl *control)
 }
 
 void
-pulse_stream_control_set_app_info (PulseStreamControl *control, MateMixerAppInfo *info)
+pulse_stream_control_set_app_info (PulseStreamControl *control,
+                                   MateMixerAppInfo   *info,
+                                   gboolean            take)
 {
     g_return_if_fail (PULSE_IS_STREAM_CONTROL (control));
 
-    if G_UNLIKELY (control->priv->app_info)
+    if G_UNLIKELY (control->priv->app_info != NULL)
         _mate_mixer_app_info_free (control->priv->app_info);
 
-    control->priv->app_info = info;
+    if (take == TRUE)
+        control->priv->app_info = info;
+    else
+        control->priv->app_info = _mate_mixer_app_info_copy (info);
 }
 
 void
@@ -324,11 +329,10 @@ pulse_stream_control_set_channel_map (PulseStreamControl *control, const pa_chan
     MateMixerStreamControlFlags flags;
 
     g_return_if_fail (PULSE_IS_STREAM_CONTROL (control));
-    g_return_if_fail (map != NULL);
 
     flags = mate_mixer_stream_control_get_flags (MATE_MIXER_STREAM_CONTROL (control));
 
-    if (pa_channel_map_valid (map)) {
+    if (map != NULL && pa_channel_map_valid (map)) {
         if (pa_channel_map_can_balance (map))
             flags |= MATE_MIXER_STREAM_CONTROL_CAN_BALANCE;
         else

@@ -89,6 +89,12 @@ alsa_toggle_new (AlsaStream               *stream,
 {
     AlsaToggle *toggle;
 
+    g_return_val_if_fail (ALSA_IS_STREAM (stream), NULL);
+    g_return_val_if_fail (name  != NULL, NULL);
+    g_return_val_if_fail (label != NULL, NULL);
+    g_return_val_if_fail (ALSA_IS_SWITCH_OPTION (on), NULL);
+    g_return_val_if_fail (ALSA_IS_SWITCH_OPTION (off), NULL);
+
     toggle = g_object_new (ALSA_TYPE_TOGGLE,
                            "name", name,
                            "label", label,
@@ -165,6 +171,8 @@ alsa_toggle_load (AlsaElement *element)
     gint                         value;
     gint                         ret;
     snd_mixer_selem_channel_id_t c;
+
+    g_return_val_if_fail (ALSA_IS_TOGGLE (element), FALSE);
 
     toggle = ALSA_TOGGLE (element);
 

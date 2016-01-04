@@ -253,6 +253,7 @@ MateMixerSwitchOption *
 mate_mixer_switch_get_option (MateMixerSwitch *swtch, const gchar *name)
 {
     g_return_val_if_fail (MATE_MIXER_IS_SWITCH (swtch), NULL);
+    g_return_val_if_fail (name != NULL, NULL);
 
     return MATE_MIXER_SWITCH_GET_CLASS (swtch)->get_option (swtch, name);
 }

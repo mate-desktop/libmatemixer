@@ -73,6 +73,8 @@ const pa_channel_position_t pulse_channel_map_to[MATE_MIXER_CHANNEL_MAX] =
 MateMixerStreamControlMediaRole
 pulse_convert_media_role_name (const gchar *name)
 {
+    g_return_val_if_fail (name != NULL, MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_UNKNOWN);
+
     if (!strcmp (name, "video")) {
         return MATE_MIXER_STREAM_CONTROL_MEDIA_ROLE_VIDEO;
     }

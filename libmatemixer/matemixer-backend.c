@@ -618,6 +618,7 @@ _mate_mixer_backend_set_default_input_stream (MateMixerBackend *backend,
                                               MateMixerStream  *stream)
 {
     g_return_if_fail (MATE_MIXER_IS_BACKEND (backend));
+    g_return_if_fail (stream == NULL || MATE_MIXER_IS_STREAM (stream));
 
     if (backend->priv->default_input == stream)
         return;
@@ -642,6 +643,7 @@ _mate_mixer_backend_set_default_output_stream (MateMixerBackend *backend,
                                                MateMixerStream  *stream)
 {
     g_return_if_fail (MATE_MIXER_IS_BACKEND (backend));
+    g_return_if_fail (stream == NULL || MATE_MIXER_IS_STREAM (stream));
 
     if (backend->priv->default_output == stream)
         return;

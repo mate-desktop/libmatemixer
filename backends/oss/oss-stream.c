@@ -21,6 +21,7 @@
 #include <libmatemixer/matemixer.h>
 #include <libmatemixer/matemixer-private.h>
 
+#include "oss-device.h"
 #include "oss-stream.h"
 #include "oss-stream-control.h"
 #include "oss-switch.h"
@@ -93,7 +94,12 @@ oss_stream_new (const gchar       *name,
                 MateMixerDevice   *device,
                 MateMixerDirection direction)
 {
-    const gchar *label = mate_mixer_device_get_label (device);
+    const gchar *label;
+
+    g_return_val_if_fail (name != NULL, NULL);
+    g_return_val_if_fail (OSS_IS_DEVICE (device), NULL);
+
+    label = mate_mixer_device_get_label (device);
 
     return g_object_new (OSS_TYPE_STREAM,
                          "name", name,
@@ -208,6 +214,8 @@ oss_stream_set_switch_data (OssStream *stream, gint fd, GList *options)
                                           _("Connector"),
                                           fd,
                                           options);
+    if G_UNLIKELY (stream->priv->swtch == NULL)
+        return;
 
     /* Read the active selection */
     oss_switch_load (stream->priv->swtch);

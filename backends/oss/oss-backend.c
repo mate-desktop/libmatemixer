@@ -298,7 +298,7 @@ read_devices (OssBackend *oss)
 
     for (i = 0; i < OSS_MAX_DEVICES; i++) {
         gchar   *path;
-        gboolean added_current = FALSE;
+        gboolean added_current;
 
         path = g_strdup_printf ("/dev/mixer%i", i);
 
@@ -333,6 +333,8 @@ read_device (OssBackend *oss, const gchar *path, gboolean *added)
     gchar     *bname;
     gchar     *label;
 
+    *added = FALSE;
+
     fd = g_open (path, O_RDWR, 0);
     if (fd == -1) {
         if (errno != ENOENT && errno != ENXIO)
@@ -360,11 +362,13 @@ read_device (OssBackend *oss, const gchar *path, gboolean *added)
 
     close (fd);
 
-    if ((*added = oss_device_open (device)) == TRUE)
-        add_device (oss, device);
-    else
-        g_object_unref (device);
-
+    if G_LIKELY (device != NULL) {
+        *added = oss_device_open (device);
+        if (*added == TRUE)
+            add_device (oss, device);
+        else
+            g_object_unref (device);
+    }
     return *added;
 }
 

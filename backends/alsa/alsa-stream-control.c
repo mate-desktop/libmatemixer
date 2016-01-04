@@ -649,24 +649,32 @@ alsa_stream_control_set_fade (MateMixerStreamControl *mmsc, gfloat fade)
 static guint
 alsa_stream_control_get_min_volume (MateMixerStreamControl *mmsc)
 {
+    g_return_val_if_fail (ALSA_IS_STREAM_CONTROL (mmsc), 0);
+
     return ALSA_STREAM_CONTROL (mmsc)->priv->data.min;
 }
 
 static guint
 alsa_stream_control_get_max_volume (MateMixerStreamControl *mmsc)
 {
+    g_return_val_if_fail (ALSA_IS_STREAM_CONTROL (mmsc), 0);
+
     return ALSA_STREAM_CONTROL (mmsc)->priv->data.max;
 }
 
 static guint
 alsa_stream_control_get_normal_volume (MateMixerStreamControl *mmsc)
 {
+    g_return_val_if_fail (ALSA_IS_STREAM_CONTROL (mmsc), 0);
+
     return ALSA_STREAM_CONTROL (mmsc)->priv->data.max;
 }
 
 static guint
 alsa_stream_control_get_base_volume (MateMixerStreamControl *mmsc)
 {
+    g_return_val_if_fail (ALSA_IS_STREAM_CONTROL (mmsc), 0);
+
     return ALSA_STREAM_CONTROL (mmsc)->priv->data.max;
 }
 

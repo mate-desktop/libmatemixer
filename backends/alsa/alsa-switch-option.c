@@ -54,6 +54,9 @@ alsa_switch_option_new (const gchar *name,
 {
     AlsaSwitchOption *option;
 
+    g_return_val_if_fail (name  != NULL, NULL);
+    g_return_val_if_fail (label != NULL, NULL);
+
     option = g_object_new (ALSA_TYPE_SWITCH_OPTION,
                            "name", name,
                            "label", label,

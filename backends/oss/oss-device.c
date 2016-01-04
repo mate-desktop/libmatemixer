@@ -274,10 +274,18 @@ oss_device_new (const gchar *name,
                 gint         fd)
 {
     OssDevice *device;
+    gint       newfd;
 
     g_return_val_if_fail (name  != NULL, NULL);
     g_return_val_if_fail (label != NULL, NULL);
     g_return_val_if_fail (path  != NULL, NULL);
+
+    newfd = dup (fd);
+    if (newfd == -1) {
+        g_warning ("Failed to duplicate file descriptor: %s",
+                   g_strerror (errno));
+        return NULL;
+    }
 
     device = g_object_new (OSS_TYPE_DEVICE,
                            "name", name,
@@ -285,7 +293,7 @@ oss_device_new (const gchar *name,
                            "icon", OSS_DEVICE_ICON,
                            NULL);
 
-    device->priv->fd   = dup (fd);
+    device->priv->fd   = newfd;
     device->priv->path = g_strdup (path);
 
     return device;
@@ -584,6 +592,8 @@ read_mixer_devices (OssDevice *device)
                                           device->priv->fd,
                                           i,
                                           stereo);
+        if G_UNLIKELY (control == NULL)
+            continue;
 
         if (oss_stream_has_controls (stream) == FALSE) {
             const gchar *name =

@@ -393,8 +393,12 @@ pulse_ext_stream_update (PulseExtStream                   *ext,
     _mate_mixer_stream_control_set_flags (MATE_MIXER_STREAM_CONTROL (ext), flags);
 
     /* Also set initially, but may change at any time */
-    _mate_mixer_stream_control_set_stream (MATE_MIXER_STREAM_CONTROL (ext),
-                                           MATE_MIXER_STREAM (parent));
+    if (parent != NULL)
+        _mate_mixer_stream_control_set_stream (MATE_MIXER_STREAM_CONTROL (ext),
+                                               MATE_MIXER_STREAM (parent));
+    else
+        _mate_mixer_stream_control_set_stream (MATE_MIXER_STREAM_CONTROL (ext),
+                                               NULL);
 
     g_object_thaw_notify (G_OBJECT (ext));
 }

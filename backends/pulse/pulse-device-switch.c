@@ -89,6 +89,10 @@ pulse_device_switch_dispose (GObject *object)
 PulseDeviceSwitch *
 pulse_device_switch_new (const gchar *name, const gchar *label, PulseDevice *device)
 {
+    g_return_val_if_fail (name  != NULL, NULL);
+    g_return_val_if_fail (label != NULL, NULL);
+    g_return_val_if_fail (PULSE_IS_DEVICE (device), NULL);
+
     return g_object_new (PULSE_TYPE_DEVICE_SWITCH,
                          "name", name,
                          "label", label,

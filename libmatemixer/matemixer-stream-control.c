@@ -405,6 +405,7 @@ mate_mixer_stream_control_set_stream (MateMixerStreamControl *control,
                                       MateMixerStream        *stream)
 {
     g_return_val_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control), FALSE);
+    g_return_val_if_fail (stream == NULL || MATE_MIXER_IS_STREAM (stream), FALSE);
 
     if ((control->priv->flags & MATE_MIXER_STREAM_CONTROL_MOVABLE) == 0)
         return FALSE;
@@ -882,6 +883,7 @@ _mate_mixer_stream_control_set_stream (MateMixerStreamControl *control,
                                        MateMixerStream        *stream)
 {
     g_return_if_fail (MATE_MIXER_IS_STREAM_CONTROL (control));
+    g_return_if_fail (stream == NULL || MATE_MIXER_IS_STREAM (stream));
 
     if (control->priv->stream == stream)
         return;

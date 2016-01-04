@@ -25,6 +25,7 @@
 #include "alsa-compat.h"
 #include "alsa-constants.h"
 #include "alsa-element.h"
+#include "alsa-stream.h"
 #include "alsa-stream-control.h"
 #include "alsa-stream-output-control.h"
 
@@ -82,6 +83,10 @@ alsa_stream_output_control_new (const gchar               *name,
                                 MateMixerStreamControlRole role,
                                 AlsaStream                *stream)
 {
+    g_return_val_if_fail (name  != NULL, NULL);
+    g_return_val_if_fail (label != NULL, NULL);
+    g_return_val_if_fail (ALSA_IS_STREAM (stream), NULL);
+
     return g_object_new (ALSA_TYPE_STREAM_OUTPUT_CONTROL,
                          "name", name,
                          "label", label,
@@ -133,7 +138,7 @@ alsa_stream_output_control_set_mute (AlsaStreamControl *control, gboolean mute)
     snd_mixer_elem_t *el;
     gint              ret;
 
-    g_return_val_if_fail (ALSA_IS_STREAM_CONTROL (control), FALSE);
+    g_return_val_if_fail (ALSA_IS_STREAM_OUTPUT_CONTROL (control), FALSE);
 
     el = alsa_element_get_snd_element (ALSA_ELEMENT (control));
     if G_UNLIKELY (el == NULL)
@@ -154,7 +159,7 @@ alsa_stream_output_control_set_volume (AlsaStreamControl *control, guint volume)
     snd_mixer_elem_t *el;
     gint              ret;
 
-    g_return_val_if_fail (ALSA_IS_STREAM_CONTROL (control), FALSE);
+    g_return_val_if_fail (ALSA_IS_STREAM_OUTPUT_CONTROL (control), FALSE);
 
     el = alsa_element_get_snd_element (ALSA_ELEMENT (control));
     if G_UNLIKELY (el == NULL)
@@ -177,7 +182,7 @@ alsa_stream_output_control_set_channel_volume (AlsaStreamControl           *cont
     snd_mixer_elem_t *el;
     gint              ret;
 
-    g_return_val_if_fail (ALSA_IS_STREAM_CONTROL (control), FALSE);
+    g_return_val_if_fail (ALSA_IS_STREAM_OUTPUT_CONTROL (control), FALSE);
 
     el = alsa_element_get_snd_element (ALSA_ELEMENT (control));
     if G_UNLIKELY (el == NULL)
@@ -202,7 +207,7 @@ alsa_stream_output_control_get_volume_from_decibel (AlsaStreamControl *control,
     glong             value;
     gint              ret;
 
-    g_return_val_if_fail (ALSA_IS_STREAM_CONTROL (control), FALSE);
+    g_return_val_if_fail (ALSA_IS_STREAM_OUTPUT_CONTROL (control), FALSE);
 
     el = alsa_element_get_snd_element (ALSA_ELEMENT (control));
     if G_UNLIKELY (el == NULL)
@@ -231,7 +236,7 @@ alsa_stream_output_control_get_decibel_from_volume (AlsaStreamControl *control,
     glong             value;
     gint              ret;
 
-    g_return_val_if_fail (ALSA_IS_STREAM_CONTROL (control), FALSE);
+    g_return_val_if_fail (ALSA_IS_STREAM_OUTPUT_CONTROL (control), FALSE);
 
     el = alsa_element_get_snd_element (ALSA_ELEMENT (control));
     if G_UNLIKELY (el == NULL)

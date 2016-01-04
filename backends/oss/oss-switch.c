@@ -107,12 +107,19 @@ oss_switch_new (OssStream   *stream,
                 GList       *options)
 {
     OssSwitch *swtch;
+    gint       newfd;
 
     g_return_val_if_fail (OSS_IS_STREAM (stream), NULL);
     g_return_val_if_fail (name != NULL, NULL);
     g_return_val_if_fail (label != NULL, NULL);
-    g_return_val_if_fail (fd != -1, NULL);
     g_return_val_if_fail (options != NULL, NULL);
+
+    newfd = dup (fd);
+    if (newfd == -1) {
+        g_warning ("Failed to duplicate file descriptor: %s",
+                   g_strerror (errno));
+        return NULL;
+    }
 
     swtch = g_object_new (OSS_TYPE_SWITCH,
                           "name", name,
@@ -122,7 +129,7 @@ oss_switch_new (OssStream   *stream,
                           NULL);
 
     /* Takes ownership of options */
-    swtch->priv->fd      = dup (fd);
+    swtch->priv->fd      = newfd;
     swtch->priv->options = options;
 
     return swtch;

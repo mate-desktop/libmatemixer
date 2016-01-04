@@ -24,6 +24,7 @@
 #include "pulse-connection.h"
 #include "pulse-port.h"
 #include "pulse-port-switch.h"
+#include "pulse-source.h"
 #include "pulse-source-switch.h"
 #include "pulse-stream.h"
 
@@ -52,6 +53,10 @@ pulse_source_switch_init (PulseSourceSwitch *swtch)
 PulsePortSwitch *
 pulse_source_switch_new (const gchar *name, const gchar *label, PulseSource *source)
 {
+    g_return_val_if_fail (name  != NULL, NULL);
+    g_return_val_if_fail (label != NULL, NULL);
+    g_return_val_if_fail (PULSE_IS_SOURCE (source), NULL);
+
     return g_object_new (PULSE_TYPE_SOURCE_SWITCH,
                          "name", name,
                          "label", label,

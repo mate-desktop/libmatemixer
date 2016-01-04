@@ -134,8 +134,12 @@ pulse_source_output_new (PulseSource                 *source,
                           NULL);
     g_free (name);
 
-    if (app_info != NULL)
-        pulse_stream_control_set_app_info (PULSE_STREAM_CONTROL (output), app_info);
+    if (app_info != NULL) {
+        /* Takes ownership of app_info */
+        pulse_stream_control_set_app_info (PULSE_STREAM_CONTROL (output),
+                                           app_info,
+                                           TRUE);
+    }
 
     pulse_source_output_update (output, info);
     return output;

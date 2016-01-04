@@ -127,6 +127,7 @@ pulse_source_new (PulseConnection      *connection,
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), NULL);
     g_return_val_if_fail (info != NULL, NULL);
+    g_return_val_if_fail (device == NULL || PULSE_IS_DEVICE (device), NULL);
 
     source = g_object_new (PULSE_TYPE_SOURCE,
                            "name", info->name,
@@ -186,6 +187,9 @@ pulse_source_add_output (PulseSource *source, const pa_source_output_info *info)
 {
     PulseSourceOutput *output;
 
+    g_return_val_if_fail (PULSE_IS_SOURCE (source), FALSE);
+    g_return_val_if_fail (info != NULL, FALSE);
+
     /* This function is used for both creating and refreshing source outputs */
     output = g_hash_table_lookup (source->priv->outputs, GUINT_TO_POINTER (info->index));
     if (output == NULL) {
@@ -214,6 +218,8 @@ pulse_source_remove_output (PulseSource *source, guint32 index)
 {
     PulseSourceOutput *output;
     gchar             *name;
+
+    g_return_if_fail (PULSE_IS_SOURCE (source));
 
     output = g_hash_table_lookup (source->priv->outputs, GUINT_TO_POINTER (index));
     if G_UNLIKELY (output == NULL)

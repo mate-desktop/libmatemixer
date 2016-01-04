@@ -786,6 +786,7 @@ pulse_connection_set_default_sink (PulseConnection *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (name != NULL, FALSE);
 
     if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
         return FALSE;
@@ -804,6 +805,7 @@ pulse_connection_set_default_source (PulseConnection *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (name != NULL, FALSE);
 
     if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
         return FALSE;
@@ -823,6 +825,8 @@ pulse_connection_set_card_profile (PulseConnection *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (card != NULL, FALSE);
+    g_return_val_if_fail (profile != NULL, FALSE);
 
     if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
         return FALSE;
@@ -863,6 +867,7 @@ pulse_connection_set_sink_volume (PulseConnection  *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (volume != NULL, FALSE);
 
     if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
         return FALSE;
@@ -883,6 +888,7 @@ pulse_connection_set_sink_port (PulseConnection *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (port != NULL, FALSE);
 
     if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
         return FALSE;
@@ -923,6 +929,7 @@ pulse_connection_set_sink_input_volume (PulseConnection  *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (volume != NULL, FALSE);
 
     if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
         return FALSE;
@@ -963,6 +970,7 @@ pulse_connection_set_source_volume (PulseConnection  *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (volume != NULL, FALSE);
 
     if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
         return FALSE;
@@ -983,6 +991,7 @@ pulse_connection_set_source_port (PulseConnection *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (port != NULL, FALSE);
 
     if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
         return FALSE;
@@ -1023,6 +1032,7 @@ pulse_connection_set_source_output_volume (PulseConnection  *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (volume != NULL, FALSE);
 
     if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
         return FALSE;
@@ -1158,6 +1168,7 @@ pulse_connection_write_ext_stream (PulseConnection                  *connection,
     pa_operation *op;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (info != NULL, FALSE);
 
     if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
         return FALSE;
@@ -1179,6 +1190,7 @@ pulse_connection_delete_ext_stream (PulseConnection *connection,
     gchar       **names;
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), FALSE);
+    g_return_val_if_fail (name != NULL, FALSE);
 
     if (connection->priv->state != PULSE_CONNECTION_CONNECTED)
         return FALSE;

@@ -130,6 +130,7 @@ pulse_sink_new (PulseConnection    *connection,
 
     g_return_val_if_fail (PULSE_IS_CONNECTION (connection), NULL);
     g_return_val_if_fail (info != NULL, NULL);
+    g_return_val_if_fail (device == NULL || PULSE_IS_DEVICE (device), NULL);
 
     sink = g_object_new (PULSE_TYPE_SINK,
                          "name", info->name,
@@ -189,6 +190,9 @@ pulse_sink_add_input (PulseSink *sink, const pa_sink_input_info *info)
 {
     PulseSinkInput *input;
 
+    g_return_val_if_fail (PULSE_IS_SINK (sink), FALSE);
+    g_return_val_if_fail (info != NULL, FALSE);
+
     /* This function is used for both creating and refreshing sink inputs */
     input = g_hash_table_lookup (sink->priv->inputs, GUINT_TO_POINTER (info->index));
     if (input == NULL) {
@@ -217,6 +221,8 @@ pulse_sink_remove_input (PulseSink *sink, guint32 index)
 {
     PulseSinkInput *input;
     gchar          *name;
+
+    g_return_if_fail (PULSE_IS_SINK (sink));
 
     input = g_hash_table_lookup (sink->priv->inputs, GUINT_TO_POINTER (index));
     if G_UNLIKELY (input == NULL)

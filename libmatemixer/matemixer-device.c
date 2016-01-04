@@ -382,6 +382,9 @@ mate_mixer_device_get_icon (MateMixerDevice *device)
 MateMixerStream *
 mate_mixer_device_get_stream (MateMixerDevice *device, const gchar *name)
 {
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), NULL);
+    g_return_val_if_fail (name != NULL, NULL);
+
     return MATE_MIXER_DEVICE_GET_CLASS (device)->get_stream (device, name);
 }
 
@@ -404,6 +407,9 @@ mate_mixer_device_get_stream (MateMixerDevice *device, const gchar *name)
 MateMixerDeviceSwitch *
 mate_mixer_device_get_switch (MateMixerDevice *device, const gchar *name)
 {
+    g_return_val_if_fail (MATE_MIXER_IS_DEVICE (device), NULL);
+    g_return_val_if_fail (name != NULL, NULL);
+
     return MATE_MIXER_DEVICE_GET_CLASS (device)->get_switch (device, name);
 }
 

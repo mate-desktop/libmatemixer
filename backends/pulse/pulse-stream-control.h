@@ -81,7 +81,8 @@ const pa_cvolume *    pulse_stream_control_get_cvolume     (PulseStreamControl  
 const pa_channel_map *pulse_stream_control_get_channel_map (PulseStreamControl   *control);
 
 void                  pulse_stream_control_set_app_info    (PulseStreamControl   *stream,
-                                                            MateMixerAppInfo     *info);
+                                                            MateMixerAppInfo     *info,
+                                                            gboolean              take);
 
 void                  pulse_stream_control_set_channel_map (PulseStreamControl   *control,
                                                             const pa_channel_map *map);

@@ -24,6 +24,7 @@
 #include "pulse-connection.h"
 #include "pulse-port.h"
 #include "pulse-port-switch.h"
+#include "pulse-sink.h"
 #include "pulse-sink-switch.h"
 #include "pulse-stream.h"
 
@@ -52,6 +53,10 @@ pulse_sink_switch_init (PulseSinkSwitch *swtch)
 PulsePortSwitch *
 pulse_sink_switch_new (const gchar *name, const gchar *label, PulseSink *sink)
 {
+    g_return_val_if_fail (name  != NULL, NULL);
+    g_return_val_if_fail (label != NULL, NULL);
+    g_return_val_if_fail (PULSE_IS_SINK (sink), NULL);
+
     return g_object_new (PULSE_TYPE_SINK_SWITCH,
                          "name", name,
                          "label", label,

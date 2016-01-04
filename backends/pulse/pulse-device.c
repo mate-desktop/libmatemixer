@@ -330,6 +330,7 @@ PulsePort *
 pulse_device_get_port (PulseDevice *device, const gchar *name)
 {
     g_return_val_if_fail (PULSE_IS_DEVICE (device), NULL);
+    g_return_val_if_fail (name != NULL, NULL);
 
     return g_hash_table_lookup (device->priv->ports, name);
 }

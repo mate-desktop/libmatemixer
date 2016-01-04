@@ -24,6 +24,7 @@
 #include <libmatemixer/matemixer-private.h>
 
 #include "oss-common.h"
+#include "oss-stream.h"
 #include "oss-stream-control.h"
 
 #define OSS_VOLUME_JOIN(left,right)   (((left) & 0xFF) | (((right) & 0xFF) << 8))
@@ -136,10 +137,19 @@ oss_stream_control_new (const gchar               *name,
                         gboolean                   stereo)
 {
     OssStreamControl           *control;
+    gint                        newfd;
     MateMixerStreamControlFlags flags;
 
     g_return_val_if_fail (name  != NULL, NULL);
     g_return_val_if_fail (label != NULL, NULL);
+    g_return_val_if_fail (OSS_IS_STREAM (stream), NULL);
+
+    newfd = dup (fd);
+    if (newfd == -1) {
+        g_warning ("Failed to duplicate file descriptor: %s",
+                   g_strerror (errno));
+        return NULL;
+    }
 
     flags = MATE_MIXER_STREAM_CONTROL_VOLUME_READABLE |
             MATE_MIXER_STREAM_CONTROL_VOLUME_WRITABLE;
@@ -154,7 +164,7 @@ oss_stream_control_new (const gchar               *name,
                             "stream", stream,
                             NULL);
 
-    control->priv->fd = fd;
+    control->priv->fd = newfd;
     control->priv->devnum = devnum;
     control->priv->stereo = stereo;
     return control;
@@ -367,18 +377,24 @@ oss_stream_control_get_min_volume (MateMixerStreamControl *mmsc)
 static guint
 oss_stream_control_get_max_volume (MateMixerStreamControl *mmsc)
 {
+    g_return_val_if_fail (OSS_IS_STREAM_CONTROL (mmsc), 0);
+
     return 100;
 }
 
 static guint
 oss_stream_control_get_normal_volume (MateMixerStreamControl *mmsc)
 {
+    g_return_val_if_fail (OSS_IS_STREAM_CONTROL (mmsc), 0);
+
     return 100;
 }
 
 static guint
 oss_stream_control_get_base_volume (MateMixerStreamControl *mmsc)
 {
+    g_return_val_if_fail (OSS_IS_STREAM_CONTROL (mmsc), 0);
+
     return 100;
 }
 

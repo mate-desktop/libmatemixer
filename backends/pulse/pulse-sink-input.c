@@ -146,8 +146,12 @@ pulse_sink_input_new (PulseSink *sink, const pa_sink_input_info *info)
                           NULL);
     g_free (name);
 
-    if (app_info != NULL)
-        pulse_stream_control_set_app_info (PULSE_STREAM_CONTROL (input), app_info);
+    if (app_info != NULL) {
+        /* Takes ownership of app_info */
+        pulse_stream_control_set_app_info (PULSE_STREAM_CONTROL (input),
+                                           app_info,
+                                           TRUE);
+    }
 
     pulse_sink_input_update (input, info);
     return input;

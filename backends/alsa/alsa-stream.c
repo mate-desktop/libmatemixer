@@ -20,6 +20,7 @@
 #include <libmatemixer/matemixer.h>
 #include <libmatemixer/matemixer-private.h>
 
+#include "alsa-device.h"
 #include "alsa-element.h"
 #include "alsa-stream.h"
 #include "alsa-stream-control.h"
@@ -94,7 +95,12 @@ alsa_stream_new (const gchar       *name,
                  MateMixerDevice   *device,
                  MateMixerDirection direction)
 {
-    const gchar *label = mate_mixer_device_get_label (device);
+    const gchar *label;
+
+    g_return_val_if_fail (name != NULL, NULL);
+    g_return_val_if_fail (ALSA_IS_DEVICE (device), NULL);
+
+    label = mate_mixer_device_get_label (device);
 
     return g_object_new (ALSA_TYPE_STREAM,
                          "name", name,
