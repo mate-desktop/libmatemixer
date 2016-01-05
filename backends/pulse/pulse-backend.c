@@ -692,11 +692,13 @@ on_connection_server_info (PulseConnection      *connection,
                                                          compare_stream_names,
                                                          (gpointer) info->default_source_name);
 
-            /* It is possible that we are unaware of the default stream, either
-             * because the stream details have not arrived yet, or because we chose
-             * to ignore the stream.
-             * When this happens, remember the name of the stream and wait for the
-             * stream info callback. */
+            /*
+             * It is possible that we are unaware of the default stream as
+             * the stream details might not have arrived yet.
+             *
+             * When this happens, remember the name of the stream and wait for
+             * the stream info callback.
+             */
             if (stream != NULL) {
                 PULSE_SET_DEFAULT_SOURCE (pulse, stream);
                 PULSE_SET_PENDING_SOURCE_NULL (pulse);
@@ -705,12 +707,10 @@ on_connection_server_info (PulseConnection      *connection,
                          info->default_source_name);
 
                 PULSE_SET_PENDING_SOURCE (pulse, info->default_source_name);
-                PULSE_SET_DEFAULT_SOURCE (pulse, NULL);
 
                 /* In most cases (for example changing profile) the stream info
-                 * arrives by itself, but do not rely on it and request it explicitely.
-                 * In the meantime, keep the default stream set to NULL, which is
-                 * important as we cannot guarantee that the info arrives and we use it. */
+                 * arrives by itself, but do not rely on it and request it
+                 * explicitly */
                 pulse_connection_load_source_info_name (pulse->priv->connection,
                                                         info->default_source_name);
             }
@@ -728,11 +728,13 @@ on_connection_server_info (PulseConnection      *connection,
                                                          compare_stream_names,
                                                          (gpointer) info->default_sink_name);
 
-            /* It is possible that we are unaware of the default stream, either
-             * because the stream details have not arrived yet, or because we chose
-             * to ignore the stream.
-             * When this happens, remember the name of the stream and wait for the
-             * stream info callback. */
+            /*
+             * It is possible that we are unaware of the default stream as
+             * the stream details might not have arrived yet.
+             *
+             * When this happens, remember the name of the stream and wait for
+             * the stream info callback.
+             */
             if (stream != NULL) {
                 PULSE_SET_DEFAULT_SINK (pulse, stream);
                 PULSE_SET_PENDING_SINK_NULL (pulse);
@@ -741,12 +743,10 @@ on_connection_server_info (PulseConnection      *connection,
                          info->default_sink_name);
 
                 PULSE_SET_PENDING_SINK (pulse, info->default_sink_name);
-                PULSE_SET_DEFAULT_SINK (pulse, NULL);
 
                 /* In most cases (for example changing profile) the stream info
-                 * arrives by itself, but do not rely on it and request it explicitely.
-                 * In the meantime, keep the default stream set to NULL, which is
-                 * important as we cannot guarantee that the info arrives and we use it. */
+                 * arrives by itself, but do not rely on it and request it
+                 * explicitly */
                 pulse_connection_load_sink_info_name (pulse->priv->connection,
                                                       info->default_sink_name);
             }
