@@ -126,7 +126,7 @@ pulse_sink_control_set_mute (PulseStreamControl *psc, gboolean mute)
     g_return_val_if_fail (PULSE_IS_SINK_CONTROL (psc), FALSE);
 
     return pulse_connection_set_sink_mute (pulse_stream_control_get_connection (psc),
-                                           PULSE_STREAM_CONTROL_GET_STREAM_INDEX (psc),
+                                           pulse_stream_control_get_stream_index (psc),
                                            mute);
 }
 
@@ -137,7 +137,7 @@ pulse_sink_control_set_volume (PulseStreamControl *psc, pa_cvolume *cvolume)
     g_return_val_if_fail (cvolume != NULL, FALSE);
 
     return pulse_connection_set_sink_volume (pulse_stream_control_get_connection (psc),
-                                             PULSE_STREAM_CONTROL_GET_STREAM_INDEX (psc),
+                                             pulse_stream_control_get_stream_index (psc),
                                              cvolume);
 }
 

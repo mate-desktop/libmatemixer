@@ -25,6 +25,7 @@
 #include "pulse-connection.h"
 #include "pulse-helpers.h"
 #include "pulse-monitor.h"
+#include "pulse-stream.h"
 #include "pulse-stream-control.h"
 
 struct _PulseStreamControlPrivate
@@ -270,9 +271,23 @@ pulse_stream_control_finalize (GObject *object)
 guint32
 pulse_stream_control_get_index (PulseStreamControl *control)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM_CONTROL (control), 0);
+    g_return_val_if_fail (PULSE_IS_STREAM_CONTROL (control), PA_INVALID_INDEX);
 
     return control->priv->index;
+}
+
+guint32
+pulse_stream_control_get_stream_index (PulseStreamControl *control)
+{
+    MateMixerStream *stream;
+
+    g_return_val_if_fail (PULSE_IS_STREAM_CONTROL (control), PA_INVALID_INDEX);
+
+    stream = mate_mixer_stream_control_get_stream (MATE_MIXER_STREAM_CONTROL (control));
+    if G_UNLIKELY (stream == NULL)
+        return PA_INVALID_INDEX;
+
+    return pulse_stream_get_index (PULSE_STREAM (stream));
 }
 
 PulseConnection *

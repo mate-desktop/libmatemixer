@@ -122,7 +122,7 @@ pulse_source_control_set_mute (PulseStreamControl *psc, gboolean mute)
     g_return_val_if_fail (PULSE_IS_SOURCE_CONTROL (psc), FALSE);
 
     return pulse_connection_set_source_mute (pulse_stream_control_get_connection (psc),
-                                             PULSE_STREAM_CONTROL_GET_STREAM_INDEX (psc),
+                                             pulse_stream_control_get_stream_index (psc),
                                              mute);
 }
 
@@ -133,7 +133,7 @@ pulse_source_control_set_volume (PulseStreamControl *psc, pa_cvolume *cvolume)
     g_return_val_if_fail (cvolume != NULL, FALSE);
 
     return pulse_connection_set_source_volume (pulse_stream_control_get_connection (psc),
-                                               PULSE_STREAM_CONTROL_GET_STREAM_INDEX (psc),
+                                               pulse_stream_control_get_stream_index (psc),
                                                cvolume);
 }
 
@@ -144,7 +144,7 @@ pulse_source_control_create_monitor (PulseStreamControl *psc)
 
     g_return_val_if_fail (PULSE_IS_SOURCE_CONTROL (psc), NULL);
 
-    index = PULSE_STREAM_CONTROL_GET_STREAM_INDEX (psc);
+    index = pulse_stream_control_get_stream_index (psc);
     if G_UNLIKELY (index == PA_INVALID_INDEX) {
         g_debug ("Monitor of stream control %s is not available",
                  mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (psc)));

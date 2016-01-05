@@ -211,6 +211,6 @@ pulse_source_output_create_monitor (PulseStreamControl *psc)
     g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (psc), NULL);
 
     return pulse_connection_create_monitor (pulse_stream_control_get_connection (psc),
-                                            PULSE_STREAM_CONTROL_GET_STREAM_INDEX (psc),
+                                            pulse_stream_control_get_stream_index (psc),
                                             PA_INVALID_INDEX);
 }

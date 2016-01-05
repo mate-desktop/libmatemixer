@@ -164,7 +164,7 @@ pulse_stream_dispose (GObject *object)
 guint32
 pulse_stream_get_index (PulseStream *stream)
 {
-    g_return_val_if_fail (PULSE_IS_STREAM (stream), 0);
+    g_return_val_if_fail (PULSE_IS_STREAM (stream), PA_INVALID_INDEX);
 
     return stream->priv->index;
 }

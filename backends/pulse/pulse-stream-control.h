@@ -41,9 +41,6 @@ G_BEGIN_DECLS
 #define PULSE_STREAM_CONTROL_GET_CLASS(o)       \
         (G_TYPE_INSTANCE_GET_CLASS ((o), PULSE_TYPE_STREAM_CONTROL, PulseStreamControlClass))
 
-#define PULSE_STREAM_CONTROL_GET_STREAM_INDEX(psc)  \
-        (pulse_stream_get_index (PULSE_STREAM (mate_mixer_stream_control_get_stream (MATE_MIXER_STREAM_CONTROL (psc)))))
-
 typedef struct _PulseStreamControlClass    PulseStreamControlClass;
 typedef struct _PulseStreamControlPrivate  PulseStreamControlPrivate;
 
@@ -68,25 +65,26 @@ struct _PulseStreamControlClass
     PulseMonitor *(*create_monitor)  (PulseStreamControl *control);
 };
 
-GType                 pulse_stream_control_get_type        (void) G_GNUC_CONST;
+GType                 pulse_stream_control_get_type         (void) G_GNUC_CONST;
 
-guint32               pulse_stream_control_get_index       (PulseStreamControl   *control);
+guint32               pulse_stream_control_get_index        (PulseStreamControl   *control);
+guint32               pulse_stream_control_get_stream_index (PulseStreamControl   *control);
 
-PulseConnection *     pulse_stream_control_get_connection  (PulseStreamControl   *control);
-PulseMonitor *        pulse_stream_control_get_monitor     (PulseStreamControl   *control);
+PulseConnection *     pulse_stream_control_get_connection   (PulseStreamControl   *control);
+PulseMonitor *        pulse_stream_control_get_monitor      (PulseStreamControl   *control);
 
-const pa_cvolume *    pulse_stream_control_get_cvolume     (PulseStreamControl   *control);
-const pa_channel_map *pulse_stream_control_get_channel_map (PulseStreamControl   *control);
+const pa_cvolume *    pulse_stream_control_get_cvolume      (PulseStreamControl   *control);
+const pa_channel_map *pulse_stream_control_get_channel_map  (PulseStreamControl   *control);
 
-void                  pulse_stream_control_set_app_info    (PulseStreamControl   *stream,
-                                                            MateMixerAppInfo     *info,
-                                                            gboolean              take);
+void                  pulse_stream_control_set_app_info     (PulseStreamControl   *stream,
+                                                             MateMixerAppInfo     *info,
+                                                             gboolean              take);
 
-void                  pulse_stream_control_set_channel_map (PulseStreamControl   *control,
-                                                            const pa_channel_map *map);
-void                  pulse_stream_control_set_cvolume     (PulseStreamControl   *control,
-                                                            const pa_cvolume     *cvolume,
-                                                            pa_volume_t           base_volume);
+void                  pulse_stream_control_set_channel_map  (PulseStreamControl   *control,
+                                                             const pa_channel_map *map);
+void                  pulse_stream_control_set_cvolume      (PulseStreamControl   *control,
+                                                             const pa_cvolume     *cvolume,
+                                                             pa_volume_t           base_volume);
 
 G_END_DECLS
 
