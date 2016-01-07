@@ -155,10 +155,10 @@ mate_mixer_stream_class_init (MateMixerStreamClass *klass)
                       G_STRUCT_OFFSET (MateMixerStreamClass, control_added),
                       NULL,
                       NULL,
-                      g_cclosure_marshal_VOID__STRING,
+                      g_cclosure_marshal_VOID__OBJECT,
                       G_TYPE_NONE,
                       1,
-                      G_TYPE_STRING);
+                      MATE_MIXER_TYPE_STREAM_CONTROL);
 
     signals[CONTROL_REMOVED] =
         g_signal_new ("control-removed",
@@ -167,10 +167,10 @@ mate_mixer_stream_class_init (MateMixerStreamClass *klass)
                       G_STRUCT_OFFSET (MateMixerStreamClass, control_removed),
                       NULL,
                       NULL,
-                      g_cclosure_marshal_VOID__STRING,
+                      g_cclosure_marshal_VOID__OBJECT,
                       G_TYPE_NONE,
                       1,
-                      G_TYPE_STRING);
+                      MATE_MIXER_TYPE_STREAM_CONTROL);
 
     signals[SWITCH_ADDED] =
         g_signal_new ("switch-added",
@@ -179,10 +179,10 @@ mate_mixer_stream_class_init (MateMixerStreamClass *klass)
                       G_STRUCT_OFFSET (MateMixerStreamClass, switch_added),
                       NULL,
                       NULL,
-                      g_cclosure_marshal_VOID__STRING,
+                      g_cclosure_marshal_VOID__OBJECT,
                       G_TYPE_NONE,
                       1,
-                      G_TYPE_STRING);
+                      MATE_MIXER_TYPE_STREAM_SWITCH);
 
     signals[SWITCH_REMOVED] =
         g_signal_new ("switch-removed",
@@ -191,10 +191,10 @@ mate_mixer_stream_class_init (MateMixerStreamClass *klass)
                       G_STRUCT_OFFSET (MateMixerStreamClass, switch_removed),
                       NULL,
                       NULL,
-                      g_cclosure_marshal_VOID__STRING,
+                      g_cclosure_marshal_VOID__OBJECT,
                       G_TYPE_NONE,
                       1,
-                      G_TYPE_STRING);
+                      MATE_MIXER_TYPE_STREAM_SWITCH);
 
     g_type_class_add_private (object_class, sizeof (MateMixerStreamPrivate));
 }

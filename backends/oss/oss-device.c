@@ -362,29 +362,23 @@ oss_device_close (OssDevice *device)
 
     /* Make each stream remove its controls and switch */
     if (device->priv->input != NULL) {
-        const gchar *name =
-            mate_mixer_stream_get_name (MATE_MIXER_STREAM (device->priv->input));
-
         oss_stream_remove_all (device->priv->input);
         free_stream_list (device);
 
         g_signal_emit_by_name (G_OBJECT (device),
                                "stream-removed",
-                               name);
+                               MATE_MIXER_STREAM (device->priv->input));
 
         g_clear_object (&device->priv->input);
     }
 
     if (device->priv->output != NULL) {
-        const gchar *name =
-            mate_mixer_stream_get_name (MATE_MIXER_STREAM (device->priv->output));
-
         oss_stream_remove_all (device->priv->output);
         free_stream_list (device);
 
         g_signal_emit_by_name (G_OBJECT (device),
                                "stream-removed",
-                               name);
+                               MATE_MIXER_STREAM (device->priv->output));
 
         g_clear_object (&device->priv->output);
     }
@@ -596,16 +590,13 @@ read_mixer_devices (OssDevice *device)
             continue;
 
         if (oss_stream_has_controls (stream) == FALSE) {
-            const gchar *name =
-                mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream));
-
             free_stream_list (device);
 
             /* Pretend the stream has just been created now that we are adding
              * the first control */
             g_signal_emit_by_name (G_OBJECT (device),
                                    "stream-added",
-                                   name);
+                                   MATE_MIXER_STREAM (stream));
         }
 
         g_debug ("Adding device %s control %s",

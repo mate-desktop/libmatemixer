@@ -76,15 +76,15 @@ struct _MateMixerStreamClass
     const GList            *(*list_switches) (MateMixerStream *stream);
 
     /* Signals */
-    void (*control_added)   (MateMixerStream *stream,
-                             const gchar     *name);
-    void (*control_removed) (MateMixerStream *stream,
-                             const gchar     *name);
+    void (*control_added)   (MateMixerStream        *stream,
+                             MateMixerStreamControl *control);
+    void (*control_removed) (MateMixerStream        *stream,
+                             MateMixerStreamControl *control);
 
-    void (*switch_added)    (MateMixerStream *stream,
-                             const gchar     *name);
-    void (*switch_removed)  (MateMixerStream *stream,
-                             const gchar     *name);
+    void (*switch_added)    (MateMixerStream        *stream,
+                             MateMixerStreamSwitch  *swtch);
+    void (*switch_removed)  (MateMixerStream        *stream,
+                             MateMixerStreamSwitch  *swtch);
 };
 
 GType                   mate_mixer_stream_get_type            (void) G_GNUC_CONST;

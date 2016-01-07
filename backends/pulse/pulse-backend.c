@@ -779,7 +779,7 @@ on_connection_card_info (PulseConnection    *connection,
         free_list_devices (pulse);
         g_signal_emit_by_name (G_OBJECT (pulse),
                                "device-added",
-                               mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)));
+                               MATE_MIXER_DEVICE (device));
     } else
         pulse_device_update (device, info);
 }
@@ -790,21 +790,20 @@ on_connection_card_removed (PulseConnection *connection,
                             PulseBackend    *pulse)
 {
     PulseDevice *device;
-    gchar       *name;
 
     device = g_hash_table_lookup (pulse->priv->devices, GUINT_TO_POINTER (index));
     if G_UNLIKELY (device == NULL)
         return;
 
-    name = g_strdup (mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)));
-
+    g_object_ref (device);
     g_hash_table_remove (pulse->priv->devices, GUINT_TO_POINTER (index));
 
     free_list_devices (pulse);
     g_signal_emit_by_name (G_OBJECT (pulse),
                            "device-removed",
-                           name);
-    g_free (name);
+                           MATE_MIXER_DEVICE (device));
+
+    g_object_unref (device);
 }
 
 static void
@@ -832,15 +831,13 @@ on_connection_sink_info (PulseConnection    *connection,
         if (device != NULL) {
             pulse_device_add_stream (device, stream);
         } else {
-            const gchar *name =
-                mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream));
-
-            /* Only emit when not a part of the device, otherwise emitted by
+            /* Only emit when not a part of a device, otherwise emitted by
              * the main library */
             g_signal_emit_by_name (G_OBJECT (pulse),
                                    "stream-added",
-                                   name);
+                                   MATE_MIXER_STREAM (stream));
         }
+
         /* We might be waiting for this sink to set it as the default */
         check_pending_sink (pulse, stream);
     } else
@@ -860,17 +857,19 @@ on_connection_sink_removed (PulseConnection *connection,
         return;
 
     g_object_ref (stream);
-
     g_hash_table_remove (pulse->priv->sinks, GUINT_TO_POINTER (idx));
+
     free_list_streams (pulse);
 
     device = pulse_stream_get_device (stream);
     if (device != NULL) {
         pulse_device_remove_stream (device, stream);
     } else {
+        /* Only emit when not a part of a device, otherwise emitted by
+         * the main library */
         g_signal_emit_by_name (G_OBJECT (pulse),
                                "stream-removed",
-                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
+                               MATE_MIXER_STREAM (stream));
     }
 
     /* The removed stream might be one of the default streams, this happens
@@ -969,15 +968,13 @@ on_connection_source_info (PulseConnection      *connection,
         if (device != NULL) {
             pulse_device_add_stream (device, stream);
         } else {
-            const gchar *name =
-                mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream));
-
-            /* Only emit when not a part of the device, otherwise emitted by
+            /* Only emit when not a part of a device, otherwise emitted by
              * the main library */
             g_signal_emit_by_name (G_OBJECT (pulse),
                                    "stream-added",
-                                   name);
+                                   MATE_MIXER_STREAM (stream));
         }
+
         /* We might be waiting for this source to set it as the default */
         check_pending_source (pulse, stream);
     } else
@@ -1005,9 +1002,11 @@ on_connection_source_removed (PulseConnection *connection,
     if (device != NULL) {
         pulse_device_remove_stream (device, stream);
     } else {
+        /* Only emit when not a part of a device, otherwise emitted by
+         * the main library */
         g_signal_emit_by_name (G_OBJECT (pulse),
                                "stream-removed",
-                               mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream)));
+                               MATE_MIXER_STREAM (stream));
     }
 
     /* The removed stream might be one of the default streams, this happens
@@ -1110,7 +1109,7 @@ on_connection_ext_stream_info (PulseConnection                  *connection,
 
         g_signal_emit_by_name (G_OBJECT (pulse),
                                "stored-control-added",
-                               mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (ext)));
+                               MATE_MIXER_STORED_CONTROL (ext));
     } else {
         pulse_ext_stream_update (ext, info, parent);
 
@@ -1136,21 +1135,23 @@ static void
 on_connection_ext_stream_loaded (PulseConnection *connection, PulseBackend *pulse)
 {
     GHashTableIter iter;
-    gpointer       name;
     gpointer       ext;
 
     g_hash_table_iter_init (&iter, pulse->priv->ext_streams);
 
-    while (g_hash_table_iter_next (&iter, &name, &ext) == TRUE) {
+    while (g_hash_table_iter_next (&iter, NULL, &ext) == TRUE) {
         if (PULSE_GET_HANGING (ext) == FALSE)
             continue;
 
+        g_object_ref (G_OBJECT (ext));
         g_hash_table_iter_remove (&iter);
-        free_list_ext_streams (pulse);
 
+        free_list_ext_streams (pulse);
         g_signal_emit_by_name (G_OBJECT (pulse),
                                "stored-control-removed",
-                               name);
+                               MATE_MIXER_STORED_CONTROL (ext));
+
+        g_object_unref (G_OBJECT (ext));
     }
 }
 

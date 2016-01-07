@@ -280,7 +280,6 @@ pulse_device_add_stream (PulseDevice *device, PulseStream *stream)
     g_return_if_fail (PULSE_IS_STREAM (stream));
 
     name = mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream));
-
     g_hash_table_insert (device->priv->streams,
                          g_strdup (name),
                          g_object_ref (stream));
@@ -289,7 +288,7 @@ pulse_device_add_stream (PulseDevice *device, PulseStream *stream)
 
     g_signal_emit_by_name (G_OBJECT (device),
                            "stream-added",
-                           name);
+                           MATE_MIXER_STREAM (stream));
 }
 
 void
@@ -302,12 +301,15 @@ pulse_device_remove_stream (PulseDevice *device, PulseStream *stream)
 
     name = mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream));
 
-    free_list_streams (device);
-
+    g_object_ref (stream);
     g_hash_table_remove (device->priv->streams, name);
+
+    free_list_streams (device);
     g_signal_emit_by_name (G_OBJECT (device),
                            "stream-removed",
-                           name);
+                           MATE_MIXER_STREAM (stream));
+
+    g_object_unref (stream);
 }
 
 guint32

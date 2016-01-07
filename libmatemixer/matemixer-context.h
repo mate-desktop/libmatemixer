@@ -67,18 +67,20 @@ struct _MateMixerContextClass
     GObjectClass parent_class;
 
     /*< private >*/
-    void (*device_added)           (MateMixerContext *context,
-                                    const gchar      *name);
-    void (*device_removed)         (MateMixerContext *context,
-                                    const gchar      *name);
-    void (*stream_added)           (MateMixerContext *context,
-                                    const gchar      *name);
-    void (*stream_removed)         (MateMixerContext *context,
-                                    const gchar      *name);
-    void (*stored_control_added)   (MateMixerContext *context,
-                                    const gchar      *name);
-    void (*stored_control_removed) (MateMixerContext *context,
-                                    const gchar      *name);
+    void (*device_added)           (MateMixerContext       *context,
+                                    MateMixerDevice        *device);
+    void (*device_removed)         (MateMixerContext       *context,
+                                    MateMixerDevice        *device);
+
+    void (*stream_added)           (MateMixerContext       *context,
+                                    MateMixerStream        *stream);
+    void (*stream_removed)         (MateMixerContext       *context,
+                                    MateMixerStream        *stream);
+
+    void (*stored_control_added)   (MateMixerContext       *context,
+                                    MateMixerStoredControl *control);
+    void (*stored_control_removed) (MateMixerContext       *context,
+                                    MateMixerStoredControl *control);
 };
 
 GType                   mate_mixer_context_get_type                  (void) G_GNUC_CONST;

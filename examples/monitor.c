@@ -327,27 +327,27 @@ on_context_state_notify (void)
 }
 
 static void
-on_context_device_added (MateMixerContext *context, const gchar *name)
+on_context_device_added (MateMixerContext *context, MateMixerDevice *device)
 {
-    g_print ("Device added: %s\n", name);
+    g_print ("Device added: %s\n", mate_mixer_device_get_name (device));
 }
 
 static void
-on_context_device_removed (MateMixerContext *context, const gchar *name)
+on_context_device_removed (MateMixerContext *context, MateMixerDevice *device)
 {
-    g_print ("Device removed: %s\n", name);
+    g_print ("Device removed: %s\n", mate_mixer_device_get_name (device));
 }
 
 static void
-on_context_stream_added (MateMixerContext *context, const gchar *name)
+on_context_stream_added (MateMixerContext *context, MateMixerStream *stream)
 {
-    g_print ("Stream added: %s\n", name);
+    g_print ("Stream added: %s\n", mate_mixer_stream_get_name (stream));
 }
 
 static void
-on_context_stream_removed (MateMixerContext *context, const gchar *name)
+on_context_stream_removed (MateMixerContext *context, MateMixerStream *stream)
 {
-    g_print ("Stream removed: %s\n", name);
+    g_print ("Stream removed: %s\n", mate_mixer_stream_get_name (stream));
 }
 
 #ifdef G_OS_UNIX

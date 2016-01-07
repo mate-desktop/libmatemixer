@@ -158,10 +158,10 @@ mate_mixer_device_class_init (MateMixerDeviceClass *klass)
                       G_STRUCT_OFFSET (MateMixerDeviceClass, stream_added),
                       NULL,
                       NULL,
-                      g_cclosure_marshal_VOID__STRING,
+                      g_cclosure_marshal_VOID__OBJECT,
                       G_TYPE_NONE,
                       1,
-                      G_TYPE_STRING);
+                      MATE_MIXER_TYPE_STREAM);
 
     /**
      * MateMixerDevice::stream-removed:
@@ -182,10 +182,10 @@ mate_mixer_device_class_init (MateMixerDeviceClass *klass)
                       G_STRUCT_OFFSET (MateMixerDeviceClass, stream_removed),
                       NULL,
                       NULL,
-                      g_cclosure_marshal_VOID__STRING,
+                      g_cclosure_marshal_VOID__OBJECT,
                       G_TYPE_NONE,
                       1,
-                      G_TYPE_STRING);
+                      MATE_MIXER_TYPE_STREAM);
 
     /**
      * MateMixerDevice::switch-added:
@@ -201,10 +201,10 @@ mate_mixer_device_class_init (MateMixerDeviceClass *klass)
                       G_STRUCT_OFFSET (MateMixerDeviceClass, switch_added),
                       NULL,
                       NULL,
-                      g_cclosure_marshal_VOID__STRING,
+                      g_cclosure_marshal_VOID__OBJECT,
                       G_TYPE_NONE,
                       1,
-                      G_TYPE_STRING);
+                      MATE_MIXER_TYPE_DEVICE_SWITCH);
 
     /**
      * MateMixerDevice::switch-removed:
@@ -225,10 +225,10 @@ mate_mixer_device_class_init (MateMixerDeviceClass *klass)
                       G_STRUCT_OFFSET (MateMixerDeviceClass, switch_removed),
                       NULL,
                       NULL,
-                      g_cclosure_marshal_VOID__STRING,
+                      g_cclosure_marshal_VOID__OBJECT,
                       G_TYPE_NONE,
                       1,
-                      G_TYPE_STRING);
+                      MATE_MIXER_TYPE_DEVICE_SWITCH);
 
     g_type_class_add_private (object_class, sizeof (MateMixerDevicePrivate));
 }

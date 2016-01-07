@@ -112,19 +112,15 @@ oss_stream_new (const gchar       *name,
 void
 oss_stream_add_control (OssStream *stream, OssStreamControl *control)
 {
-    const gchar *name;
-
     g_return_if_fail (OSS_IS_STREAM (stream));
     g_return_if_fail (OSS_IS_STREAM_CONTROL (control));
-
-    name = mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (control));
 
     stream->priv->controls =
         g_list_append (stream->priv->controls, g_object_ref (control));
 
     g_signal_emit_by_name (G_OBJECT (stream),
                            "control-added",
-                           name);
+                           MATE_MIXER_STREAM_CONTROL (control));
 }
 
 void
@@ -223,7 +219,7 @@ oss_stream_set_switch_data (OssStream *stream, gint fd, GList *options)
     stream->priv->switches = g_list_prepend (NULL, g_object_ref (stream->priv->swtch));
     g_signal_emit_by_name (G_OBJECT (stream),
                            "switch-added",
-                           OSS_STREAM_SWITCH_NAME);
+                           MATE_MIXER_STREAM_SWITCH (stream->priv->swtch));
 }
 
 void
@@ -243,7 +239,7 @@ oss_stream_remove_all (OssStream *stream)
         stream->priv->controls = g_list_delete_link (stream->priv->controls, list);
         g_signal_emit_by_name (G_OBJECT (stream),
                                "control-removed",
-                               mate_mixer_stream_control_get_name (control));
+                               control);
 
         g_object_unref (control);
         list = next;
@@ -260,7 +256,7 @@ oss_stream_remove_all (OssStream *stream)
 
         g_signal_emit_by_name (G_OBJECT (stream),
                                "switch-removed",
-                               OSS_STREAM_SWITCH_NAME);
+                               MATE_MIXER_STREAM_SWITCH (stream->priv->swtch));
 
         g_clear_object (&stream->priv->swtch);
     }

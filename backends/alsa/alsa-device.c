@@ -338,27 +338,21 @@ alsa_device_close (AlsaDevice *device)
 
     /* Make each stream remove its controls and switches */
     if (alsa_stream_has_controls_or_switches (device->priv->input) == TRUE) {
-        const gchar *name =
-            mate_mixer_stream_get_name (MATE_MIXER_STREAM (device->priv->input));
-
         alsa_stream_remove_all (device->priv->input);
         free_stream_list (device);
 
         g_signal_emit_by_name (G_OBJECT (device),
                                "stream-removed",
-                               name);
+                               MATE_MIXER_STREAM (device->priv->input));
     }
 
     if (alsa_stream_has_controls_or_switches (device->priv->output) == TRUE) {
-        const gchar *name =
-            mate_mixer_stream_get_name (MATE_MIXER_STREAM (device->priv->output));
-
         alsa_stream_remove_all (device->priv->output);
         free_stream_list (device);
 
         g_signal_emit_by_name (G_OBJECT (device),
                                "stream-removed",
-                               name);
+                               MATE_MIXER_STREAM (device->priv->output));
     }
 
     close_mixer (device);
@@ -481,16 +475,13 @@ add_element (AlsaDevice *device, AlsaStream *stream, AlsaElement *element)
     }
 
     if (add_stream == TRUE) {
-        const gchar *name =
-            mate_mixer_stream_get_name (MATE_MIXER_STREAM (stream));
-
         free_stream_list (device);
 
         /* Pretend the stream has just been created now that we have added
          * the first control */
         g_signal_emit_by_name (G_OBJECT (device),
                                "stream-added",
-                               name);
+                               MATE_MIXER_STREAM (stream));
     }
 
     el = alsa_element_get_snd_element (element);
@@ -764,26 +755,20 @@ remove_elements_by_name (AlsaDevice *device, const gchar *name)
     if (alsa_stream_remove_elements (device->priv->input, name) == TRUE) {
         /* Removing last stream element "removes" the stream */
         if (alsa_stream_has_controls_or_switches (device->priv->input) == FALSE) {
-            const gchar *stream_name =
-                mate_mixer_stream_get_name (MATE_MIXER_STREAM (device->priv->input));
-
             free_stream_list (device);
             g_signal_emit_by_name (G_OBJECT (device),
                                    "stream-removed",
-                                   stream_name);
+                                   MATE_MIXER_STREAM (device->priv->input));
         }
     }
 
     if (alsa_stream_remove_elements (device->priv->output, name) == TRUE) {
         /* Removing last stream element "removes" the stream */
         if (alsa_stream_has_controls_or_switches (device->priv->output) == FALSE) {
-            const gchar *stream_name =
-                mate_mixer_stream_get_name (MATE_MIXER_STREAM (device->priv->output));
-
             free_stream_list (device);
             g_signal_emit_by_name (G_OBJECT (device),
                                    "stream-removed",
-                                   stream_name);
+                                   MATE_MIXER_STREAM (device->priv->output));
         }
     }
 }

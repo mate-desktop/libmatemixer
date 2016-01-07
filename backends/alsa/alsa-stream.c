@@ -113,19 +113,15 @@ alsa_stream_new (const gchar       *name,
 void
 alsa_stream_add_control (AlsaStream *stream, AlsaStreamControl *control)
 {
-    const gchar *name;
-
     g_return_if_fail (ALSA_IS_STREAM (stream));
     g_return_if_fail (ALSA_IS_STREAM_CONTROL (control));
-
-    name = mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (control));
 
     stream->priv->controls =
         g_list_append (stream->priv->controls, g_object_ref (control));
 
     g_signal_emit_by_name (G_OBJECT (stream),
                            "control-added",
-                           name);
+                           MATE_MIXER_STREAM_CONTROL (control));
 
     if (alsa_stream_has_default_control (stream) == FALSE)
         alsa_stream_set_default_control (stream, control);
@@ -134,30 +130,22 @@ alsa_stream_add_control (AlsaStream *stream, AlsaStreamControl *control)
 void
 alsa_stream_add_switch (AlsaStream *stream, AlsaSwitch *swtch)
 {
-    const gchar *name;
-
     g_return_if_fail (ALSA_IS_STREAM (stream));
     g_return_if_fail (ALSA_IS_SWITCH (swtch));
-
-    name = mate_mixer_switch_get_name (MATE_MIXER_SWITCH (swtch));
 
     stream->priv->switches =
         g_list_append (stream->priv->switches, g_object_ref (swtch));
 
     g_signal_emit_by_name (G_OBJECT (stream),
                            "switch-added",
-                           name);
+                           MATE_MIXER_STREAM_SWITCH (swtch));
 }
 
 void
 alsa_stream_add_toggle (AlsaStream *stream, AlsaToggle *toggle)
 {
-    const gchar *name;
-
     g_return_if_fail (ALSA_IS_STREAM (stream));
     g_return_if_fail (ALSA_IS_TOGGLE (toggle));
-
-    name = mate_mixer_switch_get_name (MATE_MIXER_SWITCH (toggle));
 
     /* Toggle is MateMixerSwitch, but not AlsaSwitch */
     stream->priv->switches =
@@ -165,7 +153,7 @@ alsa_stream_add_toggle (AlsaStream *stream, AlsaToggle *toggle)
 
     g_signal_emit_by_name (G_OBJECT (stream),
                            "switch-added",
-                           name);
+                           MATE_MIXER_STREAM_SWITCH (toggle));
 }
 
 gboolean
@@ -285,7 +273,7 @@ alsa_stream_remove_elements (AlsaStream *stream, const gchar *name)
 
         g_signal_emit_by_name (G_OBJECT (stream),
                                "control-removed",
-                               mate_mixer_stream_control_get_name (control));
+                               control);
 
         g_object_unref (control);
         removed = TRUE;
@@ -293,14 +281,14 @@ alsa_stream_remove_elements (AlsaStream *stream, const gchar *name)
 
     item = g_list_find_custom (stream->priv->switches, name, compare_switch_name);
     if (item != NULL) {
-        MateMixerSwitch *swtch = MATE_MIXER_SWITCH (item->data);
+        MateMixerStreamSwitch *swtch = MATE_MIXER_STREAM_SWITCH (item->data);
 
         alsa_element_close (ALSA_ELEMENT (swtch));
 
         stream->priv->switches = g_list_delete_link (stream->priv->switches, item);
         g_signal_emit_by_name (G_OBJECT (stream),
                                "switch-removed",
-                               mate_mixer_switch_get_name (swtch));
+                               swtch);
 
         g_object_unref (swtch);
         removed = TRUE;
@@ -327,7 +315,7 @@ alsa_stream_remove_all (AlsaStream *stream)
         stream->priv->controls = g_list_delete_link (stream->priv->controls, list);
         g_signal_emit_by_name (G_OBJECT (stream),
                                "control-removed",
-                               mate_mixer_stream_control_get_name (control));
+                               control);
 
         g_object_unref (control);
         list = next;
@@ -339,7 +327,7 @@ alsa_stream_remove_all (AlsaStream *stream)
     /* Remove all stream switches */
     list = stream->priv->switches;
     while (list != NULL) {
-        MateMixerSwitch *swtch = MATE_MIXER_SWITCH (list->data);
+        MateMixerStreamSwitch *swtch = MATE_MIXER_STREAM_SWITCH (list->data);
         GList *next = list->next;
 
         alsa_element_close (ALSA_ELEMENT (swtch));
@@ -347,7 +335,7 @@ alsa_stream_remove_all (AlsaStream *stream)
         stream->priv->switches = g_list_delete_link (stream->priv->switches, list);
         g_signal_emit_by_name (G_OBJECT (stream),
                                "switch-removed",
-                               mate_mixer_switch_get_name (swtch));
+                               swtch);
 
         g_object_unref (swtch);
         list = next;

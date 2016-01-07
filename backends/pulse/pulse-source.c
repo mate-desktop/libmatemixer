@@ -193,7 +193,6 @@ pulse_source_add_output (PulseSource *source, const pa_source_output_info *info)
     /* This function is used for both creating and refreshing source outputs */
     output = g_hash_table_lookup (source->priv->outputs, GUINT_TO_POINTER (info->index));
     if (output == NULL) {
-        const gchar *name;
         PulseConnection *connection;
 
         connection = pulse_stream_get_connection (PULSE_STREAM (source));
@@ -206,10 +205,9 @@ pulse_source_add_output (PulseSource *source, const pa_source_output_info *info)
 
         free_list_controls (source);
 
-        name = mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (output));
         g_signal_emit_by_name (G_OBJECT (source),
                                "control-added",
-                               name);
+                               MATE_MIXER_STREAM_CONTROL (output));
         return TRUE;
     }
 
@@ -221,7 +219,6 @@ void
 pulse_source_remove_output (PulseSource *source, guint32 index)
 {
     PulseSourceOutput *output;
-    gchar             *name;
 
     g_return_if_fail (PULSE_IS_SOURCE (source));
 
@@ -229,15 +226,14 @@ pulse_source_remove_output (PulseSource *source, guint32 index)
     if G_UNLIKELY (output == NULL)
         return;
 
-    name = g_strdup (mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (output)));
-
+    g_object_ref (output);
     g_hash_table_remove (source->priv->outputs, GUINT_TO_POINTER (index));
 
     free_list_controls (source);
     g_signal_emit_by_name (G_OBJECT (source),
                            "control-removed",
-                           name);
-    g_free (name);
+                           MATE_MIXER_STREAM_CONTROL (output));
+    g_object_unref (output);
 }
 
 void

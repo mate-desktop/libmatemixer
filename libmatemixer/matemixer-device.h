@@ -75,14 +75,15 @@ struct _MateMixerDeviceClass
     const GList           *(*list_switches) (MateMixerDevice *device);
 
     /* Signals */
-    void (*stream_added)   (MateMixerDevice *device,
-                            const gchar     *name);
-    void (*stream_removed) (MateMixerDevice *device,
-                            const gchar     *name);
-    void (*switch_added)   (MateMixerDevice *device,
-                            const gchar     *name);
-    void (*switch_removed) (MateMixerDevice *device,
-                            const gchar     *name);
+    void (*stream_added)   (MateMixerDevice       *device,
+                            MateMixerStream       *stream);
+    void (*stream_removed) (MateMixerDevice       *device,
+                            MateMixerStream       *stream);
+
+    void (*switch_added)   (MateMixerDevice       *device,
+                            MateMixerDeviceSwitch *swtch);
+    void (*switch_removed) (MateMixerDevice       *device,
+                            MateMixerDeviceSwitch *swtch);
 };
 
 GType                  mate_mixer_device_get_type      (void) G_GNUC_CONST;

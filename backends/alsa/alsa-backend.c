@@ -79,7 +79,7 @@ static void         remove_device_by_list_item   (AlsaBackend      *alsa,
                                                   GList            *item);
 
 static void         remove_stream                (AlsaBackend      *alsa,
-                                                  const gchar      *name);
+                                                  MateMixerStream  *stream);
 
 static void         select_default_input_stream  (AlsaBackend      *alsa);
 static void         select_default_output_stream (AlsaBackend      *alsa);
@@ -401,7 +401,7 @@ add_device (AlsaBackend *alsa, AlsaDevice *device)
 
     g_signal_emit_by_name (G_OBJECT (alsa),
                            "device-added",
-                           mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)));
+                           MATE_MIXER_DEVICE (device));
 
     /* Load the device elements after emitting device-added, because the load
      * function will most likely emit stream-added on the device and backend */
@@ -451,29 +451,24 @@ remove_device_by_list_item (AlsaBackend *alsa, GList *item)
     g_hash_table_remove (alsa->priv->devices_ids,
                          ALSA_DEVICE_GET_ID (device));
 
-    /* The list may have been invalidated by device signals */
-    free_stream_list (alsa);
-
     g_signal_emit_by_name (G_OBJECT (alsa),
                            "device-removed",
-                           mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)));
+                           MATE_MIXER_DEVICE (device));
 
     g_object_unref (device);
 }
 
 static void
-remove_stream (AlsaBackend *alsa, const gchar *name)
+remove_stream (AlsaBackend *alsa, MateMixerStream *stream)
 {
-    MateMixerStream *stream;
+    MateMixerStream *def;
 
-    stream = mate_mixer_backend_get_default_input_stream (MATE_MIXER_BACKEND (alsa));
-
-    if (stream != NULL && strcmp (mate_mixer_stream_get_name (stream), name) == 0)
+    def = mate_mixer_backend_get_default_input_stream (MATE_MIXER_BACKEND (alsa));
+    if (def == stream)
         select_default_input_stream (alsa);
 
-    stream = mate_mixer_backend_get_default_output_stream (MATE_MIXER_BACKEND (alsa));
-
-    if (stream != NULL && strcmp (mate_mixer_stream_get_name (stream), name) == 0)
+    def = mate_mixer_backend_get_default_output_stream (MATE_MIXER_BACKEND (alsa));
+    if (def == stream)
         select_default_output_stream (alsa);
 }
 

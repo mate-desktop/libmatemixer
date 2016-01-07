@@ -74,18 +74,20 @@ struct _MateMixerBackendClass
                                                MateMixerStream  *stream);
 
     /* Signals */
-    void         (*device_added)              (MateMixerBackend *backend,
-                                               const gchar      *name);
-    void         (*device_removed)            (MateMixerBackend *backend,
-                                               const gchar      *name);
-    void         (*stream_added)              (MateMixerBackend *backend,
-                                               const gchar      *name);
-    void         (*stream_removed)            (MateMixerBackend *backend,
-                                               const gchar      *name);
-    void         (*stored_control_added)      (MateMixerBackend *backend,
-                                               const gchar      *name);
-    void         (*stored_control_removed)    (MateMixerBackend *backend,
-                                               const gchar      *name);
+    void         (*device_added)              (MateMixerBackend       *backend,
+                                               MateMixerDevice        *device);
+    void         (*device_removed)            (MateMixerBackend       *backend,
+                                               MateMixerDevice        *device);
+
+    void         (*stream_added)              (MateMixerBackend       *backend,
+                                               MateMixerStream        *stream);
+    void         (*stream_removed)            (MateMixerBackend       *backend,
+                                               MateMixerStream        *stream);
+
+    void         (*stored_control_added)      (MateMixerBackend       *backend,
+                                               MateMixerStoredControl *control);
+    void         (*stored_control_removed)    (MateMixerBackend       *backend,
+                                               MateMixerStoredControl *control);
 };
 
 GType                   mate_mixer_backend_get_type                  (void) G_GNUC_CONST;

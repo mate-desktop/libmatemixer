@@ -22,9 +22,11 @@
 #include "matemixer-backend.h"
 #include "matemixer-backend-module.h"
 #include "matemixer-context.h"
+#include "matemixer-device.h"
 #include "matemixer-enums.h"
 #include "matemixer-enum-types.h"
 #include "matemixer-private.h"
+#include "matemixer-stored-control.h"
 #include "matemixer-stream.h"
 
 /**
@@ -125,44 +127,44 @@ static void mate_mixer_context_finalize     (GObject               *object);
 
 G_DEFINE_TYPE (MateMixerContext, mate_mixer_context, G_TYPE_OBJECT);
 
-static void     on_backend_state_notify                 (MateMixerBackend *backend,
-                                                         GParamSpec       *pspec,
-                                                         MateMixerContext *context);
+static void     on_backend_state_notify                 (MateMixerBackend       *backend,
+                                                         GParamSpec             *pspec,
+                                                         MateMixerContext       *context);
 
-static void     on_backend_device_added                 (MateMixerBackend *backend,
-                                                         const gchar      *name,
-                                                         MateMixerContext *context);
-static void     on_backend_device_removed               (MateMixerBackend *backend,
-                                                         const gchar      *name,
-                                                         MateMixerContext *context);
+static void     on_backend_device_added                 (MateMixerBackend       *backend,
+                                                         MateMixerDevice        *device,
+                                                         MateMixerContext       *context);
+static void     on_backend_device_removed               (MateMixerBackend       *backend,
+                                                         MateMixerDevice        *device,
+                                                         MateMixerContext       *context);
 
-static void     on_backend_stream_added                 (MateMixerBackend *backend,
-                                                         const gchar      *name,
-                                                         MateMixerContext *context);
-static void     on_backend_stream_removed               (MateMixerBackend *backend,
-                                                         const gchar      *name,
-                                                         MateMixerContext *context);
+static void     on_backend_stream_added                 (MateMixerBackend       *backend,
+                                                         MateMixerStream        *stream,
+                                                         MateMixerContext       *context);
+static void     on_backend_stream_removed               (MateMixerBackend       *backend,
+                                                         MateMixerStream        *stream,
+                                                         MateMixerContext       *context);
 
-static void     on_backend_stored_control_added         (MateMixerBackend *backend,
-                                                         const gchar      *name,
-                                                         MateMixerContext *context);
-static void     on_backend_stored_control_removed       (MateMixerBackend *backend,
-                                                         const gchar      *name,
-                                                         MateMixerContext *context);
+static void     on_backend_stored_control_added         (MateMixerBackend       *backend,
+                                                         MateMixerStoredControl *control,
+                                                         MateMixerContext       *context);
+static void     on_backend_stored_control_removed       (MateMixerBackend       *backend,
+                                                         MateMixerStoredControl *control,
+                                                         MateMixerContext       *context);
 
-static void     on_backend_default_input_stream_notify  (MateMixerBackend *backend,
-                                                         GParamSpec       *pspec,
-                                                         MateMixerContext *context);
-static void     on_backend_default_output_stream_notify (MateMixerBackend *backend,
-                                                         GParamSpec       *pspec,
-                                                         MateMixerContext *context);
+static void     on_backend_default_input_stream_notify  (MateMixerBackend       *backend,
+                                                         GParamSpec             *pspec,
+                                                         MateMixerContext       *context);
+static void     on_backend_default_output_stream_notify (MateMixerBackend       *backend,
+                                                         GParamSpec             *pspec,
+                                                         MateMixerContext       *context);
 
-static gboolean try_next_backend                        (MateMixerContext *context);
+static gboolean try_next_backend                        (MateMixerContext       *context);
 
-static void     change_state                            (MateMixerContext *context,
-                                                         MateMixerState    state);
+static void     change_state                            (MateMixerContext       *context,
+                                                         MateMixerState          state);
 
-static void     close_context                           (MateMixerContext *context);
+static void     close_context                           (MateMixerContext       *context);
 
 static void
 mate_mixer_context_class_init (MateMixerContextClass *klass)
@@ -303,10 +305,10 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
                       G_STRUCT_OFFSET (MateMixerContextClass, device_added),
                       NULL,
                       NULL,
-                      g_cclosure_marshal_VOID__STRING,
+                      g_cclosure_marshal_VOID__OBJECT,
                       G_TYPE_NONE,
                       1,
-                      G_TYPE_STRING);
+                      MATE_MIXER_TYPE_DEVICE);
 
     /**
      * MateMixerContext::device-removed:
@@ -327,10 +329,10 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
                       G_STRUCT_OFFSET (MateMixerContextClass, device_removed),
                       NULL,
                       NULL,
-                      g_cclosure_marshal_VOID__STRING,
+                      g_cclosure_marshal_VOID__OBJECT,
                       G_TYPE_NONE,
                       1,
-                      G_TYPE_STRING);
+                      MATE_MIXER_TYPE_DEVICE);
 
     /**
      * MateMixerContext::stream-added:
@@ -353,10 +355,10 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
                       G_STRUCT_OFFSET (MateMixerContextClass, stream_added),
                       NULL,
                       NULL,
-                      g_cclosure_marshal_VOID__STRING,
+                      g_cclosure_marshal_VOID__OBJECT,
                       G_TYPE_NONE,
                       1,
-                      G_TYPE_STRING);
+                      MATE_MIXER_TYPE_STREAM);
 
     /**
      * MateMixerContext::stream-removed:
@@ -381,10 +383,10 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
                       G_STRUCT_OFFSET (MateMixerContextClass, stream_removed),
                       NULL,
                       NULL,
-                      g_cclosure_marshal_VOID__STRING,
+                      g_cclosure_marshal_VOID__OBJECT,
                       G_TYPE_NONE,
                       1,
-                      G_TYPE_STRING);
+                      MATE_MIXER_TYPE_STREAM);
 
     /**
      * MateMixerContext::stored-control-added:
@@ -402,10 +404,10 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
                       G_STRUCT_OFFSET (MateMixerContextClass, stored_control_added),
                       NULL,
                       NULL,
-                      g_cclosure_marshal_VOID__STRING,
+                      g_cclosure_marshal_VOID__OBJECT,
                       G_TYPE_NONE,
                       1,
-                      G_TYPE_STRING);
+                      MATE_MIXER_TYPE_STORED_CONTROL);
 
     /**
      * MateMixerContext::stored-control-removed:
@@ -426,10 +428,10 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
                       G_STRUCT_OFFSET (MateMixerContextClass, stored_control_removed),
                       NULL,
                       NULL,
-                      g_cclosure_marshal_VOID__STRING,
+                      g_cclosure_marshal_VOID__OBJECT,
                       G_TYPE_NONE,
                       1,
-                      G_TYPE_STRING);
+                      MATE_MIXER_TYPE_STORED_CONTROL);
 
     g_type_class_add_private (object_class, sizeof (MateMixerContextPrivate));
 }
@@ -1259,68 +1261,68 @@ on_backend_state_notify (MateMixerBackend *backend,
 
 static void
 on_backend_device_added (MateMixerBackend *backend,
-                         const gchar      *name,
+                         MateMixerDevice  *device,
                          MateMixerContext *context)
 {
     g_signal_emit (G_OBJECT (context),
                    signals[DEVICE_ADDED],
                    0,
-                   name);
+                   device);
 }
 
 static void
 on_backend_device_removed (MateMixerBackend *backend,
-                           const gchar      *name,
+                           MateMixerDevice  *device,
                            MateMixerContext *context)
 {
     g_signal_emit (G_OBJECT (context),
                    signals[DEVICE_REMOVED],
                    0,
-                   name);
+                   device);
 }
 
 static void
 on_backend_stream_added (MateMixerBackend *backend,
-                         const gchar      *name,
+                         MateMixerStream  *stream,
                          MateMixerContext *context)
 {
     g_signal_emit (G_OBJECT (context),
                    signals[STREAM_ADDED],
                    0,
-                   name);
+                   stream);
 }
 
 static void
 on_backend_stream_removed (MateMixerBackend *backend,
-                           const gchar      *name,
+                           MateMixerStream  *stream,
                            MateMixerContext *context)
 {
     g_signal_emit (G_OBJECT (context),
                    signals[STREAM_REMOVED],
                    0,
-                   name);
+                   stream);
 }
 
 static void
-on_backend_stored_control_added (MateMixerBackend *backend,
-                                 const gchar      *name,
-                                 MateMixerContext *context)
+on_backend_stored_control_added (MateMixerBackend       *backend,
+                                 MateMixerStoredControl *control,
+                                 MateMixerContext       *context)
 {
     g_signal_emit (G_OBJECT (context),
                    signals[STORED_CONTROL_ADDED],
                    0,
-                   name);
+                   control);
 }
 
 static void
-on_backend_stored_control_removed (MateMixerBackend *backend,
-                                   const gchar      *name,
-                                   MateMixerContext *context)
+on_backend_stored_control_removed (MateMixerBackend       *backend,
+                                   MateMixerStoredControl *control,
+                                   MateMixerContext       *context)
 {
     g_signal_emit (G_OBJECT (context),
                    signals[STORED_CONTROL_REMOVED],
                    0,
-                   name);
+                   control);
 }
 
 static void

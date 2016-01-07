@@ -196,7 +196,6 @@ pulse_sink_add_input (PulseSink *sink, const pa_sink_input_info *info)
     /* This function is used for both creating and refreshing sink inputs */
     input = g_hash_table_lookup (sink->priv->inputs, GUINT_TO_POINTER (info->index));
     if (input == NULL) {
-        const gchar *name;
         PulseConnection *connection;
 
         connection = pulse_stream_get_connection (PULSE_STREAM (sink));
@@ -210,10 +209,9 @@ pulse_sink_add_input (PulseSink *sink, const pa_sink_input_info *info)
 
         free_list_controls (sink);
 
-        name = mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (input));
         g_signal_emit_by_name (G_OBJECT (sink),
                                "control-added",
-                               name);
+                               MATE_MIXER_STREAM_CONTROL (input));
         return TRUE;
     }
 
@@ -225,7 +223,6 @@ void
 pulse_sink_remove_input (PulseSink *sink, guint32 index)
 {
     PulseSinkInput *input;
-    gchar          *name;
 
     g_return_if_fail (PULSE_IS_SINK (sink));
 
@@ -233,15 +230,14 @@ pulse_sink_remove_input (PulseSink *sink, guint32 index)
     if G_UNLIKELY (input == NULL)
         return;
 
-    name = g_strdup (mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (input)));
-
+    g_object_ref (input);
     g_hash_table_remove (sink->priv->inputs, GUINT_TO_POINTER (index));
 
     free_list_controls (sink);
     g_signal_emit_by_name (G_OBJECT (sink),
                            "control-removed",
-                           name);
-    g_free (name);
+                           MATE_MIXER_STREAM_CONTROL (input));
+    g_object_unref (input);
 }
 
 void
