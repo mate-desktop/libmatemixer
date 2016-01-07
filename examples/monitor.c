@@ -350,6 +350,22 @@ on_context_stream_removed (MateMixerContext *context, MateMixerStream *stream)
     g_print ("Stream removed: %s\n", mate_mixer_stream_get_name (stream));
 }
 
+static void
+on_context_stored_control_added (MateMixerContext       *context,
+                                 MateMixerStreamControl *control)
+{
+    g_print ("Stored control added: %s\n",
+             mate_mixer_stream_control_get_name (control));
+}
+
+static void
+on_context_stored_control_removed (MateMixerContext       *context,
+                                   MateMixerStreamControl *control)
+{
+    g_print ("Stored control removed: %s\n",
+             mate_mixer_stream_control_get_name (control));
+}
+
 #ifdef G_OS_UNIX
 static gboolean
 on_signal (gpointer mainloop)
@@ -452,6 +468,14 @@ int main (int argc, char *argv[])
     g_signal_connect (G_OBJECT (context),
                       "stream-removed",
                       G_CALLBACK (on_context_stream_removed),
+                      NULL);
+    g_signal_connect (G_OBJECT (context),
+                      "stored-control-added",
+                      G_CALLBACK (on_context_stored_control_added),
+                      NULL);
+    g_signal_connect (G_OBJECT (context),
+                      "stored-control-removed",
+                      G_CALLBACK (on_context_stored_control_removed),
                       NULL);
 
     /* When mate_mixer_context_open() returns TRUE, the state must be either
