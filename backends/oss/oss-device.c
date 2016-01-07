@@ -461,6 +461,15 @@ oss_device_load (OssDevice *device)
     } else
         g_clear_object (&device->priv->output);
 
+    if (device->priv->input != NULL)
+        g_signal_emit_by_name (G_OBJECT (device),
+                               "stream-added",
+                               MATE_MIXER_STREAM (device->priv->input));
+    if (device->priv->output != NULL)
+        g_signal_emit_by_name (G_OBJECT (device),
+                               "stream-added",
+                               MATE_MIXER_STREAM (device->priv->output));
+
     /*
      * See if we can use the modify_counter field to optimize polling.
      *
@@ -588,16 +597,6 @@ read_mixer_devices (OssDevice *device)
                                           stereo);
         if G_UNLIKELY (control == NULL)
             continue;
-
-        if (oss_stream_has_controls (stream) == FALSE) {
-            free_stream_list (device);
-
-            /* Pretend the stream has just been created now that we are adding
-             * the first control */
-            g_signal_emit_by_name (G_OBJECT (device),
-                                   "stream-added",
-                                   MATE_MIXER_STREAM (stream));
-        }
 
         g_debug ("Adding device %s control %s",
                  name,
