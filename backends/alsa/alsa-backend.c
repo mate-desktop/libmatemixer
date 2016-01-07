@@ -41,6 +41,7 @@
 
 struct _AlsaBackendPrivate
 {
+    AlsaDevice *default_device;
     GSource    *timeout_source;
     GList      *streams;
     GList      *devices;
@@ -65,8 +66,9 @@ static const GList *alsa_backend_list_streams    (MateMixerBackend *backend);
 
 static gboolean     read_devices                 (AlsaBackend      *alsa);
 
-static gboolean     read_device                  (AlsaBackend      *alsa,
-                                                  const gchar      *card);
+static void         read_device                  (AlsaBackend      *alsa,
+                                                  const gchar      *card,
+                                                  gboolean          default_device);
 
 static void         add_device                   (AlsaBackend      *alsa,
                                                   AlsaDevice       *device);
@@ -83,6 +85,9 @@ static void         remove_stream                (AlsaBackend      *alsa,
 
 static void         select_default_input_stream  (AlsaBackend      *alsa);
 static void         select_default_output_stream (AlsaBackend      *alsa);
+
+static gboolean     set_default_device           (AlsaBackend      *alsa,
+                                                  AlsaDevice       *device);
 
 static void         free_stream_list             (AlsaBackend      *alsa);
 
@@ -221,6 +226,7 @@ alsa_backend_close (MateMixerBackend *backend)
 
     free_stream_list (alsa);
 
+    g_clear_object (&alsa->priv->default_device);
     g_hash_table_remove_all (alsa->priv->devices_ids);
 
     _mate_mixer_backend_set_state (backend, MATE_MIXER_STATE_IDLE);
@@ -273,17 +279,16 @@ alsa_backend_list_streams (MateMixerBackend *backend)
 static gboolean
 read_devices (AlsaBackend *alsa)
 {
-    gint     num;
-    gint     ret;
-    gchar    card[16];
-    gboolean added = FALSE;
+    gint num;
 
     /* Read the default device first, it will be either one of the hardware cards
      * that will be queried later, or a software mixer */
-    if (read_device (alsa, "default") == TRUE)
-        added = TRUE;
+    read_device (alsa, "default", TRUE);
 
     for (num = -1;;) {
+        gchar card[16];
+        gint  ret;
+
         /* Read number of the next sound card */
         ret = snd_card_next (&num);
         if (ret < 0 ||
@@ -291,22 +296,31 @@ read_devices (AlsaBackend *alsa)
             break;
 
         g_snprintf (card, sizeof (card), "hw:%d", num);
-
-        if (read_device (alsa, card) == TRUE)
-            added = TRUE;
+        read_device (alsa, card, FALSE);
     }
 
-    /* If any card has been added, make sure we have the most suitable default
-     * input and output streams */
-    if (added == TRUE) {
-        select_default_input_stream (alsa);
-        select_default_output_stream (alsa);
+    /*
+     * Select the most suitable default device if one is not selected already.
+     *
+     * If a device called "default" exists in ALSA, it gets selected while
+     * reading the device.
+     * If there is no such device, select the first known device, which should
+     * also be the one preferred by ALSA.
+     */
+    if (alsa->priv->default_device == NULL) {
+        AlsaDevice *first = NULL;
+
+        if (alsa->priv->devices != NULL)
+            first = ALSA_DEVICE (alsa->priv->devices->data);
+
+        set_default_device (alsa, first);
     }
+
     return G_SOURCE_CONTINUE;
 }
 
-static gboolean
-read_device (AlsaBackend *alsa, const gchar *card)
+static void
+read_device (AlsaBackend *alsa, const gchar *card, gboolean default_device)
 {
     AlsaDevice          *device;
     snd_ctl_t           *ctl;
@@ -325,7 +339,7 @@ read_device (AlsaBackend *alsa, const gchar *card)
     ret = snd_ctl_open (&ctl, card, 0);
     if (ret < 0) {
         remove_device_by_name (alsa, card);
-        return FALSE;
+        return;
     }
 
     snd_ctl_card_info_alloca (&info);
@@ -336,7 +350,7 @@ read_device (AlsaBackend *alsa, const gchar *card)
 
         remove_device_by_name (alsa, card);
         snd_ctl_close (ctl);
-        return FALSE;
+        return;
     }
 
     id = snd_ctl_card_info_get_id (info);
@@ -345,8 +359,16 @@ read_device (AlsaBackend *alsa, const gchar *card)
      * added twice, this could commonly happen because some card may
      * also be assigned to the "default" ALSA device */
     if (g_hash_table_contains (alsa->priv->devices_ids, id) == TRUE) {
+        if (default_device == TRUE) {
+            MateMixerDevice *current;
+
+            current = mate_mixer_backend_get_device (MATE_MIXER_BACKEND (alsa), card);
+            if G_LIKELY (current != NULL)
+                set_default_device (alsa, ALSA_DEVICE (current));
+        }
+
         snd_ctl_close (ctl);
-        return FALSE;
+        return;
     }
 
     device = alsa_device_new (card, snd_ctl_card_info_get_name (info));
@@ -354,14 +376,17 @@ read_device (AlsaBackend *alsa, const gchar *card)
     if (alsa_device_open (device) == FALSE) {
         g_object_unref (device);
         snd_ctl_close (ctl);
-        return FALSE;
+        return;
     }
 
     ALSA_DEVICE_SET_ID (device, id);
+
     add_device (alsa, device);
 
+    if (default_device == TRUE)
+        set_default_device (alsa, device);
+
     snd_ctl_close (ctl);
-    return TRUE;
 }
 
 static void
@@ -439,17 +464,29 @@ remove_device_by_list_item (AlsaBackend *alsa, GList *item)
                                           G_CALLBACK (remove_device),
                                           alsa);
 
-    /* May emit removed signals */
-    if (alsa_device_is_open (device) == TRUE)
-        alsa_device_close (device);
-
-    g_signal_handlers_disconnect_by_data (G_OBJECT (device),
-                                          alsa);
-
     alsa->priv->devices = g_list_delete_link (alsa->priv->devices, item);
 
     g_hash_table_remove (alsa->priv->devices_ids,
                          ALSA_DEVICE_GET_ID (device));
+
+    /* If the removed device is the current default device, change the default
+     * to the first device in the internal list */
+    if (device == alsa->priv->default_device) {
+        AlsaDevice *first = NULL;
+
+        if (alsa->priv->devices != NULL)
+            first = ALSA_DEVICE (alsa->priv->devices->data);
+
+        set_default_device (alsa, first);
+    }
+
+    /* Closing a device emits stream-removed signals, close after fixing the
+     * default device to avoid re-validating default streams as they get
+     * removed */
+    if (alsa_device_is_open (device) == TRUE)
+        alsa_device_close (device);
+
+    g_signal_handlers_disconnect_by_data (G_OBJECT (device), alsa);
 
     g_signal_emit_by_name (G_OBJECT (alsa),
                            "device-removed",
@@ -475,17 +512,31 @@ remove_stream (AlsaBackend *alsa, MateMixerStream *stream)
 static void
 select_default_input_stream (AlsaBackend *alsa)
 {
-    GList *list;
+    AlsaStream *stream;
+    GList      *list;
 
-    list = alsa->priv->devices;
-    while (list != NULL) {
-        AlsaDevice *device = ALSA_DEVICE (list->data);
-        AlsaStream *stream = alsa_device_get_input_stream (device);
-
+    /* First try the default device */
+    if (alsa->priv->default_device != NULL) {
+        stream = alsa_device_get_input_stream (alsa->priv->default_device);
         if (stream != NULL) {
             _mate_mixer_backend_set_default_input_stream (MATE_MIXER_BACKEND (alsa),
                                                           MATE_MIXER_STREAM (stream));
             return;
+        }
+    }
+
+    list = alsa->priv->devices;
+    while (list != NULL) {
+        AlsaDevice *device = ALSA_DEVICE (list->data);
+
+        if (device != alsa->priv->default_device) {
+            stream = alsa_device_get_input_stream (device);
+
+            if (stream != NULL) {
+                _mate_mixer_backend_set_default_input_stream (MATE_MIXER_BACKEND (alsa),
+                                                              MATE_MIXER_STREAM (stream));
+                return;
+            }
         }
         list = list->next;
     }
@@ -497,23 +548,58 @@ select_default_input_stream (AlsaBackend *alsa)
 static void
 select_default_output_stream (AlsaBackend *alsa)
 {
-    GList *list;
+    AlsaStream *stream;
+    GList      *list;
 
-    list = alsa->priv->devices;
-    while (list != NULL) {
-        AlsaDevice *device = ALSA_DEVICE (list->data);
-        AlsaStream *stream = alsa_device_get_output_stream (device);
-
+    /* First try the default device */
+    if (alsa->priv->default_device != NULL) {
+        stream = alsa_device_get_output_stream (alsa->priv->default_device);
         if (stream != NULL) {
             _mate_mixer_backend_set_default_output_stream (MATE_MIXER_BACKEND (alsa),
                                                            MATE_MIXER_STREAM (stream));
             return;
+        }
+    }
+
+    list = alsa->priv->devices;
+    while (list != NULL) {
+        AlsaDevice *device = ALSA_DEVICE (list->data);
+
+        if (device != alsa->priv->default_device) {
+            stream = alsa_device_get_output_stream (device);
+
+            if (stream != NULL) {
+                _mate_mixer_backend_set_default_output_stream (MATE_MIXER_BACKEND (alsa),
+                                                               MATE_MIXER_STREAM (stream));
+                return;
+            }
         }
         list = list->next;
     }
 
     /* In the worst case unset the default stream */
     _mate_mixer_backend_set_default_output_stream (MATE_MIXER_BACKEND (alsa), NULL);
+}
+
+static gboolean
+set_default_device (AlsaBackend *alsa, AlsaDevice *device)
+{
+    if (alsa->priv->default_device == device)
+        return FALSE;
+
+    g_clear_object (&alsa->priv->default_device);
+
+    if (device != NULL) {
+        alsa->priv->default_device = g_object_ref (device);
+
+        g_debug ("Default device changed to %s",
+                 mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)));
+    } else
+        g_debug ("Default device unset");
+
+    select_default_input_stream (alsa);
+    select_default_output_stream (alsa);
+    return TRUE;
 }
 
 static void
