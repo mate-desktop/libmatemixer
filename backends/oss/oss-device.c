@@ -355,6 +355,8 @@ oss_device_is_open (OssDevice *device)
 void
 oss_device_close (OssDevice *device)
 {
+    OssStream *stream;
+
     g_return_if_fail (OSS_IS_DEVICE (device));
 
     if (device->priv->fd == -1)
@@ -365,22 +367,30 @@ oss_device_close (OssDevice *device)
         oss_stream_remove_all (device->priv->input);
         free_stream_list (device);
 
+        stream = device->priv->input;
+
+        /* Makes the stream getter return NULL when the signal is emitted */
+        device->priv->input = NULL;
         g_signal_emit_by_name (G_OBJECT (device),
                                "stream-removed",
-                               MATE_MIXER_STREAM (device->priv->input));
+                               MATE_MIXER_STREAM (stream));
 
-        g_clear_object (&device->priv->input);
+        g_object_unref (stream);
     }
 
     if (device->priv->output != NULL) {
         oss_stream_remove_all (device->priv->output);
         free_stream_list (device);
 
+        stream = device->priv->output;
+
+        /* Makes the stream getter return NULL when the signal is emitted */
+        device->priv->output = NULL;
         g_signal_emit_by_name (G_OBJECT (device),
                                "stream-removed",
-                               MATE_MIXER_STREAM (device->priv->output));
+                               MATE_MIXER_STREAM (stream));
 
-        g_clear_object (&device->priv->output);
+        g_object_unref (stream);
     }
 
     if (device->priv->poll_tag != 0)
