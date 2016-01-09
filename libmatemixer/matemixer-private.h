@@ -32,6 +32,12 @@
 
 G_BEGIN_DECLS
 
+const GList *_mate_mixer_list_modules (void);
+
+/* =======================================================================
+ * Convenience macros and functions to be used from modules
+ * =======================================================================
+ */
 #define MATE_MIXER_IS_LEFT_CHANNEL(c)                   \
     ((c) == MATE_MIXER_CHANNEL_FRONT_LEFT ||            \
      (c) == MATE_MIXER_CHANNEL_BACK_LEFT ||             \
@@ -106,10 +112,11 @@ G_BEGIN_DECLS
 #define MATE_MIXER_CHANNEL_MASK_HAS_FRONT(m)        ((m) & MATE_MIXER_CHANNEL_MASK_FRONT)
 #define MATE_MIXER_CHANNEL_MASK_HAS_BACK(m)         ((m) & MATE_MIXER_CHANNEL_MASK_BACK)
 
-const GList *_mate_mixer_list_modules        (void);
+guint32 _mate_mixer_create_channel_mask (MateMixerChannelPosition *positions,
+                                         guint                     n) G_GNUC_PURE;
 
-guint32      _mate_mixer_create_channel_mask (MateMixerChannelPosition *positions,
-                                              guint                     n) G_GNUC_PURE;
+void    _mate_mixer_clear_fd            (gint                     *fd);
+void    _mate_mixer_clear_object_list   (GList                   **list);
 
 G_END_DECLS
 

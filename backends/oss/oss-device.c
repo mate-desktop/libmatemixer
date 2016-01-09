@@ -368,8 +368,7 @@ oss_device_close (OssDevice *device)
     if (device->priv->poll_tag_restore != 0)
         g_source_remove (device->priv->poll_tag_restore);
 
-    close (device->priv->fd);
-    device->priv->fd = -1;
+    _mate_mixer_clear_fd (&device->priv->fd);
 
     g_signal_emit (G_OBJECT (device), signals[CLOSED], 0);
 }

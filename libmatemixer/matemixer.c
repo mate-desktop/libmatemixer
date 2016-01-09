@@ -18,6 +18,7 @@
 #include "config.h"
 
 #include <glib.h>
+#include <glib/gstdio.h>
 #include <glib-object.h>
 #include <gmodule.h>
 
@@ -139,6 +140,45 @@ _mate_mixer_create_channel_mask (MateMixerChannelPosition *positions, guint n)
             mask |= 1 << positions[i];
     }
     return mask;
+}
+
+/**
+ * _mate_mixer_clear_fd:
+ * @fd: a pointer to a file descriptor
+ *
+ * Closes the file descriptor if it is open and sets the pointer to -1.
+ */
+void
+_mate_mixer_clear_fd (gint *fd)
+{
+    g_return_if_fail (fd != NULL);
+
+    if (*fd == -1)
+        return;
+
+    g_close (*fd, NULL);
+
+    *fd = -1;
+}
+
+/**
+ * _mate_mixer_clear_object_list:
+ * @list: a pointer to a GList *
+ *
+ * Calls g_object_unref() on each item of the list, frees the list and
+ * sets the pointer to %NULL.
+ */
+void
+_mate_mixer_clear_object_list (GList **list)
+{
+    g_return_if_fail (list != NULL);
+
+    if (*list == NULL)
+        return;
+
+    g_list_free_full (*list, g_object_unref);
+
+   *list = NULL;
 }
 
 static void

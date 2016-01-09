@@ -53,8 +53,6 @@ G_DEFINE_TYPE (PulseSource, pulse_source, PULSE_TYPE_STREAM);
 static const GList *pulse_source_list_controls (MateMixerStream *mms);
 static const GList *pulse_source_list_switches (MateMixerStream *mms);
 
-static void         free_list_controls         (PulseSource     *source);
-
 static void
 pulse_source_class_init (PulseSourceClass *klass)
 {
@@ -96,13 +94,10 @@ pulse_source_dispose (GObject *object)
 
     g_clear_object (&source->priv->control);
     g_clear_object (&source->priv->pswitch);
+    g_clear_pointer (&source->priv->pswitch_list, g_list_free);
 
-    free_list_controls (source);
+    _mate_mixer_clear_object_list (&source->priv->outputs_list);
 
-    if (source->priv->pswitch_list != NULL) {
-        g_list_free (source->priv->pswitch_list);
-        source->priv->pswitch_list = NULL;
-    }
     G_OBJECT_CLASS (pulse_source_parent_class)->dispose (object);
 }
 
@@ -203,7 +198,7 @@ pulse_source_add_output (PulseSource *source, const pa_source_output_info *info)
                              GUINT_TO_POINTER (info->index),
                              output);
 
-        free_list_controls (source);
+        _mate_mixer_clear_object_list (&source->priv->outputs_list);
 
         g_signal_emit_by_name (G_OBJECT (source),
                                "control-added",
@@ -229,7 +224,7 @@ pulse_source_remove_output (PulseSource *source, guint32 index)
     g_object_ref (output);
     g_hash_table_remove (source->priv->outputs, GUINT_TO_POINTER (index));
 
-    free_list_controls (source);
+    _mate_mixer_clear_object_list (&source->priv->outputs_list);
     g_signal_emit_by_name (G_OBJECT (source),
                            "control-removed",
                            MATE_MIXER_STREAM_CONTROL (output));
@@ -278,15 +273,4 @@ pulse_source_list_switches (MateMixerStream *mms)
     g_return_val_if_fail (PULSE_IS_SOURCE (mms), NULL);
 
     return PULSE_SOURCE (mms)->priv->pswitch_list;
-}
-
-static void
-free_list_controls (PulseSource *source)
-{
-    if (source->priv->outputs_list == NULL)
-        return;
-
-    g_list_free_full (source->priv->outputs_list, g_object_unref);
-
-    source->priv->outputs_list = NULL;
 }

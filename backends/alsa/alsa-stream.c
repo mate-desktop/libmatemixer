@@ -17,6 +17,7 @@
 
 #include <glib.h>
 #include <glib-object.h>
+
 #include <libmatemixer/matemixer.h>
 #include <libmatemixer/matemixer-private.h>
 
@@ -78,14 +79,8 @@ alsa_stream_dispose (GObject *object)
 
     stream = ALSA_STREAM (object);
 
-    if (stream->priv->controls != NULL) {
-        g_list_free_full (stream->priv->controls, g_object_unref);
-        stream->priv->controls = NULL;
-    }
-    if (stream->priv->switches != NULL) {
-        g_list_free_full (stream->priv->switches, g_object_unref);
-        stream->priv->switches = NULL;
-    }
+    _mate_mixer_clear_object_list (&stream->priv->controls);
+    _mate_mixer_clear_object_list (&stream->priv->switches);
 
     G_OBJECT_CLASS (alsa_stream_parent_class)->dispose (object);
 }

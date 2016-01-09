@@ -219,12 +219,8 @@ alsa_backend_close (MateMixerBackend *backend)
 
     g_source_destroy (alsa->priv->timeout_source);
 
-    if (alsa->priv->devices != NULL) {
-        g_list_free_full (alsa->priv->devices, g_object_unref);
-        alsa->priv->devices = NULL;
-    }
-
-    free_stream_list (alsa);
+    _mate_mixer_clear_object_list (&alsa->priv->devices);
+    _mate_mixer_clear_object_list (&alsa->priv->streams);
 
     g_clear_object (&alsa->priv->default_device);
     g_hash_table_remove_all (alsa->priv->devices_ids);
@@ -605,12 +601,7 @@ set_default_device (AlsaBackend *alsa, AlsaDevice *device)
 static void
 free_stream_list (AlsaBackend *alsa)
 {
-    if (alsa->priv->streams == NULL)
-        return;
-
-    g_list_free_full (alsa->priv->streams, g_object_unref);
-
-    alsa->priv->streams = NULL;
+    _mate_mixer_clear_object_list (&alsa->priv->streams);
 }
 
 static gint

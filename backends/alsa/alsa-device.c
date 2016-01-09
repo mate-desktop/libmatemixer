@@ -22,7 +22,9 @@
 #include <glib/gi18n.h>
 #include <glib-object.h>
 #include <alsa/asoundlib.h>
+
 #include <libmatemixer/matemixer.h>
+#include <libmatemixer/matemixer-private.h>
 
 #include "alsa-compat.h"
 #include "alsa-constants.h"
@@ -155,8 +157,6 @@ static void               get_switch_info           (snd_mixer_elem_t           
 
 static void               close_mixer               (AlsaDevice                 *device);
 
-static void               free_stream_list          (AlsaDevice                 *device);
-
 static void
 alsa_device_class_init (AlsaDeviceClass *klass)
 {
@@ -208,7 +208,7 @@ alsa_device_dispose (GObject *object)
     g_clear_object (&device->priv->input);
     g_clear_object (&device->priv->output);
 
-    free_stream_list (device);
+    _mate_mixer_clear_object_list (&device->priv->streams);
 
     G_OBJECT_CLASS (alsa_device_parent_class)->dispose (object);
 }
@@ -339,7 +339,7 @@ alsa_device_close (AlsaDevice *device)
     /* Make each stream remove its controls and switches */
     if (alsa_stream_has_controls_or_switches (device->priv->input) == TRUE) {
         alsa_stream_remove_all (device->priv->input);
-        free_stream_list (device);
+        _mate_mixer_clear_object_list (&device->priv->streams);
 
         g_signal_emit_by_name (G_OBJECT (device),
                                "stream-removed",
@@ -348,7 +348,7 @@ alsa_device_close (AlsaDevice *device)
 
     if (alsa_stream_has_controls_or_switches (device->priv->output) == TRUE) {
         alsa_stream_remove_all (device->priv->output);
-        free_stream_list (device);
+        _mate_mixer_clear_object_list (&device->priv->streams);
 
         g_signal_emit_by_name (G_OBJECT (device),
                                "stream-removed",
@@ -475,7 +475,7 @@ add_element (AlsaDevice *device, AlsaStream *stream, AlsaElement *element)
     }
 
     if (add_stream == TRUE) {
-        free_stream_list (device);
+        _mate_mixer_clear_object_list (&device->priv->streams);
 
         /* Pretend the stream has just been created now that we have added
          * the first control */
@@ -755,7 +755,7 @@ remove_elements_by_name (AlsaDevice *device, const gchar *name)
     if (alsa_stream_remove_elements (device->priv->input, name) == TRUE) {
         /* Removing last stream element "removes" the stream */
         if (alsa_stream_has_controls_or_switches (device->priv->input) == FALSE) {
-            free_stream_list (device);
+            _mate_mixer_clear_object_list (&device->priv->streams);
             g_signal_emit_by_name (G_OBJECT (device),
                                    "stream-removed",
                                    MATE_MIXER_STREAM (device->priv->input));
@@ -765,7 +765,7 @@ remove_elements_by_name (AlsaDevice *device, const gchar *name)
     if (alsa_stream_remove_elements (device->priv->output, name) == TRUE) {
         /* Removing last stream element "removes" the stream */
         if (alsa_stream_has_controls_or_switches (device->priv->output) == FALSE) {
-            free_stream_list (device);
+            _mate_mixer_clear_object_list (&device->priv->streams);
             g_signal_emit_by_name (G_OBJECT (device),
                                    "stream-removed",
                                    MATE_MIXER_STREAM (device->priv->output));
@@ -1121,16 +1121,4 @@ close_mixer (AlsaDevice *device)
 
      device->priv->handle = NULL;
      snd_mixer_close (handle);
-}
-
-static void
-free_stream_list (AlsaDevice *device)
-{
-    /* This function is called each time the stream list changes */
-    if (device->priv->streams == NULL)
-        return;
-
-    g_list_free_full (device->priv->streams, g_object_unref);
-
-    device->priv->streams = NULL;
 }

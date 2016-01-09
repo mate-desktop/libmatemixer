@@ -86,10 +86,7 @@ alsa_switch_dispose (GObject *object)
 
     swtch = ALSA_SWITCH (object);
 
-    if (swtch->priv->options != NULL) {
-        g_list_free_full (swtch->priv->options, g_object_unref);
-        swtch->priv->options = NULL;
-    }
+    _mate_mixer_clear_object_list (&swtch->priv->options);
 
     G_OBJECT_CLASS (alsa_switch_parent_class)->dispose (object);
 }

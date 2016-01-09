@@ -267,12 +267,8 @@ oss_backend_close (MateMixerBackend *backend)
     if (oss->priv->timeout_source_default != NULL)
         g_source_destroy (oss->priv->timeout_source_default);
 
-    if (oss->priv->devices != NULL) {
-        g_list_free_full (oss->priv->devices, g_object_unref);
-        oss->priv->devices = NULL;
-    }
-
-    free_stream_list (oss);
+    _mate_mixer_clear_object_list (&oss->priv->devices);
+    _mate_mixer_clear_object_list (&oss->priv->streams);
 
     g_clear_object (&oss->priv->default_device);
     g_hash_table_remove_all (oss->priv->devices_paths);
@@ -388,7 +384,7 @@ read_device (OssBackend *oss, const gchar *path)
      * device's polling facility should handle this by itself.
      */
     if (g_hash_table_contains (oss->priv->devices_paths, path) == TRUE) {
-        close (fd);
+        g_close (fd, NULL);
         return TRUE;
     }
 
@@ -398,8 +394,7 @@ read_device (OssBackend *oss, const gchar *path)
     device = oss_device_new (bname, label, path, fd);
     g_free (bname);
     g_free (label);
-
-    close (fd);
+    g_close (fd, NULL);
 
     if G_LIKELY (device != NULL) {
         if (oss_device_open (device) == TRUE) {
@@ -717,12 +712,7 @@ set_default_device_index (OssBackend *oss, guint index, gboolean fallback)
 static void
 free_stream_list (OssBackend *oss)
 {
-    if (oss->priv->streams == NULL)
-        return;
-
-    g_list_free_full (oss->priv->streams, g_object_unref);
-
-    oss->priv->streams = NULL;
+    _mate_mixer_clear_object_list (&oss->priv->streams);
 }
 
 static gint

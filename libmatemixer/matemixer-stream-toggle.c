@@ -199,13 +199,9 @@ mate_mixer_stream_toggle_dispose (GObject *object)
 
     toggle = MATE_MIXER_STREAM_TOGGLE (object);
 
-    if (toggle->priv->options != NULL) {
-        g_list_free (toggle->priv->options);
-        toggle->priv->options = NULL;
-    }
-
     g_clear_object (&toggle->priv->on);
     g_clear_object (&toggle->priv->off);
+    g_clear_pointer (&toggle->priv->options, g_list_free);
 
     G_OBJECT_CLASS (mate_mixer_stream_toggle_parent_class)->dispose (object);
 }

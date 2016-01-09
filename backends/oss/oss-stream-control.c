@@ -206,11 +206,7 @@ oss_stream_control_close (OssStreamControl *control)
 {
     g_return_if_fail (OSS_IS_STREAM_CONTROL (control));
 
-    if (control->priv->fd == -1)
-        return;
-
-    close (control->priv->fd);
-    control->priv->fd = -1;
+    _mate_mixer_clear_fd (&control->priv->fd);
 }
 
 static guint

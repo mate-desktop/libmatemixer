@@ -78,10 +78,7 @@ oss_switch_dispose (GObject *object)
 
     swtch = OSS_SWITCH (object);
 
-    if (swtch->priv->options != NULL) {
-        g_list_free_full (swtch->priv->options, g_object_unref);
-        swtch->priv->options = NULL;
-    }
+    _mate_mixer_clear_object_list (&swtch->priv->options);
 
     G_OBJECT_CLASS (oss_switch_parent_class)->dispose (object);
 }
@@ -206,11 +203,7 @@ oss_switch_close (OssSwitch *swtch)
 {
     g_return_if_fail (OSS_IS_SWITCH (swtch));
 
-    if (swtch->priv->fd == -1)
-        return;
-
-    close (swtch->priv->fd);
-    swtch->priv->fd = -1;
+    _mate_mixer_clear_fd (&swtch->priv->fd);
 }
 
 static gboolean

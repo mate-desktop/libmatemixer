@@ -79,10 +79,8 @@ pulse_port_switch_dispose (GObject *object)
 
     swtch = PULSE_PORT_SWITCH (object);
 
-    if (swtch->priv->ports != NULL) {
-        g_list_free_full (swtch->priv->ports, g_object_unref);
-        swtch->priv->ports = NULL;
-    }
+    _mate_mixer_clear_object_list (&swtch->priv->ports);
+
     G_OBJECT_CLASS (pulse_port_switch_parent_class)->dispose (object);
 }
 

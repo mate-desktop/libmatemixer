@@ -79,10 +79,8 @@ pulse_device_switch_dispose (GObject *object)
 
     swtch = PULSE_DEVICE_SWITCH (object);
 
-    if (swtch->priv->profiles != NULL) {
-        g_list_free_full (swtch->priv->profiles, g_object_unref);
-        swtch->priv->profiles = NULL;
-    }
+    _mate_mixer_clear_object_list (&swtch->priv->profiles);
+
     G_OBJECT_CLASS (pulse_device_switch_parent_class)->dispose (object);
 }
 

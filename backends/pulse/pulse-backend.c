@@ -205,10 +205,6 @@ static void             remove_source_output                (PulseBackend       
                                                              PulseSource                      *source,
                                                              guint                             index);
 
-static void             free_list_devices                   (PulseBackend                     *pulse);
-static void             free_list_streams                   (PulseBackend                     *pulse);
-static void             free_list_ext_streams               (PulseBackend                     *pulse);
-
 static gboolean         compare_stream_names                (gpointer                          key,
                                                              gpointer                          value,
                                                              gpointer                          user_data);
@@ -469,9 +465,9 @@ pulse_backend_close (MateMixerBackend *backend)
         g_clear_object (&pulse->priv->connection);
     }
 
-    free_list_devices (pulse);
-    free_list_streams (pulse);
-    free_list_ext_streams (pulse);
+    _mate_mixer_clear_object_list (&pulse->priv->devices_list);
+    _mate_mixer_clear_object_list (&pulse->priv->streams_list);
+    _mate_mixer_clear_object_list (&pulse->priv->ext_streams_list);
 
     g_hash_table_remove_all (pulse->priv->devices);
     g_hash_table_remove_all (pulse->priv->sinks);
@@ -776,7 +772,7 @@ on_connection_card_info (PulseConnection    *connection,
                              GUINT_TO_POINTER (info->index),
                              device);
 
-        free_list_devices (pulse);
+        _mate_mixer_clear_object_list (&pulse->priv->devices_list);
         g_signal_emit_by_name (G_OBJECT (pulse),
                                "device-added",
                                MATE_MIXER_DEVICE (device));
@@ -798,7 +794,7 @@ on_connection_card_removed (PulseConnection *connection,
     g_object_ref (device);
     g_hash_table_remove (pulse->priv->devices, GUINT_TO_POINTER (index));
 
-    free_list_devices (pulse);
+    _mate_mixer_clear_object_list (&pulse->priv->devices_list);
     g_signal_emit_by_name (G_OBJECT (pulse),
                            "device-removed",
                            MATE_MIXER_DEVICE (device));
@@ -826,7 +822,7 @@ on_connection_sink_info (PulseConnection    *connection,
                              GUINT_TO_POINTER (info->index),
                              stream);
 
-        free_list_streams (pulse);
+        _mate_mixer_clear_object_list (&pulse->priv->streams_list);
 
         if (device != NULL) {
             pulse_device_add_stream (device, stream);
@@ -859,7 +855,7 @@ on_connection_sink_removed (PulseConnection *connection,
     g_object_ref (stream);
     g_hash_table_remove (pulse->priv->sinks, GUINT_TO_POINTER (idx));
 
-    free_list_streams (pulse);
+    _mate_mixer_clear_object_list (&pulse->priv->streams_list);
 
     device = pulse_stream_get_device (stream);
     if (device != NULL) {
@@ -963,7 +959,7 @@ on_connection_source_info (PulseConnection      *connection,
                              GUINT_TO_POINTER (info->index),
                              stream);
 
-        free_list_streams (pulse);
+        _mate_mixer_clear_object_list (&pulse->priv->streams_list);
 
         if (device != NULL) {
             pulse_device_add_stream (device, stream);
@@ -994,9 +990,9 @@ on_connection_source_removed (PulseConnection *connection,
         return;
 
     g_object_ref (stream);
-
     g_hash_table_remove (pulse->priv->sources, GUINT_TO_POINTER (idx));
-    free_list_streams (pulse);
+
+    _mate_mixer_clear_object_list (&pulse->priv->streams_list);
 
     device = pulse_stream_get_device (stream);
     if (device != NULL) {
@@ -1105,7 +1101,7 @@ on_connection_ext_stream_info (PulseConnection                  *connection,
                              g_strdup (info->name),
                              ext);
 
-        free_list_ext_streams (pulse);
+        _mate_mixer_clear_object_list (&pulse->priv->ext_streams_list);
 
         g_signal_emit_by_name (G_OBJECT (pulse),
                                "stored-control-added",
@@ -1146,7 +1142,7 @@ on_connection_ext_stream_loaded (PulseConnection *connection, PulseBackend *puls
         g_object_ref (G_OBJECT (ext));
         g_hash_table_iter_remove (&iter);
 
-        free_list_ext_streams (pulse);
+        _mate_mixer_clear_object_list (&pulse->priv->ext_streams_list);
         g_signal_emit_by_name (G_OBJECT (pulse),
                                "stored-control-removed",
                                MATE_MIXER_STORED_CONTROL (ext));
@@ -1226,39 +1222,6 @@ remove_source_output (PulseBackend *pulse, PulseSource *source, guint index)
     pulse_source_remove_output (source, index);
 
     g_hash_table_remove (pulse->priv->source_output_map, GUINT_TO_POINTER (index));
-}
-
-static void
-free_list_devices (PulseBackend *pulse)
-{
-    if (pulse->priv->devices_list == NULL)
-        return;
-
-    g_list_free_full (pulse->priv->devices_list, g_object_unref);
-
-    pulse->priv->devices_list = NULL;
-}
-
-static void
-free_list_streams (PulseBackend *pulse)
-{
-    if (pulse->priv->streams_list == NULL)
-        return;
-
-    g_list_free_full (pulse->priv->streams_list, g_object_unref);
-
-    pulse->priv->streams_list = NULL;
-}
-
-static void
-free_list_ext_streams (PulseBackend *pulse)
-{
-    if (pulse->priv->ext_streams_list == NULL)
-        return;
-
-    g_list_free_full (pulse->priv->ext_streams_list, g_object_unref);
-
-    pulse->priv->ext_streams_list = NULL;
 }
 
 static gboolean

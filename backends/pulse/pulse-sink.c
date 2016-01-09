@@ -54,8 +54,6 @@ G_DEFINE_TYPE (PulseSink, pulse_sink, PULSE_TYPE_STREAM);
 static const GList *pulse_sink_list_controls (MateMixerStream *mms);
 static const GList *pulse_sink_list_switches (MateMixerStream *mms);
 
-static void         free_list_controls       (PulseSink       *sink);
-
 static void
 pulse_sink_class_init (PulseSinkClass *klass)
 {
@@ -99,13 +97,10 @@ pulse_sink_dispose (GObject *object)
 
     g_clear_object (&sink->priv->control);
     g_clear_object (&sink->priv->pswitch);
+    g_clear_pointer (&sink->priv->pswitch_list, g_list_free);
 
-    free_list_controls (sink);
+    _mate_mixer_clear_object_list (&sink->priv->inputs_list);
 
-    if (sink->priv->pswitch_list != NULL) {
-        g_list_free (sink->priv->pswitch_list);
-        sink->priv->pswitch_list = NULL;
-    }
     G_OBJECT_CLASS (pulse_sink_parent_class)->dispose (object);
 }
 
@@ -207,7 +202,7 @@ pulse_sink_add_input (PulseSink *sink, const pa_sink_input_info *info)
                              GUINT_TO_POINTER (info->index),
                              input);
 
-        free_list_controls (sink);
+        _mate_mixer_clear_object_list (&sink->priv->inputs_list);
 
         g_signal_emit_by_name (G_OBJECT (sink),
                                "control-added",
@@ -233,7 +228,7 @@ pulse_sink_remove_input (PulseSink *sink, guint32 index)
     g_object_ref (input);
     g_hash_table_remove (sink->priv->inputs, GUINT_TO_POINTER (index));
 
-    free_list_controls (sink);
+    _mate_mixer_clear_object_list (&sink->priv->inputs_list);
     g_signal_emit_by_name (G_OBJECT (sink),
                            "control-removed",
                            MATE_MIXER_STREAM_CONTROL (input));
@@ -291,15 +286,4 @@ pulse_sink_list_switches (MateMixerStream *mms)
     g_return_val_if_fail (PULSE_IS_SINK (mms), NULL);
 
     return PULSE_SINK (mms)->priv->pswitch_list;
-}
-
-static void
-free_list_controls (PulseSink *sink)
-{
-    if (sink->priv->inputs_list == NULL)
-        return;
-
-    g_list_free_full (sink->priv->inputs_list, g_object_unref);
-
-    sink->priv->inputs_list = NULL;
 }

@@ -78,8 +78,6 @@ static const GList *    pulse_device_list_switches (MateMixerDevice    *mmd);
 static void             pulse_device_load          (PulseDevice        *device,
                                                     const pa_card_info *info);
 
-static void             free_list_streams          (PulseDevice        *device);
-
 static void
 pulse_device_class_init (PulseDeviceClass *klass)
 {
@@ -198,13 +196,10 @@ pulse_device_dispose (GObject *object)
 
     g_clear_object (&device->priv->connection);
     g_clear_object (&device->priv->pswitch);
+    g_clear_pointer (&device->priv->pswitch_list, g_list_free);
 
-    free_list_streams (device);
+    _mate_mixer_clear_object_list (&device->priv->streams_list);
 
-    if (device->priv->pswitch_list != NULL) {
-        g_list_free (device->priv->pswitch_list);
-        device->priv->pswitch_list = NULL;
-    }
     G_OBJECT_CLASS (pulse_device_parent_class)->dispose (object);
 }
 
@@ -284,7 +279,7 @@ pulse_device_add_stream (PulseDevice *device, PulseStream *stream)
                          g_strdup (name),
                          g_object_ref (stream));
 
-    free_list_streams (device);
+    _mate_mixer_clear_object_list (&device->priv->streams_list);
 
     g_signal_emit_by_name (G_OBJECT (device),
                            "stream-added",
@@ -304,7 +299,7 @@ pulse_device_remove_stream (PulseDevice *device, PulseStream *stream)
     g_object_ref (stream);
     g_hash_table_remove (device->priv->streams, name);
 
-    free_list_streams (device);
+    _mate_mixer_clear_object_list (&device->priv->streams_list);
     g_signal_emit_by_name (G_OBJECT (device),
                            "stream-removed",
                            MATE_MIXER_STREAM (stream));
@@ -427,15 +422,4 @@ pulse_device_load (PulseDevice *device, const pa_card_info *info)
 
         g_object_unref (profile);
     }
-}
-
-static void
-free_list_streams (PulseDevice *device)
-{
-    if (device->priv->streams_list == NULL)
-        return;
-
-    g_list_free_full (device->priv->streams_list, g_object_unref);
-
-    device->priv->streams_list = NULL;
 }

@@ -18,6 +18,7 @@
 #include <glib.h>
 #include <glib/gi18n.h>
 #include <glib-object.h>
+
 #include <libmatemixer/matemixer.h>
 #include <libmatemixer/matemixer-private.h>
 
@@ -75,14 +76,8 @@ oss_stream_dispose (GObject *object)
 
     stream = OSS_STREAM (object);
 
-    if (stream->priv->controls != NULL) {
-        g_list_free_full (stream->priv->controls, g_object_unref);
-        stream->priv->controls = NULL;
-    }
-    if (stream->priv->switches != NULL) {
-        g_list_free_full (stream->priv->switches, g_object_unref);
-        stream->priv->switches = NULL;
-    }
+    _mate_mixer_clear_object_list (&stream->priv->controls);
+    _mate_mixer_clear_object_list (&stream->priv->switches);
 
     g_clear_object (&stream->priv->swtch);
 
@@ -250,9 +245,7 @@ oss_stream_remove_all (OssStream *stream)
 
     if (stream->priv->swtch != NULL) {
         oss_switch_close (stream->priv->swtch);
-
-        g_list_free_full (stream->priv->switches, g_object_unref);
-        stream->priv->switches = NULL;
+        _mate_mixer_clear_object_list (&stream->priv->switches);
 
         g_signal_emit_by_name (G_OBJECT (stream),
                                "switch-removed",
