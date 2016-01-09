@@ -198,8 +198,6 @@ static guint        create_poll_source            (OssDevice       *device,
                                                    OssPollMode      mode);
 static guint        create_poll_restore_source    (OssDevice       *device);
 
-static void         free_stream_list              (OssDevice       *device);
-
 static gint         compare_stream_control_devnum (gconstpointer    a,
                                                    gconstpointer    b);
 
@@ -248,8 +246,6 @@ oss_device_dispose (GObject *object)
 
     g_clear_object (&device->priv->input);
     g_clear_object (&device->priv->output);
-
-    free_stream_list (device);
 
     G_OBJECT_CLASS (oss_device_parent_class)->dispose (object);
 }
@@ -364,12 +360,11 @@ oss_device_close (OssDevice *device)
 
     /* Make each stream remove its controls and switch */
     if (device->priv->input != NULL) {
-        oss_stream_remove_all (device->priv->input);
-        free_stream_list (device);
-
         stream = device->priv->input;
+        oss_stream_remove_all (stream);
+        device->priv->streams = g_list_remove (device->priv->streams, stream);
 
-        /* Makes the stream getter return NULL when the signal is emitted */
+        /* Make the stream getter return NULL when the signal is emitted */
         device->priv->input = NULL;
         g_signal_emit_by_name (G_OBJECT (device),
                                "stream-removed",
@@ -379,12 +374,11 @@ oss_device_close (OssDevice *device)
     }
 
     if (device->priv->output != NULL) {
-        oss_stream_remove_all (device->priv->output);
-        free_stream_list (device);
-
         stream = device->priv->output;
+        oss_stream_remove_all (stream);
+        device->priv->streams = g_list_remove (device->priv->streams, stream);
 
-        /* Makes the stream getter return NULL when the signal is emitted */
+        /* Make the stream getter return NULL when the signal is emitted */
         device->priv->output = NULL;
         g_signal_emit_by_name (G_OBJECT (device),
                                "stream-removed",
@@ -471,14 +465,20 @@ oss_device_load (OssDevice *device)
     } else
         g_clear_object (&device->priv->output);
 
-    if (device->priv->input != NULL)
+    if (device->priv->input != NULL) {
+        device->priv->streams = g_list_append (device->priv->streams,
+                                               device->priv->input);
         g_signal_emit_by_name (G_OBJECT (device),
                                "stream-added",
                                MATE_MIXER_STREAM (device->priv->input));
-    if (device->priv->output != NULL)
+    }
+    if (device->priv->output != NULL) {
+        device->priv->streams = g_list_append (device->priv->streams,
+                                               device->priv->output);
         g_signal_emit_by_name (G_OBJECT (device),
                                "stream-added",
                                MATE_MIXER_STREAM (device->priv->output));
+    }
 
     /*
      * See if we can use the modify_counter field to optimize polling.
@@ -545,16 +545,6 @@ oss_device_list_streams (MateMixerDevice *mmd)
     g_return_val_if_fail (OSS_IS_DEVICE (mmd), NULL);
 
     device = OSS_DEVICE (mmd);
-
-    if (device->priv->streams == NULL) {
-        if (device->priv->output != NULL)
-            device->priv->streams = g_list_prepend (device->priv->streams,
-                                                    g_object_ref (device->priv->output));
-
-        if (device->priv->input != NULL)
-            device->priv->streams = g_list_prepend (device->priv->streams,
-                                                    g_object_ref (device->priv->input));
-    }
     return device->priv->streams;
 }
 
@@ -773,18 +763,6 @@ create_poll_restore_source (OssDevice *device)
     g_source_unref (source);
 
     return tag;
-}
-
-static void
-free_stream_list (OssDevice *device)
-{
-    /* This function is called each time the stream list changes */
-    if (device->priv->streams == NULL)
-        return;
-
-    g_list_free_full (device->priv->streams, g_object_unref);
-
-    device->priv->streams = NULL;
 }
 
 static gint
