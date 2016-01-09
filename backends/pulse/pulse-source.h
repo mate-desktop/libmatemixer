@@ -57,20 +57,27 @@ struct _PulseSourceClass
     PulseStreamClass parent_class;
 };
 
-GType        pulse_source_get_type      (void) G_GNUC_CONST;
+GType              pulse_source_get_type      (void) G_GNUC_CONST;
 
-PulseSource *pulse_source_new           (PulseConnection             *connection,
-                                         const pa_source_info        *info,
-                                         PulseDevice                 *device);
+PulseSource *      pulse_source_new           (PulseConnection             *connection,
+                                               const pa_source_info        *info,
+                                               PulseDevice                 *device);
 
-gboolean     pulse_source_add_output    (PulseSource                 *source,
-                                         const pa_source_output_info *info);
+gboolean           pulse_source_add_output    (PulseSource                 *source,
+                                               PulseSourceOutput           *output,
+                                               const pa_source_output_info *info);
 
-void         pulse_source_remove_output (PulseSource                 *source,
-                                         guint32                      index);
+PulseSourceOutput *pulse_source_get_output    (PulseSource                 *source,
+                                               guint32                      index);
 
-void         pulse_source_update        (PulseSource                 *source,
-                                         const pa_source_info        *info);
+gboolean           pulse_source_read_output   (PulseSource                 *source,
+                                               const pa_source_output_info *info);
+
+void               pulse_source_remove_output (PulseSource                 *source,
+                                               guint32                      index);
+
+void               pulse_source_update        (PulseSource                 *source,
+                                               const pa_source_info        *info);
 
 G_END_DECLS
 

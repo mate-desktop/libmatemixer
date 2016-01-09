@@ -191,6 +191,13 @@ static void             on_connection_ext_stream_info       (PulseConnection    
                                                              const pa_ext_stream_restore_info *info,
                                                              PulseBackend                     *pulse);
 
+static void             on_sink_input_stream_changed        (PulseSinkInput                   *input,
+                                                             PulseSink                        *sink,
+                                                             PulseBackend                     *pulse);
+static void             on_source_output_stream_changed     (PulseSourceOutput                *output,
+                                                             PulseSource                      *source,
+                                                             PulseBackend                     *pulse);
+
 static gboolean         source_try_connect                  (PulseBackend                     *pulse);
 
 static void             check_pending_sink                  (PulseBackend                     *pulse,
@@ -198,12 +205,25 @@ static void             check_pending_sink                  (PulseBackend       
 static void             check_pending_source                (PulseBackend                     *pulse,
                                                              PulseStream                      *stream);
 
+static void             move_sink_input                     (PulseBackend                     *pulse,
+                                                             PulseSinkInput                   *input,
+                                                             PulseSink                        *prev,
+                                                             PulseSink                        *sink,
+                                                             const pa_sink_input_info         *info);
+static void             move_source_output                  (PulseBackend                     *pulse,
+                                                             PulseSourceOutput                *output,
+                                                             PulseSource                      *prev,
+                                                             PulseSource                      *source,
+                                                             const pa_source_output_info      *info);
+
 static void             remove_sink_input                   (PulseBackend                     *backend,
                                                              PulseSink                        *sink,
-                                                             guint                             index);
+                                                             guint                             index,
+                                                             gboolean                          disconnect);
 static void             remove_source_output                (PulseBackend                     *backend,
                                                              PulseSource                      *source,
-                                                             guint                             index);
+                                                             guint                             index,
+                                                             gboolean                          disconnect);
 
 static gboolean         compare_stream_names                (gpointer                          key,
                                                              gpointer                          value,
@@ -901,7 +921,7 @@ on_connection_sink_input_info (PulseConnection          *connection,
                      mate_mixer_stream_get_name (MATE_MIXER_STREAM (prev)),
                      info->sink);
 
-            remove_sink_input (pulse, prev, info->index);
+            remove_sink_input (pulse, prev, info->index, TRUE);
         } else
             g_debug ("Sink input %u created on an unknown sink %u, ignoring",
                      info->index,
@@ -912,17 +932,39 @@ on_connection_sink_input_info (PulseConnection          *connection,
     /* The sink input might have moved to a different sink */
     prev = g_hash_table_lookup (pulse->priv->sink_input_map, GUINT_TO_POINTER (info->index));
     if (prev != NULL && sink != prev) {
-        g_debug ("Sink input moved from sink %s to %s",
+        PulseSinkInput *input;
+
+        g_debug ("Sink input %u moved from sink %s to %s",
+                 info->index,
                  mate_mixer_stream_get_name (MATE_MIXER_STREAM (prev)),
                  mate_mixer_stream_get_name (MATE_MIXER_STREAM (sink)));
 
-        remove_sink_input (pulse, prev, info->index);
+        input = pulse_sink_get_input (prev, info->index);
+        if G_LIKELY (input != NULL) {
+            move_sink_input (pulse, input, prev, sink, info);
+            return;
+        }
+
+        /* Sink's hash table doesn't match backend's hash table? */
+        g_warn_if_reached ();
     }
 
-    if (pulse_sink_add_input (sink, info) == TRUE)
-        g_hash_table_insert (pulse->priv->sink_input_map,
-                             GUINT_TO_POINTER (info->index),
-                             g_object_ref (sink));
+    /* Returns TRUE when a new input is added */
+    if (pulse_sink_read_input (sink, info) == FALSE)
+        return;
+
+    /* Keep pointer to the owning sink as only the input's index will be
+     * known when the input is removed */
+    g_hash_table_insert (pulse->priv->sink_input_map,
+                         GUINT_TO_POINTER (info->index),
+                         g_object_ref (sink));
+
+    /* The hash table will have to be updated when the input is moved
+     * to a different sink using a library call */
+    g_signal_connect (G_OBJECT (pulse_sink_get_input (sink, info->index)),
+                      "stream-changed-by-request",
+                      G_CALLBACK (on_sink_input_stream_changed),
+                      pulse);
 }
 
 static void
@@ -936,7 +978,7 @@ on_connection_sink_input_removed (PulseConnection *connection,
     if G_UNLIKELY (sink == NULL)
         return;
 
-    remove_sink_input (pulse, sink, idx);
+    remove_sink_input (pulse, sink, idx, TRUE);
 }
 
 static void
@@ -1038,7 +1080,7 @@ on_connection_source_output_info (PulseConnection             *connection,
                      mate_mixer_stream_get_name (MATE_MIXER_STREAM (prev)),
                      info->source);
 
-            remove_source_output (pulse, prev, info->index);
+            remove_source_output (pulse, prev, info->index, TRUE);
         } else
             g_debug ("Source output %u created on an unknown source %u, ignoring",
                      info->index,
@@ -1049,17 +1091,39 @@ on_connection_source_output_info (PulseConnection             *connection,
     /* The source output might have moved to a different source */
     prev = g_hash_table_lookup (pulse->priv->source_output_map, GUINT_TO_POINTER (info->index));
     if (prev != NULL && source != prev) {
-        g_debug ("Source output moved from source %s to %s",
+        PulseSourceOutput *output;
+
+        g_debug ("Source output %u moved from source %s to %s",
+                 info->index,
                  mate_mixer_stream_get_name (MATE_MIXER_STREAM (prev)),
                  mate_mixer_stream_get_name (MATE_MIXER_STREAM (source)));
 
-        remove_source_output (pulse, prev, info->index);
+        output = pulse_source_get_output (prev, info->index);
+        if G_LIKELY (output != NULL) {
+            move_source_output (pulse, output, prev, source, info);
+            return;
+        }
+
+        /* Source's hash table doesn't match backend's hash table? */
+        g_warn_if_reached ();
     }
 
-    if (pulse_source_add_output (source, info) == TRUE)
-        g_hash_table_insert (pulse->priv->source_output_map,
-                             GUINT_TO_POINTER (info->index),
-                             g_object_ref (source));
+    /* Returns TRUE when a new output is added */
+    if (pulse_source_read_output (source, info) == FALSE)
+        return;
+
+    /* Keep pointer to the owning source as only the output's index will be
+     * known when the output is removed */
+    g_hash_table_insert (pulse->priv->source_output_map,
+                         GUINT_TO_POINTER (info->index),
+                         g_object_ref (source));
+
+    /* The hash table will have to be updated when the output is moved
+     * to a different source using a library call */
+    g_signal_connect (G_OBJECT (pulse_source_get_output (source, info->index)),
+                      "stream-changed-by-request",
+                      G_CALLBACK (on_source_output_stream_changed),
+                      pulse);
 }
 
 static void
@@ -1073,7 +1137,7 @@ on_connection_source_output_removed (PulseConnection *connection,
     if G_UNLIKELY (source == NULL)
         return;
 
-    remove_source_output (pulse, source, idx);
+    remove_source_output (pulse, source, idx, TRUE);
 }
 
 static void
@@ -1151,6 +1215,42 @@ on_connection_ext_stream_loaded (PulseConnection *connection, PulseBackend *puls
     }
 }
 
+static void
+on_sink_input_stream_changed (PulseSinkInput *input,
+                              PulseSink      *sink,
+                              PulseBackend   *pulse)
+{
+    PulseSink *prev;
+    guint32    index;
+
+    index = pulse_stream_control_get_index (PULSE_STREAM_CONTROL (input));
+
+    prev = g_hash_table_lookup (pulse->priv->sink_input_map, GUINT_TO_POINTER (index));
+    if G_UNLIKELY (prev == NULL) {
+        g_warn_if_reached ();
+        return;
+    }
+    move_sink_input (pulse, input, prev, sink, NULL);
+}
+
+static void
+on_source_output_stream_changed (PulseSourceOutput *output,
+                                 PulseSource       *source,
+                                 PulseBackend      *pulse)
+{
+    PulseSource *prev;
+    guint32      index;
+
+    index = pulse_stream_control_get_index (PULSE_STREAM_CONTROL (output));
+
+    prev = g_hash_table_lookup (pulse->priv->source_output_map, GUINT_TO_POINTER (index));
+    if G_UNLIKELY (prev == NULL) {
+        g_warn_if_reached ();
+        return;
+    }
+    move_source_output (pulse, output, prev, source, NULL);
+}
+
 static gboolean
 source_try_connect (PulseBackend *pulse)
 {
@@ -1209,16 +1309,104 @@ check_pending_source (PulseBackend *pulse, PulseStream *stream)
 }
 
 static void
-remove_sink_input (PulseBackend *pulse, PulseSink *sink, guint index)
+move_sink_input (PulseBackend             *pulse,
+                 PulseSinkInput           *input,
+                 PulseSink                *prev,
+                 PulseSink                *sink,
+                 const pa_sink_input_info *info)
 {
+    guint32 index;
+
+    if (info != NULL)
+        index = info->index;
+    else
+        index = pulse_stream_control_get_index (PULSE_STREAM_CONTROL (input));
+
+    g_object_ref (input);
+
+    /* Remove the input from the previous sink and add it to the new sink,
+     * removing it from the previous sink could potentially remove the
+     * last reference of the input */
+    remove_sink_input (pulse, prev, index, FALSE);
+
+    /* Non-NULL info will also refresh the input's values */
+    pulse_sink_add_input (sink, input, info);
+
+    g_hash_table_insert (pulse->priv->sink_input_map,
+                         GUINT_TO_POINTER (index),
+                         g_object_ref (sink));
+
+    g_object_unref (input);
+}
+
+static void
+move_source_output (PulseBackend                *pulse,
+                    PulseSourceOutput           *output,
+                    PulseSource                 *prev,
+                    PulseSource                 *source,
+                    const pa_source_output_info *info)
+{
+    guint32 index;
+
+    if (info != NULL)
+        index = info->index;
+    else
+        index = pulse_stream_control_get_index (PULSE_STREAM_CONTROL (output));
+
+    g_object_ref (output);
+
+    /* Remove the output from the previous source and add it to the new source,
+     * removing it from the previous source could potentially remove the
+     * last reference of the output */
+    remove_source_output (pulse, prev, index, FALSE);
+
+    /* Non-NULL info will also refresh the output's values */
+    pulse_source_add_output (source, output, info);
+
+    g_hash_table_insert (pulse->priv->source_output_map,
+                         GUINT_TO_POINTER (index),
+                         g_object_ref (source));
+
+    g_object_unref (output);
+}
+
+static void
+remove_sink_input (PulseBackend *pulse,
+                   PulseSink    *sink,
+                   guint         index,
+                   gboolean      disconnect)
+{
+    if (disconnect == TRUE) {
+        PulseSinkInput *input;
+
+        input = pulse_sink_get_input (sink, index);
+        if G_LIKELY (input != NULL)
+            g_signal_handlers_disconnect_by_func (G_OBJECT (input),
+                                                  G_CALLBACK (on_sink_input_stream_changed),
+                                                  pulse);
+    }
+
     pulse_sink_remove_input (sink, index);
 
     g_hash_table_remove (pulse->priv->sink_input_map, GUINT_TO_POINTER (index));
 }
 
 static void
-remove_source_output (PulseBackend *pulse, PulseSource *source, guint index)
+remove_source_output (PulseBackend *pulse,
+                      PulseSource  *source,
+                      guint         index,
+                      gboolean      disconnect)
 {
+    if (disconnect == TRUE) {
+        PulseSourceOutput *output;
+
+        output = pulse_source_get_output (source, index);
+        if G_LIKELY (output != NULL)
+            g_signal_handlers_disconnect_by_func (G_OBJECT (output),
+                                                  G_CALLBACK (on_source_output_stream_changed),
+                                                  pulse);
+    }
+
     pulse_source_remove_output (source, index);
 
     g_hash_table_remove (pulse->priv->source_output_map, GUINT_TO_POINTER (index));

@@ -57,22 +57,29 @@ struct _PulseSinkClass
     PulseStreamClass parent_class;
 };
 
-GType      pulse_sink_get_type          (void) G_GNUC_CONST;
+GType           pulse_sink_get_type          (void) G_GNUC_CONST;
 
-PulseSink *pulse_sink_new               (PulseConnection          *connection,
-                                         const pa_sink_info       *info,
-                                         PulseDevice              *device);
+PulseSink *     pulse_sink_new               (PulseConnection          *connection,
+                                              const pa_sink_info       *info,
+                                              PulseDevice              *device);
 
-gboolean   pulse_sink_add_input         (PulseSink                *sink,
-                                         const pa_sink_input_info *info);
+gboolean        pulse_sink_add_input         (PulseSink                *sink,
+                                              PulseSinkInput           *input,
+                                              const pa_sink_input_info *info);
 
-void       pulse_sink_remove_input      (PulseSink                *sink,
-                                         guint32                   index);
+PulseSinkInput *pulse_sink_get_input         (PulseSink                *sink,
+                                              guint32                   index);
 
-void       pulse_sink_update            (PulseSink                *sink,
-                                         const pa_sink_info       *info);
+gboolean        pulse_sink_read_input        (PulseSink                *sink,
+                                              const pa_sink_input_info *info);
 
-guint32    pulse_sink_get_index_monitor (PulseSink                *sink);
+void            pulse_sink_remove_input      (PulseSink                *sink,
+                                              guint32                   index);
+
+void            pulse_sink_update            (PulseSink                *sink,
+                                              const pa_sink_info       *info);
+
+guint32         pulse_sink_get_index_monitor (PulseSink                *sink);
 
 G_END_DECLS
 

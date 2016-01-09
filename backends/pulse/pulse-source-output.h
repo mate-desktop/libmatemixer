@@ -51,6 +51,10 @@ struct _PulseSourceOutput
 struct _PulseSourceOutputClass
 {
     PulseStreamControlClass parent_class;
+
+    /*< private >*/
+    void (*stream_changed_by_request) (PulseSourceOutput *output,
+                                       PulseSource       *source);
 };
 
 GType              pulse_source_output_get_type (void) G_GNUC_CONST;
@@ -60,7 +64,8 @@ PulseSourceOutput *pulse_source_output_new      (PulseConnection             *co
                                                  PulseSource                 *source);
 
 void               pulse_source_output_update   (PulseSourceOutput           *output,
-                                                 const pa_source_output_info *info);
+                                                 const pa_source_output_info *info,
+                                                 PulseSource                 *parent);
 
 G_END_DECLS
 

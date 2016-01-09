@@ -181,7 +181,53 @@ pulse_sink_new (PulseConnection    *connection,
 }
 
 gboolean
-pulse_sink_add_input (PulseSink *sink, const pa_sink_input_info *info)
+pulse_sink_add_input (PulseSink                *sink,
+                      PulseSinkInput           *input,
+                      const pa_sink_input_info *info)
+{
+    guint32  index;
+    gboolean ret;
+
+    g_return_val_if_fail (PULSE_IS_SINK (sink), FALSE);
+    g_return_val_if_fail (PULSE_IS_SINK_INPUT (input), FALSE);
+
+    index = pulse_stream_control_get_index (PULSE_STREAM_CONTROL (input));
+
+    /* The input might get replaced here, but that is not a problem as PulseAudio
+     * does not reuse indices */
+    ret = g_hash_table_insert (sink->priv->inputs,
+                               GUINT_TO_POINTER (index),
+                               g_object_ref (input));
+    if (ret == TRUE) {
+        /* Allows NULL info */
+        pulse_sink_input_update (input, info, sink);
+
+        _mate_mixer_clear_object_list (&sink->priv->inputs_list);
+
+        g_signal_emit_by_name (G_OBJECT (sink),
+                               "control-added",
+                               MATE_MIXER_STREAM_CONTROL (input));
+        return TRUE;
+    }
+
+    g_debug ("Pulse sink input %s already exists in sink %s",
+             mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (input)),
+             mate_mixer_stream_get_name (MATE_MIXER_STREAM (sink)));
+
+    return FALSE;
+}
+
+PulseSinkInput *
+pulse_sink_get_input (PulseSink *sink, guint32 index)
+{
+    g_return_val_if_fail (PULSE_IS_SINK (sink), FALSE);
+    g_return_val_if_fail (index != PA_INVALID_INDEX, FALSE);
+
+    return g_hash_table_lookup (sink->priv->inputs, GUINT_TO_POINTER (index));
+}
+
+gboolean
+pulse_sink_read_input (PulseSink *sink, const pa_sink_input_info *info)
 {
     PulseSinkInput *input;
 
@@ -192,25 +238,21 @@ pulse_sink_add_input (PulseSink *sink, const pa_sink_input_info *info)
     input = g_hash_table_lookup (sink->priv->inputs, GUINT_TO_POINTER (info->index));
     if (input == NULL) {
         PulseConnection *connection;
+        gboolean         ret;
 
         connection = pulse_stream_get_connection (PULSE_STREAM (sink));
         input = pulse_sink_input_new (connection,
                                       info,
                                       sink);
 
-        g_hash_table_insert (sink->priv->inputs,
-                             GUINT_TO_POINTER (info->index),
-                             input);
+        /* Pass NULL info as there is no need to re-read the input values */
+        ret = pulse_sink_add_input (sink, input, NULL);
 
-        _mate_mixer_clear_object_list (&sink->priv->inputs_list);
-
-        g_signal_emit_by_name (G_OBJECT (sink),
-                               "control-added",
-                               MATE_MIXER_STREAM_CONTROL (input));
-        return TRUE;
+        g_object_unref (input);
+        return ret; /* Returns TRUE when added */
     }
 
-    pulse_sink_input_update (input, info);
+    pulse_sink_input_update (input, info, sink);
     return FALSE;
 }
 
@@ -220,6 +262,7 @@ pulse_sink_remove_input (PulseSink *sink, guint32 index)
     PulseSinkInput *input;
 
     g_return_if_fail (PULSE_IS_SINK (sink));
+    g_return_if_fail (index != PA_INVALID_INDEX);
 
     input = g_hash_table_lookup (sink->priv->inputs, GUINT_TO_POINTER (index));
     if G_UNLIKELY (input == NULL)

@@ -51,6 +51,10 @@ struct _PulseSinkInput
 struct _PulseSinkInputClass
 {
     PulseStreamControlClass parent_class;
+
+    /*< private >*/
+    void (*stream_changed_by_request) (PulseSinkInput *input,
+                                       PulseSink      *sink);
 };
 
 GType           pulse_sink_input_get_type (void) G_GNUC_CONST;
@@ -60,7 +64,8 @@ PulseSinkInput *pulse_sink_input_new      (PulseConnection          *connection,
                                            PulseSink                *sink);
 
 void            pulse_sink_input_update   (PulseSinkInput           *input,
-                                           const pa_sink_input_info *info);
+                                           const pa_sink_input_info *info,
+                                           PulseSink                *sink);
 
 G_END_DECLS
 

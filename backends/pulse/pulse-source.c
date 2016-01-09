@@ -178,7 +178,53 @@ pulse_source_new (PulseConnection      *connection,
 }
 
 gboolean
-pulse_source_add_output (PulseSource *source, const pa_source_output_info *info)
+pulse_source_add_output (PulseSource                 *source,
+                         PulseSourceOutput           *output,
+                         const pa_source_output_info *info)
+{
+    guint32  index;
+    gboolean ret;
+
+    g_return_val_if_fail (PULSE_IS_SOURCE (source), FALSE);
+    g_return_val_if_fail (PULSE_IS_SOURCE_OUTPUT (output), FALSE);
+
+    index = pulse_stream_control_get_index (PULSE_STREAM_CONTROL (output));
+
+    /* The input might get replaced here, but that is not a problem as PulseAudio
+     * does not reuse indices */
+    ret = g_hash_table_insert (source->priv->outputs,
+                               GUINT_TO_POINTER (index),
+                               g_object_ref (output));
+    if (ret == TRUE) {
+        /* Allows NULL info */
+        pulse_source_output_update (output, info, source);
+
+        _mate_mixer_clear_object_list (&source->priv->outputs_list);
+
+        g_signal_emit_by_name (G_OBJECT (source),
+                               "control-added",
+                               MATE_MIXER_STREAM_CONTROL (output));
+        return TRUE;
+    }
+
+    g_debug ("Pulse source output %s already exists in source %s",
+             mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (output)),
+             mate_mixer_stream_get_name (MATE_MIXER_STREAM (source)));
+
+    return FALSE;
+}
+
+PulseSourceOutput *
+pulse_source_get_output (PulseSource *source, guint32 index)
+{
+    g_return_val_if_fail (PULSE_IS_SOURCE (source), FALSE);
+    g_return_val_if_fail (index != PA_INVALID_INDEX, FALSE);
+
+    return g_hash_table_lookup (source->priv->outputs, GUINT_TO_POINTER (index));
+}
+
+gboolean
+pulse_source_read_output (PulseSource *source, const pa_source_output_info *info)
 {
     PulseSourceOutput *output;
 
@@ -189,24 +235,21 @@ pulse_source_add_output (PulseSource *source, const pa_source_output_info *info)
     output = g_hash_table_lookup (source->priv->outputs, GUINT_TO_POINTER (info->index));
     if (output == NULL) {
         PulseConnection *connection;
+        gboolean         ret;
 
         connection = pulse_stream_get_connection (PULSE_STREAM (source));
         output = pulse_source_output_new (connection,
                                           info,
                                           source);
-        g_hash_table_insert (source->priv->outputs,
-                             GUINT_TO_POINTER (info->index),
-                             output);
 
-        _mate_mixer_clear_object_list (&source->priv->outputs_list);
+        /* Pass NULL info as there is no need to re-read the output values */
+        ret = pulse_source_add_output (source, output, NULL);
 
-        g_signal_emit_by_name (G_OBJECT (source),
-                               "control-added",
-                               MATE_MIXER_STREAM_CONTROL (output));
-        return TRUE;
+        g_object_unref (output);
+        return ret; /* Returns TRUE when added */
     }
 
-    pulse_source_output_update (output, info);
+    pulse_source_output_update (output, info, source);
     return FALSE;
 }
 
@@ -216,6 +259,7 @@ pulse_source_remove_output (PulseSource *source, guint32 index)
     PulseSourceOutput *output;
 
     g_return_if_fail (PULSE_IS_SOURCE (source));
+    g_return_if_fail (index != PA_INVALID_INDEX);
 
     output = g_hash_table_lookup (source->priv->outputs, GUINT_TO_POINTER (index));
     if G_UNLIKELY (output == NULL)
