@@ -211,7 +211,11 @@ if test "x$enable_oss" != "xno"; then
     # NetBSD/OpenBSD require -lossaudio, other OSS implementations do not have
     # this library
     AC_CHECK_LIB([ossaudio], [_oss_ioctl], [OSS_LIBS="-lossaudio"])
-
+    # FreeBSD allows getting/setting the default sound card and getting names
+    # of sound cards with sysctl
+    AC_CHECK_HEADERS([sys/sysctl.h], [
+      AC_CHECK_FUNCS([sysctlbyname])
+    ])
     AC_DEFINE(HAVE_OSS, [], [Define if we have OSS support])
   else
     if test "x$enable_oss" = "xyes"; then
