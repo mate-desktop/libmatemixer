@@ -170,6 +170,7 @@ struct _OssDevicePrivate
     GList      *streams;
     OssStream  *input;
     OssStream  *output;
+    gboolean    loaded;
 };
 
 enum {
@@ -181,7 +182,6 @@ static guint signals[N_SIGNALS] = { 0, };
 
 static void oss_device_class_init (OssDeviceClass *klass);
 static void oss_device_init       (OssDevice      *device);
-static void oss_device_dispose    (GObject        *object);
 static void oss_device_finalize   (GObject        *object);
 
 G_DEFINE_TYPE (OssDevice, oss_device, MATE_MIXER_TYPE_DEVICE)
@@ -208,7 +208,6 @@ oss_device_class_init (OssDeviceClass *klass)
     MateMixerDeviceClass *device_class;
 
     object_class = G_OBJECT_CLASS (klass);
-    object_class->dispose  = oss_device_dispose;
     object_class->finalize = oss_device_finalize;
 
     device_class = MATE_MIXER_DEVICE_CLASS (klass);
@@ -238,25 +237,11 @@ oss_device_init (OssDevice *device)
 }
 
 static void
-oss_device_dispose (GObject *object)
-{
-    OssDevice *device;
-
-    device = OSS_DEVICE (object);
-
-    g_clear_object (&device->priv->input);
-    g_clear_object (&device->priv->output);
-
-    G_OBJECT_CLASS (oss_device_parent_class)->dispose (object);
-}
-
-static void
 oss_device_finalize (GObject *object)
 {
     OssDevice *device = OSS_DEVICE (object);
 
-    if (device->priv->fd != -1)
-        close (device->priv->fd);
+    oss_device_close (device);
 
     g_free (device->priv->path);
 
@@ -301,6 +286,7 @@ oss_device_open (OssDevice *device)
     gint ret;
 
     g_return_val_if_fail (OSS_IS_DEVICE (device), FALSE);
+    g_return_val_if_fail (device->priv->fd != -1, FALSE);
 
     g_debug ("Opening device %s (%s)",
              device->priv->path,
@@ -333,17 +319,6 @@ fail:
     g_warning ("Failed to read device %s: %s",
                device->priv->path,
                g_strerror (errno));
-
-    return FALSE;
-}
-
-gboolean
-oss_device_is_open (OssDevice *device)
-{
-    g_return_val_if_fail (OSS_IS_DEVICE (device), FALSE);
-
-    if (device->priv->fd != -1)
-        return TRUE;
 
     return FALSE;
 }
@@ -408,6 +383,7 @@ oss_device_load (OssDevice *device)
     guint        i;
 
     g_return_if_fail (OSS_IS_DEVICE (device));
+    g_return_if_fail (device->priv->loaded == FALSE);
 
     name = mate_mixer_device_get_name (MATE_MIXER_DEVICE (device));
 
@@ -511,6 +487,8 @@ oss_device_load (OssDevice *device)
      * changed and therefore when to start the rapid polling.
      */
     device->priv->poll_tag = create_poll_source (device, OSS_POLL_NORMAL);
+
+    device->priv->loaded = TRUE;
 }
 
 const gchar *

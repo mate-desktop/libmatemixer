@@ -66,7 +66,6 @@ OssDevice *  oss_device_new               (const gchar *name,
                                            gint         fd);
 
 gboolean     oss_device_open              (OssDevice   *device);
-gboolean     oss_device_is_open           (OssDevice   *device);
 void         oss_device_close             (OssDevice   *device);
 
 void         oss_device_load              (OssDevice   *device);

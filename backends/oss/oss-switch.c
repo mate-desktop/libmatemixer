@@ -93,8 +93,7 @@ oss_switch_finalize (GObject *object)
 
     swtch = OSS_SWITCH (object);
 
-    if (swtch->priv->fd != -1)
-        close (swtch->priv->fd);
+    oss_switch_close (swtch);
 
     G_OBJECT_CLASS (oss_switch_parent_class)->finalize (object);
 }

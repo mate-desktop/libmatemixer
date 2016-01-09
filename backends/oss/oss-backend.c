@@ -568,8 +568,7 @@ remove_device_by_list_item (OssBackend *oss, GList *item)
     /* Closing a device emits stream-removed signals, close after fixing the
      * default device to avoid re-validating default streams as they get
      * removed */
-    if (oss_device_is_open (device) == TRUE)
-        oss_device_close (device);
+    oss_device_close (device);
 
     g_signal_handlers_disconnect_by_data (G_OBJECT (device), oss);
 

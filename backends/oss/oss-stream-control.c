@@ -128,8 +128,7 @@ oss_stream_control_finalize (GObject *object)
 
     control = OSS_STREAM_CONTROL (object);
 
-    if (control->priv->fd != -1)
-        close (control->priv->fd);
+    oss_stream_control_close (control);
 
     G_OBJECT_CLASS (oss_stream_control_parent_class)->finalize (object);
 }
