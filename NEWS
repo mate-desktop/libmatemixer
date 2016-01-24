@@ -3,6 +3,7 @@ Version 1.13.0
 ==============
 
 - Fix PulseAudio volume limits
+- alsa/oss: Correctly disconnect device signals
 
 ==============
 Version 1.12.1
