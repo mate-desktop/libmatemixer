@@ -7,16 +7,18 @@
 # AlexL <loginov.alex.valer@gmail.com>, 2015
 # bizdelnick <bizdelnick@gmail.com>, 2015
 # Evolve32 <evolve32@yandex.ru>, 2014
-# Ilyas B Arinov <prot.tcpip@gmail.com>, 2015
+# Ilyas B Arinov <arinov.ilyas@gmail.com>, 2015
 # Sergey Kolosov <kolosov@gmail.com>, 2014
+# theirix <theirix@gmail.com>, 2016
 # Виктор Кукшиев <andrey0bolkonsky@gmail.com>, 2015
+# павел <nazar12101@gmail.com>, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-09 12:55+0200\n"
-"PO-Revision-Date: 2015-09-23 16:47+0000\n"
-"Last-Translator: bizdelnick <bizdelnick@gmail.com>\n"
+"PO-Revision-Date: 2016-02-10 16:59+0000\n"
+"Last-Translator: theirix <theirix@gmail.com>\n"
 "Language-Team: Russian (http://www.transifex.com/mate/MATE/language/ru/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -27,7 +29,7 @@ msgstr ""
 #. Output controls
 #: ../backends/alsa/alsa-constants.c:40
 msgid "Master"
-msgstr "Главный"
+msgstr "Основной"
 
 #: ../backends/alsa/alsa-constants.c:41
 msgid "Hardware Master"
@@ -84,11 +86,11 @@ msgstr "Цифровой"
 
 #: ../backends/alsa/alsa-constants.c:60
 msgid "Master Mono"
-msgstr "Главный Моно"
+msgstr "Основной моно"
 
 #: ../backends/alsa/alsa-constants.c:61
 msgid "Master Digital"
-msgstr "Главный Цифровой"
+msgstr "Основной цифровой"
 
 #: ../backends/alsa/alsa-constants.c:62 ../backends/alsa/alsa-constants.c:63
 msgid "Side Speaker"
