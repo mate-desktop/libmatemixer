@@ -2,8 +2,13 @@
 Version 1.13.0
 ==============
 
+- Require PulseAudio 2.0 or newer
+- Improve error checking in many places
 - Fix PulseAudio volume limits
-- alsa/oss: Correctly disconnect device signals
+- Some other PulseAudio fixes
+- Some fixes and improvements in alsa and oss backends
+- Some more fixes and cleanups
+- Translations update
 
 ==============
 Version 1.12.1
