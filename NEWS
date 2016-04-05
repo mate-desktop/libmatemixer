@@ -1,5 +1,5 @@
 ==============
-Version 1.13.0
+Version 1.14.0
 ==============
 
 - Require PulseAudio 2.0 or newer
@@ -9,6 +9,7 @@ Version 1.13.0
 - Some fixes and improvements in alsa and oss backends
 - Some more fixes and cleanups
 - Translations update
+- Create Changelog from git
 
 ==============
 Version 1.12.1
