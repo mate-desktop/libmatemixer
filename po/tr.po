@@ -4,14 +4,15 @@
 # 
 # Translators:
 # Atilla Öntaş <tarakbumba@gmail.com>, 2014
-# Kudret Emre <kudretemre@hotmail.com.tr>, 2014
+# Butterfly <gokhanlnx@gmail.com>, 2015
+# Kudret <kudretemre@hotmail.com.tr>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-09 12:55+0200\n"
-"PO-Revision-Date: 2015-09-09 10:54+0000\n"
-"Last-Translator: infirit <inactive+infirit@transifex.com>\n"
+"PO-Revision-Date: 2015-11-10 19:23+0000\n"
+"Last-Translator: Butterfly <gokhanlnx@gmail.com>\n"
 "Language-Team: Turkish (http://www.transifex.com/mate/MATE/language/tr/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -289,11 +290,11 @@ msgstr "Sayısal Çalma Kaynağı"
 
 #: ../backends/alsa/alsa-constants.c:124
 msgid "Mono Output"
-msgstr ""
+msgstr "Mono Çıktı"
 
 #: ../backends/alsa/alsa-constants.c:125
 msgid "Shared Microphone/Line In"
-msgstr ""
+msgstr "Paylaşılan Mikrofon/Hat Girişi"
 
 #: ../backends/alsa/alsa-constants.c:127
 msgid "Microphone Jack Mode"
@@ -346,7 +347,7 @@ msgstr "Karıştırma Mono"
 
 #: ../backends/alsa/alsa-constants.c:142
 msgid "Microphone Capture"
-msgstr ""
+msgstr "Mikrofon Yakalama"
 
 #: ../backends/alsa/alsa-constants.c:143 ../backends/alsa/alsa-constants.c:198
 msgid "Input 1"
@@ -548,7 +549,7 @@ msgstr "Radyo"
 #: ../backends/oss/oss-stream.c:208 ../backends/pulse/pulse-sink.c:149
 #: ../backends/pulse/pulse-source.c:146
 msgid "Connector"
-msgstr ""
+msgstr "Bağlantı"
 
 #: ../backends/pulse/pulse-device.c:399
 msgid "Profile"

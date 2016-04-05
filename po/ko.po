@@ -3,7 +3,7 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# 박정규(Jung Kyu Park) <bagjunggyu@gmail.com>, 2014
+# 박정규(Jung-Kyu Park) <bagjunggyu@gmail.com>, 2014
 # Seong-ho Cho <darkcircle.0426@gmail.com>, 2014-2015
 msgid ""
 msgstr ""

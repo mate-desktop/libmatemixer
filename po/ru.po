@@ -5,12 +5,12 @@
 # Translators:
 # Alexei Sorokin <sor.alexei@meowr.ru>, 2014
 # AlexL <loginov.alex.valer@gmail.com>, 2015
-# bizdelnick <bizdelnick@gmail.com>, 2015
+# Дмитрий Михирев <bizdelnick@gmail.com>, 2015
 # Evolve32 <evolve32@yandex.ru>, 2014
 # Ilyas B Arinov <arinov.ilyas@gmail.com>, 2015
 # Sergey Kolosov <kolosov@gmail.com>, 2014
 # theirix <theirix@gmail.com>, 2016
-# Виктор Кукшиев <andrey0bolkonsky@gmail.com>, 2015
+# Андрей Болконский <andrey0bolkonsky@gmail.com>, 2015
 # павел <nazar12101@gmail.com>, 2015
 msgid ""
 msgstr ""

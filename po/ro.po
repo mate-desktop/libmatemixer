@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-09 12:55+0200\n"
-"PO-Revision-Date: 2015-11-01 05:52+0000\n"
+"PO-Revision-Date: 2015-11-11 09:00+0000\n"
 "Last-Translator: Daniel <danny34ever@yahoo.com>\n"
 "Language-Team: Romanian (http://www.transifex.com/mate/MATE/language/ro/)\n"
 "MIME-Version: 1.0\n"
@@ -129,7 +129,7 @@ msgstr "Difuzor calculator"
 
 #: ../backends/alsa/alsa-constants.c:74 ../backends/oss/oss-device.c:91
 msgid "Synth"
-msgstr ""
+msgstr "Sintetizator"
 
 #: ../backends/alsa/alsa-constants.c:75
 msgid "MIDI"
@@ -137,7 +137,7 @@ msgstr "MIDI"
 
 #: ../backends/alsa/alsa-constants.c:76
 msgid "Synth/MIDI"
-msgstr ""
+msgstr "Sintetizator/MIDI"
 
 #: ../backends/alsa/alsa-constants.c:77 ../backends/oss/oss-device.c:89
 msgid "Bass"
@@ -252,7 +252,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:108
 msgid "Headset Microphone Boost"
-msgstr ""
+msgstr "Amplificare microfon cască"
 
 #: ../backends/alsa/alsa-constants.c:109
 msgid "Line In Boost"
@@ -334,7 +334,7 @@ msgstr "Optică"
 
 #: ../backends/alsa/alsa-constants.c:139
 msgid "Auto Gain Control"
-msgstr ""
+msgstr "Control câștig automat"
 
 #: ../backends/alsa/alsa-constants.c:140
 msgid "Mix"
@@ -534,11 +534,11 @@ msgstr "Digital 3"
 
 #: ../backends/oss/oss-device.c:113
 msgid "Phone In"
-msgstr ""
+msgstr "Intrare telefon"
 
 #: ../backends/oss/oss-device.c:114
 msgid "Phone Out"
-msgstr ""
+msgstr "Ieșire telefon"
 
 #: ../backends/oss/oss-device.c:116
 msgid "Radio"

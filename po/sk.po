@@ -3,14 +3,15 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
+# Dušan Kazik <prescott66@gmail.com>, 2015
 # Tibor Kaputa <tibbbi2@gmail.com>, 2014
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-09 12:55+0200\n"
-"PO-Revision-Date: 2015-09-09 10:54+0000\n"
-"Last-Translator: infirit <inactive+infirit@transifex.com>\n"
+"PO-Revision-Date: 2015-12-09 19:50+0000\n"
+"Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: Slovak (http://www.transifex.com/mate/MATE/language/sk/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -288,11 +289,11 @@ msgstr "Digitálny zdroj playbacku"
 
 #: ../backends/alsa/alsa-constants.c:124
 msgid "Mono Output"
-msgstr ""
+msgstr "Mono výstup"
 
 #: ../backends/alsa/alsa-constants.c:125
 msgid "Shared Microphone/Line In"
-msgstr ""
+msgstr "Zdieľaný mikrofón alebo vstupná linka"
 
 #: ../backends/alsa/alsa-constants.c:127
 msgid "Microphone Jack Mode"
@@ -345,7 +346,7 @@ msgstr "Mix Mono"
 
 #: ../backends/alsa/alsa-constants.c:142
 msgid "Microphone Capture"
-msgstr ""
+msgstr "Zachytávanie mikrofónu"
 
 #: ../backends/alsa/alsa-constants.c:143 ../backends/alsa/alsa-constants.c:198
 msgid "Input 1"
@@ -547,7 +548,7 @@ msgstr "Rádio"
 #: ../backends/oss/oss-stream.c:208 ../backends/pulse/pulse-sink.c:149
 #: ../backends/pulse/pulse-source.c:146
 msgid "Connector"
-msgstr ""
+msgstr "Konektor"
 
 #: ../backends/pulse/pulse-device.c:399
 msgid "Profile"

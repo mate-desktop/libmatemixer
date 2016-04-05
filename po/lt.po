@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-09 12:55+0200\n"
-"PO-Revision-Date: 2016-02-15 18:12+0000\n"
+"PO-Revision-Date: 2016-03-07 20:10+0000\n"
 "Last-Translator: Moo\n"
 "Language-Team: Lithuanian (http://www.transifex.com/mate/MATE/language/lt/)\n"
 "MIME-Version: 1.0\n"
@@ -489,7 +489,7 @@ msgstr "OSS maišiklis %d"
 
 #: ../backends/oss/oss-device.c:88
 msgid "Volume"
-msgstr "Garsumas"
+msgstr "Garsis"
 
 #: ../backends/oss/oss-device.c:101
 msgid "PCM 2"
