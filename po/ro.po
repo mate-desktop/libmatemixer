@@ -5,13 +5,14 @@
 # Translators:
 # corneliu.e <corneliueva@yahoo.com>, 2014
 # Daniel <danny34ever@yahoo.com>, 2015
+# Polihron Alexandru (APoliTech) <ppolihron@gmail.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-09 12:55+0200\n"
-"PO-Revision-Date: 2015-11-11 09:00+0000\n"
-"Last-Translator: Daniel <danny34ever@yahoo.com>\n"
+"PO-Revision-Date: 2016-05-29 10:47+0000\n"
+"Last-Translator: Polihron Alexandru (APoliTech) <ppolihron@gmail.com>\n"
 "Language-Team: Romanian (http://www.transifex.com/mate/MATE/language/ro/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -22,11 +23,11 @@ msgstr ""
 #. Output controls
 #: ../backends/alsa/alsa-constants.c:40
 msgid "Master"
-msgstr ""
+msgstr "Principal"
 
 #: ../backends/alsa/alsa-constants.c:41
 msgid "Hardware Master"
-msgstr ""
+msgstr "Componenta principala"
 
 #: ../backends/alsa/alsa-constants.c:42 ../backends/oss/oss-device.c:92
 msgid "PCM"
@@ -58,7 +59,7 @@ msgstr "Căști 2"
 
 #: ../backends/alsa/alsa-constants.c:50
 msgid "Headset"
-msgstr ""
+msgstr "Casti"
 
 #: ../backends/alsa/alsa-constants.c:51 ../backends/alsa/alsa-constants.c:52
 #: ../backends/alsa/alsa-constants.c:53 ../backends/alsa/alsa-constants.c:54
@@ -79,11 +80,11 @@ msgstr "Digital"
 
 #: ../backends/alsa/alsa-constants.c:60
 msgid "Master Mono"
-msgstr ""
+msgstr "Principalul Mono"
 
 #: ../backends/alsa/alsa-constants.c:61
 msgid "Master Digital"
-msgstr ""
+msgstr "Digitalul principal"
 
 #: ../backends/alsa/alsa-constants.c:62 ../backends/alsa/alsa-constants.c:63
 msgid "Side Speaker"
