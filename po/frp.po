@@ -9,7 +9,7 @@ msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-09 12:55+0200\n"
-"PO-Revision-Date: 2016-03-31 16:01+0000\n"
+"PO-Revision-Date: 2016-05-09 15:32+0000\n"
 "Last-Translator: Alexandre Raymond\n"
 "Language-Team: Franco-Provençal (Arpitan) (http://www.transifex.com/mate/MATE/language/frp/)\n"
 "MIME-Version: 1.0\n"
@@ -325,7 +325,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:137
 msgid "Digital Default PCM"
-msgstr ""
+msgstr "PCM numèrico prèdèfini"
 
 #: ../backends/alsa/alsa-constants.c:138
 msgid "Optical"
