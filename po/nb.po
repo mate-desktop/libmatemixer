@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-09 12:55+0200\n"
-"PO-Revision-Date: 2016-03-25 19:50+0000\n"
+"PO-Revision-Date: 2016-11-19 14:45+0000\n"
 "Last-Translator: Allan Nordhøy <epost@anotheragency.no>\n"
 "Language-Team: Norwegian Bokmål (http://www.transifex.com/mate/MATE/language/nb/)\n"
 "MIME-Version: 1.0\n"
@@ -326,7 +326,7 @@ msgstr "Digital inn"
 
 #: ../backends/alsa/alsa-constants.c:137
 msgid "Digital Default PCM"
-msgstr "Digital standard-PCM"
+msgstr "Digitalt forvalgs-PCM"
 
 #: ../backends/alsa/alsa-constants.c:138
 msgid "Optical"

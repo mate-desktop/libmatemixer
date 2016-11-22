@@ -4,7 +4,7 @@
 # 
 # Translators:
 # corneliu.e <corneliueva@yahoo.com>, 2014
-# Daniel <danny34ever@yahoo.com>, 2015
+# Daniel <danny3@tutanota.com>, 2015
 # Polihron Alexandru (APoliTech) <ppolihron@gmail.com>, 2016
 msgid ""
 msgstr ""
