@@ -1,57 +1,41 @@
-==============
-Version 1.17.0
-==============
+### libmatemixer 1.17.0
 
-- Translations update
+  * Translations update
 
-==============
-Version 1.16.0
-==============
+### libmatemixer 1.16.0
 
-- Translations update
+  * Translations update
 
-==============
-Version 1.14.0
-==============
+### libmatemixer 1.14.0
 
-- Require PulseAudio 2.0 or newer
-- Improve error checking in many places
-- Fix PulseAudio volume limits
-- Some other PulseAudio fixes
-- Some fixes and improvements in alsa and oss backends
-- Some more fixes and cleanups
-- Translations update
-- Create Changelog from git
+  * Require PulseAudio 2.0 or newer
+  * Improve error checking in many places
+  * Fix PulseAudio volume limits
+  * Some other PulseAudio fixes
+  * Some fixes and improvements in alsa and oss backends
+  * Some more fixes and cleanups
+  * Translations update
+  * Create Changelog from git
 
-==============
-Version 1.12.1
-==============
+### libmatemixer 1.12.1
 
-- Translations update
+  * Translations update
 
-==============
-Version 1.12.0
-==============
+### libmatemixer 1.12.0
 
-- oss: Only use modify counter for polling on Linux, it is broken on BSDs
-- alsa: Fix FTBFS with old versions of ALSA
-- alsa: Fix fade
-- Translations update
+  * oss: Only use modify counter for polling on Linux, it is broken on BSDs
+  * alsa: Fix FTBFS with old versions of ALSA
+  * alsa: Fix fade
+  * Translations update
 
-==============
-Version 1.10.0
-==============
+### libmatemixer 1.10.0
 
-- First stable release
+  * First stable release
 
-==============
-Version 1.9.90
-==============
+### libmatemixer 1.9.90
 
-- New APIs: MateMixerDeviceSwitch, MateMixerStreamSwitch
+  * New APIs: MateMixerDeviceSwitch, MateMixerStreamSwitch
 
-=============
-Version 1.9.0
-=============
+### libmatemixer 1.9.0
 
-- Initial release
+  * Initial release
