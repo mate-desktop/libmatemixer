@@ -7,7 +7,7 @@ AC_PREREQ([2.60])
 # =======================================================================
 
 m4_define(libmatemixer_major_version, 1)
-m4_define(libmatemixer_minor_version, 17)
+m4_define(libmatemixer_minor_version, 18)
 m4_define(libmatemixer_micro_version, 0)
 m4_define(libmatemixer_version,
          [libmatemixer_major_version.libmatemixer_minor_version.libmatemixer_micro_version])
