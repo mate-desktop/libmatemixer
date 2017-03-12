@@ -1,5 +1,7 @@
-### libmatemixer 1.17.0
+### libmatemixer 1.18.0
 
+  * NEWS: use consistent, project wide, markdown-like formatting
+    to make generating release announcements easier
   * Translations update
 
 ### libmatemixer 1.16.0
