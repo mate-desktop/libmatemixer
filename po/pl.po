@@ -5,19 +5,20 @@
 # Translators:
 # Beniamin Pawlus <kupwzywcu@o2.pl>, 2015
 # Marcin Kralka <marcink96@gmail.com>, 2014
+# Piotr Strębski <strebski@o2.pl>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-09 12:55+0200\n"
-"PO-Revision-Date: 2015-10-08 23:12+0000\n"
-"Last-Translator: Beniamin Pawlus <kupwzywcu@o2.pl>\n"
+"PO-Revision-Date: 2017-02-10 10:25+0000\n"
+"Last-Translator: Piotr Strębski <strebski@o2.pl>\n"
 "Language-Team: Polish (http://www.transifex.com/mate/MATE/language/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: pl\n"
-"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"Plural-Forms: nplurals=4; plural=(n==1 ? 0 : (n%10>=2 && n%10<=4) && (n%100<12 || n%100>=14) ? 1 : n!=1 && (n%10>=0 && n%10<=1) || (n%10>=5 && n%10<=9) || (n%100>=12 && n%100<=14) ? 2 : 3);\n"
 
 #. Output controls
 #: ../backends/alsa/alsa-constants.c:40
@@ -289,11 +290,11 @@ msgstr "Źródło Odtwarzania Cyfrowego"
 
 #: ../backends/alsa/alsa-constants.c:124
 msgid "Mono Output"
-msgstr "Źródło Wyjścia Mono"
+msgstr "Wyjście mono"
 
 #: ../backends/alsa/alsa-constants.c:125
 msgid "Shared Microphone/Line In"
-msgstr "Wspólny Mikrofon/Wejście Liniowe"
+msgstr "Współdzielony mikrofon/wejście liniowe"
 
 #: ../backends/alsa/alsa-constants.c:127
 msgid "Microphone Jack Mode"
@@ -346,7 +347,7 @@ msgstr "Mix Mono"
 
 #: ../backends/alsa/alsa-constants.c:142
 msgid "Microphone Capture"
-msgstr "Przechwytywanie Mikrofonu"
+msgstr "Przechwytywanie mikrofonu"
 
 #: ../backends/alsa/alsa-constants.c:143 ../backends/alsa/alsa-constants.c:198
 msgid "Input 1"

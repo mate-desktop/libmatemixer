@@ -5,7 +5,7 @@
 # Translators:
 # Egy Játékos <mcserver131@gmail.com>, 2015
 # Falu.Me, 2015
-# Zoltán Faludi <info@falu.me>, 2015
+# Falu <info@falu.me>, 2015
 # kami911 <kami911@gmail.com>, 2015
 # Rezső Páder <rezso@rezso.net>, 2014-2015
 # Takler Tamás <taklertamas@gmail.com>, 2015

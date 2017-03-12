@@ -3,16 +3,16 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# ABE Tsunehiko, 2015
+# ABE Tsunehiko, 2015,2017
 # ふうせん Fu-sen. | BALLOON a.k.a. Fu-sen., 2014
-# Mika Kobayashi, 2015
+# Mika Kobayashi, 2015,2017
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-09 12:55+0200\n"
-"PO-Revision-Date: 2015-09-09 10:54+0000\n"
-"Last-Translator: infirit <inactive+infirit@transifex.com>\n"
+"PO-Revision-Date: 2017-02-23 14:25+0000\n"
+"Last-Translator: ABE Tsunehiko\n"
 "Language-Team: Japanese (http://www.transifex.com/mate/MATE/language/ja/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -55,7 +55,7 @@ msgstr "ヘッドフォン"
 
 #: ../backends/alsa/alsa-constants.c:49
 msgid "Headphone 2"
-msgstr "ヘッドフォン2"
+msgstr "ヘッドフォン 2"
 
 #: ../backends/alsa/alsa-constants.c:50
 msgid "Headset"
@@ -96,12 +96,12 @@ msgstr "リアスピーカー"
 
 #: ../backends/alsa/alsa-constants.c:65
 msgid "Wave"
-msgstr "WAVE"
+msgstr "Wave"
 
 #: ../backends/alsa/alsa-constants.c:66 ../backends/alsa/alsa-constants.c:99
 #: ../backends/alsa/alsa-constants.c:215
 msgid "Phone"
-msgstr "Phone"
+msgstr "電話"
 
 #: ../backends/alsa/alsa-constants.c:67 ../backends/alsa/alsa-constants.c:213
 #: ../backends/oss/oss-device.c:98
@@ -169,7 +169,7 @@ msgstr "マイク/ラインイン"
 #: ../backends/alsa/alsa-constants.c:171 ../backends/alsa/alsa-constants.c:172
 #: ../backends/alsa/alsa-constants.c:173
 msgid "Internal Microphone"
-msgstr "インターナルマイク"
+msgstr "内部マイク"
 
 #: ../backends/alsa/alsa-constants.c:86 ../backends/alsa/alsa-constants.c:163
 #: ../backends/alsa/alsa-constants.c:164
@@ -217,7 +217,7 @@ msgstr "ビデオ"
 
 #: ../backends/alsa/alsa-constants.c:97 ../backends/alsa/alsa-constants.c:201
 msgid "TV Tuner"
-msgstr "TVチューナー"
+msgstr "TV チューナー"
 
 #: ../backends/alsa/alsa-constants.c:98 ../backends/alsa/alsa-constants.c:202
 msgid "FM"
@@ -266,35 +266,35 @@ msgstr "アナログ出力"
 
 #: ../backends/alsa/alsa-constants.c:117
 msgid "Analog Source"
-msgstr "アナログ元"
+msgstr "アナログソース"
 
 #: ../backends/alsa/alsa-constants.c:118
 msgid "Capture Source"
-msgstr "キャプチャ元"
+msgstr "キャプチャーソース"
 
 #: ../backends/alsa/alsa-constants.c:119 ../backends/alsa/alsa-constants.c:120
 msgid "Input Source"
-msgstr "入力元"
+msgstr "入力ソース"
 
 #: ../backends/alsa/alsa-constants.c:121
 msgid "Digital Input Source"
-msgstr "デジタル入力元"
+msgstr "デジタル入力ソース"
 
 #: ../backends/alsa/alsa-constants.c:122
 msgid "PCM Capture Source"
-msgstr "PCMキャプチャー元"
+msgstr "PCM キャプチャーソース"
 
 #: ../backends/alsa/alsa-constants.c:123
 msgid "Digital Playback Source"
-msgstr "デジタルプレイバック元"
+msgstr "デジタルプレイバックソース"
 
 #: ../backends/alsa/alsa-constants.c:124
 msgid "Mono Output"
-msgstr ""
+msgstr "モノラル出力"
 
 #: ../backends/alsa/alsa-constants.c:125
 msgid "Shared Microphone/Line In"
-msgstr ""
+msgstr "マイク・外部入力共用端子"
 
 #: ../backends/alsa/alsa-constants.c:127
 msgid "Microphone Jack Mode"
@@ -347,15 +347,15 @@ msgstr "ミックスモノ"
 
 #: ../backends/alsa/alsa-constants.c:142
 msgid "Microphone Capture"
-msgstr ""
+msgstr "マイクのキャプチャ"
 
 #: ../backends/alsa/alsa-constants.c:143 ../backends/alsa/alsa-constants.c:198
 msgid "Input 1"
-msgstr "入力1"
+msgstr "入力 1"
 
 #: ../backends/alsa/alsa-constants.c:144 ../backends/alsa/alsa-constants.c:199
 msgid "Input 2"
-msgstr "入力2"
+msgstr "入力 2"
 
 #. Output options
 #: ../backends/alsa/alsa-constants.c:151
@@ -372,11 +372,11 @@ msgstr "フロントパネルヘッドフォン"
 
 #: ../backends/alsa/alsa-constants.c:158
 msgid "Microphone 1"
-msgstr "マイク1"
+msgstr "マイク 1"
 
 #: ../backends/alsa/alsa-constants.c:159
 msgid "Microphone 2"
-msgstr "マイク2"
+msgstr "マイク 2"
 
 #: ../backends/alsa/alsa-constants.c:160 ../backends/alsa/alsa-constants.c:161
 #: ../backends/alsa/alsa-constants.c:162
@@ -397,11 +397,11 @@ msgstr "デジタルマイク"
 
 #: ../backends/alsa/alsa-constants.c:176
 msgid "Digital Microphone 1"
-msgstr "デジタルマイク1"
+msgstr "デジタルマイク 1"
 
 #: ../backends/alsa/alsa-constants.c:177
 msgid "Digital Microphone 2"
-msgstr "デジタルマイク2"
+msgstr "デジタルマイク 2"
 
 #: ../backends/alsa/alsa-constants.c:179 ../backends/alsa/alsa-constants.c:180
 #: ../backends/alsa/alsa-constants.c:181 ../backends/alsa/alsa-constants.c:182
@@ -435,19 +435,19 @@ msgstr "AUX入力"
 
 #: ../backends/alsa/alsa-constants.c:207
 msgid "Auxiliary 0"
-msgstr "AUX0"
+msgstr "AUX 0"
 
 #: ../backends/alsa/alsa-constants.c:208
 msgid "Auxiliary 1"
-msgstr "AUX1"
+msgstr "AUX 1"
 
 #: ../backends/alsa/alsa-constants.c:209
 msgid "Auxiliary 2"
-msgstr "AUX2"
+msgstr "AUX 2"
 
 #: ../backends/alsa/alsa-constants.c:210
 msgid "Auxiliary 3"
-msgstr "AUX3"
+msgstr "AUX 3"
 
 #: ../backends/alsa/alsa-constants.c:211
 msgid "Docking Station"
@@ -476,16 +476,16 @@ msgstr "無効"
 
 #: ../backends/alsa/alsa-device.c:635
 msgid "On"
-msgstr "ON"
+msgstr "オン"
 
 #: ../backends/alsa/alsa-device.c:636
 msgid "Off"
-msgstr "OFF"
+msgstr "オフ"
 
 #: ../backends/oss/oss-backend.c:403
 #, c-format
 msgid "OSS Mixer %d"
-msgstr "OSSミキサー %d"
+msgstr "OSS ミキサー %d"
 
 #: ../backends/oss/oss-device.c:88
 msgid "Volume"
@@ -502,36 +502,36 @@ msgstr "録音"
 
 #: ../backends/oss/oss-device.c:104
 msgid "Input Gain"
-msgstr "入力Gain"
+msgstr "入力ゲイン"
 
 #: ../backends/oss/oss-device.c:105
 msgid "Output Gain"
-msgstr "出力Gain"
+msgstr "出力ゲイン"
 
 #: ../backends/oss/oss-device.c:106
 msgid "Line In 1"
-msgstr "ライン入力1"
+msgstr "ライン入力 1"
 
 #: ../backends/oss/oss-device.c:107
 msgid "Line In 2"
-msgstr "ライン入力2"
+msgstr "ライン入力 2"
 
 #: ../backends/oss/oss-device.c:108
 msgid "Line In 3"
-msgstr "ライン入力3"
+msgstr "ライン入力 3"
 
 #. These 3 can be attached to either digital input or output
 #: ../backends/oss/oss-device.c:110
 msgid "Digital 1"
-msgstr "デジタル1"
+msgstr "デジタル 1"
 
 #: ../backends/oss/oss-device.c:111
 msgid "Digital 2"
-msgstr "デジタル2"
+msgstr "デジタル 2"
 
 #: ../backends/oss/oss-device.c:112
 msgid "Digital 3"
-msgstr "デジタル3"
+msgstr "デジタル 3"
 
 #: ../backends/oss/oss-device.c:113
 msgid "Phone In"
@@ -549,7 +549,7 @@ msgstr "ラジオ"
 #: ../backends/oss/oss-stream.c:208 ../backends/pulse/pulse-sink.c:149
 #: ../backends/pulse/pulse-source.c:146
 msgid "Connector"
-msgstr ""
+msgstr "コネクタ"
 
 #: ../backends/pulse/pulse-device.c:399
 msgid "Profile"

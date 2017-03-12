@@ -3,14 +3,14 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# samson <sambelet@yahoo.com>, 2014-2015
+# samson <sambelet@yahoo.com>, 2014-2015,2017
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-09 12:55+0200\n"
-"PO-Revision-Date: 2015-09-09 10:54+0000\n"
-"Last-Translator: infirit <inactive+infirit@transifex.com>\n"
+"PO-Revision-Date: 2017-03-03 22:51+0000\n"
+"Last-Translator: samson <sambelet@yahoo.com>\n"
 "Language-Team: Amharic (http://www.transifex.com/mate/MATE/language/am/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -25,11 +25,11 @@ msgstr "ዋናው"
 
 #: ../backends/alsa/alsa-constants.c:41
 msgid "Hardware Master"
-msgstr ""
+msgstr "ዋናው ጠንካራ አካል"
 
 #: ../backends/alsa/alsa-constants.c:42 ../backends/oss/oss-device.c:92
 msgid "PCM"
-msgstr ""
+msgstr "PCM"
 
 #. OSS manual says this should be the beeper, but Linux OSS seems to assign it
 #. to
@@ -70,7 +70,7 @@ msgstr "የ መሀከል ስፒከር"
 
 #: ../backends/alsa/alsa-constants.c:57 ../backends/alsa/alsa-constants.c:58
 msgid "CLFE Speaker"
-msgstr ""
+msgstr "CLFE ስፒከር"
 
 #: ../backends/alsa/alsa-constants.c:59 ../backends/alsa/alsa-constants.c:135
 msgid "Digital"
@@ -78,11 +78,11 @@ msgstr "ዲጂታል"
 
 #: ../backends/alsa/alsa-constants.c:60
 msgid "Master Mono"
-msgstr ""
+msgstr "ዋናው ነጠላ"
 
 #: ../backends/alsa/alsa-constants.c:61
 msgid "Master Digital"
-msgstr ""
+msgstr "ዋናው ዲጂታል"
 
 #: ../backends/alsa/alsa-constants.c:62 ../backends/alsa/alsa-constants.c:63
 msgid "Side Speaker"
@@ -116,58 +116,58 @@ msgstr "AC97"
 
 #: ../backends/alsa/alsa-constants.c:70 ../backends/alsa/alsa-constants.c:71
 msgid "LFE Speaker"
-msgstr ""
+msgstr "LFE ስፒከር"
 
 #: ../backends/alsa/alsa-constants.c:72
 msgid "Bass Speaker"
-msgstr ""
+msgstr "ባስ ስፒከር"
 
 #: ../backends/alsa/alsa-constants.c:73
 msgid "PC Speaker"
-msgstr ""
+msgstr "የ ፒሲ ስፒከር"
 
 #: ../backends/alsa/alsa-constants.c:74 ../backends/oss/oss-device.c:91
 msgid "Synth"
-msgstr ""
+msgstr "Synth"
 
 #: ../backends/alsa/alsa-constants.c:75
 msgid "MIDI"
-msgstr ""
+msgstr "MIDI"
 
 #: ../backends/alsa/alsa-constants.c:76
 msgid "Synth/MIDI"
-msgstr ""
+msgstr "Synth/MIDI"
 
 #: ../backends/alsa/alsa-constants.c:77 ../backends/oss/oss-device.c:89
 msgid "Bass"
-msgstr ""
+msgstr "ባስ"
 
 #: ../backends/alsa/alsa-constants.c:78 ../backends/oss/oss-device.c:90
 msgid "Treble"
-msgstr ""
+msgstr "ቴረብል"
 
 #. Input controls
 #: ../backends/alsa/alsa-constants.c:81
 msgid "Capture"
-msgstr ""
+msgstr "መያዣ"
 
 #. Microphone options
 #: ../backends/alsa/alsa-constants.c:82 ../backends/alsa/alsa-constants.c:126
 #: ../backends/alsa/alsa-constants.c:156 ../backends/alsa/alsa-constants.c:157
 #: ../backends/oss/oss-device.c:97
 msgid "Microphone"
-msgstr ""
+msgstr "ማይክሮፎን"
 
 #: ../backends/alsa/alsa-constants.c:83 ../backends/alsa/alsa-constants.c:194
 msgid "Microphone/Line In"
-msgstr ""
+msgstr "ማይክሮፎን/መስመር ማስገቢያ"
 
 #: ../backends/alsa/alsa-constants.c:84 ../backends/alsa/alsa-constants.c:85
 #: ../backends/alsa/alsa-constants.c:168 ../backends/alsa/alsa-constants.c:169
 #: ../backends/alsa/alsa-constants.c:171 ../backends/alsa/alsa-constants.c:172
 #: ../backends/alsa/alsa-constants.c:173
 msgid "Internal Microphone"
-msgstr ""
+msgstr "የውስጥ ማይክሮፎን"
 
 #: ../backends/alsa/alsa-constants.c:86 ../backends/alsa/alsa-constants.c:163
 #: ../backends/alsa/alsa-constants.c:164
@@ -181,19 +181,19 @@ msgstr "የ ኋላ ማይክሮፎን "
 
 #: ../backends/alsa/alsa-constants.c:88 ../backends/alsa/alsa-constants.c:167
 msgid "Dock Microphone"
-msgstr ""
+msgstr "ማይክሮፎን ማሳረፊያ"
 
 #: ../backends/alsa/alsa-constants.c:89 ../backends/alsa/alsa-constants.c:165
 msgid "Headphone Microphone"
-msgstr ""
+msgstr "በ ጆሮ ማድመጫ ማይክሮፎን"
 
 #: ../backends/alsa/alsa-constants.c:90 ../backends/alsa/alsa-constants.c:166
 msgid "Headset Microphone"
-msgstr ""
+msgstr "በ ጆሮ ማድመጫ ማይክሮፎን"
 
 #: ../backends/alsa/alsa-constants.c:91
 msgid "Inverted Internal Microphone"
-msgstr ""
+msgstr "የ ተገለበጠ የውስጥ ማይክሮፎን"
 
 #: ../backends/alsa/alsa-constants.c:92 ../backends/alsa/alsa-constants.c:93
 #: ../backends/alsa/alsa-constants.c:94 ../backends/alsa/alsa-constants.c:191
@@ -201,12 +201,12 @@ msgstr ""
 #: ../backends/alsa/alsa-constants.c:196 ../backends/alsa/alsa-constants.c:197
 #: ../backends/oss/oss-device.c:96
 msgid "Line In"
-msgstr ""
+msgstr "መስመር ማስገቢያ"
 
 #: ../backends/alsa/alsa-constants.c:95 ../backends/alsa/alsa-constants.c:203
 #: ../backends/alsa/alsa-constants.c:206
 msgid "Auxiliary"
-msgstr ""
+msgstr "ተጨማሪ"
 
 #: ../backends/alsa/alsa-constants.c:96 ../backends/alsa/alsa-constants.c:214
 #: ../backends/oss/oss-device.c:115
@@ -215,7 +215,7 @@ msgstr "ቪዲዮ"
 
 #: ../backends/alsa/alsa-constants.c:97 ../backends/alsa/alsa-constants.c:201
 msgid "TV Tuner"
-msgstr ""
+msgstr "ቲቪ ማስተካከያ"
 
 #: ../backends/alsa/alsa-constants.c:98 ../backends/alsa/alsa-constants.c:202
 msgid "FM"
@@ -223,129 +223,129 @@ msgstr "ኤፍኤም"
 
 #: ../backends/alsa/alsa-constants.c:100
 msgid "Microphone Boost"
-msgstr ""
+msgstr "ማይክሮፎን መጨመሪያ"
 
 #: ../backends/alsa/alsa-constants.c:101
 msgid "Microphone Boost (+20dB)"
-msgstr ""
+msgstr "ማይክሮፎን መጨመሪያ (+20dB)"
 
 #: ../backends/alsa/alsa-constants.c:102 ../backends/alsa/alsa-constants.c:103
 msgid "Internal Microphone Boost"
-msgstr ""
+msgstr "የ ውስጥ ማይክሮፎን መጨመሪያ"
 
 #: ../backends/alsa/alsa-constants.c:104
 msgid "Front Microphone Boost"
-msgstr ""
+msgstr "የ ፊት ለፊት ማይክሮፎን መጨመሪያ"
 
 #: ../backends/alsa/alsa-constants.c:105
 msgid "Rear Microphone Boost"
-msgstr ""
+msgstr "የ ኋላ ማይክሮፎን መጨመሪያ"
 
 #: ../backends/alsa/alsa-constants.c:106
 msgid "Dock Microphone Boost"
-msgstr ""
+msgstr "ማሳረፊያ የ ማይክሮፎን መጨመሪያ"
 
 #: ../backends/alsa/alsa-constants.c:107
 msgid "Headphone Microphone Boost"
-msgstr ""
+msgstr "በ ጆሮ ማድመጫ ማይክሮፎን መጨመሪያ"
 
 #: ../backends/alsa/alsa-constants.c:108
 msgid "Headset Microphone Boost"
-msgstr ""
+msgstr "በ ጆሮ ማድመጫ ማይክሮፎን መጨመሪያ "
 
 #: ../backends/alsa/alsa-constants.c:109
 msgid "Line In Boost"
-msgstr ""
+msgstr "መስመር ወደ ውስጥ መጨመሪያ"
 
 #. Switches
 #: ../backends/alsa/alsa-constants.c:116
 msgid "Analog Output"
-msgstr ""
+msgstr "የ አናሎግ ውጤት"
 
 #: ../backends/alsa/alsa-constants.c:117
 msgid "Analog Source"
-msgstr ""
+msgstr "የ አናሎግ ምንጭ"
 
 #: ../backends/alsa/alsa-constants.c:118
 msgid "Capture Source"
-msgstr ""
+msgstr "ምንጩን መያዣ"
 
 #: ../backends/alsa/alsa-constants.c:119 ../backends/alsa/alsa-constants.c:120
 msgid "Input Source"
-msgstr ""
+msgstr "የ ማስገቢያ ምንጭ"
 
 #: ../backends/alsa/alsa-constants.c:121
 msgid "Digital Input Source"
-msgstr ""
+msgstr "ዲጂታል ማስገቢያ ምንጭ"
 
 #: ../backends/alsa/alsa-constants.c:122
 msgid "PCM Capture Source"
-msgstr ""
+msgstr "PCM ምንጩን መያዣ"
 
 #: ../backends/alsa/alsa-constants.c:123
 msgid "Digital Playback Source"
-msgstr ""
+msgstr "ዲጂታል መልሶ ማጨወቻ ምንጭ"
 
 #: ../backends/alsa/alsa-constants.c:124
 msgid "Mono Output"
-msgstr ""
+msgstr "ነጠላ ውጤት"
 
 #: ../backends/alsa/alsa-constants.c:125
 msgid "Shared Microphone/Line In"
-msgstr ""
+msgstr "የሚካፈሉት ማይክሮፎን/መስመር ወደ ውስጥ"
 
 #: ../backends/alsa/alsa-constants.c:127
 msgid "Microphone Jack Mode"
-msgstr ""
+msgstr "ማይክሮፎን Jack Mode"
 
 #: ../backends/alsa/alsa-constants.c:128
 msgid "Surround Jack Mode"
-msgstr ""
+msgstr "የ ተከበበ Jack Mode"
 
 #: ../backends/alsa/alsa-constants.c:129
 msgid "Auto-Mute Mode"
-msgstr ""
+msgstr "በራሱ-መቀነሻ ዘዴ"
 
 #. Toggles
 #: ../backends/alsa/alsa-constants.c:132
 msgid "External Amplifier"
-msgstr ""
+msgstr "የ ውስጥ ማጉሊያ"
 
 #: ../backends/alsa/alsa-constants.c:133
 msgid "Bass Boost"
-msgstr ""
+msgstr "ባስ መጨመሪያ"
 
 #: ../backends/alsa/alsa-constants.c:134
 msgid "Capture Boost"
-msgstr ""
+msgstr "መጨመሪያ መያዣ"
 
 #: ../backends/alsa/alsa-constants.c:136 ../backends/alsa/alsa-constants.c:200
 msgid "Digital In"
-msgstr ""
+msgstr "ዲጂታል ማስገቢያ"
 
 #: ../backends/alsa/alsa-constants.c:137
 msgid "Digital Default PCM"
-msgstr ""
+msgstr "ዲጂታል ነባር PCM"
 
 #: ../backends/alsa/alsa-constants.c:138
 msgid "Optical"
-msgstr ""
+msgstr "ሲዲ"
 
 #: ../backends/alsa/alsa-constants.c:139
 msgid "Auto Gain Control"
-msgstr ""
+msgstr "በራሱ መቆጣጠሪያ ማግኛ"
 
 #: ../backends/alsa/alsa-constants.c:140
 msgid "Mix"
-msgstr ""
+msgstr "መቀላቀያ"
 
 #: ../backends/alsa/alsa-constants.c:141
 msgid "Mix Mono"
-msgstr ""
+msgstr "ነጠላ መቀላቀያ"
 
 #: ../backends/alsa/alsa-constants.c:142
 msgid "Microphone Capture"
-msgstr ""
+msgstr "ማይክሮፎን መጨመሪያ"
 
 #: ../backends/alsa/alsa-constants.c:143 ../backends/alsa/alsa-constants.c:198
 msgid "Input 1"
@@ -366,7 +366,7 @@ msgstr "በ ጆሮ ማድመጫ"
 
 #: ../backends/alsa/alsa-constants.c:153
 msgid "Front Panel Headphones"
-msgstr ""
+msgstr "የ ፊት በኩል ማይክሮፎን "
 
 #: ../backends/alsa/alsa-constants.c:158
 msgid "Microphone 1"
@@ -379,15 +379,15 @@ msgstr "ማይክሮፎን 2"
 #: ../backends/alsa/alsa-constants.c:160 ../backends/alsa/alsa-constants.c:161
 #: ../backends/alsa/alsa-constants.c:162
 msgid "Microphone In"
-msgstr ""
+msgstr "ማይክሮፎን ማስገቢያ"
 
 #: ../backends/alsa/alsa-constants.c:170
 msgid "Internal Microphone 1"
-msgstr ""
+msgstr "የውስጥ ማይክሮፎን 1 "
 
 #: ../backends/alsa/alsa-constants.c:174
 msgid "Internal Digital Microphone"
-msgstr ""
+msgstr "የውስጥ ዲጂታል ማይክሮፎን"
 
 #: ../backends/alsa/alsa-constants.c:175 ../backends/alsa/alsa-constants.c:178
 msgid "Digital Microphone"
@@ -404,57 +404,57 @@ msgstr "ዲጂታል ማይክሮፎን 2 "
 #: ../backends/alsa/alsa-constants.c:179 ../backends/alsa/alsa-constants.c:180
 #: ../backends/alsa/alsa-constants.c:181 ../backends/alsa/alsa-constants.c:182
 msgid "External Microphone"
-msgstr ""
+msgstr "የውጪ ማይክሮፎን"
 
 #: ../backends/alsa/alsa-constants.c:185
 msgid "Camera Microphone"
-msgstr ""
+msgstr "የ ካሜራ ማይክሮፎን"
 
 #. Other options
 #: ../backends/alsa/alsa-constants.c:188
 msgid "Analog"
-msgstr ""
+msgstr "አናሎግ "
 
 #: ../backends/alsa/alsa-constants.c:189
 msgid "Analog In"
-msgstr ""
+msgstr "አናሎግ ማስገቢያ"
 
 #: ../backends/alsa/alsa-constants.c:190
 msgid "Analog Inputs"
-msgstr ""
+msgstr "አናሎግ ማስገቢያ "
 
 #: ../backends/alsa/alsa-constants.c:195
 msgid "Line In/Microphone"
-msgstr ""
+msgstr "የ ማይክሮፎን/መስመር ማስገቢያ"
 
 #: ../backends/alsa/alsa-constants.c:204 ../backends/alsa/alsa-constants.c:205
 msgid "Auxiliary In"
-msgstr ""
+msgstr "ተጨማሪ ማስገቢያ"
 
 #: ../backends/alsa/alsa-constants.c:207
 msgid "Auxiliary 0"
-msgstr ""
+msgstr "ተጨማሪ 0"
 
 #: ../backends/alsa/alsa-constants.c:208
 msgid "Auxiliary 1"
-msgstr ""
+msgstr "ተጨማሪ 1"
 
 #: ../backends/alsa/alsa-constants.c:209
 msgid "Auxiliary 2"
-msgstr ""
+msgstr "ተጨማሪ 2"
 
 #: ../backends/alsa/alsa-constants.c:210
 msgid "Auxiliary 3"
-msgstr ""
+msgstr "ተጨማሪ 3"
 
 #: ../backends/alsa/alsa-constants.c:211
 msgid "Docking Station"
-msgstr ""
+msgstr "ማሳረፊያ ጣቢያ"
 
 #. Recording monitor
 #: ../backends/alsa/alsa-constants.c:212 ../backends/oss/oss-device.c:100
 msgid "Mixer"
-msgstr ""
+msgstr "መቀላቀያ"
 
 #: ../backends/alsa/alsa-constants.c:216
 msgid "Unknown 1"
@@ -483,7 +483,7 @@ msgstr "ማጥፊያ"
 #: ../backends/oss/oss-backend.c:403
 #, c-format
 msgid "OSS Mixer %d"
-msgstr ""
+msgstr "OSS Mixer %d"
 
 #: ../backends/oss/oss-device.c:88
 msgid "Volume"
@@ -491,32 +491,32 @@ msgstr "መጠን "
 
 #: ../backends/oss/oss-device.c:101
 msgid "PCM 2"
-msgstr ""
+msgstr "PCM 2"
 
 #. Recording level (master input)
 #: ../backends/oss/oss-device.c:103
 msgid "Record"
-msgstr ""
+msgstr "መቅረጫ"
 
 #: ../backends/oss/oss-device.c:104
 msgid "Input Gain"
-msgstr ""
+msgstr "ማስገቢያ ማግኛ"
 
 #: ../backends/oss/oss-device.c:105
 msgid "Output Gain"
-msgstr ""
+msgstr "ማውጫ ማግኛ"
 
 #: ../backends/oss/oss-device.c:106
 msgid "Line In 1"
-msgstr ""
+msgstr "መስመር ማስገቢያ 1"
 
 #: ../backends/oss/oss-device.c:107
 msgid "Line In 2"
-msgstr ""
+msgstr "መስመር ማስገቢያ 2 "
 
 #: ../backends/oss/oss-device.c:108
 msgid "Line In 3"
-msgstr ""
+msgstr "መስመር ማስገቢያ 3 "
 
 #. These 3 can be attached to either digital input or output
 #: ../backends/oss/oss-device.c:110
@@ -533,11 +533,11 @@ msgstr "ዲጂታል 3"
 
 #: ../backends/oss/oss-device.c:113
 msgid "Phone In"
-msgstr ""
+msgstr "ስልክ ማስገቢያ"
 
 #: ../backends/oss/oss-device.c:114
 msgid "Phone Out"
-msgstr ""
+msgstr "ስልክ ማውጫ"
 
 #: ../backends/oss/oss-device.c:116
 msgid "Radio"
@@ -547,7 +547,7 @@ msgstr "ሬዲዮ"
 #: ../backends/oss/oss-stream.c:208 ../backends/pulse/pulse-sink.c:149
 #: ../backends/pulse/pulse-source.c:146
 msgid "Connector"
-msgstr ""
+msgstr "አገናኝ"
 
 #: ../backends/pulse/pulse-device.c:399
 msgid "Profile"
@@ -555,4 +555,4 @@ msgstr "ገጽታ"
 
 #: ../backends/pulse/pulse-monitor.c:282
 msgid "Peak detect"
-msgstr ""
+msgstr "ከፍታ ተገኝቷል"
