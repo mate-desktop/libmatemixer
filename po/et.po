@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-09 12:55+0200\n"
-"PO-Revision-Date: 2015-12-31 02:25+0000\n"
+"PO-Revision-Date: 2017-09-20 12:16+0000\n"
 "Last-Translator: Mattias Põldaru <mahfiaz@gmail.com>\n"
 "Language-Team: Estonian (http://www.transifex.com/mate/MATE/language/et/)\n"
 "MIME-Version: 1.0\n"
@@ -50,15 +50,15 @@ msgstr "Eesmine kõlar"
 
 #: ../backends/alsa/alsa-constants.c:48
 msgid "Headphone"
-msgstr "Kõrvaklapid"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:49
 msgid "Headphone 2"
-msgstr "Kõrvaklapid 2"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:50
 msgid "Headset"
-msgstr "Peakomplekt"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:51 ../backends/alsa/alsa-constants.c:52
 #: ../backends/alsa/alsa-constants.c:53 ../backends/alsa/alsa-constants.c:54
@@ -220,7 +220,7 @@ msgstr "TV tüüner"
 
 #: ../backends/alsa/alsa-constants.c:98 ../backends/alsa/alsa-constants.c:202
 msgid "FM"
-msgstr "FM"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:100
 msgid "Microphone Boost"
@@ -273,11 +273,11 @@ msgstr "Lindistuse sisend"
 
 #: ../backends/alsa/alsa-constants.c:119 ../backends/alsa/alsa-constants.c:120
 msgid "Input Source"
-msgstr "Sisendi allikas"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:121
 msgid "Digital Input Source"
-msgstr "Digisisendi allikas"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:122
 msgid "PCM Capture Source"
@@ -384,11 +384,11 @@ msgstr "Mikrofon sisse"
 
 #: ../backends/alsa/alsa-constants.c:170
 msgid "Internal Microphone 1"
-msgstr "Sisemine mikrofon 1"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:174
 msgid "Internal Digital Microphone"
-msgstr "Sisemine digimikrofon"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:175 ../backends/alsa/alsa-constants.c:178
 msgid "Digital Microphone"

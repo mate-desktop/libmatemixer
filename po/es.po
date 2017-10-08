@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-09 12:55+0200\n"
-"PO-Revision-Date: 2015-09-30 01:00+0000\n"
+"PO-Revision-Date: 2017-09-20 12:16+0000\n"
 "Last-Translator: Benjamin Perez Carrillo <benperezc@gmail.com>\n"
 "Language-Team: Spanish (http://www.transifex.com/mate/MATE/language/es/)\n"
 "MIME-Version: 1.0\n"
@@ -159,7 +159,7 @@ msgstr "Captura"
 #: ../backends/alsa/alsa-constants.c:156 ../backends/alsa/alsa-constants.c:157
 #: ../backends/oss/oss-device.c:97
 msgid "Microphone"
-msgstr "Micrófono"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:83 ../backends/alsa/alsa-constants.c:194
 msgid "Microphone/Line In"
@@ -170,7 +170,7 @@ msgstr "Micrófono/Entrada de línea"
 #: ../backends/alsa/alsa-constants.c:171 ../backends/alsa/alsa-constants.c:172
 #: ../backends/alsa/alsa-constants.c:173
 msgid "Internal Microphone"
-msgstr "Micrófono interno"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:86 ../backends/alsa/alsa-constants.c:163
 #: ../backends/alsa/alsa-constants.c:164
@@ -222,7 +222,7 @@ msgstr "Sintonizador de TV"
 
 #: ../backends/alsa/alsa-constants.c:98 ../backends/alsa/alsa-constants.c:202
 msgid "FM"
-msgstr "FM"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:100
 msgid "Microphone Boost"
@@ -352,7 +352,7 @@ msgstr "Control de micrófono"
 
 #: ../backends/alsa/alsa-constants.c:143 ../backends/alsa/alsa-constants.c:198
 msgid "Input 1"
-msgstr "Entrada 1"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:144 ../backends/alsa/alsa-constants.c:199
 msgid "Input 2"
@@ -361,7 +361,7 @@ msgstr "Entrada 2"
 #. Output options
 #: ../backends/alsa/alsa-constants.c:151
 msgid "Speakers"
-msgstr "Altavoces"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:152
 msgid "Headphones"
@@ -473,15 +473,15 @@ msgstr "Habilitado"
 
 #: ../backends/alsa/alsa-constants.c:219
 msgid "Disabled"
-msgstr "Deshabilitado"
+msgstr ""
 
 #: ../backends/alsa/alsa-device.c:635
 msgid "On"
-msgstr "Encendido"
+msgstr ""
 
 #: ../backends/alsa/alsa-device.c:636
 msgid "Off"
-msgstr "Apagado"
+msgstr ""
 
 #: ../backends/oss/oss-backend.c:403
 #, c-format
@@ -490,7 +490,7 @@ msgstr "Mezclador OSS %d"
 
 #: ../backends/oss/oss-device.c:88
 msgid "Volume"
-msgstr "Volumen"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:101
 msgid "PCM 2"
@@ -499,7 +499,7 @@ msgstr "PCM 2"
 #. Recording level (master input)
 #: ../backends/oss/oss-device.c:103
 msgid "Record"
-msgstr "Grabar"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:104
 msgid "Input Gain"
@@ -524,7 +524,7 @@ msgstr "Entrada de línea 3"
 #. These 3 can be attached to either digital input or output
 #: ../backends/oss/oss-device.c:110
 msgid "Digital 1"
-msgstr "Digital 1"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:111
 msgid "Digital 2"
@@ -532,7 +532,7 @@ msgstr "Digital 2"
 
 #: ../backends/oss/oss-device.c:112
 msgid "Digital 3"
-msgstr "Digital 3"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:113
 msgid "Phone In"
@@ -554,7 +554,7 @@ msgstr "Conector"
 
 #: ../backends/pulse/pulse-device.c:399
 msgid "Profile"
-msgstr "Perfil"
+msgstr ""
 
 #: ../backends/pulse/pulse-monitor.c:282
 msgid "Peak detect"

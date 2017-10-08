@@ -5,7 +5,7 @@
 # Translators:
 # Alexei Sorokin <sor.alexei@meowr.ru>, 2014
 # AlexL <loginov.alex.valer@gmail.com>, 2015
-# Дмитрий Михирев <bizdelnick@gmail.com>, 2015
+# Дмитрий Михирев, 2015
 # Evolve32 <evolve32@yandex.ru>, 2014
 # Ilyas B Arinov <arinov.ilyas@gmail.com>, 2015
 # Sergey Kolosov <kolosov@gmail.com>, 2014
@@ -17,7 +17,7 @@ msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2015-09-09 12:55+0200\n"
-"PO-Revision-Date: 2016-02-10 16:59+0000\n"
+"PO-Revision-Date: 2017-09-23 20:17+0000\n"
 "Last-Translator: theirix <theirix@gmail.com>\n"
 "Language-Team: Russian (http://www.transifex.com/mate/MATE/language/ru/)\n"
 "MIME-Version: 1.0\n"
