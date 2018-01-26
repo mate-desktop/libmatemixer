@@ -3,199 +3,197 @@
 # This file is distributed under the same license as the PACKAGE package.
 # 
 # Translators:
-# Angelos Chraniotis <chraniotis@gmail.com>, 2016
-# Efstathios Iosifidis <iefstathios@gmail.com>, 2014-2015
-# Panos Panagiotopoulos <panagiotopoulos@gmail.com>, 2014
+# chautari <chautari@gmail.com>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-11-28 09:57+0100\n"
-"PO-Revision-Date: 2017-09-23 20:17+0000\n"
-"Last-Translator: Αλέξανδρος Καπετάνιος <alexandros@gnugr.org>\n"
-"Language-Team: Greek (http://www.transifex.com/mate/MATE/language/el/)\n"
+"PO-Revision-Date: 2017-11-13 09:21+0000\n"
+"Last-Translator: chautari <chautari@gmail.com>\n"
+"Language-Team: Nepali (http://www.transifex.com/mate/MATE/language/ne/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: el\n"
+"Language: ne\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. Output controls
 #: ../backends/alsa/alsa-constants.c:41
 msgid "Master"
-msgstr "Κύρια έξοδος"
+msgstr "मुख्य"
 
 #: ../backends/alsa/alsa-constants.c:42
 msgid "Hardware Master"
-msgstr "Κύρια έξοδος Υλικού"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:43 ../backends/oss/oss-device.c:92
 msgid "PCM"
-msgstr "PCM"
+msgstr ""
 
 #. OSS manual says this should be the beeper, but Linux OSS seems to assign it
 #. to
 #. * regular volume control
 #: ../backends/alsa/alsa-constants.c:44 ../backends/oss/oss-device.c:95
 msgid "Speaker"
-msgstr "Ηχείο"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:45
 msgid "Desktop Speaker"
-msgstr "Επιτραπέζια Ηχεία"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:46 ../backends/alsa/alsa-constants.c:47
 #: ../backends/alsa/alsa-constants.c:48
 msgid "Front Speaker"
-msgstr "Μπροστινό ηχείο"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:49
 msgid "Headphone"
-msgstr "Ακουστικά"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:50
 msgid "Headphone 2"
-msgstr "Ακουστικά 2"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:51
 msgid "Headset"
-msgstr "Ακουστικά με μικρόφωνο"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:52 ../backends/alsa/alsa-constants.c:53
 #: ../backends/alsa/alsa-constants.c:54 ../backends/alsa/alsa-constants.c:55
 msgid "Surround Speaker"
-msgstr "Ηχεία Surround"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:56 ../backends/alsa/alsa-constants.c:57
 msgid "Center Speaker"
-msgstr "Κεντρικό ηχείο"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:58 ../backends/alsa/alsa-constants.c:59
 msgid "CLFE Speaker"
-msgstr "Ηχεία CLFE"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:60 ../backends/alsa/alsa-constants.c:136
 msgid "Digital"
-msgstr "Ψηφιακή"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:61
 msgid "Master Mono"
-msgstr "Κύρια έξοδος Μονοφωνικού"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:62
 msgid "Master Digital"
-msgstr "Κύρια έξοδος Ψηφιακού"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:63 ../backends/alsa/alsa-constants.c:64
 msgid "Side Speaker"
-msgstr "Πλευρικά Ηχεία"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:65
 msgid "Rear Speaker"
-msgstr "Οπίσθια Ηχεία"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:66
 msgid "Wave"
-msgstr "Κυματομορφή"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:67 ../backends/alsa/alsa-constants.c:100
 #: ../backends/alsa/alsa-constants.c:216
 msgid "Phone"
-msgstr "Τηλέφωνο"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:68 ../backends/alsa/alsa-constants.c:214
 #: ../backends/oss/oss-device.c:98
 msgid "CD"
-msgstr "CD"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:69
 msgid "Music"
-msgstr "Μουσική"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:70
 msgid "AC97"
-msgstr "AC97"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:71 ../backends/alsa/alsa-constants.c:72
 msgid "LFE Speaker"
-msgstr "Ηχείο χαμηλών συχνοτήτων"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:73
 msgid "Bass Speaker"
-msgstr "Ηχείο Μπάσων"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:74
 msgid "PC Speaker"
-msgstr "Ηχείο υπολογιστή"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:75 ../backends/oss/oss-device.c:91
 msgid "Synth"
-msgstr "Synth"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:76
 msgid "MIDI"
-msgstr "MIDI"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:77
 msgid "Synth/MIDI"
-msgstr "Synth/MIDI"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:78 ../backends/oss/oss-device.c:89
 msgid "Bass"
-msgstr "Μπάσα"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:79 ../backends/oss/oss-device.c:90
 msgid "Treble"
-msgstr "Πρίμα"
+msgstr ""
 
 #. Input controls
 #: ../backends/alsa/alsa-constants.c:82
 msgid "Capture"
-msgstr "Ηχογράφηση"
+msgstr ""
 
 #. Microphone options
 #: ../backends/alsa/alsa-constants.c:83 ../backends/alsa/alsa-constants.c:127
 #: ../backends/alsa/alsa-constants.c:157 ../backends/alsa/alsa-constants.c:158
 #: ../backends/oss/oss-device.c:97
 msgid "Microphone"
-msgstr "Μικρόφωνο"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:84 ../backends/alsa/alsa-constants.c:195
 msgid "Microphone/Line In"
-msgstr "Μικρόφωνο/Είσοδος"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:85 ../backends/alsa/alsa-constants.c:86
 #: ../backends/alsa/alsa-constants.c:169 ../backends/alsa/alsa-constants.c:170
 #: ../backends/alsa/alsa-constants.c:172 ../backends/alsa/alsa-constants.c:173
 #: ../backends/alsa/alsa-constants.c:174
 msgid "Internal Microphone"
-msgstr "Εσωτερικό Μικρόφωνο"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:87 ../backends/alsa/alsa-constants.c:164
 #: ../backends/alsa/alsa-constants.c:165
 msgid "Front Microphone"
-msgstr "Εμπρόσθιο Μικρόφωνο"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:88 ../backends/alsa/alsa-constants.c:184
 #: ../backends/alsa/alsa-constants.c:185
 msgid "Rear Microphone"
-msgstr "Οπίσθιο Μικρόφωνο"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:89 ../backends/alsa/alsa-constants.c:168
 msgid "Dock Microphone"
-msgstr "Μικρόφωνο Βάσης"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:90 ../backends/alsa/alsa-constants.c:166
 msgid "Headphone Microphone"
-msgstr "Μικρόφωνο Ακουστικών"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:91 ../backends/alsa/alsa-constants.c:167
 msgid "Headset Microphone"
-msgstr "Μικρόφωνο Ακουστικών με μικρόφωνο"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:92
 msgid "Inverted Internal Microphone"
-msgstr "Εσωτερικό Μικρόφωνο Ανεστραμμένου Σήματος"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:93 ../backends/alsa/alsa-constants.c:94
 #: ../backends/alsa/alsa-constants.c:95 ../backends/alsa/alsa-constants.c:192
@@ -203,358 +201,358 @@ msgstr "Εσωτερικό Μικρόφωνο Ανεστραμμένου Σήμ�
 #: ../backends/alsa/alsa-constants.c:197 ../backends/alsa/alsa-constants.c:198
 #: ../backends/oss/oss-device.c:96
 msgid "Line In"
-msgstr "Είσοδος"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:96 ../backends/alsa/alsa-constants.c:204
 #: ../backends/alsa/alsa-constants.c:207
 msgid "Auxiliary"
-msgstr "Βοηθητική Είσοδος"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:97 ../backends/alsa/alsa-constants.c:215
 #: ../backends/oss/oss-device.c:115
 msgid "Video"
-msgstr "Βίντεο"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:98 ../backends/alsa/alsa-constants.c:202
 msgid "TV Tuner"
-msgstr "Δέκτης TV"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:99 ../backends/alsa/alsa-constants.c:203
 msgid "FM"
-msgstr "FM"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:101
 msgid "Microphone Boost"
-msgstr "Ενίσχυση Μικροφώνου"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:102
 msgid "Microphone Boost (+20dB)"
-msgstr "Ενίσχυση Μικροφώνου (+20dB)"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:103 ../backends/alsa/alsa-constants.c:104
 msgid "Internal Microphone Boost"
-msgstr "Ενίσχυση Εσωτερικού Μικροφώνου"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:105
 msgid "Front Microphone Boost"
-msgstr "Ενίσχυση Εμπρόσθιου Μικροφώνου"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:106
 msgid "Rear Microphone Boost"
-msgstr "Ενίσχυση Οπίσθιου Μικροφώνου"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:107
 msgid "Dock Microphone Boost"
-msgstr "Ενίσχυση Μικροφώνου Βάσης"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:108
 msgid "Headphone Microphone Boost"
-msgstr "Ενίσχυση Μικροφώνου Ακουστικών"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:109
 msgid "Headset Microphone Boost"
-msgstr "Ενίσχυση Μικροφώνου Ακουστικών με μικρόφωνο"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:110
 msgid "Line In Boost"
-msgstr "Ενίσχυση Γραμμής Εισόδου"
+msgstr ""
 
 #. Switches
 #: ../backends/alsa/alsa-constants.c:117
 msgid "Analog Output"
-msgstr "Αναλογική Έξοδος"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:118
 msgid "Analog Source"
-msgstr "Αναλογική Πηγή"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:119
 msgid "Capture Source"
-msgstr "Πηγή Ηχογράφησης"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:120 ../backends/alsa/alsa-constants.c:121
 msgid "Input Source"
-msgstr "Πηγή Εισόδου"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:122
 msgid "Digital Input Source"
-msgstr "Πηγή Ψηφιακής Εισόδου"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:123
 msgid "PCM Capture Source"
-msgstr "Πηγή Ηχογράφησης PCM"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:124
 msgid "Digital Playback Source"
-msgstr "Πηγή Ψηφιακής Αναπαραγωγής"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:125
 msgid "Mono Output"
-msgstr "Μονοφωνική Έξοδος"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:126
 msgid "Shared Microphone/Line In"
-msgstr "Διπλή λειτουργία Μικρόφωνο/Είσοδος"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:128
 msgid "Microphone Jack Mode"
-msgstr "Λειτουργία Υποδοχής Μικροφώνου"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:129
 msgid "Surround Jack Mode"
-msgstr "Λειτουργία Υποδοχής Surround"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:130
 msgid "Auto-Mute Mode"
-msgstr "Λειτουργία Αυτόματης Σίγασης"
+msgstr ""
 
 #. Toggles
 #: ../backends/alsa/alsa-constants.c:133
 msgid "External Amplifier"
-msgstr "Εξωτερικός Ενισχυτής"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:134
 msgid "Bass Boost"
-msgstr "Ενίσχυση Μπάσων"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:135
 msgid "Capture Boost"
-msgstr "Ενίσχυση Ηχογράφησης"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:137 ../backends/alsa/alsa-constants.c:201
 msgid "Digital In"
-msgstr "Ψηφιακή Είσοδος"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:138
 msgid "Digital Default PCM"
-msgstr "Προεπιλεγμένο Ψηφιακό PCM"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:139
 msgid "Optical"
-msgstr "Οπτική"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:140
 msgid "Auto Gain Control"
-msgstr "Αυτόματος Έλεγχος Προσαύξησης Έντασης"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:141
 msgid "Mix"
-msgstr "Μίξη"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:142
 msgid "Mix Mono"
-msgstr "Μονοφωνική Μίξη"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:143
 msgid "Microphone Capture"
-msgstr "Ηχογράφηση Μικροφώνου"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:144 ../backends/alsa/alsa-constants.c:199
 msgid "Input 1"
-msgstr "Είσοδος 1"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:145 ../backends/alsa/alsa-constants.c:200
 msgid "Input 2"
-msgstr "Είσοδος 2"
+msgstr ""
 
 #. Output options
 #: ../backends/alsa/alsa-constants.c:152
 msgid "Speakers"
-msgstr "Ηχεία"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:153
 msgid "Headphones"
-msgstr "Ακουστικά"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:154
 msgid "Front Panel Headphones"
-msgstr "Ακουστικά Εμπρόσθιου Πάνελ"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:159
 msgid "Microphone 1"
-msgstr "Μικρόφωνο 1"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:160
 msgid "Microphone 2"
-msgstr "Μικρόφωνο 2"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:161 ../backends/alsa/alsa-constants.c:162
 #: ../backends/alsa/alsa-constants.c:163
 msgid "Microphone In"
-msgstr "Είσοδος Μικροφώνου"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:171
 msgid "Internal Microphone 1"
-msgstr "Εσωτερικό Μικρόφωνο 1"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:175
 msgid "Internal Digital Microphone"
-msgstr "Εσωτερικό Ψηφιακό Μικρόφωνο"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:176 ../backends/alsa/alsa-constants.c:179
 msgid "Digital Microphone"
-msgstr "Ψηφιακό Μικρόφωνο"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:177
 msgid "Digital Microphone 1"
-msgstr "Ψηφιακό Μικρόφωνο 1"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:178
 msgid "Digital Microphone 2"
-msgstr "Ψηφιακό Μικρόφωνο 2"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:180 ../backends/alsa/alsa-constants.c:181
 #: ../backends/alsa/alsa-constants.c:182 ../backends/alsa/alsa-constants.c:183
 msgid "External Microphone"
-msgstr "Εξωτερικό Μικρόφωνο"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:186
 msgid "Camera Microphone"
-msgstr "Μικρόφωνο Κάμερας"
+msgstr ""
 
 #. Other options
 #: ../backends/alsa/alsa-constants.c:189
 msgid "Analog"
-msgstr "Αναλογική"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:190
 msgid "Analog In"
-msgstr "Αναλογική Είσοδος"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:191
 msgid "Analog Inputs"
-msgstr "Αναλογικές Είσοδοι"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:196
 msgid "Line In/Microphone"
-msgstr "Γραμμή Εισόδου/Μικρόφωνο"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:205 ../backends/alsa/alsa-constants.c:206
 msgid "Auxiliary In"
-msgstr "Βοηθητική Είσοδος"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:208
 msgid "Auxiliary 0"
-msgstr "Βοηθητική 0"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:209
 msgid "Auxiliary 1"
-msgstr "Βοηθητική 1"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:210
 msgid "Auxiliary 2"
-msgstr "Βοηθητική 2"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:211
 msgid "Auxiliary 3"
-msgstr "Βοηθητική 3"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:212
 msgid "Docking Station"
-msgstr "Βάση Σύνδεσης"
+msgstr ""
 
 #. Recording monitor
 #: ../backends/alsa/alsa-constants.c:213 ../backends/oss/oss-device.c:100
 msgid "Mixer"
-msgstr "Μίκτης"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:217
 msgid "Unknown 1"
-msgstr "Άγνωστο 1"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:218
 msgid "Unknown 2"
-msgstr "Άγνωστο 2"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:219
 msgid "Enabled"
-msgstr "Ενεργοποιημένο"
+msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:220
 msgid "Disabled"
-msgstr "Απενεργοποιημένο"
+msgstr ""
 
 #: ../backends/alsa/alsa-device.c:636
 msgid "On"
-msgstr "Ανοικτό"
+msgstr ""
 
 #: ../backends/alsa/alsa-device.c:637
 msgid "Off"
-msgstr "Κλειστό"
+msgstr ""
 
 #: ../backends/oss/oss-backend.c:407
 #, c-format
 msgid "OSS Mixer %d"
-msgstr "Μίκτης OSS %d"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:88
 msgid "Volume"
-msgstr "Ένταση"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:101
 msgid "PCM 2"
-msgstr "PCM 2"
+msgstr ""
 
 #. Recording level (master input)
 #: ../backends/oss/oss-device.c:103
 msgid "Record"
-msgstr "Ηχογράφηση"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:104
 msgid "Input Gain"
-msgstr "Κέρδος Εισόδου"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:105
 msgid "Output Gain"
-msgstr "Κέρδος Εξόδου"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:106
 msgid "Line In 1"
-msgstr "Γραμμή Εισόδου 1"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:107
 msgid "Line In 2"
-msgstr "Γραμμή Εισόδου 2"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:108
 msgid "Line In 3"
-msgstr "Γραμμή Εισόδου 3"
+msgstr ""
 
 #. These 3 can be attached to either digital input or output
 #: ../backends/oss/oss-device.c:110
 msgid "Digital 1"
-msgstr "Ψηφιακή 1"
+msgstr "डिजिटल १"
 
 #: ../backends/oss/oss-device.c:111
 msgid "Digital 2"
-msgstr "Ψηφιακή 2"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:112
 msgid "Digital 3"
-msgstr "Ψηφιακή 3"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:113
 msgid "Phone In"
-msgstr "Είσοδος Τηλεφώνου"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:114
 msgid "Phone Out"
-msgstr "Έξοδος Τηλεφώνου"
+msgstr ""
 
 #: ../backends/oss/oss-device.c:116
 msgid "Radio"
-msgstr "Ραδιόφωνο"
+msgstr ""
 
 #. Create the port switch
 #: ../backends/oss/oss-stream.c:214 ../backends/pulse/pulse-sink.c:150
 #: ../backends/pulse/pulse-source.c:147
 msgid "Connector"
-msgstr "Βύσμα"
+msgstr ""
 
 #: ../backends/pulse/pulse-device.c:398
 msgid "Profile"
-msgstr "Προφίλ"
+msgstr ""
 
 #: ../backends/pulse/pulse-monitor.c:282
 msgid "Peak detect"
-msgstr "Εντοπισμός Αιχμών"
+msgstr ""
