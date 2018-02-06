@@ -1,6 +1,7 @@
 ### libmatemixer 1.20.0
 
   * Translations update
+  * building: bump required glib version to 2.50.0
 
 ### libmatemixer 1.19.0
 
