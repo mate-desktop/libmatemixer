@@ -1,0 +1,5 @@
+#! /bin/sh
+
+PACKAGE=libmatemixer;
+
+make -C po $PACKAGE.pot && mv po/$PACKAGE.pot .
