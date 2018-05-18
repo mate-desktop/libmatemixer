@@ -260,15 +260,9 @@ pulse_device_update (PulseDevice *device, const pa_card_info *info)
     g_return_if_fail (PULSE_IS_DEVICE (device));
     g_return_if_fail (info != NULL);
 
-#if PA_CHECK_VERSION (5, 0, 0)
     if G_LIKELY (info->active_profile2 != NULL)
         pulse_device_switch_set_active_profile_by_name (device->priv->pswitch,
                                                         info->active_profile2->name);
-#else
-    if G_LIKELY (info->active_profile != NULL)
-        pulse_device_switch_set_active_profile_by_name (device->priv->pswitch,
-                                                        info->active_profile->name);
-#endif
 }
 
 void
@@ -404,7 +398,6 @@ pulse_device_load (PulseDevice *device, const pa_card_info *info)
     for (i = 0; i < info->n_profiles; i++) {
         PulseDeviceProfile *profile;
 
-#if PA_CHECK_VERSION (5, 0, 0)
         pa_card_profile_info2 *p_info = info->profiles2[i];
 
         /* PulseAudio 5.0 includes a new pa_card_profile_info2 which only
@@ -412,10 +405,6 @@ pulse_device_load (PulseDevice *device, const pa_card_info *info)
          * which are unavailable */
         if (p_info->available == 0)
             continue;
-#else
-        /* The old profile list is an array of structs, not pointers */
-        pa_card_profile_info *p_info = &info->profiles[i];
-#endif
 
         profile = pulse_device_profile_new (p_info->name,
                                             p_info->description,

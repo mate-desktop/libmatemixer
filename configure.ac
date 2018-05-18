@@ -113,7 +113,7 @@ AC_SUBST(HAVE_NULL)
 # -----------------------------------------------------------------------
 # PulseAudio
 # -----------------------------------------------------------------------
-PA_REQUIRED_VERSION=2.0.0
+PA_REQUIRED_VERSION=5.0.0
 
 AC_ARG_ENABLE([pulseaudio],
               AS_HELP_STRING([--enable-pulseaudio],
