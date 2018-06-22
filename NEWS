@@ -1,5 +1,8 @@
 ### libmatemixer 1.21.0
 
+  * Translations update
+  * require PulseAudio 5.0 and drop some old code
+
 ### libmatemixer 1.20.0
 
   * Translations update
