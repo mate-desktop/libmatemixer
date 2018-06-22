@@ -1,20 +1,17 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
-# Translators:
-# Abdulwahab Bah <Amb1110@gmail.com>, 2018
-# alibacha19 <alibacha19@gmail.com>, 2015
-# Saif Husam <saifxman10@yahoo.com>, 2016
-# مهدي السطيفي <chinoune.mehdi@gmail.com>, 2015
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-11-28 09:57+0100\n"
-"PO-Revision-Date: 2018-01-13 18:31+0000\n"
-"Last-Translator: Abdulwahab Bah <Amb1110@gmail.com>\n"
-"Language-Team: Arabic (http://www.transifex.com/mate/MATE/language/ar/)\n"
+"POT-Creation-Date: 2018-03-14 09:53+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: Saif Husam <saifxman10@yahoo.com>, 2018\n"
+"Language-Team: Arabic (https://www.transifex.com/mate/teams/13566/ar/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -119,7 +116,7 @@ msgstr "بطاقة صوتAC97"
 
 #: ../backends/alsa/alsa-constants.c:71 ../backends/alsa/alsa-constants.c:72
 msgid "LFE Speaker"
-msgstr ""
+msgstr "سماعة التردد المنخفض"
 
 #: ../backends/alsa/alsa-constants.c:73
 msgid "Bass Speaker"
@@ -275,19 +272,19 @@ msgstr "مصدر اللقطة"
 
 #: ../backends/alsa/alsa-constants.c:120 ../backends/alsa/alsa-constants.c:121
 msgid "Input Source"
-msgstr ""
+msgstr "مصدر الادخال"
 
 #: ../backends/alsa/alsa-constants.c:122
 msgid "Digital Input Source"
-msgstr ""
+msgstr "مصدر إدخال رقمي"
 
 #: ../backends/alsa/alsa-constants.c:123
 msgid "PCM Capture Source"
-msgstr ""
+msgstr "مصدر اللقطةPCM"
 
 #: ../backends/alsa/alsa-constants.c:124
 msgid "Digital Playback Source"
-msgstr ""
+msgstr "مصدر تشغيل رقمي"
 
 #: ../backends/alsa/alsa-constants.c:125
 msgid "Mono Output"
@@ -299,11 +296,11 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:128
 msgid "Microphone Jack Mode"
-msgstr ""
+msgstr "الميكروفون في وضع أعلى"
 
 #: ../backends/alsa/alsa-constants.c:129
 msgid "Surround Jack Mode"
-msgstr ""
+msgstr "إحاطة في وضع أعلى"
 
 #: ../backends/alsa/alsa-constants.c:130
 msgid "Auto-Mute Mode"
@@ -328,23 +325,23 @@ msgstr "مدخل رقمي"
 
 #: ../backends/alsa/alsa-constants.c:138
 msgid "Digital Default PCM"
-msgstr ""
+msgstr "PCM افتراضي رقمي"
 
 #: ../backends/alsa/alsa-constants.c:139
 msgid "Optical"
-msgstr ""
+msgstr "بصري"
 
 #: ../backends/alsa/alsa-constants.c:140
 msgid "Auto Gain Control"
-msgstr ""
+msgstr "جلب مراقبة آلية"
 
 #: ../backends/alsa/alsa-constants.c:141
 msgid "Mix"
-msgstr ""
+msgstr "خلط"
 
 #: ../backends/alsa/alsa-constants.c:142
 msgid "Mix Mono"
-msgstr ""
+msgstr "خلط أحادي"
 
 #: ../backends/alsa/alsa-constants.c:143
 msgid "Microphone Capture"
@@ -428,36 +425,36 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:196
 msgid "Line In/Microphone"
-msgstr ""
+msgstr "مدخل /ميكروفون"
 
 #: ../backends/alsa/alsa-constants.c:205 ../backends/alsa/alsa-constants.c:206
 msgid "Auxiliary In"
-msgstr ""
+msgstr "مدخل إضافي"
 
 #: ../backends/alsa/alsa-constants.c:208
 msgid "Auxiliary 0"
-msgstr ""
+msgstr " إضافي 0"
 
 #: ../backends/alsa/alsa-constants.c:209
 msgid "Auxiliary 1"
-msgstr ""
+msgstr " إضافي 1"
 
 #: ../backends/alsa/alsa-constants.c:210
 msgid "Auxiliary 2"
-msgstr ""
+msgstr " إضافي 2"
 
 #: ../backends/alsa/alsa-constants.c:211
 msgid "Auxiliary 3"
-msgstr ""
+msgstr " إضافي 3"
 
 #: ../backends/alsa/alsa-constants.c:212
 msgid "Docking Station"
-msgstr ""
+msgstr "قاعدة تركيب"
 
 #. Recording monitor
 #: ../backends/alsa/alsa-constants.c:213 ../backends/oss/oss-device.c:100
 msgid "Mixer"
-msgstr ""
+msgstr "مازج"
 
 #: ../backends/alsa/alsa-constants.c:217
 msgid "Unknown 1"
@@ -486,7 +483,7 @@ msgstr "مُطفأ"
 #: ../backends/oss/oss-backend.c:407
 #, c-format
 msgid "OSS Mixer %d"
-msgstr ""
+msgstr "مازجOSS %d "
 
 #: ../backends/oss/oss-device.c:88
 msgid "Volume"
@@ -494,7 +491,7 @@ msgstr "حجم الصوت"
 
 #: ../backends/oss/oss-device.c:101
 msgid "PCM 2"
-msgstr ""
+msgstr "PCM2"
 
 #. Recording level (master input)
 #: ../backends/oss/oss-device.c:103
@@ -503,23 +500,23 @@ msgstr "تسجيل"
 
 #: ../backends/oss/oss-device.c:104
 msgid "Input Gain"
-msgstr ""
+msgstr "مدخل Gain"
 
 #: ../backends/oss/oss-device.c:105
 msgid "Output Gain"
-msgstr ""
+msgstr "قناة الإخراج"
 
 #: ../backends/oss/oss-device.c:106
 msgid "Line In 1"
-msgstr ""
+msgstr "منفذ إدخال 1"
 
 #: ../backends/oss/oss-device.c:107
 msgid "Line In 2"
-msgstr ""
+msgstr "منفذ إدخال 2"
 
 #: ../backends/oss/oss-device.c:108
 msgid "Line In 3"
-msgstr ""
+msgstr "منفذ إدخال 3"
 
 #. These 3 can be attached to either digital input or output
 #: ../backends/oss/oss-device.c:110
@@ -544,7 +541,7 @@ msgstr "مخرج الهاتف"
 
 #: ../backends/oss/oss-device.c:116
 msgid "Radio"
-msgstr ""
+msgstr "إذاعة"
 
 #. Create the port switch
 #: ../backends/oss/oss-stream.c:214 ../backends/pulse/pulse-sink.c:150
@@ -558,4 +555,4 @@ msgstr "النمط"
 
 #: ../backends/pulse/pulse-monitor.c:282
 msgid "Peak detect"
-msgstr ""
+msgstr "التعرف على الذروة"

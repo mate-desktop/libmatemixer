@@ -1,17 +1,17 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
-# Translators:
-# nomen omen <vapoursoft@gmail.com>, 2017
+#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-11-28 09:57+0100\n"
-"PO-Revision-Date: 2017-09-20 12:16+0000\n"
-"Last-Translator: nomen omen <vapoursoft@gmail.com>\n"
-"Language-Team: Finnish (http://www.transifex.com/mate/MATE/language/fi/)\n"
+"POT-Creation-Date: 2018-03-14 09:53+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: nomen omen, 2018\n"
+"Language-Team: Finnish (https://www.transifex.com/mate/teams/13566/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -99,7 +99,7 @@ msgstr "Aalto"
 #: ../backends/alsa/alsa-constants.c:67 ../backends/alsa/alsa-constants.c:100
 #: ../backends/alsa/alsa-constants.c:216
 msgid "Phone"
-msgstr ""
+msgstr "Puhelin"
 
 #: ../backends/alsa/alsa-constants.c:68 ../backends/alsa/alsa-constants.c:214
 #: ../backends/oss/oss-device.c:98
@@ -149,7 +149,7 @@ msgstr ""
 #. Input controls
 #: ../backends/alsa/alsa-constants.c:82
 msgid "Capture"
-msgstr ""
+msgstr "Kaappaa"
 
 #. Microphone options
 #: ../backends/alsa/alsa-constants.c:83 ../backends/alsa/alsa-constants.c:127
@@ -288,7 +288,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:125
 msgid "Mono Output"
-msgstr ""
+msgstr "Mono ulostulo"
 
 #: ../backends/alsa/alsa-constants.c:126
 msgid "Shared Microphone/Line In"
@@ -329,7 +329,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:139
 msgid "Optical"
-msgstr ""
+msgstr "Optinen"
 
 #: ../backends/alsa/alsa-constants.c:140
 msgid "Auto Gain Control"
@@ -362,7 +362,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:153
 msgid "Headphones"
-msgstr ""
+msgstr "Kuulokkeet"
 
 #: ../backends/alsa/alsa-constants.c:154
 msgid "Front Panel Headphones"
@@ -370,11 +370,11 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:159
 msgid "Microphone 1"
-msgstr ""
+msgstr "Mikrofoni 1"
 
 #: ../backends/alsa/alsa-constants.c:160
 msgid "Microphone 2"
-msgstr ""
+msgstr "Mikrofoni 2"
 
 #: ../backends/alsa/alsa-constants.c:161 ../backends/alsa/alsa-constants.c:162
 #: ../backends/alsa/alsa-constants.c:163
@@ -383,7 +383,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:171
 msgid "Internal Microphone 1"
-msgstr ""
+msgstr "Sisäinen mikrofoni 1"
 
 #: ../backends/alsa/alsa-constants.c:175
 msgid "Internal Digital Microphone"
@@ -395,16 +395,16 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:177
 msgid "Digital Microphone 1"
-msgstr ""
+msgstr "Digitaalinen mikrofoni 1"
 
 #: ../backends/alsa/alsa-constants.c:178
 msgid "Digital Microphone 2"
-msgstr ""
+msgstr "Digitaalinen mikrofoni 2"
 
 #: ../backends/alsa/alsa-constants.c:180 ../backends/alsa/alsa-constants.c:181
 #: ../backends/alsa/alsa-constants.c:182 ../backends/alsa/alsa-constants.c:183
 msgid "External Microphone"
-msgstr ""
+msgstr "Ulkoinen mikrofoni"
 
 #: ../backends/alsa/alsa-constants.c:186
 msgid "Camera Microphone"
@@ -449,7 +449,7 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:212
 msgid "Docking Station"
-msgstr ""
+msgstr "Telakointiasema"
 
 #. Recording monitor
 #: ../backends/alsa/alsa-constants.c:213 ../backends/oss/oss-device.c:100
@@ -466,19 +466,19 @@ msgstr ""
 
 #: ../backends/alsa/alsa-constants.c:219
 msgid "Enabled"
-msgstr ""
+msgstr "Käytössä"
 
 #: ../backends/alsa/alsa-constants.c:220
 msgid "Disabled"
-msgstr ""
+msgstr "Ei käytössä"
 
 #: ../backends/alsa/alsa-device.c:636
 msgid "On"
-msgstr ""
+msgstr "Päällä"
 
 #: ../backends/alsa/alsa-device.c:637
 msgid "Off"
-msgstr ""
+msgstr "Pois päältä"
 
 #: ../backends/oss/oss-backend.c:407
 #, c-format
@@ -487,7 +487,7 @@ msgstr ""
 
 #: ../backends/oss/oss-device.c:88
 msgid "Volume"
-msgstr "Äänenvoimakkuus"
+msgstr "Määrä"
 
 #: ../backends/oss/oss-device.c:101
 msgid "PCM 2"
@@ -551,8 +551,8 @@ msgstr ""
 
 #: ../backends/pulse/pulse-device.c:398
 msgid "Profile"
-msgstr ""
+msgstr "Profiili"
 
 #: ../backends/pulse/pulse-monitor.c:282
 msgid "Peak detect"
-msgstr ""
+msgstr "Havaitse piikit"
