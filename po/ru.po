@@ -3,13 +3,23 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
+# Translators:
+# Alexei Sorokin <sor.alexei@meowr.ru>, 2018
+# Дмитрий Михирев, 2018
+# Victor Kukshiev <andrey0bolkonsky@gmail.com>, 2018
+# AlexL <loginov.alex.valer@gmail.com>, 2018
+# Evolve32 <evolve32@yandex.ru>, 2018
+# Sergey Kolosov <kolosov@gmail.com>, 2018
+# monsta <monsta@inbox.ru>, 2018
+# theirix <theirix@gmail.com>, 2018
+# 
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: MATE Desktop Environment\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2018-03-14 09:53+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2018-03-11 15:58+0000\n"
 "Last-Translator: theirix <theirix@gmail.com>, 2018\n"
 "Language-Team: Russian (https://www.transifex.com/mate/teams/13566/ru/)\n"
 "MIME-Version: 1.0\n"
