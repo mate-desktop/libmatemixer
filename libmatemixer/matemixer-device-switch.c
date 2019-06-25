@@ -57,7 +57,7 @@ static void mate_mixer_device_switch_set_property (GObject                    *o
 
 static void mate_mixer_device_switch_init         (MateMixerDeviceSwitch      *swtch);
 
-G_DEFINE_ABSTRACT_TYPE (MateMixerDeviceSwitch, mate_mixer_device_switch, MATE_MIXER_TYPE_SWITCH)
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MateMixerDeviceSwitch, mate_mixer_device_switch, MATE_MIXER_TYPE_SWITCH)
 
 static void
 mate_mixer_device_switch_class_init (MateMixerDeviceSwitchClass *klass)
@@ -88,8 +88,6 @@ mate_mixer_device_switch_class_init (MateMixerDeviceSwitchClass *klass)
                              G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_properties (object_class, N_PROPERTIES, properties);
-
-    g_type_class_add_private (object_class, sizeof (MateMixerDeviceSwitchPrivate));
 }
 
 static void
@@ -146,9 +144,7 @@ mate_mixer_device_switch_set_property (GObject      *object,
 static void
 mate_mixer_device_switch_init (MateMixerDeviceSwitch *swtch)
 {
-    swtch->priv = G_TYPE_INSTANCE_GET_PRIVATE (swtch,
-                                               MATE_MIXER_TYPE_DEVICE_SWITCH,
-                                               MateMixerDeviceSwitchPrivate);
+    swtch->priv = mate_mixer_device_switch_get_instance_private (swtch);
 }
 
 /**

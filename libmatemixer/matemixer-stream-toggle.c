@@ -59,7 +59,7 @@ static void mate_mixer_stream_toggle_set_property (GObject                    *o
 static void mate_mixer_stream_toggle_init         (MateMixerStreamToggle      *toggle);
 static void mate_mixer_stream_toggle_dispose      (GObject                    *object);
 
-G_DEFINE_ABSTRACT_TYPE (MateMixerStreamToggle, mate_mixer_stream_toggle, MATE_MIXER_TYPE_STREAM_SWITCH)
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MateMixerStreamToggle, mate_mixer_stream_toggle, MATE_MIXER_TYPE_STREAM_SWITCH)
 
 static MateMixerSwitchOption *mate_mixer_stream_toggle_get_option   (MateMixerSwitch *swtch,
                                                                      const gchar     *name);
@@ -124,8 +124,6 @@ mate_mixer_stream_toggle_class_init (MateMixerStreamToggleClass *klass)
                              G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_properties (object_class, N_PROPERTIES, properties);
-
-    g_type_class_add_private (object_class, sizeof (MateMixerStreamTogglePrivate));
 }
 
 static void
@@ -187,9 +185,7 @@ mate_mixer_stream_toggle_set_property (GObject      *object,
 static void
 mate_mixer_stream_toggle_init (MateMixerStreamToggle *toggle)
 {
-    toggle->priv = G_TYPE_INSTANCE_GET_PRIVATE (toggle,
-                                                MATE_MIXER_TYPE_STREAM_TOGGLE,
-                                                MateMixerStreamTogglePrivate);
+    toggle->priv = mate_mixer_stream_toggle_get_instance_private (toggle);
 }
 
 static void

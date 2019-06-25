@@ -123,7 +123,7 @@ static void mate_mixer_context_init         (MateMixerContext      *context);
 static void mate_mixer_context_dispose      (GObject               *object);
 static void mate_mixer_context_finalize     (GObject               *object);
 
-G_DEFINE_TYPE (MateMixerContext, mate_mixer_context, G_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_PRIVATE (MateMixerContext, mate_mixer_context, G_TYPE_OBJECT);
 
 static void     on_backend_state_notify                 (MateMixerBackend *backend,
                                                          GParamSpec       *pspec,
@@ -430,8 +430,6 @@ mate_mixer_context_class_init (MateMixerContextClass *klass)
                       G_TYPE_NONE,
                       1,
                       G_TYPE_STRING);
-
-    g_type_class_add_private (object_class, sizeof (MateMixerContextPrivate));
 }
 
 static void
@@ -518,9 +516,7 @@ mate_mixer_context_set_property (GObject      *object,
 static void
 mate_mixer_context_init (MateMixerContext *context)
 {
-    context->priv = G_TYPE_INSTANCE_GET_PRIVATE (context,
-                                                 MATE_MIXER_TYPE_CONTEXT,
-                                                 MateMixerContextPrivate);
+    context->priv = mate_mixer_context_get_instance_private (context);
 
     context->priv->app_info = _mate_mixer_app_info_new ();
 }

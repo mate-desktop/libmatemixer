@@ -74,7 +74,7 @@ static void mate_mixer_backend_set_property (GObject               *object,
 static void mate_mixer_backend_dispose      (GObject               *object);
 static void mate_mixer_backend_finalize     (GObject               *object);
 
-G_DEFINE_ABSTRACT_TYPE (MateMixerBackend, mate_mixer_backend, G_TYPE_OBJECT)
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MateMixerBackend, mate_mixer_backend, G_TYPE_OBJECT)
 
 static void device_added          (MateMixerBackend *backend,
                                    const gchar      *name);
@@ -195,8 +195,6 @@ mate_mixer_backend_class_init (MateMixerBackendClass *klass)
                       G_TYPE_NONE,
                       1,
                       G_TYPE_STRING);
-
-    g_type_class_add_private (object_class, sizeof (MateMixerBackendPrivate));
 }
 
 static void
@@ -253,9 +251,7 @@ mate_mixer_backend_set_property (GObject      *object,
 static void
 mate_mixer_backend_init (MateMixerBackend *backend)
 {
-    backend->priv = G_TYPE_INSTANCE_GET_PRIVATE (backend,
-                                                 MATE_MIXER_TYPE_BACKEND,
-                                                 MateMixerBackendPrivate);
+    backend->priv = mate_mixer_backend_get_instance_private (backend);
 
     backend->priv->devices = g_hash_table_new_full (g_str_hash,
                                                     g_str_equal,
