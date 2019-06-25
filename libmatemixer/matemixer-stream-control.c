@@ -80,7 +80,7 @@ static void mate_mixer_stream_control_set_property (GObject                     
 static void mate_mixer_stream_control_init         (MateMixerStreamControl      *control);
 static void mate_mixer_stream_control_finalize     (GObject                     *object);
 
-G_DEFINE_ABSTRACT_TYPE (MateMixerStreamControl, mate_mixer_stream_control, G_TYPE_OBJECT)
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MateMixerStreamControl, mate_mixer_stream_control, G_TYPE_OBJECT)
 
 static void
 mate_mixer_stream_control_class_init (MateMixerStreamControlClass *klass)
@@ -200,8 +200,6 @@ mate_mixer_stream_control_class_init (MateMixerStreamControlClass *klass)
                       G_TYPE_NONE,
                       1,
                       G_TYPE_DOUBLE);
-
-    g_type_class_add_private (object_class, sizeof (MateMixerStreamControlPrivate));
 }
 
 static void
@@ -286,9 +284,7 @@ mate_mixer_stream_control_set_property (GObject      *object,
 static void
 mate_mixer_stream_control_init (MateMixerStreamControl *control)
 {
-    control->priv = G_TYPE_INSTANCE_GET_PRIVATE (control,
-                                                 MATE_MIXER_TYPE_STREAM_CONTROL,
-                                                 MateMixerStreamControlPrivate);
+    control->priv = mate_mixer_stream_control_get_instance_private (control);
 }
 
 static void

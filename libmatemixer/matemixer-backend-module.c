@@ -56,7 +56,7 @@ static void mate_mixer_backend_module_init         (MateMixerBackendModule      
 static void mate_mixer_backend_module_dispose      (GObject                     *object);
 static void mate_mixer_backend_module_finalize     (GObject                     *object);
 
-G_DEFINE_TYPE (MateMixerBackendModule, mate_mixer_backend_module, G_TYPE_TYPE_MODULE);
+G_DEFINE_TYPE_WITH_PRIVATE (MateMixerBackendModule, mate_mixer_backend_module, G_TYPE_TYPE_MODULE);
 
 static gboolean backend_module_load   (GTypeModule *gmodule);
 static void     backend_module_unload (GTypeModule *gmodule);
@@ -86,8 +86,6 @@ mate_mixer_backend_module_class_init (MateMixerBackendModuleClass *klass)
     module_class = G_TYPE_MODULE_CLASS (klass);
     module_class->load   = backend_module_load;
     module_class->unload = backend_module_unload;
-
-    g_type_class_add_private (object_class, sizeof (MateMixerBackendModulePrivate));
 }
 
 static void
@@ -138,9 +136,7 @@ mate_mixer_backend_module_set_property (GObject      *object,
 static void
 mate_mixer_backend_module_init (MateMixerBackendModule *module)
 {
-    module->priv = G_TYPE_INSTANCE_GET_PRIVATE (module,
-                                                MATE_MIXER_TYPE_BACKEND_MODULE,
-                                                MateMixerBackendModulePrivate);
+    module->priv = mate_mixer_backend_module_get_instance_private (module);
 }
 
 static void

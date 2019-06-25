@@ -75,7 +75,7 @@ static void mate_mixer_device_set_property (GObject              *object,
 static void mate_mixer_device_init         (MateMixerDevice      *device);
 static void mate_mixer_device_finalize     (GObject              *object);
 
-G_DEFINE_ABSTRACT_TYPE (MateMixerDevice, mate_mixer_device, G_TYPE_OBJECT)
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MateMixerDevice, mate_mixer_device, G_TYPE_OBJECT)
 
 static MateMixerStream *      mate_mixer_device_real_get_stream (MateMixerDevice *device,
                                                                  const gchar     *name);
@@ -229,8 +229,6 @@ mate_mixer_device_class_init (MateMixerDeviceClass *klass)
                       G_TYPE_NONE,
                       1,
                       G_TYPE_STRING);
-
-    g_type_class_add_private (object_class, sizeof (MateMixerDevicePrivate));
 }
 
 static void
@@ -293,9 +291,7 @@ mate_mixer_device_set_property (GObject      *object,
 static void
 mate_mixer_device_init (MateMixerDevice *device)
 {
-    device->priv = G_TYPE_INSTANCE_GET_PRIVATE (device,
-                                                MATE_MIXER_TYPE_DEVICE,
-                                                MateMixerDevicePrivate);
+    device->priv = mate_mixer_device_get_instance_private (device);
 }
 
 static void

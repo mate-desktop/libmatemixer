@@ -49,7 +49,7 @@ static void mate_mixer_stored_control_set_property (GObject                     
 
 static void mate_mixer_stored_control_init         (MateMixerStoredControl      *control);
 
-G_DEFINE_ABSTRACT_TYPE (MateMixerStoredControl, mate_mixer_stored_control, MATE_MIXER_TYPE_STREAM_CONTROL)
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MateMixerStoredControl, mate_mixer_stored_control, MATE_MIXER_TYPE_STREAM_CONTROL)
 
 static void
 mate_mixer_stored_control_class_init (MateMixerStoredControlClass *klass)
@@ -71,8 +71,6 @@ mate_mixer_stored_control_class_init (MateMixerStoredControlClass *klass)
                            G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_properties (object_class, N_PROPERTIES, properties);
-
-    g_type_class_add_private (object_class, sizeof (MateMixerStoredControlPrivate));
 }
 
 static void
@@ -118,9 +116,7 @@ mate_mixer_stored_control_set_property (GObject      *object,
 static void
 mate_mixer_stored_control_init (MateMixerStoredControl *control)
 {
-    control->priv = G_TYPE_INSTANCE_GET_PRIVATE (control,
-                                                 MATE_MIXER_TYPE_STORED_CONTROL,
-                                                 MateMixerStoredControlPrivate);
+    control->priv = mate_mixer_stored_control_get_instance_private (control);
 }
 
 /**

@@ -57,7 +57,7 @@ static void mate_mixer_switch_option_set_property (GObject                    *o
 static void mate_mixer_switch_option_init         (MateMixerSwitchOption      *option);
 static void mate_mixer_switch_option_finalize     (GObject                    *object);
 
-G_DEFINE_TYPE (MateMixerSwitchOption, mate_mixer_switch_option, G_TYPE_OBJECT)
+G_DEFINE_TYPE_WITH_PRIVATE (MateMixerSwitchOption, mate_mixer_switch_option, G_TYPE_OBJECT)
 
 static void
 mate_mixer_switch_option_class_init (MateMixerSwitchOptionClass *klass)
@@ -114,8 +114,6 @@ mate_mixer_switch_option_class_init (MateMixerSwitchOptionClass *klass)
                              G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_properties (object_class, N_PROPERTIES, properties);
-
-    g_type_class_add_private (object_class, sizeof (MateMixerSwitchOptionPrivate));
 }
 
 static void
@@ -178,9 +176,7 @@ mate_mixer_switch_option_set_property (GObject      *object,
 static void
 mate_mixer_switch_option_init (MateMixerSwitchOption *option)
 {
-    option->priv = G_TYPE_INSTANCE_GET_PRIVATE (option,
-                                                MATE_MIXER_TYPE_SWITCH_OPTION,
-                                                MateMixerSwitchOptionPrivate);
+    option->priv = mate_mixer_switch_option_get_instance_private (option);
 }
 
 static void
