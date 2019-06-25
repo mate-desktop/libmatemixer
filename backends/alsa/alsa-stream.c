@@ -37,7 +37,7 @@ static void alsa_stream_class_init (AlsaStreamClass *klass);
 static void alsa_stream_init       (AlsaStream      *stream);
 static void alsa_stream_dispose    (GObject         *object);
 
-G_DEFINE_TYPE (AlsaStream, alsa_stream, MATE_MIXER_TYPE_STREAM)
+G_DEFINE_TYPE_WITH_PRIVATE (AlsaStream, alsa_stream, MATE_MIXER_TYPE_STREAM)
 
 static const GList *alsa_stream_list_controls (MateMixerStream *mms);
 static const GList *alsa_stream_list_switches (MateMixerStream *mms);
@@ -59,16 +59,12 @@ alsa_stream_class_init (AlsaStreamClass *klass)
     stream_class = MATE_MIXER_STREAM_CLASS (klass);
     stream_class->list_controls = alsa_stream_list_controls;
     stream_class->list_switches = alsa_stream_list_switches;
-
-    g_type_class_add_private (object_class, sizeof (AlsaStreamPrivate));
 }
 
 static void
 alsa_stream_init (AlsaStream *stream)
 {
-    stream->priv = G_TYPE_INSTANCE_GET_PRIVATE (stream,
-                                                ALSA_TYPE_STREAM,
-                                                AlsaStreamPrivate);
+    stream->priv = alsa_stream_get_instance_private (stream);
 }
 
 static void

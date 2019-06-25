@@ -74,7 +74,7 @@ static void alsa_device_init       (AlsaDevice      *device);
 static void alsa_device_dispose    (GObject         *object);
 static void alsa_device_finalize   (GObject         *object);
 
-G_DEFINE_TYPE (AlsaDevice, alsa_device, MATE_MIXER_TYPE_DEVICE)
+G_DEFINE_TYPE_WITH_PRIVATE (AlsaDevice, alsa_device, MATE_MIXER_TYPE_DEVICE)
 
 static const GList *      alsa_device_list_streams  (MateMixerDevice            *mmd);
 
@@ -181,16 +181,12 @@ alsa_device_class_init (AlsaDeviceClass *klass)
                       G_TYPE_NONE,
                       0,
                       G_TYPE_NONE);
-
-    g_type_class_add_private (object_class, sizeof (AlsaDevicePrivate));
 }
 
 static void
 alsa_device_init (AlsaDevice *device)
 {
-    device->priv = G_TYPE_INSTANCE_GET_PRIVATE (device,
-                                                ALSA_TYPE_DEVICE,
-                                                AlsaDevicePrivate);
+    device->priv = alsa_device_get_instance_private (device);
 
     device->priv->context = g_main_context_ref_thread_default ();
 

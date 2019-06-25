@@ -40,6 +40,7 @@ static void alsa_toggle_class_init      (AlsaToggleClass      *klass);
 static void alsa_toggle_init            (AlsaToggle           *toggle);
 
 G_DEFINE_TYPE_WITH_CODE (AlsaToggle, alsa_toggle, MATE_MIXER_TYPE_STREAM_TOGGLE,
+                         G_ADD_PRIVATE(AlsaToggle)
                          G_IMPLEMENT_INTERFACE (ALSA_TYPE_ELEMENT,
                                                 alsa_element_interface_init))
 
@@ -66,16 +67,12 @@ alsa_toggle_class_init (AlsaToggleClass *klass)
 
     switch_class = MATE_MIXER_SWITCH_CLASS (klass);
     switch_class->set_active_option = alsa_toggle_set_active_option;
-
-    g_type_class_add_private (G_OBJECT_CLASS (klass), sizeof (AlsaTogglePrivate));
 }
 
 static void
 alsa_toggle_init (AlsaToggle *toggle)
 {
-    toggle->priv = G_TYPE_INSTANCE_GET_PRIVATE (toggle,
-                                                ALSA_TYPE_TOGGLE,
-                                                AlsaTogglePrivate);
+    toggle->priv = alsa_toggle_get_instance_private (toggle);
 }
 
 AlsaToggle *

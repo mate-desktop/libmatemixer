@@ -42,6 +42,7 @@ static void alsa_switch_dispose         (GObject              *object);
 
 G_DEFINE_TYPE_WITH_CODE (AlsaSwitch, alsa_switch,
                          MATE_MIXER_TYPE_STREAM_SWITCH,
+                         G_ADD_PRIVATE(AlsaSwitch)
                          G_IMPLEMENT_INTERFACE (ALSA_TYPE_ELEMENT,
                                                 alsa_element_interface_init))
 
@@ -75,8 +76,6 @@ alsa_switch_class_init (AlsaSwitchClass *klass)
     switch_class = MATE_MIXER_SWITCH_CLASS (klass);
     switch_class->set_active_option = alsa_switch_set_active_option;
     switch_class->list_options      = alsa_switch_list_options;
-
-    g_type_class_add_private (G_OBJECT_CLASS (klass), sizeof (AlsaSwitchPrivate));
 }
 
 static void
@@ -97,9 +96,7 @@ alsa_switch_dispose (GObject *object)
 static void
 alsa_switch_init (AlsaSwitch *swtch)
 {
-    swtch->priv = G_TYPE_INSTANCE_GET_PRIVATE (swtch,
-                                               ALSA_TYPE_SWITCH,
-                                               AlsaSwitchPrivate);
+    swtch->priv = alsa_switch_get_instance_private (swtch);
 }
 
 AlsaSwitch *
