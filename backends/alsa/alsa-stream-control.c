@@ -40,6 +40,7 @@ static void alsa_stream_control_init       (AlsaStreamControl      *control);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_CODE (AlsaStreamControl, alsa_stream_control,
                                   MATE_MIXER_TYPE_STREAM_CONTROL,
+                                  G_ADD_PRIVATE(AlsaStreamControl)
                                   G_IMPLEMENT_INTERFACE (ALSA_TYPE_ELEMENT,
                                                          alsa_element_interface_init))
 
@@ -135,16 +136,12 @@ alsa_stream_control_class_init (AlsaStreamControlClass *klass)
     control_class->get_max_volume       = alsa_stream_control_get_max_volume;
     control_class->get_normal_volume    = alsa_stream_control_get_normal_volume;
     control_class->get_base_volume      = alsa_stream_control_get_base_volume;
-
-    g_type_class_add_private (G_OBJECT_CLASS (klass), sizeof (AlsaStreamControlPrivate));
 }
 
 static void
 alsa_stream_control_init (AlsaStreamControl *control)
 {
-    control->priv = G_TYPE_INSTANCE_GET_PRIVATE (control,
-                                                 ALSA_TYPE_STREAM_CONTROL,
-                                                 AlsaStreamControlPrivate);
+    control->priv = alsa_stream_control_get_instance_private (control);
 }
 
 AlsaControlData *

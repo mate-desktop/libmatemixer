@@ -30,20 +30,17 @@ struct _AlsaSwitchOptionPrivate
 static void alsa_switch_option_class_init (AlsaSwitchOptionClass *klass);
 static void alsa_switch_option_init       (AlsaSwitchOption      *option);
 
-G_DEFINE_TYPE (AlsaSwitchOption, alsa_switch_option, MATE_MIXER_TYPE_SWITCH_OPTION)
+G_DEFINE_TYPE_WITH_PRIVATE (AlsaSwitchOption, alsa_switch_option, MATE_MIXER_TYPE_SWITCH_OPTION)
 
 static void
 alsa_switch_option_class_init (AlsaSwitchOptionClass *klass)
 {
-    g_type_class_add_private (G_OBJECT_CLASS (klass), sizeof (AlsaSwitchOptionPrivate));
 }
 
 static void
 alsa_switch_option_init (AlsaSwitchOption *option)
 {
-    option->priv = G_TYPE_INSTANCE_GET_PRIVATE (option,
-                                                ALSA_TYPE_SWITCH_OPTION,
-                                                AlsaSwitchOptionPrivate);
+    option->priv = alsa_switch_option_get_instance_private (option);
 }
 
 AlsaSwitchOption *
