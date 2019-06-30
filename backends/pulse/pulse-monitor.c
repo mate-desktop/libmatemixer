@@ -64,7 +64,7 @@ static void pulse_monitor_set_property (GObject           *object,
 static void pulse_monitor_init         (PulseMonitor      *monitor);
 static void pulse_monitor_finalize     (GObject           *object);
 
-G_DEFINE_TYPE (PulseMonitor, pulse_monitor, G_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_PRIVATE (PulseMonitor, pulse_monitor, G_TYPE_OBJECT);
 
 static gboolean stream_connect (PulseMonitor *monitor);
 
@@ -125,8 +125,6 @@ pulse_monitor_class_init (PulseMonitorClass *klass)
                       G_TYPE_NONE,
                       1,
                       G_TYPE_DOUBLE);
-
-    g_type_class_add_private (object_class, sizeof (PulseMonitorPrivate));
 }
 
 static void
@@ -181,9 +179,7 @@ pulse_monitor_set_property (GObject      *object,
 static void
 pulse_monitor_init (PulseMonitor *monitor)
 {
-    monitor->priv = G_TYPE_INSTANCE_GET_PRIVATE (monitor,
-                                                 PULSE_TYPE_MONITOR,
-                                                 PulseMonitorPrivate);
+    monitor->priv = pulse_monitor_get_instance_private (monitor);
 }
 
 static void

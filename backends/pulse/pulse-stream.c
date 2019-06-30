@@ -58,7 +58,7 @@ static void pulse_stream_set_property (GObject          *object,
 static void pulse_stream_init         (PulseStream      *stream);
 static void pulse_stream_dispose      (GObject          *object);
 
-G_DEFINE_ABSTRACT_TYPE (PulseStream, pulse_stream, MATE_MIXER_TYPE_STREAM)
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (PulseStream, pulse_stream, MATE_MIXER_TYPE_STREAM)
 
 static void
 pulse_stream_class_init (PulseStreamClass *klass)
@@ -91,8 +91,6 @@ pulse_stream_class_init (PulseStreamClass *klass)
                              G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_properties (object_class, N_PROPERTIES, properties);
-
-    g_type_class_add_private (object_class, sizeof (PulseStreamPrivate));
 }
 
 static void
@@ -144,9 +142,7 @@ pulse_stream_set_property (GObject      *object,
 static void
 pulse_stream_init (PulseStream *stream)
 {
-    stream->priv = G_TYPE_INSTANCE_GET_PRIVATE (stream,
-                                                PULSE_TYPE_STREAM,
-                                                PulseStreamPrivate);
+    stream->priv = pulse_stream_get_instance_private (stream);
 }
 
 static void

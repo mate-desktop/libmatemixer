@@ -49,7 +49,7 @@ static void pulse_sink_init       (PulseSink      *sink);
 static void pulse_sink_dispose    (GObject        *object);
 static void pulse_sink_finalize   (GObject        *object);
 
-G_DEFINE_TYPE (PulseSink, pulse_sink, PULSE_TYPE_STREAM);
+G_DEFINE_TYPE_WITH_PRIVATE (PulseSink, pulse_sink, PULSE_TYPE_STREAM);
 
 static const GList *pulse_sink_list_controls (MateMixerStream *mms);
 static const GList *pulse_sink_list_switches (MateMixerStream *mms);
@@ -69,16 +69,12 @@ pulse_sink_class_init (PulseSinkClass *klass)
     stream_class = MATE_MIXER_STREAM_CLASS (klass);
     stream_class->list_controls = pulse_sink_list_controls;
     stream_class->list_switches = pulse_sink_list_switches;
-
-    g_type_class_add_private (klass, sizeof (PulseSinkPrivate));
 }
 
 static void
 pulse_sink_init (PulseSink *sink)
 {
-    sink->priv = G_TYPE_INSTANCE_GET_PRIVATE (sink,
-                                              PULSE_TYPE_SINK,
-                                              PulseSinkPrivate);
+    sink->priv = pulse_sink_get_instance_private (sink);
 
     sink->priv->inputs = g_hash_table_new_full (g_direct_hash,
                                                 g_direct_equal,

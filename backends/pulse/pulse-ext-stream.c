@@ -64,7 +64,7 @@ static void pulse_ext_stream_init         (PulseExtStream      *ext);
 static void pulse_ext_stream_dispose      (GObject             *object);
 static void pulse_ext_stream_finalize     (GObject             *object);
 
-G_DEFINE_TYPE (PulseExtStream, pulse_ext_stream, MATE_MIXER_TYPE_STORED_CONTROL)
+G_DEFINE_TYPE_WITH_PRIVATE (PulseExtStream, pulse_ext_stream, MATE_MIXER_TYPE_STORED_CONTROL)
 
 static MateMixerAppInfo *       pulse_ext_stream_get_app_info         (MateMixerStreamControl  *mmsc);
 
@@ -159,8 +159,6 @@ pulse_ext_stream_class_init (PulseExtStreamClass *klass)
                             G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_properties (object_class, N_PROPERTIES, properties);
-
-    g_type_class_add_private (object_class, sizeof (PulseExtStreamPrivate));
 }
 
 static void
@@ -214,9 +212,7 @@ pulse_ext_stream_set_property (GObject      *object,
 static void
 pulse_ext_stream_init (PulseExtStream *ext)
 {
-    ext->priv = G_TYPE_INSTANCE_GET_PRIVATE (ext,
-                                             PULSE_TYPE_EXT_STREAM,
-                                             PulseExtStreamPrivate);
+    ext->priv = pulse_ext_stream_get_instance_private (ext);
 }
 
 static void

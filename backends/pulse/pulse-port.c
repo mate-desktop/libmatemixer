@@ -35,20 +35,17 @@ struct _PulsePortPrivate
 static void pulse_port_class_init (PulsePortClass *klass);
 static void pulse_port_init       (PulsePort      *port);
 
-G_DEFINE_TYPE (PulsePort, pulse_port, MATE_MIXER_TYPE_SWITCH_OPTION)
+G_DEFINE_TYPE_WITH_PRIVATE (PulsePort, pulse_port, MATE_MIXER_TYPE_SWITCH_OPTION)
 
 static void
 pulse_port_class_init (PulsePortClass *klass)
 {
-    g_type_class_add_private (klass, sizeof (PulsePortPrivate));
 }
 
 static void
 pulse_port_init (PulsePort *port)
 {
-    port->priv = G_TYPE_INSTANCE_GET_PRIVATE (port,
-                                              PULSE_TYPE_PORT,
-                                              PulsePortPrivate);
+    port->priv = pulse_port_get_instance_private (port);
 }
 
 PulsePort *

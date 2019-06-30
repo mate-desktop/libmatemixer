@@ -67,7 +67,7 @@ static void pulse_device_init         (PulseDevice      *device);
 static void pulse_device_dispose      (GObject          *object);
 static void pulse_device_finalize     (GObject          *object);
 
-G_DEFINE_TYPE (PulseDevice, pulse_device, MATE_MIXER_TYPE_DEVICE)
+G_DEFINE_TYPE_WITH_PRIVATE (PulseDevice, pulse_device, MATE_MIXER_TYPE_DEVICE)
 
 static MateMixerStream *pulse_device_get_stream    (MateMixerDevice    *mmd,
                                                     const gchar        *name);
@@ -118,8 +118,6 @@ pulse_device_class_init (PulseDeviceClass *klass)
                              G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_properties (object_class, N_PROPERTIES, properties);
-
-    g_type_class_add_private (object_class, sizeof (PulseDevicePrivate));
 }
 
 static void
@@ -171,9 +169,7 @@ pulse_device_set_property (GObject      *object,
 static void
 pulse_device_init (PulseDevice *device)
 {
-    device->priv = G_TYPE_INSTANCE_GET_PRIVATE (device,
-                                                PULSE_TYPE_DEVICE,
-                                                PulseDevicePrivate);
+    device->priv = pulse_device_get_instance_private (device);
 
     device->priv->ports = g_hash_table_new_full (g_str_hash,
                                                  g_str_equal,

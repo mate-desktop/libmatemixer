@@ -48,7 +48,7 @@ static void pulse_source_init       (PulseSource      *source);
 static void pulse_source_dispose    (GObject          *object);
 static void pulse_source_finalize   (GObject          *object);
 
-G_DEFINE_TYPE (PulseSource, pulse_source, PULSE_TYPE_STREAM);
+G_DEFINE_TYPE_WITH_PRIVATE (PulseSource, pulse_source, PULSE_TYPE_STREAM);
 
 static const GList *pulse_source_list_controls (MateMixerStream *mms);
 static const GList *pulse_source_list_switches (MateMixerStream *mms);
@@ -68,16 +68,12 @@ pulse_source_class_init (PulseSourceClass *klass)
     stream_class = MATE_MIXER_STREAM_CLASS (klass);
     stream_class->list_controls = pulse_source_list_controls;
     stream_class->list_switches = pulse_source_list_switches;
-
-    g_type_class_add_private (klass, sizeof (PulseSourcePrivate));
 }
 
 static void
 pulse_source_init (PulseSource *source)
 {
-    source->priv = G_TYPE_INSTANCE_GET_PRIVATE (source,
-                                                PULSE_TYPE_SOURCE,
-                                                PulseSourcePrivate);
+    source->priv = pulse_source_get_instance_private (source);
 
     source->priv->outputs = g_hash_table_new_full (g_direct_hash,
                                                    g_direct_equal,
