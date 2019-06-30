@@ -29,20 +29,17 @@ struct _OssSwitchOptionPrivate
 static void oss_switch_option_class_init (OssSwitchOptionClass *klass);
 static void oss_switch_option_init       (OssSwitchOption      *option);
 
-G_DEFINE_TYPE (OssSwitchOption, oss_switch_option, MATE_MIXER_TYPE_SWITCH_OPTION)
+G_DEFINE_TYPE_WITH_PRIVATE (OssSwitchOption, oss_switch_option, MATE_MIXER_TYPE_SWITCH_OPTION)
 
 static void
 oss_switch_option_class_init (OssSwitchOptionClass *klass)
 {
-    g_type_class_add_private (G_OBJECT_CLASS (klass), sizeof (OssSwitchOptionPrivate));
 }
 
 static void
 oss_switch_option_init (OssSwitchOption *option)
 {
-    option->priv = G_TYPE_INSTANCE_GET_PRIVATE (option,
-                                                OSS_TYPE_SWITCH_OPTION,
-                                                OssSwitchOptionPrivate);
+    option->priv = oss_switch_option_get_instance_private (option);
 }
 
 OssSwitchOption *

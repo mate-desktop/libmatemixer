@@ -51,7 +51,7 @@ static void oss_stream_control_class_init (OssStreamControlClass *klass);
 static void oss_stream_control_init       (OssStreamControl      *control);
 static void oss_stream_control_finalize   (GObject               *object);
 
-G_DEFINE_TYPE (OssStreamControl, oss_stream_control, MATE_MIXER_TYPE_STREAM_CONTROL)
+G_DEFINE_TYPE_WITH_PRIVATE (OssStreamControl, oss_stream_control, MATE_MIXER_TYPE_STREAM_CONTROL)
 
 static guint                    oss_stream_control_get_num_channels     (MateMixerStreamControl  *mmsc);
 
@@ -110,15 +110,12 @@ oss_stream_control_class_init (OssStreamControlClass *klass)
     control_class->get_normal_volume    = oss_stream_control_get_normal_volume;
     control_class->get_base_volume      = oss_stream_control_get_base_volume;
 
-    g_type_class_add_private (object_class, sizeof (OssStreamControlPrivate));
 }
 
 static void
 oss_stream_control_init (OssStreamControl *control)
 {
-    control->priv = G_TYPE_INSTANCE_GET_PRIVATE (control,
-                                                 OSS_TYPE_STREAM_CONTROL,
-                                                 OssStreamControlPrivate);
+    control->priv = oss_stream_control_get_instance_private (control);
 }
 
 static void

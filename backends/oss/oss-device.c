@@ -184,7 +184,7 @@ static void oss_device_init       (OssDevice      *device);
 static void oss_device_dispose    (GObject        *object);
 static void oss_device_finalize   (GObject        *object);
 
-G_DEFINE_TYPE (OssDevice, oss_device, MATE_MIXER_TYPE_DEVICE)
+G_DEFINE_TYPE_WITH_PRIVATE (OssDevice, oss_device, MATE_MIXER_TYPE_DEVICE)
 
 static const GList *oss_device_list_streams       (MateMixerDevice *mmd);
 
@@ -227,16 +227,12 @@ oss_device_class_init (OssDeviceClass *klass)
                       G_TYPE_NONE,
                       0,
                       G_TYPE_NONE);
-
-    g_type_class_add_private (object_class, sizeof (OssDevicePrivate));
 }
 
 static void
 oss_device_init (OssDevice *device)
 {
-    device->priv = G_TYPE_INSTANCE_GET_PRIVATE (device,
-                                                OSS_TYPE_DEVICE,
-                                                OssDevicePrivate);
+    device->priv = oss_device_get_instance_private (device);
 }
 
 static void
