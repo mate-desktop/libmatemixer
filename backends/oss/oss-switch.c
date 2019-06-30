@@ -37,7 +37,7 @@ static void oss_switch_init       (OssSwitch      *swtch);
 static void oss_switch_dispose    (GObject        *object);
 static void oss_switch_finalize   (GObject        *object);
 
-G_DEFINE_TYPE (OssSwitch, oss_switch, MATE_MIXER_TYPE_STREAM_SWITCH)
+G_DEFINE_TYPE_WITH_PRIVATE (OssSwitch, oss_switch, MATE_MIXER_TYPE_STREAM_SWITCH)
 
 static gboolean         oss_switch_set_active_option (MateMixerSwitch       *mms,
                                                       MateMixerSwitchOption *mmso);
@@ -59,16 +59,12 @@ oss_switch_class_init (OssSwitchClass *klass)
     switch_class = MATE_MIXER_SWITCH_CLASS (klass);
     switch_class->set_active_option = oss_switch_set_active_option;
     switch_class->list_options      = oss_switch_list_options;
-
-    g_type_class_add_private (G_OBJECT_CLASS (klass), sizeof (OssSwitchPrivate));
 }
 
 static void
 oss_switch_init (OssSwitch *swtch)
 {
-    swtch->priv = G_TYPE_INSTANCE_GET_PRIVATE (swtch,
-                                               OSS_TYPE_SWITCH,
-                                               OssSwitchPrivate);
+    swtch->priv = oss_switch_get_instance_private (swtch);
 }
 
 static void

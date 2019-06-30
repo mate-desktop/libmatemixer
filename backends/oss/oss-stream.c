@@ -39,7 +39,7 @@ static void oss_stream_class_init (OssStreamClass *klass);
 static void oss_stream_init       (OssStream      *stream);
 static void oss_stream_dispose    (GObject        *object);
 
-G_DEFINE_TYPE (OssStream, oss_stream, MATE_MIXER_TYPE_STREAM)
+G_DEFINE_TYPE_WITH_PRIVATE (OssStream, oss_stream, MATE_MIXER_TYPE_STREAM)
 
 static const GList *oss_stream_list_controls (MateMixerStream *mms);
 static const GList *oss_stream_list_switches (MateMixerStream *mms);
@@ -56,16 +56,12 @@ oss_stream_class_init (OssStreamClass *klass)
     stream_class = MATE_MIXER_STREAM_CLASS (klass);
     stream_class->list_controls = oss_stream_list_controls;
     stream_class->list_switches = oss_stream_list_switches;
-
-    g_type_class_add_private (object_class, sizeof (OssStreamPrivate));
 }
 
 static void
 oss_stream_init (OssStream *stream)
 {
-    stream->priv = G_TYPE_INSTANCE_GET_PRIVATE (stream,
-                                                OSS_TYPE_STREAM,
-                                                OssStreamPrivate);
+    stream->priv = oss_stream_get_instance_private (stream);
 }
 
 static void
