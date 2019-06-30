@@ -84,7 +84,7 @@ static void pulse_connection_set_property (GObject              *object,
 static void pulse_connection_init         (PulseConnection      *connection);
 static void pulse_connection_finalize     (GObject              *object);
 
-G_DEFINE_TYPE (PulseConnection, pulse_connection, G_TYPE_OBJECT);
+G_DEFINE_TYPE_WITH_PRIVATE (PulseConnection, pulse_connection, G_TYPE_OBJECT);
 
 static gchar    *create_app_name             (void);
 
@@ -331,8 +331,6 @@ pulse_connection_class_init (PulseConnectionClass *klass)
                       G_TYPE_NONE,
                       1,
                       G_TYPE_POINTER);
-
-    g_type_class_add_private (object_class, sizeof (PulseConnectionPrivate));
 }
 
 static void
@@ -382,9 +380,7 @@ pulse_connection_set_property (GObject      *object,
 static void
 pulse_connection_init (PulseConnection *connection)
 {
-    connection->priv = G_TYPE_INSTANCE_GET_PRIVATE (connection,
-                                                    PULSE_TYPE_CONNECTION,
-                                                    PulseConnectionPrivate);
+    connection->priv = pulse_connection_get_instance_private (connection);
 }
 
 static void

@@ -36,7 +36,7 @@ static void pulse_port_switch_class_init   (PulsePortSwitchClass *klass);
 static void pulse_port_switch_init         (PulsePortSwitch         *swtch);
 static void pulse_port_switch_dispose      (GObject                 *object);
 
-G_DEFINE_ABSTRACT_TYPE (PulsePortSwitch, pulse_port_switch, MATE_MIXER_TYPE_STREAM_SWITCH)
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (PulsePortSwitch, pulse_port_switch, MATE_MIXER_TYPE_STREAM_SWITCH)
 
 static gboolean     pulse_port_switch_set_active_option (MateMixerSwitch       *mms,
                                                          MateMixerSwitchOption *mmso);
@@ -60,16 +60,12 @@ pulse_port_switch_class_init (PulsePortSwitchClass *klass)
     switch_class = MATE_MIXER_SWITCH_CLASS (klass);
     switch_class->set_active_option = pulse_port_switch_set_active_option;
     switch_class->list_options      = pulse_port_switch_list_options;
-
-    g_type_class_add_private (G_OBJECT_CLASS (klass), sizeof (PulsePortSwitchPrivate));
 }
 
 static void
 pulse_port_switch_init (PulsePortSwitch *swtch)
 {
-    swtch->priv = G_TYPE_INSTANCE_GET_PRIVATE (swtch,
-                                               PULSE_TYPE_PORT_SWITCH,
-                                               PulsePortSwitchPrivate);
+    swtch->priv = pulse_port_switch_get_instance_private (swtch);
 }
 
 static void

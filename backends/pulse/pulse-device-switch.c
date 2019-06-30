@@ -36,7 +36,7 @@ static void pulse_device_switch_class_init   (PulseDeviceSwitchClass *klass);
 static void pulse_device_switch_init         (PulseDeviceSwitch      *swtch);
 static void pulse_device_switch_dispose      (GObject                *object);
 
-G_DEFINE_TYPE (PulseDeviceSwitch, pulse_device_switch, MATE_MIXER_TYPE_DEVICE_SWITCH)
+G_DEFINE_TYPE_WITH_PRIVATE (PulseDeviceSwitch, pulse_device_switch, MATE_MIXER_TYPE_DEVICE_SWITCH)
 
 static gboolean     pulse_device_switch_set_active_option (MateMixerSwitch       *mms,
                                                            MateMixerSwitchOption *mmso);
@@ -60,16 +60,12 @@ pulse_device_switch_class_init (PulseDeviceSwitchClass *klass)
     switch_class = MATE_MIXER_SWITCH_CLASS (klass);
     switch_class->set_active_option = pulse_device_switch_set_active_option;
     switch_class->list_options      = pulse_device_switch_list_options;
-
-    g_type_class_add_private (G_OBJECT_CLASS (klass), sizeof (PulseDeviceSwitchPrivate));
 }
 
 static void
 pulse_device_switch_init (PulseDeviceSwitch *swtch)
 {
-    swtch->priv = G_TYPE_INSTANCE_GET_PRIVATE (swtch,
-                                               PULSE_TYPE_DEVICE_SWITCH,
-                                               PulseDeviceSwitchPrivate);
+    swtch->priv = pulse_device_switch_get_instance_private (swtch);
 }
 
 static void

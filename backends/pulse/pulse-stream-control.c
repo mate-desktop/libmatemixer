@@ -64,7 +64,7 @@ static void pulse_stream_control_init         (PulseStreamControl      *control)
 static void pulse_stream_control_dispose      (GObject                 *object);
 static void pulse_stream_control_finalize     (GObject                 *object);
 
-G_DEFINE_ABSTRACT_TYPE (PulseStreamControl, pulse_stream_control, MATE_MIXER_TYPE_STREAM_CONTROL)
+G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (PulseStreamControl, pulse_stream_control, MATE_MIXER_TYPE_STREAM_CONTROL)
 
 static MateMixerAppInfo *       pulse_stream_control_get_app_info         (MateMixerStreamControl   *mmsc);
 
@@ -178,8 +178,6 @@ pulse_stream_control_class_init (PulseStreamControlClass *klass)
                              G_PARAM_STATIC_STRINGS);
 
     g_object_class_install_properties (object_class, N_PROPERTIES, properties);
-
-    g_type_class_add_private (object_class, sizeof (PulseStreamControlPrivate));
 }
 
 static void
@@ -231,9 +229,7 @@ pulse_stream_control_set_property (GObject      *object,
 static void
 pulse_stream_control_init (PulseStreamControl *control)
 {
-    control->priv = G_TYPE_INSTANCE_GET_PRIVATE (control,
-                                                 PULSE_TYPE_STREAM_CONTROL,
-                                                 PulseStreamControlPrivate);
+    control->priv = pulse_stream_control_get_instance_private (control);
 
     /* Initialize empty volume and channel map structures, they will be used
      * if the stream does not support volume */

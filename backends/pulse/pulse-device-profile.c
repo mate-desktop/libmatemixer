@@ -36,20 +36,17 @@ struct _PulseDeviceProfilePrivate
 static void pulse_device_profile_class_init (PulseDeviceProfileClass *klass);
 static void pulse_device_profile_init       (PulseDeviceProfile      *profile);
 
-G_DEFINE_TYPE (PulseDeviceProfile, pulse_device_profile, MATE_MIXER_TYPE_SWITCH_OPTION)
+G_DEFINE_TYPE_WITH_PRIVATE (PulseDeviceProfile, pulse_device_profile, MATE_MIXER_TYPE_SWITCH_OPTION)
 
 static void
 pulse_device_profile_class_init (PulseDeviceProfileClass *klass)
 {
-    g_type_class_add_private (klass, sizeof (PulseDeviceProfilePrivate));
 }
 
 static void
 pulse_device_profile_init (PulseDeviceProfile *profile)
 {
-    profile->priv = G_TYPE_INSTANCE_GET_PRIVATE (profile,
-                                                 PULSE_TYPE_DEVICE_PROFILE,
-                                                 PulseDeviceProfilePrivate);
+    profile->priv = pulse_device_profile_get_instance_private (profile);
 }
 
 PulseDeviceProfile *
