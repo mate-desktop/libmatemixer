@@ -1,3 +1,12 @@
+### libmatemixer 1.23.0
+
+  * Translations update
+  * pulse: avoid deprecated g_type_class_add_private
+  * oss: avoid deprecated g_type_class_add_private
+  * backend-alsa: avoid deprecated g_type_class_add_private
+  * libmatemixer: avoid deprecated g_type_class_add_private
+  * Change url project's website
+
 ### libmatemixer 1.22.0
 
   * Translations update
