@@ -1,10 +1,14 @@
+NULL =
+
 lib_LTLIBRARIES = libmatemixer.la
 
-AM_CPPFLAGS =                                                   \
-	-I$(top_srcdir)                                         \
-	-I$(top_srcdir)/libmatemixer                            \
-	-DG_LOG_DOMAIN=\"libmatemixer\"                         \
-	-DLIBMATEMIXER_BACKEND_DIR=\"$(libdir)/libmatemixer\"
+AM_CPPFLAGS =							\
+	-I$(top_srcdir)						\
+	-I$(top_srcdir)/libmatemixer				\
+	-DG_LOG_DOMAIN=\"libmatemixer\"				\
+	-DLIBMATEMIXER_BACKEND_DIR=\"$(libdir)/libmatemixer\"	\
+	$(GLIB_CFLAGS)						\
+	$(NULL)
 
 libmatemixer_includedir = $(includedir)/mate-mixer/libmatemixer
 
@@ -26,7 +30,9 @@ libmatemixer_include_HEADERS =                                  \
 	matemixer-types.h                                       \
 	matemixer-version.h
 
-libmatemixer_la_CFLAGS = $(GLIB_CFLAGS)
+libmatemixer_la_CFLAGS =					\
+	$(WARN_CFLAGS)						\
+	$(NULL)
 
 libmatemixer_la_SOURCES =                                       \
 	matemixer.c                                             \

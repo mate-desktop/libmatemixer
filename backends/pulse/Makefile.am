@@ -1,15 +1,19 @@
+NULL =
+
 backenddir = $(libdir)/libmatemixer
 
 backend_LTLIBRARIES = libmatemixer-pulse.la
 
-AM_CPPFLAGS =                                                   \
-	-Wno-unknown-pragmas                                    \
-	-I$(top_srcdir)                                         \
-	-DG_LOG_DOMAIN=\"libmatemixer-pulse\"
+AM_CPPFLAGS =							\
+	-I$(top_srcdir)						\
+	-DG_LOG_DOMAIN=\"libmatemixer-pulse\"			\
+	$(GLIB_CFLAGS)						\
+	$(PULSEAUDIO_CFLAGS)					\
+	$(NULL)
 
-libmatemixer_pulse_la_CFLAGS =                                  \
-	$(GLIB_CFLAGS)                                          \
-	$(PULSEAUDIO_CFLAGS)
+libmatemixer_pulse_la_CFLAGS =					\
+	$(WARN_CFLAGS)						\
+	$(NULL)
 
 libmatemixer_pulse_la_SOURCES =                                 \
 	pulse-backend.c                                         \

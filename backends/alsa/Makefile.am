@@ -1,15 +1,19 @@
+NULL =
+
 backenddir = $(libdir)/libmatemixer
 
 backend_LTLIBRARIES = libmatemixer-alsa.la
 
-AM_CPPFLAGS =                                                   \
-	-Wno-unknown-pragmas                                    \
-	-I$(top_srcdir)                                         \
-	-DG_LOG_DOMAIN=\"libmatemixer-alsa\"
+AM_CPPFLAGS =							\
+	-I$(top_srcdir)						\
+	-DG_LOG_DOMAIN=\"libmatemixer-alsa\"			\
+	$(GLIB_CFLAGS)						\
+	$(ALSA_CFLAGS)						\
+	$(NULL)
 
-libmatemixer_alsa_la_CFLAGS =                                   \
-	$(GLIB_CFLAGS)                                          \
-	$(ALSA_CFLAGS)
+libmatemixer_alsa_la_CFLAGS =					\
+	$(WARN_CFLAGS)						\
+	$(NULL)
 
 libmatemixer_alsa_la_SOURCES =                                  \
 	alsa-backend.c                                          \

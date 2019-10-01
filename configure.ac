@@ -51,6 +51,11 @@ m4_ifdef([AM_SILENT_RULES],
          [AM_SILENT_RULES([yes])],
          [AM_DEFAULT_VERBOSITY=1 AC_SUBST(AM_DEFAULT_VERBOSITY)])
 
+# =======================================================================
+# Compiler warnings
+# =======================================================================
+MATE_COMPILE_WARNINGS([yes])
+
 # Checks for required programs.
 AC_PROG_CC
 AM_PROG_CC_C_O
@@ -229,49 +234,6 @@ AC_SUBST(OSS_CFLAGS)
 AC_SUBST(OSS_LIBS)
 
 # =======================================================================
-# Compiler warnings
-# =======================================================================
-MATE_COMPILE_WARNINGS([maximum])
-MATE_CXX_WARNINGS
-
-# Turn on the additional warnings last, so warnings don't affect other tests.
-AC_ARG_ENABLE(more-warnings,
-        [AC_HELP_STRING([--enable-more-warnings],
-        [Maximum compiler warnings])],
-        set_more_warnings="$enableval",[
-                if test -d $srcdir/.git; then
-                        set_more_warnings=yes
-                else
-                        set_more_warnings=no
-                fi
-        ])
-
-AC_MSG_CHECKING(for more warnings)
-if test "$GCC" = "yes" -a "$set_more_warnings" != "no"; then
-        AC_MSG_RESULT(yes)
-        CFLAGS="-Wall -Wchar-subscripts -Wmissing-declarations -Wmissing-prototypes -Wnested-externs -Wpointer-arith -Wcast-align -Wsign-compare $CFLAGS"
-
-        for option in -Wno-unused-parameter -Wno-strict-aliasing -Wno-sign-compare; do
-                SAVE_CFLAGS="$CFLAGS"
-                CFLAGS="$CFLAGS $option"
-                AC_MSG_CHECKING([whether gcc understands $option])
-                AC_TRY_COMPILE([], [],
-                        has_option=yes,
-                        has_option=no,)
-                if test $has_option = no; then
-                        CFLAGS="$SAVE_CFLAGS"
-                fi
-                AC_MSG_RESULT($has_option)
-                unset has_option
-                unset SAVE_CFLAGS
-        done
-        unset option
-else
-        AC_MSG_RESULT(no)
-fi
-AC_SUBST(CFLAGS)
-
-# =======================================================================
 # Finish
 # =======================================================================
 AC_CONFIG_FILES([
@@ -302,7 +264,8 @@ echo "
         Prefix:                      ${prefix}
         Source code location:        ${srcdir}
         Compiler:                    ${CC}
-        CFLAGS:                      ${CFLAGS}
+        Compiler flags:              ${CFLAGS}
+        Warning flags:               ${WARN_CFLAGS}
 
         Build Null module:           $have_null
         Build PulseAudio module:     $have_pulseaudio
