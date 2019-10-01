@@ -1,15 +1,19 @@
+NULL =
+
 backenddir = $(libdir)/libmatemixer
 
 backend_LTLIBRARIES = libmatemixer-oss.la
 
-AM_CPPFLAGS =                                                   \
-	-Wno-unknown-pragmas                                    \
-	-I$(top_srcdir)                                         \
-	-DG_LOG_DOMAIN=\"libmatemixer-oss\"
+AM_CPPFLAGS =							\
+	-I$(top_srcdir)						\
+	-DG_LOG_DOMAIN=\"libmatemixer-oss\"			\
+	$(GLIB_CFLAGS)						\
+	$(OSS_CFLAGS)						\
+	$(NULL)
 
-libmatemixer_oss_la_CFLAGS =                                    \
-	$(GLIB_CFLAGS)                                          \
-	$(OSS_CFLAGS)
+libmatemixer_oss_la_CFLAGS =					\
+	$(WARN_CFLAGS)						\
+	$(NULL)
 
 libmatemixer_oss_la_SOURCES =                                   \
 	oss-common.h                                            \

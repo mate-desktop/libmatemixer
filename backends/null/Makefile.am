@@ -1,13 +1,18 @@
+NULL =
+
 backenddir = $(libdir)/libmatemixer
 
 backend_LTLIBRARIES = libmatemixer-null.la
 
-AM_CPPFLAGS =                                                   \
-	-Wno-unknown-pragmas                                    \
-	-I$(top_srcdir)                                         \
-	-DG_LOG_DOMAIN=\"libmatemixer-null\"
+AM_CPPFLAGS =							\
+	-I$(top_srcdir)						\
+	-DG_LOG_DOMAIN=\"libmatemixer-null\"			\
+	$(GLIB_CFLAGS)						\
+	$(NULL)
 
-libmatemixer_null_la_CFLAGS = $(GLIB_CFLAGS)
+libmatemixer_null_la_CFLAGS =					\
+	$(WARN_CFLAGS)						\
+	$(NULL)
 
 libmatemixer_null_la_SOURCES =                                  \
 	null-backend.c                                          \

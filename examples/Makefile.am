@@ -1,10 +1,17 @@
-AM_CPPFLAGS =                                                   \
-	-I$(top_srcdir)                                         \
-	$(GLIB_CFLAGS)
+NULL =
+
+AM_CPPFLAGS =							\
+	-I$(top_srcdir)						\
+	$(GLIB_CFLAGS)						\
+	$(NULL)
 
 noinst_PROGRAMS = matemixer-monitor
 
 matemixer_monitor_SOURCES = monitor.c
+
+matemixer_monitor_CFLAGS =					\
+	$(WARN_CFLAGS)						\
+	$(NULL)
 
 matemixer_monitor_LDADD =                                       \
 	$(GLIB_LIBS)                                            \
