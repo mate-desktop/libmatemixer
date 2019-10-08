@@ -16,7 +16,7 @@ install:
   - ./docker-build --name ${DISTRO} --config .travis.yml --install
 
 script:
-  - ./docker-build --name ${DISTRO} --verbose --config .travis.yml --build autotools
+  - ./docker-build --name ${DISTRO} --verbose --config .travis.yml --build scripts
 
 deploy:
   - provider: script
@@ -38,6 +38,7 @@ env:
 requires:
   archlinux:
     # Useful URL: https://git.archlinux.org/svntogit/community.git/tree/libmatemixer
+    - autoconf-archive
     - gcc
     - git
     - glib2
@@ -50,6 +51,7 @@ requires:
   debian:
     # Useful URL: https://github.com/mate-desktop/debian-packages
     # Useful URL: https://salsa.debian.org/debian-mate-team/libmatemixer
+    - autoconf-archive
     - git
     - libasound2-dev
     - libglib2.0-dev
@@ -60,6 +62,7 @@ requires:
   fedora:
     # Useful URL: https://src.fedoraproject.org/cgit/rpms/libmatemixer.git
     - alsa-lib-devel
+    - autoconf-archive
     - gcc
     - git
     - make
@@ -68,6 +71,7 @@ requires:
     - redhat-rpm-config
 
   ubuntu:
+    - autoconf-archive
     - git
     - libasound2-dev
     - libglib2.0-dev
@@ -78,11 +82,28 @@ requires:
 variables:
   - CFLAGS="-Wall -Werror=format-security"
 
+build_scripts:
+  - ./autogen.sh --enable-compile-warnings=maximum
+  - make
+
 before_scripts:
+  # Debian - patch intltool-update
   - if [ ${DISTRO_NAME} == "debian" ];then
   -     curl -Ls -o debian.sh https://github.com/mate-desktop/mate-dev-scripts/raw/master/travis/debian.sh
   -     bash ./debian.sh
   - fi
+  # Install mate-common fron tarball
+  - cd ${START_DIR}
+  - '[ -f mate-common-1.23.3.tar.xz ] || curl -Ls -o mate-common-1.23.3.tar.xz http://pub.mate-desktop.org/releases/1.23/mate-common-1.23.3.tar.xz'
+  - tar xf mate-common-1.23.3.tar.xz
+  - cd mate-common-1.23.3
+  - if [ ${DISTRO_NAME} == "debian" -o ${DISTRO_NAME} == "ubuntu" ];then
+  -     ./configure --prefix=/usr --libdir=/usr/lib/x86_64-linux-gnu --libexecdir=/usr/lib/x86_64-linux-gnu
+  - else
+  -     ./configure --prefix=/usr
+  - fi
+  - make
+  - make install
 
 after_scripts:
   - make distcheck
