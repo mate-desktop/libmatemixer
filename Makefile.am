@@ -1,12 +1,12 @@
 ACLOCAL_AMFLAGS = -I m4 ${ACLOCAL_FLAGS}
 
 SUBDIRS =                               \
+	po								\
 	libmatemixer                    \
 	backends                        \
 	data                            \
 	docs                            \
-	examples                        \
-	po
+	examples
 
 EXTRA_DIST = autogen.sh
 
