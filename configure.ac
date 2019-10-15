@@ -71,13 +71,13 @@ LT_INIT
 # =======================================================================
 # Gettext
 # =======================================================================
-IT_PROG_INTLTOOL([0.35.0])
 
 GETTEXT_PACKAGE=libmatemixer
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [Gettext Package])
 
-AM_GLIB_GNU_GETTEXT
+AM_GNU_GETTEXT_VERSION([0.19.8])
+AM_GNU_GETTEXT([external])
 
 # =======================================================================
 # Check for required packages
