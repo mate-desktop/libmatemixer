@@ -42,7 +42,6 @@ requires:
     - gcc
     - git
     - glib2
-    - intltool
     - libpulse
     - make
     - mate-common
@@ -52,6 +51,7 @@ requires:
     # Useful URL: https://github.com/mate-desktop/debian-packages
     # Useful URL: https://salsa.debian.org/debian-mate-team/libmatemixer
     - autoconf-archive
+    - autopoint
     - git
     - libasound2-dev
     - libglib2.0-dev
@@ -72,6 +72,7 @@ requires:
 
   ubuntu:
     - autoconf-archive
+    - autopoint
     - git
     - libasound2-dev
     - libglib2.0-dev
