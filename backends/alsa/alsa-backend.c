@@ -47,9 +47,6 @@ struct _AlsaBackendPrivate
     GHashTable *devices_ids;
 };
 
-static void alsa_backend_class_init     (AlsaBackendClass *klass);
-static void alsa_backend_class_finalize (AlsaBackendClass *klass);
-static void alsa_backend_init           (AlsaBackend      *alsa);
 static void alsa_backend_dispose        (GObject          *object);
 static void alsa_backend_finalize       (GObject          *object);
 

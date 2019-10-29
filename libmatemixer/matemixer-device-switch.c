@@ -44,8 +44,6 @@ enum {
 
 static GParamSpec *properties[N_PROPERTIES] = { NULL, };
 
-static void mate_mixer_device_switch_class_init   (MateMixerDeviceSwitchClass *klass);
-
 static void mate_mixer_device_switch_get_property (GObject                    *object,
                                                    guint                       param_id,
                                                    GValue                     *value,
@@ -54,8 +52,6 @@ static void mate_mixer_device_switch_set_property (GObject                    *o
                                                    guint                       param_id,
                                                    const GValue               *value,
                                                    GParamSpec                 *pspec);
-
-static void mate_mixer_device_switch_init         (MateMixerDeviceSwitch      *swtch);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MateMixerDeviceSwitch, mate_mixer_device_switch, MATE_MIXER_TYPE_SWITCH)
 

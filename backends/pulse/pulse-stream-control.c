@@ -49,8 +49,6 @@ enum {
 
 static GParamSpec *properties[N_PROPERTIES] = { NULL, };
 
-static void pulse_stream_control_class_init   (PulseStreamControlClass *klass);
-
 static void pulse_stream_control_get_property (GObject                 *object,
                                                guint                    param_id,
                                                GValue                  *value,
@@ -60,7 +58,6 @@ static void pulse_stream_control_set_property (GObject                 *object,
                                                const GValue            *value,
                                                GParamSpec              *pspec);
 
-static void pulse_stream_control_init         (PulseStreamControl      *control);
 static void pulse_stream_control_dispose      (GObject                 *object);
 static void pulse_stream_control_finalize     (GObject                 *object);
 

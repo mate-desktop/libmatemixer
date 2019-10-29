@@ -35,9 +35,6 @@ struct _AlsaStreamControlPrivate
 
 static void alsa_element_interface_init    (AlsaElementInterface   *iface);
 
-static void alsa_stream_control_class_init (AlsaStreamControlClass *klass);
-static void alsa_stream_control_init       (AlsaStreamControl      *control);
-
 G_DEFINE_ABSTRACT_TYPE_WITH_CODE (AlsaStreamControl, alsa_stream_control,
                                   MATE_MIXER_TYPE_STREAM_CONTROL,
                                   G_ADD_PRIVATE(AlsaStreamControl)

@@ -49,8 +49,6 @@ enum {
 
 static GParamSpec *properties[N_PROPERTIES] = { NULL, };
 
-static void pulse_ext_stream_class_init   (PulseExtStreamClass *klass);
-
 static void pulse_ext_stream_get_property (GObject             *object,
                                            guint                param_id,
                                            GValue              *value,
@@ -60,7 +58,6 @@ static void pulse_ext_stream_set_property (GObject             *object,
                                            const GValue        *value,
                                            GParamSpec          *pspec);
 
-static void pulse_ext_stream_init         (PulseExtStream      *ext);
 static void pulse_ext_stream_dispose      (GObject             *object);
 static void pulse_ext_stream_finalize     (GObject             *object);
 

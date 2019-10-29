@@ -61,8 +61,6 @@ enum {
 
 static guint signals[N_SIGNALS] = { 0, };
 
-static void mate_mixer_device_class_init   (MateMixerDeviceClass *klass);
-
 static void mate_mixer_device_get_property (GObject              *object,
                                             guint                 param_id,
                                             GValue               *value,
@@ -72,7 +70,6 @@ static void mate_mixer_device_set_property (GObject              *object,
                                             const GValue         *value,
                                             GParamSpec           *pspec);
 
-static void mate_mixer_device_init         (MateMixerDevice      *device);
 static void mate_mixer_device_finalize     (GObject              *object);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MateMixerDevice, mate_mixer_device, G_TYPE_OBJECT)

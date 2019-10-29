@@ -26,10 +26,6 @@
 #define BACKEND_PRIORITY  0
 #define BACKEND_FLAGS     MATE_MIXER_BACKEND_NO_FLAGS
 
-static void null_backend_class_init     (NullBackendClass *klass);
-static void null_backend_class_finalize (NullBackendClass *klass);
-static void null_backend_init           (NullBackend      *null);
-
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
 G_DEFINE_DYNAMIC_TYPE (NullBackend, null_backend, MATE_MIXER_TYPE_BACKEND)

@@ -32,8 +32,6 @@ struct _PulsePortSwitchPrivate
     GList *ports;
 };
 
-static void pulse_port_switch_class_init   (PulsePortSwitchClass *klass);
-static void pulse_port_switch_init         (PulsePortSwitch         *swtch);
 static void pulse_port_switch_dispose      (GObject                 *object);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (PulsePortSwitch, pulse_port_switch, MATE_MIXER_TYPE_STREAM_SWITCH)

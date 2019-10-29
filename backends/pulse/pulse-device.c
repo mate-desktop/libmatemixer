@@ -52,8 +52,6 @@ enum {
 
 static GParamSpec *properties[N_PROPERTIES] = { NULL, };
 
-static void pulse_device_class_init   (PulseDeviceClass *klass);
-
 static void pulse_device_get_property (GObject          *object,
                                        guint             param_id,
                                        GValue           *value,
@@ -63,7 +61,6 @@ static void pulse_device_set_property (GObject          *object,
                                        const GValue     *value,
                                        GParamSpec       *pspec);
 
-static void pulse_device_init         (PulseDevice      *device);
 static void pulse_device_dispose      (GObject          *object);
 static void pulse_device_finalize     (GObject          *object);
 

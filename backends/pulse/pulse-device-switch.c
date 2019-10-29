@@ -32,8 +32,6 @@ struct _PulseDeviceSwitchPrivate
     GList *profiles;
 };
 
-static void pulse_device_switch_class_init   (PulseDeviceSwitchClass *klass);
-static void pulse_device_switch_init         (PulseDeviceSwitch      *swtch);
 static void pulse_device_switch_dispose      (GObject                *object);
 
 G_DEFINE_TYPE_WITH_PRIVATE (PulseDeviceSwitch, pulse_device_switch, MATE_MIXER_TYPE_DEVICE_SWITCH)

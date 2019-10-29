@@ -33,8 +33,6 @@ struct _AlsaStreamPrivate
     GList *controls;
 };
 
-static void alsa_stream_class_init (AlsaStreamClass *klass);
-static void alsa_stream_init       (AlsaStream      *stream);
 static void alsa_stream_dispose    (GObject         *object);
 
 G_DEFINE_TYPE_WITH_PRIVATE (AlsaStream, alsa_stream, MATE_MIXER_TYPE_STREAM)

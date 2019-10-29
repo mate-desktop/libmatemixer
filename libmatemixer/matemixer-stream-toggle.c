@@ -45,8 +45,6 @@ enum {
 
 static GParamSpec *properties[N_PROPERTIES] = { NULL, };
 
-static void mate_mixer_stream_toggle_class_init   (MateMixerStreamToggleClass *klass);
-
 static void mate_mixer_stream_toggle_get_property (GObject                    *object,
                                                    guint                       param_id,
                                                    GValue                     *value,
@@ -56,7 +54,6 @@ static void mate_mixer_stream_toggle_set_property (GObject                    *o
                                                    const GValue               *value,
                                                    GParamSpec                 *pspec);
 
-static void mate_mixer_stream_toggle_init         (MateMixerStreamToggle      *toggle);
 static void mate_mixer_stream_toggle_dispose      (GObject                    *object);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MateMixerStreamToggle, mate_mixer_stream_toggle, MATE_MIXER_TYPE_STREAM_SWITCH)

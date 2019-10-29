@@ -50,8 +50,6 @@ enum {
 
 static guint signals[N_SIGNALS] = { 0, };
 
-static void pulse_monitor_class_init   (PulseMonitorClass *klass);
-
 static void pulse_monitor_get_property (GObject           *object,
                                         guint              param_id,
                                         GValue            *value,
@@ -61,7 +59,6 @@ static void pulse_monitor_set_property (GObject           *object,
                                         const GValue      *value,
                                         GParamSpec        *pspec);
 
-static void pulse_monitor_init         (PulseMonitor      *monitor);
 static void pulse_monitor_finalize     (GObject           *object);
 
 G_DEFINE_TYPE_WITH_PRIVATE (PulseMonitor, pulse_monitor, G_TYPE_OBJECT);

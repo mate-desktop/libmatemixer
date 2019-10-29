@@ -69,8 +69,6 @@ enum {
 
 static guint signals[N_SIGNALS] = { 0, };
 
-static void alsa_device_class_init (AlsaDeviceClass *klass);
-static void alsa_device_init       (AlsaDevice      *device);
 static void alsa_device_dispose    (GObject         *object);
 static void alsa_device_finalize   (GObject         *object);
 

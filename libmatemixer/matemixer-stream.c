@@ -64,8 +64,6 @@ enum {
 
 static guint signals[N_SIGNALS] = { 0, };
 
-static void mate_mixer_stream_class_init   (MateMixerStreamClass *klass);
-
 static void mate_mixer_stream_get_property (GObject              *object,
                                             guint                 param_id,
                                             GValue               *value,
@@ -75,7 +73,6 @@ static void mate_mixer_stream_set_property (GObject              *object,
                                             const GValue         *value,
                                             GParamSpec           *pspec);
 
-static void mate_mixer_stream_init         (MateMixerStream      *stream);
 static void mate_mixer_stream_dispose      (GObject              *object);
 static void mate_mixer_stream_finalize     (GObject              *object);
 

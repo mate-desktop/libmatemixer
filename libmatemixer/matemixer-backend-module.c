@@ -41,8 +41,6 @@ enum {
     PROP_PATH
 };
 
-static void mate_mixer_backend_module_class_init   (MateMixerBackendModuleClass *klass);
-
 static void mate_mixer_backend_module_get_property (GObject                     *object,
                                                     guint                        param_id,
                                                     GValue                      *value,
@@ -52,7 +50,6 @@ static void mate_mixer_backend_module_set_property (GObject                     
                                                     const GValue                *value,
                                                     GParamSpec                  *pspec);
 
-static void mate_mixer_backend_module_init         (MateMixerBackendModule      *module);
 static void mate_mixer_backend_module_dispose      (GObject                     *object);
 static void mate_mixer_backend_module_finalize     (GObject                     *object);
 

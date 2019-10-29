@@ -28,9 +28,6 @@
 #include "pulse-sink.h"
 #include "pulse-sink-control.h"
 
-static void pulse_sink_control_class_init (PulseSinkControlClass *klass);
-static void pulse_sink_control_init       (PulseSinkControl      *control);
-
 G_DEFINE_TYPE (PulseSinkControl, pulse_sink_control, PULSE_TYPE_STREAM_CONTROL);
 
 static gboolean      pulse_sink_control_set_mute        (PulseStreamControl *psc,

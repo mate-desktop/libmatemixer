@@ -44,8 +44,6 @@ struct _PulseSinkPrivate
     PulseSinkControl *control;
 };
 
-static void pulse_sink_class_init (PulseSinkClass *klass);
-static void pulse_sink_init       (PulseSink      *sink);
 static void pulse_sink_dispose    (GObject        *object);
 static void pulse_sink_finalize   (GObject        *object);
 

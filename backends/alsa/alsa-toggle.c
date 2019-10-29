@@ -36,9 +36,6 @@ struct _AlsaTogglePrivate
 
 static void alsa_element_interface_init (AlsaElementInterface *iface);
 
-static void alsa_toggle_class_init      (AlsaToggleClass      *klass);
-static void alsa_toggle_init            (AlsaToggle           *toggle);
-
 G_DEFINE_TYPE_WITH_CODE (AlsaToggle, alsa_toggle, MATE_MIXER_TYPE_STREAM_TOGGLE,
                          G_ADD_PRIVATE(AlsaToggle)
                          G_IMPLEMENT_INTERFACE (ALSA_TYPE_ELEMENT,

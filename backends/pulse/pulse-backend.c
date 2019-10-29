@@ -114,10 +114,6 @@ struct _PulseBackendPrivate
         (g_object_steal_data (G_OBJECT (o),                             \
                               "__matemixer_pulse_hanging"))
 
-static void pulse_backend_class_init     (PulseBackendClass *klass);
-static void pulse_backend_class_finalize (PulseBackendClass *klass);
-
-static void pulse_backend_init           (PulseBackend      *pulse);
 static void pulse_backend_dispose        (GObject           *object);
 static void pulse_backend_finalize       (GObject           *object);
 

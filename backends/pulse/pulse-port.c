@@ -32,9 +32,6 @@ struct _PulsePortPrivate
     guint priority;
 };
 
-static void pulse_port_class_init (PulsePortClass *klass);
-static void pulse_port_init       (PulsePort      *port);
-
 G_DEFINE_TYPE_WITH_PRIVATE (PulsePort, pulse_port, MATE_MIXER_TYPE_SWITCH_OPTION)
 
 static void

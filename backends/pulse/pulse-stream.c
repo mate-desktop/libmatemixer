@@ -44,8 +44,6 @@ enum {
 
 static GParamSpec *properties[N_PROPERTIES] = { NULL, };
 
-static void pulse_stream_class_init   (PulseStreamClass *klass);
-
 static void pulse_stream_get_property (GObject          *object,
                                        guint             param_id,
                                        GValue           *value,
@@ -55,7 +53,6 @@ static void pulse_stream_set_property (GObject          *object,
                                        const GValue     *value,
                                        GParamSpec       *pspec);
 
-static void pulse_stream_init         (PulseStream      *stream);
 static void pulse_stream_dispose      (GObject          *object);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (PulseStream, pulse_stream, MATE_MIXER_TYPE_STREAM)

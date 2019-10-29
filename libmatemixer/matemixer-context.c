@@ -108,8 +108,6 @@ enum {
 
 static guint signals[N_SIGNALS] = { 0, };
 
-static void mate_mixer_context_class_init   (MateMixerContextClass *klass);
-
 static void mate_mixer_context_get_property (GObject               *object,
                                              guint                  param_id,
                                              GValue                *value,
@@ -119,7 +117,6 @@ static void mate_mixer_context_set_property (GObject               *object,
                                              const GValue          *value,
                                              GParamSpec            *pspec);
 
-static void mate_mixer_context_init         (MateMixerContext      *context);
 static void mate_mixer_context_dispose      (GObject               *object);
 static void mate_mixer_context_finalize     (GObject               *object);
 
