@@ -33,9 +33,6 @@ struct _PulseDeviceProfilePrivate
     guint priority;
 };
 
-static void pulse_device_profile_class_init (PulseDeviceProfileClass *klass);
-static void pulse_device_profile_init       (PulseDeviceProfile      *profile);
-
 G_DEFINE_TYPE_WITH_PRIVATE (PulseDeviceProfile, pulse_device_profile, MATE_MIXER_TYPE_SWITCH_OPTION)
 
 static void

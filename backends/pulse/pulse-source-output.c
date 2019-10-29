@@ -30,9 +30,6 @@
 #include "pulse-stream.h"
 #include "pulse-stream-control.h"
 
-static void pulse_source_output_class_init (PulseSourceOutputClass *klass);
-static void pulse_source_output_init       (PulseSourceOutput      *output);
-
 G_DEFINE_TYPE (PulseSourceOutput, pulse_source_output, PULSE_TYPE_STREAM_CONTROL);
 
 static guint         pulse_source_output_get_max_volume (MateMixerStreamControl *mmsc);

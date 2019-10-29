@@ -58,10 +58,6 @@ enum {
 
 static guint signals[N_SIGNALS] = { 0, };
 
-static void mate_mixer_backend_class_init   (MateMixerBackendClass *klass);
-
-static void mate_mixer_backend_init         (MateMixerBackend      *backend);
-
 static void mate_mixer_backend_get_property (GObject               *object,
                                              guint                  param_id,
                                              GValue                *value,

@@ -28,9 +28,6 @@
 #include "pulse-source-switch.h"
 #include "pulse-stream.h"
 
-static void pulse_source_switch_class_init (PulseSourceSwitchClass *klass);
-static void pulse_source_switch_init       (PulseSourceSwitch      *swtch);
-
 G_DEFINE_TYPE (PulseSourceSwitch, pulse_source_switch, PULSE_TYPE_PORT_SWITCH)
 
 static gboolean pulse_source_switch_set_active_port (PulsePortSwitch *swtch,

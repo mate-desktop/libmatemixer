@@ -28,9 +28,6 @@
 #include "pulse-sink-switch.h"
 #include "pulse-stream.h"
 
-static void pulse_sink_switch_class_init (PulseSinkSwitchClass *klass);
-static void pulse_sink_switch_init       (PulseSinkSwitch      *swtch);
-
 G_DEFINE_TYPE (PulseSinkSwitch, pulse_sink_switch, PULSE_TYPE_PORT_SWITCH)
 
 static gboolean pulse_sink_switch_set_active_port (PulsePortSwitch *swtch,

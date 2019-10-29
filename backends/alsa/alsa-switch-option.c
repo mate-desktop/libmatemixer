@@ -27,9 +27,6 @@ struct _AlsaSwitchOptionPrivate
     guint id;
 };
 
-static void alsa_switch_option_class_init (AlsaSwitchOptionClass *klass);
-static void alsa_switch_option_init       (AlsaSwitchOption      *option);
-
 G_DEFINE_TYPE_WITH_PRIVATE (AlsaSwitchOption, alsa_switch_option, MATE_MIXER_TYPE_SWITCH_OPTION)
 
 static void

@@ -66,8 +66,6 @@ enum {
 
 static guint signals[N_SIGNALS] = { 0, };
 
-static void mate_mixer_stream_control_class_init   (MateMixerStreamControlClass *klass);
-
 static void mate_mixer_stream_control_get_property (GObject                     *object,
                                                     guint                        param_id,
                                                     GValue                      *value,
@@ -77,7 +75,6 @@ static void mate_mixer_stream_control_set_property (GObject                     
                                                     const GValue                *value,
                                                     GParamSpec                  *pspec);
 
-static void mate_mixer_stream_control_init         (MateMixerStreamControl      *control);
 static void mate_mixer_stream_control_finalize     (GObject                     *object);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MateMixerStreamControl, mate_mixer_stream_control, G_TYPE_OBJECT)

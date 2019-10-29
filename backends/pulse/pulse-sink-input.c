@@ -30,9 +30,6 @@
 #include "pulse-stream.h"
 #include "pulse-stream-control.h"
 
-static void pulse_sink_input_class_init (PulseSinkInputClass *klass);
-static void pulse_sink_input_init       (PulseSinkInput      *input);
-
 G_DEFINE_TYPE (PulseSinkInput, pulse_sink_input, PULSE_TYPE_STREAM_CONTROL);
 
 static guint         pulse_sink_input_get_max_volume (MateMixerStreamControl *mmsc);

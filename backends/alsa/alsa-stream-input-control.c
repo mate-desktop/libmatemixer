@@ -29,9 +29,6 @@
 #include "alsa-stream-control.h"
 #include "alsa-stream-input-control.h"
 
-static void alsa_stream_input_control_class_init (AlsaStreamInputControlClass *klass);
-static void alsa_stream_input_control_init       (AlsaStreamInputControl      *control);
-
 G_DEFINE_TYPE (AlsaStreamInputControl, alsa_stream_input_control, ALSA_TYPE_STREAM_CONTROL)
 
 static gboolean alsa_stream_input_control_load                    (AlsaStreamControl           *control);

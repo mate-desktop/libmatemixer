@@ -28,9 +28,6 @@
 #include "pulse-source.h"
 #include "pulse-source-control.h"
 
-static void pulse_source_control_class_init (PulseSourceControlClass *klass);
-static void pulse_source_control_init       (PulseSourceControl      *control);
-
 G_DEFINE_TYPE (PulseSourceControl, pulse_source_control, PULSE_TYPE_STREAM_CONTROL);
 
 static gboolean      pulse_source_control_set_mute        (PulseStreamControl *psc,

@@ -70,8 +70,6 @@ enum {
 
 static guint signals[N_SIGNALS] = { 0, };
 
-static void pulse_connection_class_init   (PulseConnectionClass *klass);
-
 static void pulse_connection_get_property (GObject              *object,
                                            guint                 param_id,
                                            GValue               *value,
@@ -81,7 +79,6 @@ static void pulse_connection_set_property (GObject              *object,
                                            const GValue         *value,
                                            GParamSpec           *pspec);
 
-static void pulse_connection_init         (PulseConnection      *connection);
 static void pulse_connection_finalize     (GObject              *object);
 
 G_DEFINE_TYPE_WITH_PRIVATE (PulseConnection, pulse_connection, G_TYPE_OBJECT);

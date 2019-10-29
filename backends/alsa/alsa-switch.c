@@ -36,8 +36,6 @@ struct _AlsaSwitchPrivate
 
 static void alsa_element_interface_init (AlsaElementInterface *iface);
 
-static void alsa_switch_class_init      (AlsaSwitchClass      *klass);
-static void alsa_switch_init            (AlsaSwitch           *swtch);
 static void alsa_switch_dispose         (GObject              *object);
 
 G_DEFINE_TYPE_WITH_CODE (AlsaSwitch, alsa_switch,

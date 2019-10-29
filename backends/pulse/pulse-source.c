@@ -43,8 +43,6 @@ struct _PulseSourcePrivate
     PulseSourceControl *control;
 };
 
-static void pulse_source_class_init (PulseSourceClass *klass);
-static void pulse_source_init       (PulseSource      *source);
 static void pulse_source_dispose    (GObject          *object);
 static void pulse_source_finalize   (GObject          *object);
 
