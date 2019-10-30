@@ -6,7 +6,6 @@
 # Translators:
 # Robert Antoni Buj Gelonch <rbuj@fedoraproject.org>, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

@@ -7,7 +7,6 @@
 # Andi Chandler <andi@gowling.com>, 2018
 # Martin Wimpress <code@flexion.org>, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

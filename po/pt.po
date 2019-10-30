@@ -9,7 +9,6 @@
 # alfalb_mansil, 2018
 # Diogo Oliveira <diogodesigns@gmail.com>, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

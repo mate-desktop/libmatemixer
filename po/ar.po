@@ -9,7 +9,6 @@
 # Abdulwahab Bah <Amb1110@gmail.com>, 2018
 # Saif Husam <saifxman10@yahoo.com>, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

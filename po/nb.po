@@ -7,7 +7,6 @@
 # Allan Nordhøy <epost@anotheragency.no>, 2018
 # Kenneth Jenssen <kennethjenssen@yahoo.com>, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

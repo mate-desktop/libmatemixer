@@ -9,7 +9,6 @@
 # Marcin Kralka <marcink96@gmail.com>, 2018
 # Beniamin Pawlus <kupwzywcu@o2.pl>, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

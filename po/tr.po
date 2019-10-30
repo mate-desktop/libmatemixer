@@ -9,7 +9,6 @@
 # Butterfly <gokhanlnx@gmail.com>, 2018
 # Kudret <kudretemre@hotmail.com.tr>, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

@@ -13,7 +13,6 @@
 # Cleber Teixeira, 2018
 # Roger Araújo <roger.rf@gmail.com>, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

@@ -8,7 +8,6 @@
 # Moo, 2018
 # Audrius Meskauskas, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

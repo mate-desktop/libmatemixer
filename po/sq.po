@@ -9,7 +9,6 @@
 # Ardit Dani <ardit.dani@gmail.com>, 2018
 # Indrit Bashkimi <indrit.bashkimi@gmail.com>, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

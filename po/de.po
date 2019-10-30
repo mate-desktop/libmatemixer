@@ -9,7 +9,6 @@
 # Xpistian <xpistianbecker2@web.de>, 2018
 # Julian Rüger <jr98@gmx.net>, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

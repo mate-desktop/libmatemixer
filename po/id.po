@@ -7,7 +7,6 @@
 # Ibnu Daru Aji, 2018
 # Willy Sudiarto Raharjo <willysr@slackware-id.org>, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

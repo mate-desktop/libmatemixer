@@ -10,7 +10,6 @@
 # Takler Tamás <taklertamas@gmail.com>, 2018
 # Falu <info@falu.me>, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

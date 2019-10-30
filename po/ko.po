@@ -7,7 +7,6 @@
 # Seong-ho Cho <darkcircle.0426@gmail.com>, 2018
 # 박정규(Jung-Kyu Park) <bagjunggyu@gmail.com>, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

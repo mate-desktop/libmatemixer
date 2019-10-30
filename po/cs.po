@@ -7,7 +7,6 @@
 # Michal <sinope@seznam.cz>, 2018
 # Stanislav Kučera <inactive+kacernator@transifex.com>, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

@@ -8,7 +8,6 @@
 # Mika Kobayashi, 2018
 # ふうせん Fu-sen. | BALLOON a.k.a. Fu-sen., 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

@@ -6,7 +6,6 @@
 # Translators:
 # Cédric Valmary <cvalmary@yahoo.fr>, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

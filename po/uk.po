@@ -9,7 +9,6 @@
 # Шаповалов Анатолій Романович <elrond.716.smith@gmail.com>, 2018
 # dsafsadf <heneral@gmail.com>, 2019
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

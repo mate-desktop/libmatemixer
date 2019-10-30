@@ -6,7 +6,6 @@
 # Translators:
 # Мирослав Николић <miroslavnikolic@rocketmail.com>, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"

@@ -7,7 +7,6 @@
 # Mingcong Bai <jeffbai@aosc.xyz>, 2018
 # liushuyu011 <liushuyu011@gmail.com>, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
