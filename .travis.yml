@@ -39,6 +39,7 @@ requires:
   archlinux:
     # Useful URL: https://git.archlinux.org/svntogit/community.git/tree/libmatemixer
     - autoconf-archive
+    - clang
     - gcc
     - git
     - glib2
@@ -52,6 +53,9 @@ requires:
     # Useful URL: https://salsa.debian.org/debian-mate-team/libmatemixer
     - autoconf-archive
     - autopoint
+    - clang
+    - clang-tools
+    - gcc
     - git
     - libasound2-dev
     - libglib2.0-dev
@@ -63,6 +67,8 @@ requires:
     # Useful URL: https://src.fedoraproject.org/cgit/rpms/libmatemixer.git
     - alsa-lib-devel
     - autoconf-archive
+    - clang
+    - clang-analyzer
     - gcc
     - git
     - make
@@ -73,6 +79,8 @@ requires:
   ubuntu:
     - autoconf-archive
     - autopoint
+    - clang
+    - clang-tools
     - git
     - libasound2-dev
     - libglib2.0-dev
@@ -82,10 +90,31 @@ requires:
 
 variables:
   - CFLAGS="-Wall -Werror=format-security -Wredundant-decls"
+  - 'CHECKERS="
+    -enable-checker deadcode.DeadStores
+    -enable-checker alpha.deadcode.UnreachableCode
+    -enable-checker alpha.core.CastSize
+    -enable-checker alpha.core.CastToStruct
+    -enable-checker alpha.core.IdenticalExpr
+    -enable-checker alpha.core.SizeofPtr
+    -enable-checker alpha.security.ArrayBoundV2
+    -enable-checker alpha.security.MallocOverflow
+    -enable-checker alpha.security.ReturnPtrRange
+    -enable-checker alpha.unix.SimpleStream
+    -enable-checker alpha.unix.cstring.BufferOverlap
+    -enable-checker alpha.unix.cstring.NotNullTerminated
+    -enable-checker alpha.unix.cstring.OutOfBounds
+    -enable-checker alpha.core.FixedAddr
+    -enable-checker security.insecureAPI.strcpy"'
 
 build_scripts:
   - ./autogen.sh --enable-compile-warnings=maximum
-  - make
+  - scan-build $CHECKERS ./configure --enable-compile-warnings=maximum
+  - if [ $CPU_COUNT -gt 1 ]; then
+  -     scan-build $CHECKERS --keep-cc -o html-report make -j $CPU_COUNT
+  - else
+  -     scan-build $CHECKERS --keep-cc -o html-report make
+  - fi
 
 before_scripts:
   # Debian - patch intltool-update
