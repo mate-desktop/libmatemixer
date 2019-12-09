@@ -118,7 +118,7 @@ pulse_port_switch_set_active_port_by_name (PulsePortSwitch *swtch, const gchar *
     g_return_if_fail (name != NULL);
 
     item = g_list_find_custom (swtch->priv->ports, name, compare_port_name);
-    if G_UNLIKELY (item == NULL) {
+    if (G_UNLIKELY (item == NULL)) {
         g_debug ("Invalid switch port name %s", name);
         return;
     }

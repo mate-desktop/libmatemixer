@@ -149,7 +149,7 @@ load_modules (void)
     if (loaded == TRUE)
         return;
 
-    if G_LIKELY (g_module_supported () == TRUE) {
+    if (G_LIKELY (g_module_supported () == TRUE)) {
         GDir   *dir;
         GError *error = NULL;
 

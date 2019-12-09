@@ -396,7 +396,7 @@ alsa_stream_control_has_channel_position (MateMixerStreamControl  *mmsc,
 
     control = ALSA_STREAM_CONTROL (mmsc);
 
-    if MATE_MIXER_CHANNEL_MASK_HAS_CHANNEL (control->priv->channel_mask, position)
+    if (MATE_MIXER_CHANNEL_MASK_HAS_CHANNEL (control->priv->channel_mask, position))
         return TRUE;
     else
         return FALSE;
@@ -455,7 +455,7 @@ alsa_stream_control_set_channel_volume (MateMixerStreamControl *mmsc, guint chan
 
         /* Convert channel index to ALSA channel position and make sure it is valid */
         snd_mixer_selem_channel_id_t c = alsa_channel_map_to[control->priv->data.c[channel]];
-        if G_UNLIKELY (c == SND_MIXER_SCHN_UNKNOWN) {
+        if (G_UNLIKELY (c == SND_MIXER_SCHN_UNKNOWN)) {
             g_warn_if_reached ();
             return FALSE;
         }
@@ -682,11 +682,11 @@ control_data_get_average_left_right (AlsaControlData *data, guint *left, guint *
     guint channel;
 
     for (channel = 0; channel < data->channels; channel++)
-        if MATE_MIXER_IS_LEFT_CHANNEL (data->c[channel]) {
+        if (MATE_MIXER_IS_LEFT_CHANNEL (data->c[channel])) {
             l += data->v[channel];
             nl++;
         }
-        else if MATE_MIXER_IS_RIGHT_CHANNEL (data->c[channel]) {
+        else if (MATE_MIXER_IS_RIGHT_CHANNEL (data->c[channel])) {
             r += data->v[channel];
             nr++;
         }
@@ -705,11 +705,11 @@ control_data_get_average_front_back (AlsaControlData *data, guint *front, guint 
     guint channel;
 
     for (channel = 0; channel < data->channels; channel++)
-        if MATE_MIXER_IS_FRONT_CHANNEL (data->c[channel]) {
+        if (MATE_MIXER_IS_FRONT_CHANNEL (data->c[channel])) {
             f += data->v[channel];
             nf++;
         }
-        else if MATE_MIXER_IS_BACK_CHANNEL (data->c[channel]) {
+        else if (MATE_MIXER_IS_BACK_CHANNEL (data->c[channel])) {
             b += data->v[channel];
             nb++;
         }

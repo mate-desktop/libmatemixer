@@ -189,7 +189,7 @@ oss_stream_control_load (OssStreamControl *control)
 
     g_return_if_fail (OSS_IS_STREAM_CONTROL (control));
 
-    if G_UNLIKELY (control->priv->fd == -1)
+    if (G_UNLIKELY (control->priv->fd == -1))
         return;
 
     ret = ioctl (control->priv->fd, MIXER_READ (control->priv->devnum), &v);
@@ -244,7 +244,7 @@ oss_stream_control_set_volume (MateMixerStreamControl *mmsc, guint volume)
 
     control = OSS_STREAM_CONTROL (mmsc);
 
-    if G_UNLIKELY (control->priv->fd == -1)
+    if (G_UNLIKELY (control->priv->fd == -1))
         return FALSE;
 
     return write_and_store_volume (control, OSS_VOLUME_JOIN_SAME (CLAMP (volume, 0, 100)));
@@ -281,7 +281,7 @@ oss_stream_control_set_channel_volume (MateMixerStreamControl *mmsc,
 
     control = OSS_STREAM_CONTROL (mmsc);
 
-    if G_UNLIKELY (control->priv->fd == -1)
+    if (G_UNLIKELY (control->priv->fd == -1))
         return FALSE;
 
     if (channel != LEFT_CHANNEL &&
@@ -345,7 +345,7 @@ oss_stream_control_set_balance (MateMixerStreamControl *mmsc, gfloat balance)
 
     control = OSS_STREAM_CONTROL (mmsc);
 
-    if G_UNLIKELY (control->priv->fd == -1)
+    if (G_UNLIKELY (control->priv->fd == -1))
         return FALSE;
 
     max = MAX (control->priv->volume[LEFT_CHANNEL],

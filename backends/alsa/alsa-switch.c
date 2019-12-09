@@ -136,12 +136,12 @@ alsa_switch_set_active_option (MateMixerSwitch *mms, MateMixerSwitchOption *mmso
 
     swtch = ALSA_SWITCH (mms);
 
-    if G_UNLIKELY (swtch->priv->element == NULL)
+    if (G_UNLIKELY (swtch->priv->element == NULL))
         return FALSE;
 
     /* The channel mask is created when reading the active option the first
      * time, so a successful load must be done before changing the option */
-    if G_UNLIKELY (swtch->priv->channel_mask == 0) {
+    if (G_UNLIKELY (swtch->priv->channel_mask == 0)) {
         g_debug ("Not setting active switch option, channel mask unknown");
         return FALSE;
     }
@@ -203,7 +203,7 @@ alsa_switch_load (AlsaElement *element)
 
     swtch = ALSA_SWITCH (element);
 
-    if G_UNLIKELY (swtch->priv->element == NULL)
+    if (G_UNLIKELY (swtch->priv->element == NULL))
         return FALSE;
 
     /* When reading the first time we try all the channels, otherwise only the

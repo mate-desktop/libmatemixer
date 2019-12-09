@@ -427,7 +427,7 @@ mate_mixer_device_list_streams (MateMixerDevice *device)
 
     klass = MATE_MIXER_DEVICE_GET_CLASS (device);
 
-    if G_LIKELY (klass->list_streams != NULL)
+    if (G_LIKELY (klass->list_streams != NULL))
         return klass->list_streams (device);
 
     return NULL;
@@ -461,7 +461,7 @@ mate_mixer_device_list_switches (MateMixerDevice *device)
 
     klass = MATE_MIXER_DEVICE_GET_CLASS (device);
 
-    if G_LIKELY (klass->list_switches != NULL)
+    if (G_LIKELY (klass->list_switches != NULL))
         return klass->list_switches (device);
 
     return NULL;

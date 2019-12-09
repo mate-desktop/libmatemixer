@@ -563,7 +563,7 @@ add_switch (AlsaDevice *device, AlsaStream *stream, snd_mixer_elem_t *el)
     MateMixerStreamSwitchRole role;
 
     count = snd_mixer_selem_get_enum_items (el);
-    if G_UNLIKELY (count <= 0) {
+    if (G_UNLIKELY (count <= 0)) {
         g_debug ("Skipping mixer switch %s with %d items",
                  snd_mixer_selem_get_name (el),
                  count);
@@ -573,7 +573,7 @@ add_switch (AlsaDevice *device, AlsaStream *stream, snd_mixer_elem_t *el)
     for (i = 0; i < count; i++) {
         gint ret = snd_mixer_selem_get_enum_item_name (el, i, sizeof (item), item);
 
-        if G_LIKELY (ret == 0) {
+        if (G_LIKELY (ret == 0)) {
             gint j;
             AlsaSwitchOption *option = NULL;
 
@@ -594,7 +594,7 @@ add_switch (AlsaDevice *device, AlsaStream *stream, snd_mixer_elem_t *el)
             g_warning ("Failed to read switch item name: %s", snd_strerror (ret));
     }
 
-    if G_UNLIKELY (options == NULL)
+    if (G_UNLIKELY (options == NULL))
         return;
 
     get_switch_info (el, &name, &label, &role);

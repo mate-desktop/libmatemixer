@@ -279,7 +279,7 @@ pulse_ext_stream_new (PulseConnection                  *connection,
         suffix++;
 
     if (strstr (info->name, "-by-media-role:")) {
-        if G_LIKELY (suffix != NULL)
+        if (G_LIKELY (suffix != NULL))
             media_role = pulse_convert_media_role_name (suffix);
     }
     else if (strstr (info->name, "-by-application-name:")) {
@@ -291,7 +291,7 @@ pulse_ext_stream_new (PulseConnection                  *connection,
         if (app_info == NULL)
             app_info = _mate_mixer_app_info_new ();
 
-        if G_LIKELY (suffix != NULL)
+        if (G_LIKELY (suffix != NULL))
             _mate_mixer_app_info_set_name (app_info, suffix);
     }
     else if (strstr (info->name, "-by-application-id:")) {
@@ -303,7 +303,7 @@ pulse_ext_stream_new (PulseConnection                  *connection,
         if (app_info == NULL)
             app_info = _mate_mixer_app_info_new ();
 
-        if G_LIKELY (suffix != NULL)
+        if (G_LIKELY (suffix != NULL))
             _mate_mixer_app_info_set_id (app_info, suffix);
     }
 

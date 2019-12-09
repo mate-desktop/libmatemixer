@@ -220,7 +220,7 @@ pulse_source_remove_output (PulseSource *source, guint32 index)
     g_return_if_fail (PULSE_IS_SOURCE (source));
 
     output = g_hash_table_lookup (source->priv->outputs, GUINT_TO_POINTER (index));
-    if G_UNLIKELY (output == NULL)
+    if (G_UNLIKELY (output == NULL))
         return;
 
     name = g_strdup (mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (output)));

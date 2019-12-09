@@ -224,7 +224,7 @@ pulse_sink_remove_input (PulseSink *sink, guint32 index)
     g_return_if_fail (PULSE_IS_SINK (sink));
 
     input = g_hash_table_lookup (sink->priv->inputs, GUINT_TO_POINTER (index));
-    if G_UNLIKELY (input == NULL)
+    if (G_UNLIKELY (input == NULL))
         return;
 
     name = g_strdup (mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (input)));

@@ -358,7 +358,7 @@ read_device (OssBackend *oss, const gchar *path, gboolean *added)
 
     close (fd);
 
-    if G_LIKELY (device != NULL) {
+    if (G_LIKELY (device != NULL)) {
         *added = oss_device_open (device);
         if (*added == TRUE)
             add_device (oss, device);
@@ -591,7 +591,7 @@ get_default_device (OssBackend *oss)
     item = g_list_find_custom (oss->priv->devices,
                                oss->priv->default_device,
                                compare_device_path);
-    if G_LIKELY (item != NULL)
+    if (G_LIKELY (item != NULL))
         return OSS_DEVICE (item->data);
 
     return NULL;

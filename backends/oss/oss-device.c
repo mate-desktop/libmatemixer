@@ -588,7 +588,7 @@ read_mixer_devices (OssDevice *device)
                                           device->priv->fd,
                                           i,
                                           stereo);
-        if G_UNLIKELY (control == NULL)
+        if (G_UNLIKELY (control == NULL))
             continue;
 
         if (oss_stream_has_controls (stream) == FALSE) {
@@ -638,7 +638,7 @@ read_mixer_switch (OssDevice *device)
         options = g_list_prepend (options, option);
     }
 
-    if G_LIKELY (options != NULL)
+    if (G_LIKELY (options != NULL))
         oss_stream_set_switch_data (device->priv->input,
                                     device->priv->fd,
                                     g_list_reverse (options));
@@ -649,7 +649,7 @@ poll_mixer (OssDevice *device)
 {
     gboolean load = TRUE;
 
-    if G_UNLIKELY (device->priv->fd == -1)
+    if (G_UNLIKELY (device->priv->fd == -1))
         return G_SOURCE_REMOVE;
 
 #ifdef SOUND_MIXER_INFO
@@ -707,7 +707,7 @@ poll_mixer (OssDevice *device)
 static gboolean
 poll_mixer_restore (OssDevice *device)
 {
-    if G_LIKELY (device->priv->poll_mode == OSS_POLL_RAPID) {
+    if (G_LIKELY (device->priv->poll_mode == OSS_POLL_RAPID)) {
         /* Remove the current rapid source */
         g_source_remove (device->priv->poll_tag);
 
