@@ -346,7 +346,7 @@ pulse_backend_open (MateMixerBackend *backend)
 
     pulse = PULSE_BACKEND (backend);
 
-    if G_UNLIKELY (pulse->priv->connection != NULL) {
+    if (G_UNLIKELY (pulse->priv->connection != NULL)) {
         g_warn_if_reached ();
         return TRUE;
     }
@@ -360,7 +360,7 @@ pulse_backend_open (MateMixerBackend *backend)
     /* No connection attempt is made during the construction of the connection,
      * but it sets up the PulseAudio structures, which might fail in an
      * unlikely case */
-    if G_UNLIKELY (connection == NULL) {
+    if (G_UNLIKELY (connection == NULL)) {
         PULSE_CHANGE_STATE (pulse, MATE_MIXER_STATE_FAILED);
         return FALSE;
     }
@@ -628,7 +628,7 @@ on_connection_state_notify (PulseConnection *connection,
              * is reached. */
             PULSE_CHANGE_STATE (pulse, MATE_MIXER_STATE_CONNECTING);
 
-            if G_UNLIKELY (pulse->priv->connect_tag != 0)
+            if (G_UNLIKELY (pulse->priv->connect_tag != 0))
                 break;
 
             if (pulse_connection_connect (connection, TRUE) == FALSE) {
@@ -785,7 +785,7 @@ on_connection_card_removed (PulseConnection *connection,
     gchar       *name;
 
     device = g_hash_table_lookup (pulse->priv->devices, GUINT_TO_POINTER (index));
-    if G_UNLIKELY (device == NULL)
+    if (G_UNLIKELY (device == NULL))
         return;
 
     name = g_strdup (mate_mixer_device_get_name (MATE_MIXER_DEVICE (device)));
@@ -848,7 +848,7 @@ on_connection_sink_removed (PulseConnection *connection,
     PulseDevice *device;
 
     stream = g_hash_table_lookup (pulse->priv->sinks, GUINT_TO_POINTER (idx));
-    if G_UNLIKELY (stream == NULL)
+    if (G_UNLIKELY (stream == NULL))
         return;
 
     g_object_ref (stream);
@@ -887,10 +887,10 @@ on_connection_sink_input_info (PulseConnection          *connection,
     PulseSink *sink = NULL;
     PulseSink *prev;
 
-    if G_LIKELY (info->sink != PA_INVALID_INDEX)
+    if (G_LIKELY (info->sink != PA_INVALID_INDEX))
         sink = g_hash_table_lookup (pulse->priv->sinks, GUINT_TO_POINTER (info->sink));
 
-    if G_UNLIKELY (sink == NULL) {
+    if (G_UNLIKELY (sink == NULL)) {
         prev = g_hash_table_lookup (pulse->priv->sink_input_map, GUINT_TO_POINTER (info->index));
         if (prev != NULL) {
             g_debug ("Sink input %u moved from sink %s to an unknown sink %u, removing",
@@ -930,7 +930,7 @@ on_connection_sink_input_removed (PulseConnection *connection,
     PulseSink *sink;
 
     sink = g_hash_table_lookup (pulse->priv->sink_input_map, GUINT_TO_POINTER (idx));
-    if G_UNLIKELY (sink == NULL)
+    if (G_UNLIKELY (sink == NULL))
         return;
 
     remove_sink_input (pulse, sink, idx);
@@ -985,7 +985,7 @@ on_connection_source_removed (PulseConnection *connection,
     PulseStream *stream;
 
     stream = g_hash_table_lookup (pulse->priv->sources, GUINT_TO_POINTER (idx));
-    if G_UNLIKELY (stream == NULL)
+    if (G_UNLIKELY (stream == NULL))
         return;
 
     g_object_ref (stream);
@@ -1024,10 +1024,10 @@ on_connection_source_output_info (PulseConnection             *connection,
     PulseSource *source = NULL;
     PulseSource *prev;
 
-    if G_LIKELY (info->source != PA_INVALID_INDEX)
+    if (G_LIKELY (info->source != PA_INVALID_INDEX))
         source = g_hash_table_lookup (pulse->priv->sources, GUINT_TO_POINTER (info->source));
 
-    if G_UNLIKELY (source == NULL) {
+    if (G_UNLIKELY (source == NULL)) {
         prev = g_hash_table_lookup (pulse->priv->source_output_map, GUINT_TO_POINTER (info->index));
         if (prev != NULL) {
             g_debug ("Source output %u moved from source %s to an unknown source %u, removing",
@@ -1067,7 +1067,7 @@ on_connection_source_output_removed (PulseConnection *connection,
     PulseSource *source;
 
     source = g_hash_table_lookup (pulse->priv->source_output_map, GUINT_TO_POINTER (idx));
-    if G_UNLIKELY (source == NULL)
+    if (G_UNLIKELY (source == NULL))
         return;
 
     remove_source_output (pulse, source, idx);

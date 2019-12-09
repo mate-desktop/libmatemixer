@@ -277,7 +277,7 @@ pulse_stream_control_get_stream_index (PulseStreamControl *control)
     g_return_val_if_fail (PULSE_IS_STREAM_CONTROL (control), PA_INVALID_INDEX);
 
     stream = mate_mixer_stream_control_get_stream (MATE_MIXER_STREAM_CONTROL (control));
-    if G_UNLIKELY (stream == NULL)
+    if (G_UNLIKELY (stream == NULL))
         return PA_INVALID_INDEX;
 
     return pulse_stream_get_index (PULSE_STREAM (stream));
@@ -322,7 +322,7 @@ pulse_stream_control_set_app_info (PulseStreamControl *control,
 {
     g_return_if_fail (PULSE_IS_STREAM_CONTROL (control));
 
-    if G_UNLIKELY (control->priv->app_info != NULL)
+    if (G_UNLIKELY (control->priv->app_info != NULL))
         _mate_mixer_app_info_free (control->priv->app_info);
 
     if (take == TRUE)
@@ -653,7 +653,7 @@ pulse_stream_control_set_monitor_enabled (MateMixerStreamControl *mmsc, gboolean
             control->priv->monitor =
                 PULSE_STREAM_CONTROL_GET_CLASS (control)->create_monitor (control);
 
-            if G_UNLIKELY (control->priv->monitor == NULL)
+            if (G_UNLIKELY (control->priv->monitor == NULL))
                 return FALSE;
 
             g_signal_connect (G_OBJECT (control->priv->monitor),

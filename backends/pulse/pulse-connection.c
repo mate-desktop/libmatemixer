@@ -410,7 +410,7 @@ pulse_connection_new (const gchar *app_name,
     PulseConnection  *connection;
 
     mainloop = pa_glib_mainloop_new (g_main_context_get_thread_default ());
-    if G_UNLIKELY (mainloop == NULL) {
+    if (G_UNLIKELY (mainloop == NULL)) {
         g_warning ("Failed to create PulseAudio main loop");
         return NULL;
     }
@@ -461,7 +461,7 @@ pulse_connection_connect (PulseConnection *connection, gboolean wait_for_daemon)
     context  = pa_context_new_with_proplist (mainloop,
                                              NULL,
                                              connection->priv->proplist);
-    if G_UNLIKELY (context == NULL) {
+    if (G_UNLIKELY (context == NULL)) {
         g_warning ("Failed to create PulseAudio context");
         return FALSE;
     }
@@ -1224,7 +1224,7 @@ load_lists (PulseConnection *connection)
     GSList       *ops = NULL;
     pa_operation *op;
 
-    if G_UNLIKELY (connection->priv->outstanding > 0) {
+    if (G_UNLIKELY (connection->priv->outstanding > 0)) {
         g_warn_if_reached ();
         return FALSE;
     }
@@ -1232,7 +1232,7 @@ load_lists (PulseConnection *connection)
     op = pa_context_get_card_info_list (connection->priv->context,
                                         pulse_card_info_cb,
                                         connection);
-    if G_UNLIKELY (op == NULL)
+    if (G_UNLIKELY (op == NULL))
         goto error;
 
     ops = g_slist_prepend (ops, op);
@@ -1240,7 +1240,7 @@ load_lists (PulseConnection *connection)
     op = pa_context_get_sink_info_list (connection->priv->context,
                                         pulse_sink_info_cb,
                                         connection);
-    if G_UNLIKELY (op == NULL)
+    if (G_UNLIKELY (op == NULL))
         goto error;
 
     ops = g_slist_prepend (ops, op);
@@ -1248,7 +1248,7 @@ load_lists (PulseConnection *connection)
     op = pa_context_get_sink_input_info_list (connection->priv->context,
                                               pulse_sink_input_info_cb,
                                               connection);
-    if G_UNLIKELY (op == NULL)
+    if (G_UNLIKELY (op == NULL))
         goto error;
 
     ops = g_slist_prepend (ops, op);
@@ -1256,7 +1256,7 @@ load_lists (PulseConnection *connection)
     op = pa_context_get_source_info_list (connection->priv->context,
                                           pulse_source_info_cb,
                                           connection);
-    if G_UNLIKELY (op == NULL)
+    if (G_UNLIKELY (op == NULL))
         goto error;
 
     ops = g_slist_prepend (ops, op);
@@ -1264,7 +1264,7 @@ load_lists (PulseConnection *connection)
     op = pa_context_get_source_output_info_list (connection->priv->context,
                                                  pulse_source_output_info_cb,
                                                  connection);
-    if G_UNLIKELY (op == NULL)
+    if (G_UNLIKELY (op == NULL))
         goto error;
 
     ops = g_slist_prepend (ops, op);
@@ -1300,7 +1300,7 @@ load_list_finished (PulseConnection *connection)
      * as the final step in the connection process */
     connection->priv->outstanding--;
 
-    if G_UNLIKELY (connection->priv->outstanding < 0) {
+    if (G_UNLIKELY (connection->priv->outstanding < 0)) {
         g_warn_if_reached ();
         connection->priv->outstanding = 0;
     }
@@ -1308,7 +1308,7 @@ load_list_finished (PulseConnection *connection)
     if (connection->priv->outstanding == 0) {
         gboolean ret = pulse_connection_load_server_info (connection);
 
-        if G_UNLIKELY (ret == FALSE) {
+        if (G_UNLIKELY (ret == FALSE)) {
             pulse_connection_disconnect (connection);
             return FALSE;
         }
@@ -1637,7 +1637,7 @@ change_state (PulseConnection *connection, PulseConnectionState state)
 static gboolean
 process_pulse_operation (PulseConnection *connection, pa_operation *op)
 {
-    if G_UNLIKELY (op == NULL) {
+    if (G_UNLIKELY (op == NULL)) {
         g_warning ("PulseAudio operation failed: %s",
                    pa_strerror (pa_context_errno (connection->priv->context)));
         return FALSE;

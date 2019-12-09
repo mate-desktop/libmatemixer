@@ -414,7 +414,7 @@ mate_mixer_stream_list_controls (MateMixerStream *stream)
 
     klass = MATE_MIXER_STREAM_GET_CLASS (stream);
 
-    if G_LIKELY (klass->list_controls != NULL)
+    if (G_LIKELY (klass->list_controls != NULL))
         return klass->list_controls (stream);
 
     return NULL;
@@ -433,7 +433,7 @@ mate_mixer_stream_list_switches (MateMixerStream *stream)
 
     klass = MATE_MIXER_STREAM_GET_CLASS (stream);
 
-    if G_LIKELY (klass->list_switches != NULL)
+    if (G_LIKELY (klass->list_switches != NULL))
         return klass->list_switches (stream);
 
     return NULL;

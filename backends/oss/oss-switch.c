@@ -140,7 +140,7 @@ oss_switch_load (OssSwitch *swtch)
 
     g_return_if_fail (OSS_IS_SWITCH (swtch));
 
-    if G_UNLIKELY (swtch->priv->fd == -1)
+    if (G_UNLIKELY (swtch->priv->fd == -1))
         return;
 
     /* Recsrc contains a bitmask of currently enabled recording sources */
@@ -222,7 +222,7 @@ oss_switch_set_active_option (MateMixerSwitch *mms, MateMixerSwitchOption *mmso)
 
     swtch = OSS_SWITCH (mms);
 
-    if G_UNLIKELY (swtch->priv->fd == -1)
+    if (G_UNLIKELY (swtch->priv->fd == -1))
         return FALSE;
 
     recsrc = 1 << oss_switch_option_get_devnum (OSS_SWITCH_OPTION (mmso));

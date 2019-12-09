@@ -220,7 +220,7 @@ mate_mixer_stream_toggle_get_state (MateMixerStreamToggle *toggle)
     g_return_val_if_fail (MATE_MIXER_IS_STREAM_TOGGLE (toggle), FALSE);
 
     active = mate_mixer_switch_get_active_option (MATE_MIXER_SWITCH (toggle));
-    if G_UNLIKELY (active == NULL)
+    if (G_UNLIKELY (active == NULL))
         return FALSE;
 
     if (active == toggle->priv->on)
@@ -273,7 +273,7 @@ mate_mixer_stream_toggle_set_state (MateMixerStreamToggle *toggle, gboolean stat
     else
         active = toggle->priv->off;
 
-    if G_UNLIKELY (active == NULL)
+    if (G_UNLIKELY (active == NULL))
         return FALSE;
 
     return mate_mixer_switch_set_active_option (MATE_MIXER_SWITCH (toggle), active);
@@ -307,10 +307,10 @@ mate_mixer_stream_toggle_list_options (MateMixerSwitch *swtch)
     toggle = MATE_MIXER_STREAM_TOGGLE (swtch);
 
     if (toggle->priv->options == NULL) {
-        if G_LIKELY (toggle->priv->off != NULL)
+        if (G_LIKELY (toggle->priv->off != NULL))
             toggle->priv->options = g_list_prepend (toggle->priv->options,
                                                     toggle->priv->off);
-        if G_LIKELY (toggle->priv->on != NULL)
+        if (G_LIKELY (toggle->priv->on != NULL))
             toggle->priv->options = g_list_prepend (toggle->priv->options,
                                                     toggle->priv->on);
     }

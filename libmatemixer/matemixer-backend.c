@@ -529,7 +529,7 @@ device_added (MateMixerBackend *backend, const gchar *name)
     MateMixerDevice *device;
 
     device = mate_mixer_backend_get_device (backend, name);
-    if G_UNLIKELY (device == NULL) {
+    if (G_UNLIKELY (device == NULL)) {
         g_warn_if_reached ();
         return;
     }
@@ -558,7 +558,7 @@ device_removed (MateMixerBackend *backend, const gchar *name)
     MateMixerDevice *device;
 
     device = g_hash_table_lookup (backend->priv->devices, name);
-    if G_UNLIKELY (device == NULL) {
+    if (G_UNLIKELY (device == NULL)) {
         g_warn_if_reached ();
         return;
     }

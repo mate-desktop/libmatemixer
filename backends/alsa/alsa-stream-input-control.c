@@ -102,11 +102,11 @@ alsa_stream_input_control_load (AlsaStreamControl *control)
     g_return_val_if_fail (ALSA_IS_STREAM_INPUT_CONTROL (control), FALSE);
 
     el = alsa_element_get_snd_element (ALSA_ELEMENT (control));
-    if G_UNLIKELY (el == NULL)
+    if (G_UNLIKELY (el == NULL))
         return FALSE;
 
-    if G_UNLIKELY (snd_mixer_selem_has_capture_volume (el) == 0 &&
-                   snd_mixer_selem_has_common_volume (el) == 0) {
+    if (G_UNLIKELY (snd_mixer_selem_has_capture_volume (el) == 0 &&
+                    snd_mixer_selem_has_common_volume (el) == 0)) {
         g_warn_if_reached ();
         return FALSE;
     }
@@ -139,7 +139,7 @@ alsa_stream_input_control_set_mute (AlsaStreamControl *control, gboolean mute)
     g_return_val_if_fail (ALSA_IS_STREAM_INPUT_CONTROL (control), FALSE);
 
     el = alsa_element_get_snd_element (ALSA_ELEMENT (control));
-    if G_UNLIKELY (el == NULL)
+    if (G_UNLIKELY (el == NULL))
         return FALSE;
 
     /* Set the switch for all channels */
@@ -160,7 +160,7 @@ alsa_stream_input_control_set_volume (AlsaStreamControl *control, guint volume)
     g_return_val_if_fail (ALSA_IS_STREAM_INPUT_CONTROL (control), FALSE);
 
     el = alsa_element_get_snd_element (ALSA_ELEMENT (control));
-    if G_UNLIKELY (el == NULL)
+    if (G_UNLIKELY (el == NULL))
         return FALSE;
 
     /* Set the volume for all channels */
@@ -183,7 +183,7 @@ alsa_stream_input_control_set_channel_volume (AlsaStreamControl           *contr
     g_return_val_if_fail (ALSA_IS_STREAM_INPUT_CONTROL (control), FALSE);
 
     el = alsa_element_get_snd_element (ALSA_ELEMENT (control));
-    if G_UNLIKELY (el == NULL)
+    if (G_UNLIKELY (el == NULL))
         return FALSE;
 
     /* Set the volume for a single channel */
@@ -208,7 +208,7 @@ alsa_stream_input_control_get_volume_from_decibel (AlsaStreamControl *control,
     g_return_val_if_fail (ALSA_IS_STREAM_INPUT_CONTROL (control), FALSE);
 
     el = alsa_element_get_snd_element (ALSA_ELEMENT (control));
-    if G_UNLIKELY (el == NULL)
+    if (G_UNLIKELY (el == NULL))
         return FALSE;
 
     ret = snd_mixer_selem_ask_capture_dB_vol (el, (glong) (decibel * 100), 0, &value);
@@ -237,7 +237,7 @@ alsa_stream_input_control_get_decibel_from_volume (AlsaStreamControl *control,
     g_return_val_if_fail (ALSA_IS_STREAM_INPUT_CONTROL (control), FALSE);
 
     el = alsa_element_get_snd_element (ALSA_ELEMENT (control));
-    if G_UNLIKELY (el == NULL)
+    if (G_UNLIKELY (el == NULL))
         return FALSE;
 
     ret = snd_mixer_selem_ask_capture_vol_dB (el, (glong) volume, &value);
@@ -264,7 +264,7 @@ read_volume_data (snd_mixer_elem_t *el, AlsaControlData *data)
     /* Read volume ranges, this call should never fail on valid input */
 #if SND_LIB_VERSION >= ALSA_PACK_VERSION (1, 0, 10)
     ret = snd_mixer_selem_get_capture_volume_range (el, &min, &max);
-    if G_UNLIKELY (ret < 0) {
+    if (G_UNLIKELY (ret < 0)) {
         g_warning ("Failed to read capture volume range: %s", snd_strerror (ret));
         return;
     }
@@ -311,7 +311,7 @@ read_volume_data (snd_mixer_elem_t *el, AlsaControlData *data)
             gint value;
 
             ret = snd_mixer_selem_get_capture_switch (el, SND_MIXER_SCHN_MONO, &value);
-            if G_LIKELY (ret == 0)
+            if (G_LIKELY (ret == 0))
                 data->m[0] = !value;
         }
     } else {

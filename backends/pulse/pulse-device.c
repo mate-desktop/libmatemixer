@@ -225,11 +225,11 @@ pulse_device_new (PulseConnection *connection, const pa_card_info *info)
     g_return_val_if_fail (info != NULL, NULL);
 
     label = pa_proplist_gets (info->proplist, PA_PROP_DEVICE_DESCRIPTION);
-    if G_UNLIKELY (label == NULL)
+    if (G_UNLIKELY (label == NULL))
         label = info->name;
 
     icon = pa_proplist_gets (info->proplist, PA_PROP_DEVICE_ICON_NAME);
-    if G_UNLIKELY (icon == NULL)
+    if (G_UNLIKELY (icon == NULL))
         icon = "audio-card";
 
     /* Consider the device index as unchanging parameter */
@@ -253,7 +253,7 @@ pulse_device_update (PulseDevice *device, const pa_card_info *info)
     g_return_if_fail (PULSE_IS_DEVICE (device));
     g_return_if_fail (info != NULL);
 
-    if G_LIKELY (info->active_profile2 != NULL)
+    if (G_LIKELY (info->active_profile2 != NULL))
         pulse_device_switch_set_active_profile_by_name (device->priv->pswitch,
                                                         info->active_profile2->name);
 }

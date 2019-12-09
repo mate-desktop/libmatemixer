@@ -257,7 +257,7 @@ backend_module_load (GTypeModule *type_module)
 
     /* Make sure get_info() returns something, so we can avoid checking it
      * in other parts of the library */
-    if G_UNLIKELY (module->priv->get_info () == NULL) {
+    if (G_UNLIKELY (module->priv->get_info () == NULL)) {
         g_critical ("Backend module %s does not provide module information",
                     module->priv->path);
 

@@ -866,8 +866,8 @@ mate_mixer_context_open (MateMixerContext *context)
 
     state = mate_mixer_backend_get_state (context->priv->backend);
 
-    if G_UNLIKELY (state != MATE_MIXER_STATE_READY &&
-                   state != MATE_MIXER_STATE_CONNECTING) {
+    if (G_UNLIKELY (state != MATE_MIXER_STATE_READY &&
+                    state != MATE_MIXER_STATE_CONNECTING)) {
         /* This would be a backend bug */
         g_warn_if_reached ();
 
@@ -1377,8 +1377,8 @@ try_next_backend (MateMixerContext *context)
 
     state = mate_mixer_backend_get_state (context->priv->backend);
 
-    if G_UNLIKELY (state != MATE_MIXER_STATE_READY &&
-                   state != MATE_MIXER_STATE_CONNECTING) {
+    if (G_UNLIKELY (state != MATE_MIXER_STATE_READY &&
+                    state != MATE_MIXER_STATE_CONNECTING)) {
         /* This would be a backend bug */
         g_warn_if_reached ();
 

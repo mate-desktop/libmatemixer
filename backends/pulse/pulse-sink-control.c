@@ -149,7 +149,7 @@ pulse_sink_control_create_monitor (PulseStreamControl *psc)
     sink = PULSE_SINK (mate_mixer_stream_control_get_stream (MATE_MIXER_STREAM_CONTROL (psc)));
 
     index = pulse_sink_get_index_monitor (sink);
-    if G_UNLIKELY (index == PA_INVALID_INDEX) {
+    if (G_UNLIKELY (index == PA_INVALID_INDEX)) {
         g_debug ("Monitor of stream control %s is not available",
                  mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (psc)));
         return NULL;

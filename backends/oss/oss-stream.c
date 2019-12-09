@@ -199,7 +199,7 @@ oss_stream_set_switch_data (OssStream *stream, gint fd, GList *options)
     g_return_if_fail (options != NULL);
 
     /* Function may only be called once */
-    if G_UNLIKELY (stream->priv->swtch != NULL) {
+    if (G_UNLIKELY (stream->priv->swtch != NULL)) {
         g_warn_if_reached ();
         return;
     }
@@ -210,7 +210,7 @@ oss_stream_set_switch_data (OssStream *stream, gint fd, GList *options)
                                           _("Connector"),
                                           fd,
                                           options);
-    if G_UNLIKELY (stream->priv->swtch == NULL)
+    if (G_UNLIKELY (stream->priv->swtch == NULL))
         return;
 
     /* Read the active selection */

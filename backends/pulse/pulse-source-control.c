@@ -142,7 +142,7 @@ pulse_source_control_create_monitor (PulseStreamControl *psc)
     g_return_val_if_fail (PULSE_IS_SOURCE_CONTROL (psc), NULL);
 
     index = pulse_stream_control_get_stream_index (psc);
-    if G_UNLIKELY (index == PA_INVALID_INDEX) {
+    if (G_UNLIKELY (index == PA_INVALID_INDEX)) {
         g_debug ("Monitor of stream control %s is not available",
                  mate_mixer_stream_control_get_name (MATE_MIXER_STREAM_CONTROL (psc)));
         return NULL;

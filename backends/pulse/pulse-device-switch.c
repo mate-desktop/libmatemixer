@@ -126,7 +126,7 @@ pulse_device_switch_set_active_profile_by_name (PulseDeviceSwitch *swtch, const 
     g_return_if_fail (name != NULL);
 
     item = g_list_find_custom (swtch->priv->profiles, name, compare_profile_name);
-    if G_UNLIKELY (item == NULL) {
+    if (G_UNLIKELY (item == NULL)) {
         g_debug ("Invalid device switch profile name %s", name);
         return;
     }
@@ -144,7 +144,7 @@ pulse_device_switch_set_active_option (MateMixerSwitch *mms, MateMixerSwitchOpti
     g_return_val_if_fail (PULSE_IS_DEVICE_PROFILE (mmso), FALSE);
 
     device = mate_mixer_device_switch_get_device (MATE_MIXER_DEVICE_SWITCH (mms));
-    if G_UNLIKELY (device == NULL)
+    if (G_UNLIKELY (device == NULL))
         return FALSE;
 
     device_name  = mate_mixer_device_get_name (device);

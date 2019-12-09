@@ -115,14 +115,14 @@ alsa_toggle_set_active_option (MateMixerSwitch *mms, MateMixerSwitchOption *mmso
 
     toggle = ALSA_TOGGLE (mms);
 
-    if G_UNLIKELY (toggle->priv->element == NULL)
+    if (G_UNLIKELY (toggle->priv->element == NULL))
         return FALSE;
 
     /* For toggles the 0/1 value is stored as the switch option id, there is not really
      * a need to validate that the option belong to the switch, just make sure it
      * contains the value 0 or 1 */
     value = alsa_switch_option_get_id (ALSA_SWITCH_OPTION (mmso));
-    if G_UNLIKELY (value != 0 && value != 1) {
+    if (G_UNLIKELY (value != 0 && value != 1)) {
         g_warn_if_reached ();
         return FALSE;
     }
@@ -170,7 +170,7 @@ alsa_toggle_load (AlsaElement *element)
 
     toggle = ALSA_TOGGLE (element);
 
-    if G_UNLIKELY (toggle->priv->element == NULL)
+    if (G_UNLIKELY (toggle->priv->element == NULL))
         return FALSE;
 
     /* When reading the first time we try all the channels, otherwise only the
