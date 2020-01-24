@@ -1,18 +1,17 @@
 # SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
-# This file is distributed under the same license as the PACKAGE package.
+# Copyright (C) YEAR MATE Desktop Environment team
+# This file is distributed under the same license as the libmatemixer package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
 # Translators:
 # Michal <sinope@seznam.cz>, 2018
 # Stanislav Kučera <inactive+kacernator@transifex.com>, 2018
 # 
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-03-14 09:53+0100\n"
+"Project-Id-Version: libmatemixer 1.23.0\n"
+"Report-Msgid-Bugs-To: https://mate-desktop.org\n"
+"POT-Creation-Date: 2019-11-04 23:09+0100\n"
 "PO-Revision-Date: 2018-03-11 15:58+0000\n"
 "Last-Translator: Stanislav Kučera <inactive+kacernator@transifex.com>, 2018\n"
 "Language-Team: Czech (https://www.transifex.com/mate/teams/13566/cs/)\n"
@@ -22,541 +21,527 @@ msgstr ""
 "Language: cs\n"
 "Plural-Forms: nplurals=4; plural=(n == 1 && n % 1 == 0) ? 0 : (n >= 2 && n <= 4 && n % 1 == 0) ? 1: (n % 1 != 0 ) ? 2 : 3;\n"
 
-#. Output controls
-#: ../backends/alsa/alsa-constants.c:41
+#: backends/alsa/alsa-constants.c:41
 msgid "Master"
 msgstr "Hlavní kanál"
 
-#: ../backends/alsa/alsa-constants.c:42
+#: backends/alsa/alsa-constants.c:42
 msgid "Hardware Master"
 msgstr "Hlavní hardwarový kanál"
 
-#: ../backends/alsa/alsa-constants.c:43 ../backends/oss/oss-device.c:92
+#: backends/alsa/alsa-constants.c:43 backends/oss/oss-device.c:92
 msgid "PCM"
 msgstr "PCM"
 
-#. OSS manual says this should be the beeper, but Linux OSS seems to assign it
-#. to
-#. * regular volume control
-#: ../backends/alsa/alsa-constants.c:44 ../backends/oss/oss-device.c:95
+#: backends/alsa/alsa-constants.c:44 backends/oss/oss-device.c:95
 msgid "Speaker"
 msgstr "Reproduktor"
 
-#: ../backends/alsa/alsa-constants.c:45
+#: backends/alsa/alsa-constants.c:45
 msgid "Desktop Speaker"
 msgstr "Desktop reproduktor"
 
-#: ../backends/alsa/alsa-constants.c:46 ../backends/alsa/alsa-constants.c:47
-#: ../backends/alsa/alsa-constants.c:48
+#: backends/alsa/alsa-constants.c:46 backends/alsa/alsa-constants.c:47
+#: backends/alsa/alsa-constants.c:48
 msgid "Front Speaker"
 msgstr "Přední reproduktor"
 
-#: ../backends/alsa/alsa-constants.c:49
+#: backends/alsa/alsa-constants.c:49
 msgid "Headphone"
 msgstr "Sluchátka"
 
-#: ../backends/alsa/alsa-constants.c:50
+#: backends/alsa/alsa-constants.c:50
 msgid "Headphone 2"
 msgstr "Sluchátka 2"
 
-#: ../backends/alsa/alsa-constants.c:51
+#: backends/alsa/alsa-constants.c:51
 msgid "Headset"
 msgstr "Sluchátka s mikrofonem"
 
-#: ../backends/alsa/alsa-constants.c:52 ../backends/alsa/alsa-constants.c:53
-#: ../backends/alsa/alsa-constants.c:54 ../backends/alsa/alsa-constants.c:55
+#: backends/alsa/alsa-constants.c:52 backends/alsa/alsa-constants.c:53
+#: backends/alsa/alsa-constants.c:54 backends/alsa/alsa-constants.c:55
 msgid "Surround Speaker"
 msgstr "Prostorový reproduktor"
 
-#: ../backends/alsa/alsa-constants.c:56 ../backends/alsa/alsa-constants.c:57
+#: backends/alsa/alsa-constants.c:56 backends/alsa/alsa-constants.c:57
 msgid "Center Speaker"
 msgstr "Střední reproduktor"
 
-#: ../backends/alsa/alsa-constants.c:58 ../backends/alsa/alsa-constants.c:59
+#: backends/alsa/alsa-constants.c:58 backends/alsa/alsa-constants.c:59
 msgid "CLFE Speaker"
 msgstr "Rozšíření basů na středním reproduktoru"
 
-#: ../backends/alsa/alsa-constants.c:60 ../backends/alsa/alsa-constants.c:136
+#: backends/alsa/alsa-constants.c:60 backends/alsa/alsa-constants.c:136
 msgid "Digital"
 msgstr "Digitální"
 
-#: ../backends/alsa/alsa-constants.c:61
+#: backends/alsa/alsa-constants.c:61
 msgid "Master Mono"
 msgstr "Hlavní kanál - mono"
 
-#: ../backends/alsa/alsa-constants.c:62
+#: backends/alsa/alsa-constants.c:62
 msgid "Master Digital"
 msgstr "Hlavní digitální kanál"
 
-#: ../backends/alsa/alsa-constants.c:63 ../backends/alsa/alsa-constants.c:64
+#: backends/alsa/alsa-constants.c:63 backends/alsa/alsa-constants.c:64
 msgid "Side Speaker"
 msgstr "Boční reproduktor"
 
-#: ../backends/alsa/alsa-constants.c:65
+#: backends/alsa/alsa-constants.c:65
 msgid "Rear Speaker"
 msgstr "Zadní reproduktor"
 
-#: ../backends/alsa/alsa-constants.c:66
+#: backends/alsa/alsa-constants.c:66
 msgid "Wave"
 msgstr "Wave"
 
-#: ../backends/alsa/alsa-constants.c:67 ../backends/alsa/alsa-constants.c:100
-#: ../backends/alsa/alsa-constants.c:216
+#: backends/alsa/alsa-constants.c:67 backends/alsa/alsa-constants.c:100
+#: backends/alsa/alsa-constants.c:216
 msgid "Phone"
 msgstr "Sluchátka"
 
-#: ../backends/alsa/alsa-constants.c:68 ../backends/alsa/alsa-constants.c:214
-#: ../backends/oss/oss-device.c:98
+#: backends/alsa/alsa-constants.c:68 backends/alsa/alsa-constants.c:214
+#: backends/oss/oss-device.c:98
 msgid "CD"
 msgstr "CD"
 
-#: ../backends/alsa/alsa-constants.c:69
+#: backends/alsa/alsa-constants.c:69
 msgid "Music"
 msgstr "Hudba"
 
-#: ../backends/alsa/alsa-constants.c:70
+#: backends/alsa/alsa-constants.c:70
 msgid "AC97"
 msgstr "AC97"
 
-#: ../backends/alsa/alsa-constants.c:71 ../backends/alsa/alsa-constants.c:72
+#: backends/alsa/alsa-constants.c:71 backends/alsa/alsa-constants.c:72
 msgid "LFE Speaker"
 msgstr "Subwoofer"
 
-#: ../backends/alsa/alsa-constants.c:73
+#: backends/alsa/alsa-constants.c:73
 msgid "Bass Speaker"
 msgstr "Basový reproduktor"
 
-#: ../backends/alsa/alsa-constants.c:74
+#: backends/alsa/alsa-constants.c:74
 msgid "PC Speaker"
 msgstr "Vestavěný PC reproduktor"
 
-#: ../backends/alsa/alsa-constants.c:75 ../backends/oss/oss-device.c:91
+#: backends/alsa/alsa-constants.c:75 backends/oss/oss-device.c:91
 msgid "Synth"
 msgstr "Syntéza"
 
-#: ../backends/alsa/alsa-constants.c:76
+#: backends/alsa/alsa-constants.c:76
 msgid "MIDI"
 msgstr "MIDI"
 
-#: ../backends/alsa/alsa-constants.c:77
+#: backends/alsa/alsa-constants.c:77
 msgid "Synth/MIDI"
 msgstr "Syntéza / MIDI"
 
-#: ../backends/alsa/alsa-constants.c:78 ../backends/oss/oss-device.c:89
+#: backends/alsa/alsa-constants.c:78 backends/oss/oss-device.c:89
 msgid "Bass"
 msgstr "Basy"
 
-#: ../backends/alsa/alsa-constants.c:79 ../backends/oss/oss-device.c:90
+#: backends/alsa/alsa-constants.c:79 backends/oss/oss-device.c:90
 msgid "Treble"
 msgstr "Výšky"
 
-#. Input controls
-#: ../backends/alsa/alsa-constants.c:82
+#: backends/alsa/alsa-constants.c:82
 msgid "Capture"
 msgstr "Zachytit"
 
-#. Microphone options
-#: ../backends/alsa/alsa-constants.c:83 ../backends/alsa/alsa-constants.c:127
-#: ../backends/alsa/alsa-constants.c:157 ../backends/alsa/alsa-constants.c:158
-#: ../backends/oss/oss-device.c:97
+#: backends/alsa/alsa-constants.c:83 backends/alsa/alsa-constants.c:127
+#: backends/alsa/alsa-constants.c:157 backends/alsa/alsa-constants.c:158
+#: backends/oss/oss-device.c:97
 msgid "Microphone"
 msgstr "Mikrofon"
 
-#: ../backends/alsa/alsa-constants.c:84 ../backends/alsa/alsa-constants.c:195
+#: backends/alsa/alsa-constants.c:84 backends/alsa/alsa-constants.c:195
 msgid "Microphone/Line In"
 msgstr "Mikrofonní / linkový vstup"
 
-#: ../backends/alsa/alsa-constants.c:85 ../backends/alsa/alsa-constants.c:86
-#: ../backends/alsa/alsa-constants.c:169 ../backends/alsa/alsa-constants.c:170
-#: ../backends/alsa/alsa-constants.c:172 ../backends/alsa/alsa-constants.c:173
-#: ../backends/alsa/alsa-constants.c:174
+#: backends/alsa/alsa-constants.c:85 backends/alsa/alsa-constants.c:86
+#: backends/alsa/alsa-constants.c:169 backends/alsa/alsa-constants.c:170
+#: backends/alsa/alsa-constants.c:172 backends/alsa/alsa-constants.c:173
+#: backends/alsa/alsa-constants.c:174
 msgid "Internal Microphone"
 msgstr "Interní mikrofon"
 
-#: ../backends/alsa/alsa-constants.c:87 ../backends/alsa/alsa-constants.c:164
-#: ../backends/alsa/alsa-constants.c:165
+#: backends/alsa/alsa-constants.c:87 backends/alsa/alsa-constants.c:164
+#: backends/alsa/alsa-constants.c:165
 msgid "Front Microphone"
 msgstr "Přední mikrofon"
 
-#: ../backends/alsa/alsa-constants.c:88 ../backends/alsa/alsa-constants.c:184
-#: ../backends/alsa/alsa-constants.c:185
+#: backends/alsa/alsa-constants.c:88 backends/alsa/alsa-constants.c:184
+#: backends/alsa/alsa-constants.c:185
 msgid "Rear Microphone"
 msgstr "Zadní mikrofon"
 
-#: ../backends/alsa/alsa-constants.c:89 ../backends/alsa/alsa-constants.c:168
+#: backends/alsa/alsa-constants.c:89 backends/alsa/alsa-constants.c:168
 msgid "Dock Microphone"
 msgstr "Mikrofon v docku"
 
-#: ../backends/alsa/alsa-constants.c:90 ../backends/alsa/alsa-constants.c:166
+#: backends/alsa/alsa-constants.c:90 backends/alsa/alsa-constants.c:166
 msgid "Headphone Microphone"
 msgstr "Náhlavní mikrofon"
 
-#: ../backends/alsa/alsa-constants.c:91 ../backends/alsa/alsa-constants.c:167
+#: backends/alsa/alsa-constants.c:91 backends/alsa/alsa-constants.c:167
 msgid "Headset Microphone"
 msgstr "Náhlavní mikrofon"
 
-#: ../backends/alsa/alsa-constants.c:92
+#: backends/alsa/alsa-constants.c:92
 msgid "Inverted Internal Microphone"
 msgstr "Fázově obrácený vnitřní mikrofon"
 
-#: ../backends/alsa/alsa-constants.c:93 ../backends/alsa/alsa-constants.c:94
-#: ../backends/alsa/alsa-constants.c:95 ../backends/alsa/alsa-constants.c:192
-#: ../backends/alsa/alsa-constants.c:193 ../backends/alsa/alsa-constants.c:194
-#: ../backends/alsa/alsa-constants.c:197 ../backends/alsa/alsa-constants.c:198
-#: ../backends/oss/oss-device.c:96
+#: backends/alsa/alsa-constants.c:93 backends/alsa/alsa-constants.c:94
+#: backends/alsa/alsa-constants.c:95 backends/alsa/alsa-constants.c:192
+#: backends/alsa/alsa-constants.c:193 backends/alsa/alsa-constants.c:194
+#: backends/alsa/alsa-constants.c:197 backends/alsa/alsa-constants.c:198
+#: backends/oss/oss-device.c:96
 msgid "Line In"
 msgstr "Linkový vstup"
 
-#: ../backends/alsa/alsa-constants.c:96 ../backends/alsa/alsa-constants.c:204
-#: ../backends/alsa/alsa-constants.c:207
+#: backends/alsa/alsa-constants.c:96 backends/alsa/alsa-constants.c:204
+#: backends/alsa/alsa-constants.c:207
 msgid "Auxiliary"
 msgstr "Vstup vnějšího zdroje"
 
-#: ../backends/alsa/alsa-constants.c:97 ../backends/alsa/alsa-constants.c:215
-#: ../backends/oss/oss-device.c:115
+#: backends/alsa/alsa-constants.c:97 backends/alsa/alsa-constants.c:215
+#: backends/oss/oss-device.c:115
 msgid "Video"
 msgstr "Video"
 
-#: ../backends/alsa/alsa-constants.c:98 ../backends/alsa/alsa-constants.c:202
+#: backends/alsa/alsa-constants.c:98 backends/alsa/alsa-constants.c:202
 msgid "TV Tuner"
 msgstr "TV tuner"
 
-#: ../backends/alsa/alsa-constants.c:99 ../backends/alsa/alsa-constants.c:203
+#: backends/alsa/alsa-constants.c:99 backends/alsa/alsa-constants.c:203
 msgid "FM"
 msgstr "FM - rádio"
 
-#: ../backends/alsa/alsa-constants.c:101
+#: backends/alsa/alsa-constants.c:101
 msgid "Microphone Boost"
 msgstr "Zesílení mikrofonu"
 
-#: ../backends/alsa/alsa-constants.c:102
+#: backends/alsa/alsa-constants.c:102
 msgid "Microphone Boost (+20dB)"
 msgstr "Zesílení mikrofonu (+20 dB)"
 
-#: ../backends/alsa/alsa-constants.c:103 ../backends/alsa/alsa-constants.c:104
+#: backends/alsa/alsa-constants.c:103 backends/alsa/alsa-constants.c:104
 msgid "Internal Microphone Boost"
 msgstr "Zesílení vnitřního mikrofonu"
 
-#: ../backends/alsa/alsa-constants.c:105
+#: backends/alsa/alsa-constants.c:105
 msgid "Front Microphone Boost"
 msgstr "Zesílení předního mikrofonu"
 
-#: ../backends/alsa/alsa-constants.c:106
+#: backends/alsa/alsa-constants.c:106
 msgid "Rear Microphone Boost"
 msgstr "Zesílení zadního mikrofonu"
 
-#: ../backends/alsa/alsa-constants.c:107
+#: backends/alsa/alsa-constants.c:107
 msgid "Dock Microphone Boost"
 msgstr "Zesílení mikrofonu v docku"
 
-#: ../backends/alsa/alsa-constants.c:108
+#: backends/alsa/alsa-constants.c:108
 msgid "Headphone Microphone Boost"
 msgstr "Zesílení náhlavního mikrofonu"
 
-#: ../backends/alsa/alsa-constants.c:109
+#: backends/alsa/alsa-constants.c:109
 msgid "Headset Microphone Boost"
 msgstr "Zesílení náhlavního mikrofonu"
 
-#: ../backends/alsa/alsa-constants.c:110
+#: backends/alsa/alsa-constants.c:110
 msgid "Line In Boost"
 msgstr "Zesílení linkového vstupu"
 
-#. Switches
-#: ../backends/alsa/alsa-constants.c:117
+#: backends/alsa/alsa-constants.c:117
 msgid "Analog Output"
 msgstr "Analogový výstup"
 
-#: ../backends/alsa/alsa-constants.c:118
+#: backends/alsa/alsa-constants.c:118
 msgid "Analog Source"
 msgstr "Analogový zdroj"
 
-#: ../backends/alsa/alsa-constants.c:119
+#: backends/alsa/alsa-constants.c:119
 msgid "Capture Source"
 msgstr "Zdroj zachytávání - nahrávání"
 
-#: ../backends/alsa/alsa-constants.c:120 ../backends/alsa/alsa-constants.c:121
+#: backends/alsa/alsa-constants.c:120 backends/alsa/alsa-constants.c:121
 msgid "Input Source"
 msgstr "Vstupní zdroj"
 
-#: ../backends/alsa/alsa-constants.c:122
+#: backends/alsa/alsa-constants.c:122
 msgid "Digital Input Source"
 msgstr "Vstupní digitální zdroj"
 
-#: ../backends/alsa/alsa-constants.c:123
+#: backends/alsa/alsa-constants.c:123
 msgid "PCM Capture Source"
 msgstr "Zdroj zachytávání PCM"
 
-#: ../backends/alsa/alsa-constants.c:124
+#: backends/alsa/alsa-constants.c:124
 msgid "Digital Playback Source"
 msgstr "Zdroj digitálního přehrávání"
 
-#: ../backends/alsa/alsa-constants.c:125
+#: backends/alsa/alsa-constants.c:125
 msgid "Mono Output"
 msgstr "Výstup mono"
 
-#: ../backends/alsa/alsa-constants.c:126
+#: backends/alsa/alsa-constants.c:126
 msgid "Shared Microphone/Line In"
 msgstr "Sdílená zdířka mikrofon / linkový vstup"
 
-#: ../backends/alsa/alsa-constants.c:128
+#: backends/alsa/alsa-constants.c:128
 msgid "Microphone Jack Mode"
 msgstr "Režim mikrofonní zdířky"
 
-#: ../backends/alsa/alsa-constants.c:129
+#: backends/alsa/alsa-constants.c:129
 msgid "Surround Jack Mode"
 msgstr "Režim zdířky prostorového zvuku"
 
-#: ../backends/alsa/alsa-constants.c:130
+#: backends/alsa/alsa-constants.c:130
 msgid "Auto-Mute Mode"
 msgstr "Režim automatického ztlumení"
 
-#. Toggles
-#: ../backends/alsa/alsa-constants.c:133
+#: backends/alsa/alsa-constants.c:133
 msgid "External Amplifier"
 msgstr "Vnější zesilovač"
 
-#: ../backends/alsa/alsa-constants.c:134
+#: backends/alsa/alsa-constants.c:134
 msgid "Bass Boost"
 msgstr "Zesílení basů"
 
-#: ../backends/alsa/alsa-constants.c:135
+#: backends/alsa/alsa-constants.c:135
 msgid "Capture Boost"
 msgstr "Zesílení nahrávacího zdroje"
 
-#: ../backends/alsa/alsa-constants.c:137 ../backends/alsa/alsa-constants.c:201
+#: backends/alsa/alsa-constants.c:137 backends/alsa/alsa-constants.c:201
 msgid "Digital In"
 msgstr "Digitální vstup"
 
-#: ../backends/alsa/alsa-constants.c:138
+#: backends/alsa/alsa-constants.c:138
 msgid "Digital Default PCM"
 msgstr "Výchozí PCM digitální"
 
-#: ../backends/alsa/alsa-constants.c:139
+#: backends/alsa/alsa-constants.c:139
 msgid "Optical"
 msgstr "Optický"
 
-#: ../backends/alsa/alsa-constants.c:140
+#: backends/alsa/alsa-constants.c:140
 msgid "Auto Gain Control"
 msgstr "Automatické nastavení úrovně zisku"
 
-#: ../backends/alsa/alsa-constants.c:141
+#: backends/alsa/alsa-constants.c:141
 msgid "Mix"
 msgstr "Směšovač"
 
-#: ../backends/alsa/alsa-constants.c:142
+#: backends/alsa/alsa-constants.c:142
 msgid "Mix Mono"
 msgstr "Směšovač mono"
 
-#: ../backends/alsa/alsa-constants.c:143
+#: backends/alsa/alsa-constants.c:143
 msgid "Microphone Capture"
 msgstr "Zachytáváni mikrofonu"
 
-#: ../backends/alsa/alsa-constants.c:144 ../backends/alsa/alsa-constants.c:199
+#: backends/alsa/alsa-constants.c:144 backends/alsa/alsa-constants.c:199
 msgid "Input 1"
 msgstr "Vstup 1"
 
-#: ../backends/alsa/alsa-constants.c:145 ../backends/alsa/alsa-constants.c:200
+#: backends/alsa/alsa-constants.c:145 backends/alsa/alsa-constants.c:200
 msgid "Input 2"
 msgstr "Vstup 2"
 
-#. Output options
-#: ../backends/alsa/alsa-constants.c:152
+#: backends/alsa/alsa-constants.c:152
 msgid "Speakers"
 msgstr "Reproduktory"
 
-#: ../backends/alsa/alsa-constants.c:153
+#: backends/alsa/alsa-constants.c:153
 msgid "Headphones"
 msgstr "Sluchátka"
 
-#: ../backends/alsa/alsa-constants.c:154
+#: backends/alsa/alsa-constants.c:154
 msgid "Front Panel Headphones"
 msgstr "Sluchátka na předním panelu"
 
-#: ../backends/alsa/alsa-constants.c:159
+#: backends/alsa/alsa-constants.c:159
 msgid "Microphone 1"
 msgstr "Mikrofon 1"
 
-#: ../backends/alsa/alsa-constants.c:160
+#: backends/alsa/alsa-constants.c:160
 msgid "Microphone 2"
 msgstr "Mikrofon 2"
 
-#: ../backends/alsa/alsa-constants.c:161 ../backends/alsa/alsa-constants.c:162
-#: ../backends/alsa/alsa-constants.c:163
+#: backends/alsa/alsa-constants.c:161 backends/alsa/alsa-constants.c:162
+#: backends/alsa/alsa-constants.c:163
 msgid "Microphone In"
 msgstr "Vstup mikrofonu"
 
-#: ../backends/alsa/alsa-constants.c:171
+#: backends/alsa/alsa-constants.c:171
 msgid "Internal Microphone 1"
 msgstr "Vnitřní mikrofon 1"
 
-#: ../backends/alsa/alsa-constants.c:175
+#: backends/alsa/alsa-constants.c:175
 msgid "Internal Digital Microphone"
 msgstr "Vnitřní digitální mikrofon"
 
-#: ../backends/alsa/alsa-constants.c:176 ../backends/alsa/alsa-constants.c:179
+#: backends/alsa/alsa-constants.c:176 backends/alsa/alsa-constants.c:179
 msgid "Digital Microphone"
 msgstr "Digitální mikrofon"
 
-#: ../backends/alsa/alsa-constants.c:177
+#: backends/alsa/alsa-constants.c:177
 msgid "Digital Microphone 1"
 msgstr "Digitální mikrofon 1"
 
-#: ../backends/alsa/alsa-constants.c:178
+#: backends/alsa/alsa-constants.c:178
 msgid "Digital Microphone 2"
 msgstr "Digitální mikrofon 2"
 
-#: ../backends/alsa/alsa-constants.c:180 ../backends/alsa/alsa-constants.c:181
-#: ../backends/alsa/alsa-constants.c:182 ../backends/alsa/alsa-constants.c:183
+#: backends/alsa/alsa-constants.c:180 backends/alsa/alsa-constants.c:181
+#: backends/alsa/alsa-constants.c:182 backends/alsa/alsa-constants.c:183
 msgid "External Microphone"
 msgstr "Vnější mikrofon"
 
-#: ../backends/alsa/alsa-constants.c:186
+#: backends/alsa/alsa-constants.c:186
 msgid "Camera Microphone"
 msgstr "Mikrofon webcamery"
 
-#. Other options
-#: ../backends/alsa/alsa-constants.c:189
+#: backends/alsa/alsa-constants.c:189
 msgid "Analog"
 msgstr "Analogový"
 
-#: ../backends/alsa/alsa-constants.c:190
+#: backends/alsa/alsa-constants.c:190
 msgid "Analog In"
 msgstr "Analogový vstup"
 
-#: ../backends/alsa/alsa-constants.c:191
+#: backends/alsa/alsa-constants.c:191
 msgid "Analog Inputs"
 msgstr "Analogové vstupy"
 
-#: ../backends/alsa/alsa-constants.c:196
+#: backends/alsa/alsa-constants.c:196
 msgid "Line In/Microphone"
 msgstr "Linkový / Mikrofonní vstup"
 
-#: ../backends/alsa/alsa-constants.c:205 ../backends/alsa/alsa-constants.c:206
+#: backends/alsa/alsa-constants.c:205 backends/alsa/alsa-constants.c:206
 msgid "Auxiliary In"
 msgstr "Vstup vnějšího zdroje"
 
-#: ../backends/alsa/alsa-constants.c:208
+#: backends/alsa/alsa-constants.c:208
 msgid "Auxiliary 0"
 msgstr "Vnější zdroj 0"
 
-#: ../backends/alsa/alsa-constants.c:209
+#: backends/alsa/alsa-constants.c:209
 msgid "Auxiliary 1"
 msgstr "Vnější zdroj 1"
 
-#: ../backends/alsa/alsa-constants.c:210
+#: backends/alsa/alsa-constants.c:210
 msgid "Auxiliary 2"
 msgstr "Vnější zdroj 2"
 
-#: ../backends/alsa/alsa-constants.c:211
+#: backends/alsa/alsa-constants.c:211
 msgid "Auxiliary 3"
 msgstr "Vnější zdroj 3"
 
-#: ../backends/alsa/alsa-constants.c:212
+#: backends/alsa/alsa-constants.c:212
 msgid "Docking Station"
 msgstr "Dockovací stanice"
 
-#. Recording monitor
-#: ../backends/alsa/alsa-constants.c:213 ../backends/oss/oss-device.c:100
+#: backends/alsa/alsa-constants.c:213 backends/oss/oss-device.c:100
 msgid "Mixer"
 msgstr "Směšovač"
 
-#: ../backends/alsa/alsa-constants.c:217
+#: backends/alsa/alsa-constants.c:217
 msgid "Unknown 1"
 msgstr "Neznámý 1"
 
-#: ../backends/alsa/alsa-constants.c:218
+#: backends/alsa/alsa-constants.c:218
 msgid "Unknown 2"
 msgstr "Neznámý 2"
 
-#: ../backends/alsa/alsa-constants.c:219
+#: backends/alsa/alsa-constants.c:219
 msgid "Enabled"
 msgstr "Povoleno"
 
-#: ../backends/alsa/alsa-constants.c:220
+#: backends/alsa/alsa-constants.c:220
 msgid "Disabled"
 msgstr "Zakázáno"
 
-#: ../backends/alsa/alsa-device.c:636
+#: backends/alsa/alsa-device.c:630
 msgid "On"
 msgstr "Zapnout"
 
-#: ../backends/alsa/alsa-device.c:637
+#: backends/alsa/alsa-device.c:631
 msgid "Off"
 msgstr "Vypnout"
 
-#: ../backends/oss/oss-backend.c:407
+#: backends/oss/oss-backend.c:403
 #, c-format
 msgid "OSS Mixer %d"
 msgstr "Směšovač OSS %d"
 
-#: ../backends/oss/oss-device.c:88
+#: backends/oss/oss-device.c:88
 msgid "Volume"
 msgstr "Hlasitost"
 
-#: ../backends/oss/oss-device.c:101
+#: backends/oss/oss-device.c:101
 msgid "PCM 2"
 msgstr "PCM 2"
 
-#. Recording level (master input)
-#: ../backends/oss/oss-device.c:103
+#: backends/oss/oss-device.c:103
 msgid "Record"
 msgstr "Záznam"
 
-#: ../backends/oss/oss-device.c:104
+#: backends/oss/oss-device.c:104
 msgid "Input Gain"
 msgstr "Vstupní citlivost"
 
-#: ../backends/oss/oss-device.c:105
+#: backends/oss/oss-device.c:105
 msgid "Output Gain"
 msgstr "Výstupní citlivost"
 
-#: ../backends/oss/oss-device.c:106
+#: backends/oss/oss-device.c:106
 msgid "Line In 1"
 msgstr "Linkový vstup 1"
 
-#: ../backends/oss/oss-device.c:107
+#: backends/oss/oss-device.c:107
 msgid "Line In 2"
 msgstr "Linkový vstup 2"
 
-#: ../backends/oss/oss-device.c:108
+#: backends/oss/oss-device.c:108
 msgid "Line In 3"
 msgstr "Linkový vstup 3"
 
-#. These 3 can be attached to either digital input or output
-#: ../backends/oss/oss-device.c:110
+#: backends/oss/oss-device.c:110
 msgid "Digital 1"
 msgstr "Digitál 1"
 
-#: ../backends/oss/oss-device.c:111
+#: backends/oss/oss-device.c:111
 msgid "Digital 2"
 msgstr "Digitál 2"
 
-#: ../backends/oss/oss-device.c:112
+#: backends/oss/oss-device.c:112
 msgid "Digital 3"
 msgstr "Digitál 3"
 
-#: ../backends/oss/oss-device.c:113
+#: backends/oss/oss-device.c:113
 msgid "Phone In"
 msgstr "Sluchátkový vstup"
 
-#: ../backends/oss/oss-device.c:114
+#: backends/oss/oss-device.c:114
 msgid "Phone Out"
 msgstr "Sluchátkový výstup"
 
-#: ../backends/oss/oss-device.c:116
+#: backends/oss/oss-device.c:116
 msgid "Radio"
 msgstr "Rádio"
 
-#. Create the port switch
-#: ../backends/oss/oss-stream.c:214 ../backends/pulse/pulse-sink.c:150
-#: ../backends/pulse/pulse-source.c:147
+#: backends/oss/oss-stream.c:210 backends/pulse/pulse-sink.c:144
+#: backends/pulse/pulse-source.c:141
 msgid "Connector"
 msgstr "Konektor"
 
-#: ../backends/pulse/pulse-device.c:398
+#: backends/pulse/pulse-device.c:385
 msgid "Profile"
 msgstr "Profil"
 
-#: ../backends/pulse/pulse-monitor.c:282
+#: backends/pulse/pulse-monitor.c:275
 msgid "Peak detect"
 msgstr "Detekce hlasitostních špiček"
