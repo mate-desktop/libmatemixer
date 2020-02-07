@@ -1,3 +1,11 @@
+### libmatemixer 1.24.0
+
+  * Translations update
+  * avoid redundant redeclarations
+  * update indent for Makefile.am
+  * migrate from intltool to gettext
+  * Use WARN_CFLAGS which are only set with --enable-compiler-warnings
+
 ### libmatemixer 1.23.0
 
   * Translations update
