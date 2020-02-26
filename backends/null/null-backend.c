@@ -26,10 +26,7 @@
 #define BACKEND_PRIORITY  0
 #define BACKEND_FLAGS     MATE_MIXER_BACKEND_NO_FLAGS
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-function"
 G_DEFINE_DYNAMIC_TYPE (NullBackend, null_backend, MATE_MIXER_TYPE_BACKEND)
-#pragma clang diagnostic pop
 
 static gboolean null_backend_open (MateMixerBackend *backend);
 
