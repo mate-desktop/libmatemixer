@@ -50,14 +50,11 @@ struct _AlsaBackendPrivate
 static void alsa_backend_dispose        (GObject          *object);
 static void alsa_backend_finalize       (GObject          *object);
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-function"
 G_DEFINE_DYNAMIC_TYPE_EXTENDED (AlsaBackend,
                                 alsa_backend,
                                 MATE_MIXER_TYPE_BACKEND,
                                 0,
                                 G_ADD_PRIVATE_DYNAMIC(AlsaBackend))
-#pragma clang diagnostic pop
 
 static gboolean     alsa_backend_open            (MateMixerBackend *backend);
 static void         alsa_backend_close           (MateMixerBackend *backend);
