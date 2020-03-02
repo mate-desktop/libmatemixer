@@ -232,7 +232,6 @@ AC_SUBST(OSS_LIBS)
 # Compiler warnings
 # =======================================================================
 MATE_COMPILE_WARNINGS([maximum])
-MATE_CXX_WARNINGS
 
 # Turn on the additional warnings last, so warnings don't affect other tests.
 AC_ARG_ENABLE(more-warnings,
