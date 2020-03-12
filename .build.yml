@@ -36,7 +36,6 @@ requires:
     - autoconf-archive
     - clang
     - clang-analyzer
-    - cppcheck-htmlreport
     - gcc
     - git
     - make
@@ -107,11 +106,6 @@ before_scripts:
   - make install
 
 after_scripts:
-  - if [ ${DISTRO_NAME} == "fedora" ];then
-  -   cppcheck --xml --output-file=cppcheck.xml --enable=warning,style,performance,portability,information,missingInclude .
-  -   cppcheck-htmlreport --title=${REPO_NAME} --file=cppcheck.xml --report-dir=cppcheck-htmlreport
-  -   ./gen-index -l 20
-  - fi
   - make distcheck
 
 releases:
