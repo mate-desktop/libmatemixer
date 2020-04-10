@@ -54,7 +54,7 @@ m4_ifdef([AM_SILENT_RULES],
 # =======================================================================
 # Compiler warnings
 # =======================================================================
-MATE_COMPILE_WARNINGS([yes])
+MATE_COMPILE_WARNINGS
 
 # Checks for required programs.
 AC_PROG_CC
