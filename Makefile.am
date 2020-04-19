@@ -8,6 +8,9 @@ SUBDIRS =                               \
 	docs                            \
 	examples
 
+DISTCHECK_CONFIGURE_FLAGS = \
+	--enable-compile-warnings=no
+
 EXTRA_DIST = autogen.sh
 
 MAINTAINERCLEANFILES =                      \
