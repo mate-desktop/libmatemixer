@@ -61,7 +61,7 @@ static void oss_backend_finalize       (GObject         *object);
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-function"
-G_DEFINE_DYNAMIC_TYPE_EXTENDED (OssBackend, oss_backend, MATE_MIXER_TYPE_BACKEND, 0, G_ADD_PRIVATE (OssBackend))
+G_DEFINE_DYNAMIC_TYPE_EXTENDED (OssBackend, oss_backend, MATE_MIXER_TYPE_BACKEND, 0, G_ADD_PRIVATE_DYNAMIC (OssBackend))
 #pragma clang diagnostic pop
 
 static gboolean     oss_backend_open             (MateMixerBackend *backend);
