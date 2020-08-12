@@ -4,18 +4,19 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
 # Translators:
-# Carlos Moreira, 2018
-# Hugo Carvalho <hugokarvalho@hotmail.com>, 2018
-# alfalb_mansil, 2018
-# Diogo Oliveira <diogodesigns@gmail.com>, 2018
+# Carlos Moreira, 2020
+# Hugo Carvalho <hugokarvalho@hotmail.com>, 2020
+# fc2d9c36d73e741383fbbf46a4aac49f_013445b, 2020
+# Wolfgang Ulbrich <mate@raveit.de>, 2020
+# Diogo Oliveira <diogodesigns@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: libmatemixer 1.23.0\n"
 "Report-Msgid-Bugs-To: https://mate-desktop.org\n"
 "POT-Creation-Date: 2019-11-04 23:09+0100\n"
-"PO-Revision-Date: 2018-03-11 15:58+0000\n"
-"Last-Translator: Diogo Oliveira <diogodesigns@gmail.com>, 2018\n"
+"PO-Revision-Date: 2020-02-14 12:44+0000\n"
+"Last-Translator: Diogo Oliveira <diogodesigns@gmail.com>, 2020\n"
 "Language-Team: Portuguese (https://www.transifex.com/mate/teams/13566/pt/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -481,7 +482,7 @@ msgstr "Misturador OSS %d"
 
 #: backends/oss/oss-device.c:88
 msgid "Volume"
-msgstr "Volume"
+msgstr "Unidade"
 
 #: backends/oss/oss-device.c:101
 msgid "PCM 2"

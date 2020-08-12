@@ -4,16 +4,16 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
 # Translators:
-# worm <thewormhole@gmail.com>, 2018
-# Arnold Marko <arnold.marko@gmail.com>, 2019
+# worm <thewormhole@gmail.com>, 2020
+# Arnold Marko <arnold.marko@gmail.com>, 2020
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: libmatemixer 1.23.0\n"
 "Report-Msgid-Bugs-To: https://mate-desktop.org\n"
 "POT-Creation-Date: 2019-11-04 23:09+0100\n"
-"PO-Revision-Date: 2018-03-11 15:58+0000\n"
-"Last-Translator: Arnold Marko <arnold.marko@gmail.com>, 2019\n"
+"PO-Revision-Date: 2020-02-14 12:44+0000\n"
+"Last-Translator: Arnold Marko <arnold.marko@gmail.com>, 2020\n"
 "Language-Team: Slovenian (https://www.transifex.com/mate/teams/13566/sl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
