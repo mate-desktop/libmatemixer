@@ -1,3 +1,9 @@
+### libmatemixer 1.24.1
+
+  * Translations update
+  * Use the correct macro for dynamic type's private
+  * build: silent build warnings for distcheck
+
 ### libmatemixer 1.24.0
 
   * Translations update
