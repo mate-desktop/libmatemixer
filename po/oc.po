@@ -5,6 +5,7 @@
 # 
 # Translators:
 # Cédric Valmary <cvalmary@yahoo.fr>, 2018
+# Quentin PAGÈS, 2020
 # 
 msgid ""
 msgstr ""
@@ -12,7 +13,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: https://mate-desktop.org\n"
 "POT-Creation-Date: 2019-11-04 23:09+0100\n"
 "PO-Revision-Date: 2018-03-11 15:58+0000\n"
-"Last-Translator: Cédric Valmary <cvalmary@yahoo.fr>, 2018\n"
+"Last-Translator: Quentin PAGÈS, 2020\n"
 "Language-Team: Occitan (post 1500) (https://www.transifex.com/mate/teams/13566/oc/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -92,7 +93,7 @@ msgstr "Nautparlaire arrièr"
 
 #: backends/alsa/alsa-constants.c:66
 msgid "Wave"
-msgstr ""
+msgstr "Wave"
 
 #: backends/alsa/alsa-constants.c:67 backends/alsa/alsa-constants.c:100
 #: backends/alsa/alsa-constants.c:216
@@ -122,7 +123,7 @@ msgstr ""
 
 #: backends/alsa/alsa-constants.c:74
 msgid "PC Speaker"
-msgstr ""
+msgstr "Nautparlaire del PC"
 
 #: backends/alsa/alsa-constants.c:75 backends/oss/oss-device.c:91
 msgid "Synth"

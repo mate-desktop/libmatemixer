@@ -7,6 +7,8 @@
 # Stefano Karapetsas <stefano@karapetsas.com>, 2018
 # Dario Di Nucci <linkin88mail@gmail.com>, 2018
 # Marco Bartolucci <nap.84@live.it>, 2018
+# Alessandro Volturno <alelvb@inwind.it>, 2020
+# Enrico B. <enricobe@hotmail.com>, 2020
 # 
 msgid ""
 msgstr ""
@@ -14,7 +16,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: https://mate-desktop.org\n"
 "POT-Creation-Date: 2019-11-04 23:09+0100\n"
 "PO-Revision-Date: 2018-03-11 15:58+0000\n"
-"Last-Translator: Marco Bartolucci <nap.84@live.it>, 2018\n"
+"Last-Translator: Enrico B. <enricobe@hotmail.com>, 2020\n"
 "Language-Team: Italian (https://www.transifex.com/mate/teams/13566/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,7 +30,7 @@ msgstr "Principale"
 
 #: backends/alsa/alsa-constants.c:42
 msgid "Hardware Master"
-msgstr "Dispositivo Principale"
+msgstr "Dispositivo principale"
 
 #: backends/alsa/alsa-constants.c:43 backends/oss/oss-device.c:92
 msgid "PCM"
@@ -165,7 +167,7 @@ msgstr "Microfono/Ingresso"
 #: backends/alsa/alsa-constants.c:172 backends/alsa/alsa-constants.c:173
 #: backends/alsa/alsa-constants.c:174
 msgid "Internal Microphone"
-msgstr "Microfono interno"
+msgstr "Microfono Interno"
 
 #: backends/alsa/alsa-constants.c:87 backends/alsa/alsa-constants.c:164
 #: backends/alsa/alsa-constants.c:165
@@ -183,11 +185,11 @@ msgstr "Dock Microfono"
 
 #: backends/alsa/alsa-constants.c:90 backends/alsa/alsa-constants.c:166
 msgid "Headphone Microphone"
-msgstr "Microfono delle Cuffie"
+msgstr "Microfono delle cuffie"
 
 #: backends/alsa/alsa-constants.c:91 backends/alsa/alsa-constants.c:167
 msgid "Headset Microphone"
-msgstr "Microfono delle Cuffie"
+msgstr "Microfono delle cuffie"
 
 #: backends/alsa/alsa-constants.c:92
 msgid "Inverted Internal Microphone"
@@ -265,15 +267,15 @@ msgstr "Sorgente Analogica"
 
 #: backends/alsa/alsa-constants.c:119
 msgid "Capture Source"
-msgstr "Sorgente Cattura"
+msgstr "Sorgente di Cattura"
 
 #: backends/alsa/alsa-constants.c:120 backends/alsa/alsa-constants.c:121
 msgid "Input Source"
-msgstr "Sorgente Ingresso"
+msgstr "Sorgente di Ingresso"
 
 #: backends/alsa/alsa-constants.c:122
 msgid "Digital Input Source"
-msgstr "Sorgente Ingresso Digitale"
+msgstr "Sorgente di Ingresso Digitale"
 
 #: backends/alsa/alsa-constants.c:123
 msgid "PCM Capture Source"
@@ -281,7 +283,7 @@ msgstr "Sorgente Cattura PCM"
 
 #: backends/alsa/alsa-constants.c:124
 msgid "Digital Playback Source"
-msgstr "Sorgente Riproduzione Digitale"
+msgstr "Sorgente di Riproduzione Digitale"
 
 #: backends/alsa/alsa-constants.c:125
 msgid "Mono Output"
@@ -325,7 +327,7 @@ msgstr "PCM Digitale di Default"
 
 #: backends/alsa/alsa-constants.c:139
 msgid "Optical"
-msgstr "Ottica"
+msgstr "Ottico"
 
 #: backends/alsa/alsa-constants.c:140
 msgid "Auto Gain Control"
@@ -545,4 +547,4 @@ msgstr "Profilo"
 
 #: backends/pulse/pulse-monitor.c:275
 msgid "Peak detect"
-msgstr "Rilevazione Picco"
+msgstr "Rilevamento Picco"

@@ -4,7 +4,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
 # Translators:
-# Mantas Kriaučiūnas <mantas@akl.lt>, 2018
+# Mantas Kriaučiūnas Baltix <mantas@akl.lt>, 2018
 # Moo, 2018
 # Audrius Meskauskas, 2018
 # 

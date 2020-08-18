@@ -4,7 +4,7 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
 # Translators:
-# Alexei Sorokin <sor.alexei@meowr.ru>, 2018
+# Alexei Sorokin, 2018
 # Дмитрий Михирев, 2018
 # Victor Kukshiev <andrey0bolkonsky@gmail.com>, 2018
 # AlexL <loginov.alex.valer@gmail.com>, 2018
