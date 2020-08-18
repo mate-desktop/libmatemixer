@@ -1,5 +1,12 @@
 ### libmatemixer 1.25.0
 
+  * Translations update
+  * Use the correct macro for dynamic type's private
+  * add git.mk to generate .gitignore
+  * build: silent build warnings for distcheck
+  * build: do not override the default value for MATE_COMPILE_WARNINGS
+  * Remove warnings: ignoring #pragma clang diagnostic [-Wunknown-pragmas]
+
 ### libmatemixer 1.24.0
 
   * Translations update
