@@ -8,6 +8,7 @@ AM_CPPFLAGS =							\
 	-I$(top_srcdir)						\
 	-DG_LOG_DOMAIN=\"libmatemixer-alsa\"			\
 	$(GLIB_CFLAGS)						\
+	$(UDEV_CFLAGS)						\
 	$(ALSA_CFLAGS)						\
 	$(NULL)
 
@@ -43,6 +44,7 @@ libmatemixer_alsa_la_SOURCES =                                  \
 
 libmatemixer_alsa_la_LIBADD =                                   \
 	$(GLIB_LIBS)                                            \
+	$(UDEV_LIBS)						\
 	$(ALSA_LIBS)
 
 libmatemixer_alsa_la_LDFLAGS =                                  \

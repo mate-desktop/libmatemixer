@@ -184,11 +184,38 @@ if test "x$enable_alsa" != "xno"; then
   fi
 fi
 
+AC_ARG_ENABLE([udev],
+              AS_HELP_STRING([--enable-udev],
+                             [Enable UDEV support @<:@default=auto@:>@]),
+              enable_udev=$enableval,
+              enable_udev=auto)
+
+have_udev=no
+if test "x$enable_udev" != "xno" -a \
+        "x$have_alsa" = "xyes"; then
+        PKG_CHECK_MODULES(UDEV, [libudev],
+                          have_udev=yes,
+                          have_udev=no)
+  if test "x$have_udev" = "xyes"; then
+    AC_DEFINE(HAVE_UDEV, [], [Define if we have UDEV support])
+  else
+    if test "x$enable_udev" = "xyes"; then
+      AC_MSG_ERROR([UDEV support explicitly requested but dependencies not found])
+    else
+      AC_MSG_NOTICE([UDEV dependencies not found, the module will not be built])
+    fi
+  fi
+fi
+
 AM_CONDITIONAL(HAVE_ALSA, test "x$have_alsa" = "xyes")
+AM_CONDITIONAL(HAVE_UDEV, test "x$have_udev" = "xyes")
 
 AC_SUBST(HAVE_ALSA)
 AC_SUBST(ALSA_CFLAGS)
 AC_SUBST(ALSA_LIBS)
+AC_SUBST(HAVE_UDEV)
+AC_SUBST(UDEV_CFLAGS)
+AC_SUBST(UDEV_LIBS)
 
 # -----------------------------------------------------------------------
 # OSS
@@ -269,6 +296,6 @@ echo "
 
         Build Null module:           $have_null
         Build PulseAudio module:     $have_pulseaudio
-        Build ALSA module:           $have_alsa
+        Build ALSA module:           $have_alsa (udev: $have_udev)
         Build OSS module:            $have_oss
 "
