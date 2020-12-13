@@ -15,9 +15,15 @@
  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "config.h"
+
 #include <glib.h>
 #include <glib-object.h>
 #include <alsa/asoundlib.h>
+#ifdef HAVE_UDEV
+#include <libudev.h>
+#include <glib-unix.h>
+#endif
 
 #include <libmatemixer/matemixer.h>
 #include <libmatemixer/matemixer-private.h>
@@ -45,6 +51,15 @@ struct _AlsaBackendPrivate
     GList      *streams;
     GList      *devices;
     GHashTable *devices_ids;
+
+#ifdef HAVE_UDEV
+    struct {
+        struct udev         *udev;
+        struct udev_monitor *monitor;
+        guint                fd_source;
+        int                  fd;
+    } udev;
+#endif
 };
 
 static void alsa_backend_dispose        (GObject          *object);
@@ -169,15 +184,99 @@ alsa_backend_finalize (GObject *object)
     G_OBJECT_CLASS (alsa_backend_parent_class)->finalize (object);
 }
 
-static gboolean
-alsa_backend_open (MateMixerBackend *backend)
+#ifdef HAVE_UDEV
+static gboolean udev_event_ok (struct udev_device *dev)
 {
-    AlsaBackend *alsa;
+    const char *action = udev_device_get_action (dev);
 
-    g_return_val_if_fail (ALSA_IS_BACKEND (backend), FALSE);
+    if (action && !strcmp (action, "remove"))
+        return TRUE;
 
-    alsa = ALSA_BACKEND (backend);
+    /*
+     * See /lib/udev/rules.d/78-sound-card.rules
+     * why "add" events are not handled here.
+     */
+    if ((!action || !strcmp (action, "change")) &&
+        udev_device_get_property_value (dev, "SOUND_INITIALIZED"))
+        return TRUE;
 
+    return FALSE;
+}
+
+static gboolean
+udev_monitor_cb (gint fd,
+                 GIOCondition condition,
+                 gpointer user_data)
+{
+    AlsaBackend *alsa = user_data;
+    struct udev_device *dev;
+
+    dev = udev_monitor_receive_device (alsa->priv->udev.monitor);
+    if (!dev)
+        return TRUE;
+
+    if (!udev_event_ok (dev)) {
+        udev_device_unref (dev);
+        return TRUE;
+    }
+
+    read_devices (alsa);
+
+    udev_device_unref (dev);
+
+    return TRUE;
+}
+
+static gboolean
+udev_monitor_setup (AlsaBackend *alsa)
+{
+    alsa->priv->udev.udev = udev_new ();
+    if (!alsa->priv->udev.udev)
+        return FALSE;
+
+    alsa->priv->udev.monitor = udev_monitor_new_from_netlink (alsa->priv->udev.udev, "udev");
+    if (!alsa->priv->udev.monitor) {
+        udev_unref (alsa->priv->udev.udev);
+        alsa->priv->udev.udev = NULL;
+        return FALSE;
+    }
+
+    if (udev_monitor_filter_add_match_subsystem_devtype (alsa->priv->udev.monitor, "sound", NULL) < 0 ||
+        udev_monitor_enable_receiving (alsa->priv->udev.monitor) < 0) {
+        udev_monitor_unref (alsa->priv->udev.monitor);
+        udev_unref (alsa->priv->udev.udev);
+        alsa->priv->udev.udev = NULL;
+        return FALSE;
+    }
+
+    alsa->priv->udev.fd = udev_monitor_get_fd (alsa->priv->udev.monitor);
+    if (alsa->priv->udev.fd < 0) {
+        udev_monitor_unref (alsa->priv->udev.monitor);
+        udev_unref (alsa->priv->udev.udev);
+        alsa->priv->udev.udev = NULL;
+        return FALSE;
+    }
+
+    alsa->priv->udev.fd_source = g_unix_fd_add (alsa->priv->udev.fd, G_IO_IN, udev_monitor_cb, alsa);
+
+    return TRUE;
+}
+
+static void
+udev_monitor_cleanup (AlsaBackend *alsa)
+{
+    if (!alsa->priv->udev.udev)
+        return;
+
+    g_source_remove (alsa->priv->udev.fd_source);
+    udev_monitor_unref (alsa->priv->udev.monitor);
+    udev_unref (alsa->priv->udev.udev);
+}
+#endif
+
+static void
+timeout_source_setup (AlsaBackend *alsa)
+{
     /* Poll ALSA for changes every second, this only discovers added or removed
      * sound cards, sound card related events are handled by AlsaDevices */
     alsa->priv->timeout_source = g_timeout_source_new_seconds (1);
@@ -187,6 +286,30 @@ alsa_backend_open (MateMixerBackend *backend)
                            NULL);
     g_source_attach (alsa->priv->timeout_source,
                      g_main_context_get_thread_default ());
+}
+
+static void
+timeout_source_cleanup (AlsaBackend *alsa)
+{
+    if (!alsa->priv->timeout_source)
+        return;
+
+    g_source_destroy (alsa->priv->timeout_source);
+}
+
+static gboolean
+alsa_backend_open (MateMixerBackend *backend)
+{
+    AlsaBackend *alsa;
+
+    g_return_val_if_fail (ALSA_IS_BACKEND (backend), FALSE);
+
+    alsa = ALSA_BACKEND (backend);
+
+#ifdef HAVE_UDEV
+    if (!udev_monitor_setup (alsa))
+#endif
+        timeout_source_setup (alsa);
 
     /* Read the initial list of devices so we have some starting point, there
      * isn't really a way to detect errors here, failing to add a device may
@@ -206,7 +329,10 @@ alsa_backend_close (MateMixerBackend *backend)
 
     alsa = ALSA_BACKEND (backend);
 
-    g_source_destroy (alsa->priv->timeout_source);
+    timeout_source_cleanup (alsa);
+#ifdef HAVE_UDEV
+    udev_monitor_cleanup (alsa);
+#endif
 
     if (alsa->priv->devices != NULL) {
         g_list_free_full (alsa->priv->devices, g_object_unref);
