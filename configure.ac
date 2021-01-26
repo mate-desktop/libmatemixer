@@ -72,7 +72,7 @@ LT_INIT
 # Gettext
 # =======================================================================
 
-GETTEXT_PACKAGE=libmatemixer
+GETTEXT_PACKAGE=AC_PACKAGE_NAME
 AC_SUBST(GETTEXT_PACKAGE)
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [Gettext Package])
 
