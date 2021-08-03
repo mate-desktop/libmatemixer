@@ -1,3 +1,9 @@
+### libmatemixer 1.26.0
+
+  * Translations update
+  * build: set GETTEXT_PACKAGE=AC_PACKAGE_NAME
+  * alsa: Add udev support
+
 ### libmatemixer 1.25.0
 
   * Translations update
