@@ -1,7 +1,7 @@
 [main]
 host = https://www.transifex.com
  
-[MATE.master--libmatemixer]
+[MATE.1-26--libmatemixer]
 file_filter = po/<lang>.po
 source_file = po/libmatemixer.pot
 source_lang = en
