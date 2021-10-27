@@ -283,19 +283,19 @@ po/Makefile.in
 AC_OUTPUT
 
 echo "
+Configure summary:
 
-                    ${PACKAGE} ${VERSION}
-                    ============
+    ${PACKAGE_STRING}
+    `echo $PACKAGE_STRING | sed "s/./=/g"`
 
+    Prefix ........................: ${prefix}
+    Source code location ..........: ${srcdir}
+    Compiler ......................: ${CC}
+    Compiler flags ................: ${CFLAGS}
+    Warning flags .................: ${WARN_CFLAGS}
 
-        Prefix:                      ${prefix}
-        Source code location:        ${srcdir}
-        Compiler:                    ${CC}
-        Compiler flags:              ${CFLAGS}
-        Warning flags:               ${WARN_CFLAGS}
-
-        Build Null module:           $have_null
-        Build PulseAudio module:     $have_pulseaudio
-        Build ALSA module:           $have_alsa (udev: $have_udev)
-        Build OSS module:            $have_oss
+    Build Null module .............: $have_null
+    Build PulseAudio module .......: $have_pulseaudio
+    Build ALSA module .............: $have_alsa (udev: $have_udev)
+    Build OSS module ..............: $have_oss
 "
