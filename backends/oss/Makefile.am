@@ -32,6 +32,7 @@ libmatemixer_oss_la_SOURCES =                                   \
 	oss-types.h
 
 libmatemixer_oss_la_LIBADD =                                    \
+	$(top_builddir)/libmatemixer/libmatemixer.la            \
 	$(GLIB_LIBS)                                            \
 	$(OSS_LIBS)
 
