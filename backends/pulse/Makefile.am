@@ -62,6 +62,7 @@ libmatemixer_pulse_la_SOURCES =                                 \
 	pulse-types.h
 
 libmatemixer_pulse_la_LIBADD =                                  \
+	$(top_builddir)/libmatemixer/libmatemixer.la            \
 	$(GLIB_LIBS)                                            \
 	$(PULSEAUDIO_LIBS)
 

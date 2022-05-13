@@ -43,6 +43,7 @@ libmatemixer_alsa_la_SOURCES =                                  \
 	alsa-types.h
 
 libmatemixer_alsa_la_LIBADD =                                   \
+	$(top_builddir)/libmatemixer/libmatemixer.la            \
 	$(GLIB_LIBS)                                            \
 	$(UDEV_LIBS)						\
 	$(ALSA_LIBS)

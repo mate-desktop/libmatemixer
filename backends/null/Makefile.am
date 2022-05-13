@@ -18,7 +18,9 @@ libmatemixer_null_la_SOURCES =                                  \
 	null-backend.c                                          \
 	null-backend.h
 
-libmatemixer_null_la_LIBADD = $(GLIB_LIBS)
+libmatemixer_null_la_LIBADD =                                   \
+	$(top_builddir)/libmatemixer/libmatemixer.la            \
+	$(GLIB_LIBS)
 
 libmatemixer_null_la_LDFLAGS =                                  \
 	-avoid-version                                          \
