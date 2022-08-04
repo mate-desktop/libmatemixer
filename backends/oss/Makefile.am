@@ -38,7 +38,7 @@ libmatemixer_oss_la_LIBADD =                                    \
 
 libmatemixer_oss_la_LDFLAGS =                                   \
 	-avoid-version                                          \
-	-no-undefined                                           \
+	-Wl,--no-undefined                                      \
 	-export-dynamic                                         \
 	-module
 

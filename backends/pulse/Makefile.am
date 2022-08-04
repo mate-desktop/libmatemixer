@@ -68,7 +68,7 @@ libmatemixer_pulse_la_LIBADD =                                  \
 
 libmatemixer_pulse_la_LDFLAGS =                                 \
 	-avoid-version                                          \
-	-no-undefined                                           \
+	-Wl,--no-undefined                                      \
 	-export-dynamic                                         \
 	-module
 

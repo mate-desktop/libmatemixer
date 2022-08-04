@@ -50,7 +50,7 @@ libmatemixer_alsa_la_LIBADD =                                   \
 
 libmatemixer_alsa_la_LDFLAGS =                                  \
 	-avoid-version                                          \
-	-no-undefined                                           \
+	-Wl,--no-undefined                                      \
 	-export-dynamic                                         \
 	-module
 

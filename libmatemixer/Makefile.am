@@ -63,7 +63,7 @@ libmatemixer_la_LIBADD = $(GLIB_LIBS)
 
 libmatemixer_la_LDFLAGS =                                       \
 	-version-info $(LT_VERSION)                             \
-	-no-undefined                                           \
+	-Wl,--no-undefined                                      \
 	-export-dynamic
 
 -include $(top_srcdir)/git.mk
