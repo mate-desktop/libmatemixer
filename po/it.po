@@ -6,31 +6,31 @@
 # Translators:
 # Stefano Karapetsas <stefano@karapetsas.com>, 2018
 # Dario Di Nucci <linkin88mail@gmail.com>, 2018
-# Marco Bartolucci <nap.84@live.it>, 2018
-# Alessandro Volturno <alelvb@inwind.it>, 2020
+# Marco Bartolucci, 2018
 # Enrico B. <enricobe@hotmail.com>, 2020
+# Alessandro Volturno <alelvb@inwind.it>, 2022
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: libmatemixer 1.23.0\n"
+"Project-Id-Version: libmatemixer 1.26.0\n"
 "Report-Msgid-Bugs-To: https://mate-desktop.org\n"
-"POT-Creation-Date: 2019-11-04 23:09+0100\n"
+"POT-Creation-Date: 2022-10-29 15:24+0200\n"
 "PO-Revision-Date: 2018-03-11 15:58+0000\n"
-"Last-Translator: Enrico B. <enricobe@hotmail.com>, 2020\n"
+"Last-Translator: Alessandro Volturno <alelvb@inwind.it>, 2022\n"
 "Language-Team: Italian (https://www.transifex.com/mate/teams/13566/it/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: it\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"Plural-Forms: nplurals=3; plural=n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;\n"
 
 #: backends/alsa/alsa-constants.c:41
 msgid "Master"
-msgstr "Principale"
+msgstr "Master"
 
 #: backends/alsa/alsa-constants.c:42
 msgid "Hardware Master"
-msgstr "Dispositivo principale"
+msgstr "Hardware Master"
 
 #: backends/alsa/alsa-constants.c:43 backends/oss/oss-device.c:92
 msgid "PCM"
@@ -59,7 +59,7 @@ msgstr "Cuffie 2"
 
 #: backends/alsa/alsa-constants.c:51
 msgid "Headset"
-msgstr "Cuffia"
+msgstr "Headset"
 
 #: backends/alsa/alsa-constants.c:52 backends/alsa/alsa-constants.c:53
 #: backends/alsa/alsa-constants.c:54 backends/alsa/alsa-constants.c:55
@@ -80,11 +80,11 @@ msgstr "Digitale"
 
 #: backends/alsa/alsa-constants.c:61
 msgid "Master Mono"
-msgstr "Altoparlante Principale"
+msgstr "Master Mono"
 
 #: backends/alsa/alsa-constants.c:62
 msgid "Master Digital"
-msgstr "Digitale Principale"
+msgstr "Master Digitale"
 
 #: backends/alsa/alsa-constants.c:63 backends/alsa/alsa-constants.c:64
 msgid "Side Speaker"
@@ -122,11 +122,11 @@ msgstr "Altoparlante LFE"
 
 #: backends/alsa/alsa-constants.c:73
 msgid "Bass Speaker"
-msgstr "Altoparlante bassi"
+msgstr "Altoparlante dei Bassi"
 
 #: backends/alsa/alsa-constants.c:74
 msgid "PC Speaker"
-msgstr "Altoparlante PC"
+msgstr "Altoparlante del PC"
 
 #: backends/alsa/alsa-constants.c:75 backends/oss/oss-device.c:91
 msgid "Synth"
@@ -160,7 +160,7 @@ msgstr "Microfono"
 
 #: backends/alsa/alsa-constants.c:84 backends/alsa/alsa-constants.c:195
 msgid "Microphone/Line In"
-msgstr "Microfono/Ingresso"
+msgstr "Microfono/Line in"
 
 #: backends/alsa/alsa-constants.c:85 backends/alsa/alsa-constants.c:86
 #: backends/alsa/alsa-constants.c:169 backends/alsa/alsa-constants.c:170
@@ -185,11 +185,11 @@ msgstr "Dock Microfono"
 
 #: backends/alsa/alsa-constants.c:90 backends/alsa/alsa-constants.c:166
 msgid "Headphone Microphone"
-msgstr "Microfono delle cuffie"
+msgstr "Microfono delle Cuffie"
 
 #: backends/alsa/alsa-constants.c:91 backends/alsa/alsa-constants.c:167
 msgid "Headset Microphone"
-msgstr "Microfono delle cuffie"
+msgstr "Microfono dell'Headset"
 
 #: backends/alsa/alsa-constants.c:92
 msgid "Inverted Internal Microphone"
@@ -201,7 +201,7 @@ msgstr "Microfono Interno Invertito"
 #: backends/alsa/alsa-constants.c:197 backends/alsa/alsa-constants.c:198
 #: backends/oss/oss-device.c:96
 msgid "Line In"
-msgstr "Ingresso"
+msgstr "Line In"
 
 #: backends/alsa/alsa-constants.c:96 backends/alsa/alsa-constants.c:204
 #: backends/alsa/alsa-constants.c:207
@@ -251,7 +251,7 @@ msgstr "Incremento Volume Microfono delle Cuffie"
 
 #: backends/alsa/alsa-constants.c:109
 msgid "Headset Microphone Boost"
-msgstr "Incremento Volume Microfono delle Cuffie"
+msgstr "Incremento Volume Microfono dell'Headset"
 
 #: backends/alsa/alsa-constants.c:110
 msgid "Line In Boost"
@@ -291,7 +291,7 @@ msgstr "Uscita Mono"
 
 #: backends/alsa/alsa-constants.c:126
 msgid "Shared Microphone/Line In"
-msgstr "Microfono Condiviso/Ingresso"
+msgstr "Condivisone Microfono/Line in"
 
 #: backends/alsa/alsa-constants.c:128
 msgid "Microphone Jack Mode"
@@ -502,15 +502,15 @@ msgstr "Guadagno Uscita"
 
 #: backends/oss/oss-device.c:106
 msgid "Line In 1"
-msgstr "Ingresso 1"
+msgstr "Line In 1"
 
 #: backends/oss/oss-device.c:107
 msgid "Line In 2"
-msgstr "Ingresso 2"
+msgstr "Line In 2"
 
 #: backends/oss/oss-device.c:108
 msgid "Line In 3"
-msgstr "Ingresso 3"
+msgstr "Line In 3"
 
 #: backends/oss/oss-device.c:110
 msgid "Digital 1"

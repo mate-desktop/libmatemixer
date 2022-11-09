@@ -5,15 +5,15 @@
 # 
 # Translators:
 # Cédric Valmary <cvalmary@yahoo.fr>, 2018
-# Quentin PAGÈS, 2020
+# Quentin PAGÈS, 2021
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: libmatemixer 1.23.0\n"
+"Project-Id-Version: libmatemixer 1.26.0\n"
 "Report-Msgid-Bugs-To: https://mate-desktop.org\n"
-"POT-Creation-Date: 2019-11-04 23:09+0100\n"
+"POT-Creation-Date: 2022-10-29 15:24+0200\n"
 "PO-Revision-Date: 2018-03-11 15:58+0000\n"
-"Last-Translator: Quentin PAGÈS, 2020\n"
+"Last-Translator: Quentin PAGÈS, 2021\n"
 "Language-Team: Occitan (post 1500) (https://www.transifex.com/mate/teams/13566/oc/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -115,11 +115,11 @@ msgstr "AC97"
 
 #: backends/alsa/alsa-constants.c:71 backends/alsa/alsa-constants.c:72
 msgid "LFE Speaker"
-msgstr ""
+msgstr "Nautparlaire LFE"
 
 #: backends/alsa/alsa-constants.c:73
 msgid "Bass Speaker"
-msgstr ""
+msgstr "Nautparlaire de bassa"
 
 #: backends/alsa/alsa-constants.c:74
 msgid "PC Speaker"
@@ -127,7 +127,7 @@ msgstr "Nautparlaire del PC"
 
 #: backends/alsa/alsa-constants.c:75 backends/oss/oss-device.c:91
 msgid "Synth"
-msgstr ""
+msgstr "Sintetizador"
 
 #: backends/alsa/alsa-constants.c:76
 msgid "MIDI"
@@ -135,7 +135,7 @@ msgstr "MIDI"
 
 #: backends/alsa/alsa-constants.c:77
 msgid "Synth/MIDI"
-msgstr ""
+msgstr "Sintetizador/MIDI"
 
 #: backends/alsa/alsa-constants.c:78 backends/oss/oss-device.c:89
 msgid "Bass"
@@ -190,7 +190,7 @@ msgstr "Microfòn de casc"
 
 #: backends/alsa/alsa-constants.c:92
 msgid "Inverted Internal Microphone"
-msgstr ""
+msgstr "Microfòn intèrn invertit"
 
 #: backends/alsa/alsa-constants.c:93 backends/alsa/alsa-constants.c:94
 #: backends/alsa/alsa-constants.c:95 backends/alsa/alsa-constants.c:192
@@ -220,39 +220,39 @@ msgstr "FM"
 
 #: backends/alsa/alsa-constants.c:101
 msgid "Microphone Boost"
-msgstr ""
+msgstr "Amplificador microfòn"
 
 #: backends/alsa/alsa-constants.c:102
 msgid "Microphone Boost (+20dB)"
-msgstr ""
+msgstr "Amplificador microfòn (+20dB)"
 
 #: backends/alsa/alsa-constants.c:103 backends/alsa/alsa-constants.c:104
 msgid "Internal Microphone Boost"
-msgstr ""
+msgstr "Amplificador de microfòn intèrn"
 
 #: backends/alsa/alsa-constants.c:105
 msgid "Front Microphone Boost"
-msgstr ""
+msgstr "Amplificador de microfòn frontal"
 
 #: backends/alsa/alsa-constants.c:106
 msgid "Rear Microphone Boost"
-msgstr ""
+msgstr "Amplificador de microfòn arrièr"
 
 #: backends/alsa/alsa-constants.c:107
 msgid "Dock Microphone Boost"
-msgstr ""
+msgstr "Amplificador microfòn Dock"
 
 #: backends/alsa/alsa-constants.c:108
 msgid "Headphone Microphone Boost"
-msgstr ""
+msgstr "Amplificador microfòn escotadors"
 
 #: backends/alsa/alsa-constants.c:109
 msgid "Headset Microphone Boost"
-msgstr ""
+msgstr "Amplificador de Micro-casc"
 
 #: backends/alsa/alsa-constants.c:110
 msgid "Line In Boost"
-msgstr ""
+msgstr "Amplificador entrada linha"
 
 #: backends/alsa/alsa-constants.c:117
 msgid "Analog Output"
@@ -272,15 +272,15 @@ msgstr "Font d'entrada"
 
 #: backends/alsa/alsa-constants.c:122
 msgid "Digital Input Source"
-msgstr ""
+msgstr "Entrada de sorga numerica"
 
 #: backends/alsa/alsa-constants.c:123
 msgid "PCM Capture Source"
-msgstr ""
+msgstr "Sorga de captura PCM"
 
 #: backends/alsa/alsa-constants.c:124
 msgid "Digital Playback Source"
-msgstr ""
+msgstr "Sorga de lectura numerica"
 
 #: backends/alsa/alsa-constants.c:125
 msgid "Mono Output"
@@ -288,39 +288,39 @@ msgstr "Sortida Mono"
 
 #: backends/alsa/alsa-constants.c:126
 msgid "Shared Microphone/Line In"
-msgstr ""
+msgstr "Microfòn partejat/Entrada linha"
 
 #: backends/alsa/alsa-constants.c:128
 msgid "Microphone Jack Mode"
-msgstr ""
+msgstr "Microfòn en mòde Jack"
 
 #: backends/alsa/alsa-constants.c:129
 msgid "Surround Jack Mode"
-msgstr ""
+msgstr "Ambient en mòde Jack"
 
 #: backends/alsa/alsa-constants.c:130
 msgid "Auto-Mute Mode"
-msgstr ""
+msgstr "Mòde sordina auto"
 
 #: backends/alsa/alsa-constants.c:133
 msgid "External Amplifier"
-msgstr ""
+msgstr "Amplificador extèrn"
 
 #: backends/alsa/alsa-constants.c:134
 msgid "Bass Boost"
-msgstr ""
+msgstr "Amplificador de bassa"
 
 #: backends/alsa/alsa-constants.c:135
 msgid "Capture Boost"
-msgstr ""
+msgstr "Amplificador de captura"
 
 #: backends/alsa/alsa-constants.c:137 backends/alsa/alsa-constants.c:201
 msgid "Digital In"
-msgstr ""
+msgstr "Entrada numerica"
 
 #: backends/alsa/alsa-constants.c:138
 msgid "Digital Default PCM"
-msgstr ""
+msgstr "PCM numeric per defaut"
 
 #: backends/alsa/alsa-constants.c:139
 msgid "Optical"
@@ -328,7 +328,7 @@ msgstr "Optica"
 
 #: backends/alsa/alsa-constants.c:140
 msgid "Auto Gain Control"
-msgstr ""
+msgstr "Contraròtla auto de ganh"
 
 #: backends/alsa/alsa-constants.c:141
 msgid "Mix"
@@ -340,7 +340,7 @@ msgstr "Mix Mono"
 
 #: backends/alsa/alsa-constants.c:143
 msgid "Microphone Capture"
-msgstr ""
+msgstr "Captura microfòn"
 
 #: backends/alsa/alsa-constants.c:144 backends/alsa/alsa-constants.c:199
 msgid "Input 1"
@@ -360,7 +360,7 @@ msgstr "Escotadors"
 
 #: backends/alsa/alsa-constants.c:154
 msgid "Front Panel Headphones"
-msgstr ""
+msgstr "Escotadors pel panèl avant"
 
 #: backends/alsa/alsa-constants.c:159
 msgid "Microphone 1"
@@ -406,23 +406,23 @@ msgstr "Microfòn de camèra"
 
 #: backends/alsa/alsa-constants.c:189
 msgid "Analog"
-msgstr ""
+msgstr "Analogic"
 
 #: backends/alsa/alsa-constants.c:190
 msgid "Analog In"
-msgstr ""
+msgstr "Entrada analogica"
 
 #: backends/alsa/alsa-constants.c:191
 msgid "Analog Inputs"
-msgstr ""
+msgstr "Entradas analogicas"
 
 #: backends/alsa/alsa-constants.c:196
 msgid "Line In/Microphone"
-msgstr ""
+msgstr "Entrada linha/Microfòn"
 
 #: backends/alsa/alsa-constants.c:205 backends/alsa/alsa-constants.c:206
 msgid "Auxiliary In"
-msgstr ""
+msgstr "Entrada auxiliara"
 
 #: backends/alsa/alsa-constants.c:208
 msgid "Auxiliary 0"
@@ -442,11 +442,11 @@ msgstr "Auxiliar 3"
 
 #: backends/alsa/alsa-constants.c:212
 msgid "Docking Station"
-msgstr ""
+msgstr "Estacion d’acuèlh"
 
 #: backends/alsa/alsa-constants.c:213 backends/oss/oss-device.c:100
 msgid "Mixer"
-msgstr ""
+msgstr "Mixer"
 
 #: backends/alsa/alsa-constants.c:217
 msgid "Unknown 1"
@@ -475,7 +475,7 @@ msgstr "Atudat"
 #: backends/oss/oss-backend.c:403
 #, c-format
 msgid "OSS Mixer %d"
-msgstr ""
+msgstr "Mixer OSS %d"
 
 #: backends/oss/oss-device.c:88
 msgid "Volume"
@@ -487,7 +487,7 @@ msgstr "PCM 2"
 
 #: backends/oss/oss-device.c:103
 msgid "Record"
-msgstr ""
+msgstr "Enregistrament"
 
 #: backends/oss/oss-device.c:104
 msgid "Input Gain"
@@ -523,11 +523,11 @@ msgstr "Numeric 3"
 
 #: backends/oss/oss-device.c:113
 msgid "Phone In"
-msgstr ""
+msgstr "Entrada telefòn"
 
 #: backends/oss/oss-device.c:114
 msgid "Phone Out"
-msgstr ""
+msgstr "Sortida telefòn"
 
 #: backends/oss/oss-device.c:116
 msgid "Radio"
@@ -544,4 +544,4 @@ msgstr "Perfil"
 
 #: backends/pulse/pulse-monitor.c:275
 msgid "Peak detect"
-msgstr ""
+msgstr "Deteccion de crèsta"
