@@ -1,3 +1,12 @@
+### libmatemixer 1.27.0
+
+  * tx: sync with transifex
+  * tx: update resource
+  * tx: migrate config file
+  * backends: Add missing dependencies
+  * ci: drop -Wunused-parameter compiler cflag from debian build
+  * build: show configure summary using a pretty format
+
 ### libmatemixer 1.26.0
 
   * Translations update
