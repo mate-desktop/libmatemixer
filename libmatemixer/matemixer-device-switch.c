@@ -53,6 +53,8 @@ static void mate_mixer_device_switch_set_property (GObject                    *o
                                                    const GValue               *value,
                                                    GParamSpec                 *pspec);
 
+static void mate_mixer_device_switch_dispose      (GObject                    *object);
+
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MateMixerDeviceSwitch, mate_mixer_device_switch, MATE_MIXER_TYPE_SWITCH)
 
 static void
@@ -61,6 +63,7 @@ mate_mixer_device_switch_class_init (MateMixerDeviceSwitchClass *klass)
     GObjectClass *object_class;
 
     object_class = G_OBJECT_CLASS (klass);
+    object_class->dispose      = mate_mixer_device_switch_dispose;
     object_class->get_property = mate_mixer_device_switch_get_property;
     object_class->set_property = mate_mixer_device_switch_set_property;
 
@@ -141,6 +144,20 @@ static void
 mate_mixer_device_switch_init (MateMixerDeviceSwitch *swtch)
 {
     swtch->priv = mate_mixer_device_switch_get_instance_private (swtch);
+}
+
+static void
+mate_mixer_device_switch_dispose (GObject *object)
+{
+    MateMixerDeviceSwitch *swtch;
+
+    swtch = MATE_MIXER_DEVICE_SWITCH (object);
+
+    if (swtch->priv->device != NULL)
+        g_object_remove_weak_pointer(G_OBJECT (swtch->priv->device),
+                                     (gpointer *) &swtch->priv->device);
+
+    G_OBJECT_CLASS (mate_mixer_device_switch_parent_class)->dispose (object);
 }
 
 /**
