@@ -75,6 +75,7 @@ static void mate_mixer_stream_control_set_property (GObject                     
                                                     const GValue                *value,
                                                     GParamSpec                  *pspec);
 
+static void mate_mixer_stream_control_dispose      (GObject                     *object);
 static void mate_mixer_stream_control_finalize     (GObject                     *object);
 
 G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE (MateMixerStreamControl, mate_mixer_stream_control, G_TYPE_OBJECT)
@@ -85,6 +86,7 @@ mate_mixer_stream_control_class_init (MateMixerStreamControlClass *klass)
     GObjectClass *object_class;
 
     object_class = G_OBJECT_CLASS (klass);
+    object_class->dispose      = mate_mixer_stream_control_dispose;
     object_class->finalize     = mate_mixer_stream_control_finalize;
     object_class->get_property = mate_mixer_stream_control_get_property;
     object_class->set_property = mate_mixer_stream_control_set_property;
@@ -282,6 +284,19 @@ static void
 mate_mixer_stream_control_init (MateMixerStreamControl *control)
 {
     control->priv = mate_mixer_stream_control_get_instance_private (control);
+}
+
+static void
+mate_mixer_stream_control_dispose (GObject *object)
+{
+    MateMixerStreamControl *control;
+
+    control = MATE_MIXER_STREAM_CONTROL (object);
+    if (control->priv->stream != NULL)
+        g_object_remove_weak_pointer(G_OBJECT (control->priv->stream),
+                                     (gpointer *) &control->priv->stream);
+
+    G_OBJECT_CLASS (mate_mixer_stream_control_parent_class)->dispose (object);
 }
 
 static void
