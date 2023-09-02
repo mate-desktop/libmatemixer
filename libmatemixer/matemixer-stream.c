@@ -281,6 +281,10 @@ mate_mixer_stream_dispose (GObject *object)
 
     stream = MATE_MIXER_STREAM (object);
 
+    if (stream->priv->device != NULL)
+        g_object_remove_weak_pointer (G_OBJECT (stream->priv->device),
+                                      (gpointer *) &stream->priv->device);
+
     g_clear_object (&stream->priv->control);
 
     G_OBJECT_CLASS (mate_mixer_stream_parent_class)->dispose (object);
