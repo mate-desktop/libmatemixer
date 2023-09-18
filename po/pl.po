@@ -4,20 +4,20 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
 # Translators:
-# Piotr Drąg <piotrdrag@gmail.com>, 2018
-# Piotr Strębski <strebski@gmail.com>, 2018
-# Marcin Kralka <marcink96@gmail.com>, 2018
-# Beniamin Pawlus <kupwzywcu@o2.pl>, 2018
-# No Ne, 2020
+# Piotr Drąg <piotrdrag@gmail.com>, 2021
+# Piotr Strębski <strebski@gmail.com>, 2021
+# Marcin Kralka <marcink96@gmail.com>, 2021
+# Marek Adamski, 2021
+# Beniamin Pawlus <kupwzywcu@o2.pl>, 2021
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: libmatemixer 1.23.0\n"
 "Report-Msgid-Bugs-To: https://mate-desktop.org\n"
 "POT-Creation-Date: 2019-11-04 23:09+0100\n"
-"PO-Revision-Date: 2018-03-11 15:58+0000\n"
-"Last-Translator: No Ne, 2020\n"
-"Language-Team: Polish (https://www.transifex.com/mate/teams/13566/pl/)\n"
+"PO-Revision-Date: 2021-09-18 19:52+0000\n"
+"Last-Translator: Beniamin Pawlus <kupwzywcu@o2.pl>, 2021\n"
+"Language-Team: Polish (https://app.transifex.com/mate/teams/13566/pl/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"

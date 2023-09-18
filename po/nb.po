@@ -4,17 +4,18 @@
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # 
 # Translators:
-# Allan Nordhøy <epost@anotheragency.no>, 2018
-# Kenneth Jenssen <kennethjenssen@yahoo.com>, 2018
+# Allan Nordhøy <epost@anotheragency.no>, 2021
+# Kenneth Jenssen <kennethjenssen@yahoo.com>, 2021
+# heskjestad <cato@heskjestad.xyz>, 2021
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: libmatemixer 1.23.0\n"
 "Report-Msgid-Bugs-To: https://mate-desktop.org\n"
 "POT-Creation-Date: 2019-11-04 23:09+0100\n"
-"PO-Revision-Date: 2018-03-11 15:58+0000\n"
-"Last-Translator: Kenneth Jenssen <kennethjenssen@yahoo.com>, 2018\n"
-"Language-Team: Norwegian Bokmål (https://www.transifex.com/mate/teams/13566/nb/)\n"
+"PO-Revision-Date: 2021-09-18 19:52+0000\n"
+"Last-Translator: heskjestad <cato@heskjestad.xyz>, 2021\n"
+"Language-Team: Norwegian Bokmål (https://app.transifex.com/mate/teams/13566/nb/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -123,7 +124,7 @@ msgstr "Bass-høytaler"
 
 #: backends/alsa/alsa-constants.c:74
 msgid "PC Speaker"
-msgstr "PC høyttaler"
+msgstr "PC-høyttaler"
 
 #: backends/alsa/alsa-constants.c:75 backends/oss/oss-device.c:91
 msgid "Synth"
@@ -224,7 +225,7 @@ msgstr "Boost for mikrofon"
 
 #: backends/alsa/alsa-constants.c:102
 msgid "Microphone Boost (+20dB)"
-msgstr "Boost for mikrofon (+20dB)"
+msgstr "Boost for mikrofon (+20 dB)"
 
 #: backends/alsa/alsa-constants.c:103 backends/alsa/alsa-constants.c:104
 msgid "Internal Microphone Boost"
