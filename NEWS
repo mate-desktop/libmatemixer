@@ -1,3 +1,9 @@
+### libmatemixer 1.26.1
+
+  * Translations update
+  * migrate to new transifex api
+  * Remove weak pointers on dispose
+
 ### libmatemixer 1.26.0
 
   * Translations update
