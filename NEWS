@@ -1,6 +1,11 @@
+### libmatemixer 1.28.0
+
+  * Translations update
+  * Remove weak pointers on dispose
+
 ### libmatemixer 1.27.0
 
-  * tx: sync with transifex
+  * Translations update
   * tx: update resource
   * tx: migrate config file
   * backends: Add missing dependencies
