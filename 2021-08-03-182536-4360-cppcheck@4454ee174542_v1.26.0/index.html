@@ -1,0 +1,138 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cppcheck - HTML report - libmatemixer</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+
+    </style>
+    <script>
+      function getStyle(el, styleProp) {
+        var y;
+
+        if (el.currentStyle) {
+          y = el.currentStyle[styleProp];
+        } else if (window.getComputedStyle) {
+          y = document.defaultView.getComputedStyle(el, null).getPropertyValue(styleProp);
+        }
+
+        return y;
+      }
+
+      function toggle() {
+        var el = this.expandable_content;
+        var mark = this.expandable_marker;
+
+        if (el.style.display === "block") {
+          el.style.display = "none";
+          mark.textContent = "[+]";
+        } else {
+          el.style.display = "block";
+          mark.textContent = "[-]";
+        }
+      }
+
+      function initExpandables() {
+        var elements = document.querySelectorAll(".expandable");
+
+        for (var i = 0, len = elements.length; i < len; i++) {
+          var el = elements[i];
+          var clickable = el.querySelector("span");
+          var marker = clickable.querySelector(".marker");
+          var content = el.querySelector(".content");
+          var width = clickable.clientWidth - parseInt(getStyle(content, "padding-left")) - parseInt(getStyle(content, "padding-right"));
+          content.style.width = width + "px";
+          clickable.expandable_content = content;
+          clickable.expandable_marker = marker;
+          clickable.addEventListener("click", toggle);
+        }
+      }
+
+      function toggleDisplay(id) {
+        var elements = document.querySelectorAll("." + id);
+
+        for (var i = 0, len = elements.length; i < len; i++) {
+          elements[i].classList.toggle("d-none");
+        }
+      }
+
+      function toggleAll() {
+        var elements = document.querySelectorAll("input");
+
+        // starting from 1 since 0 is the "toggle all" input
+        for (var i = 1, len = elements.length; i < len; i++) {
+          var el = elements[i];
+
+          if (el.checked) {
+            el.checked = false;
+          } else {
+            el.checked = true;
+          }
+
+          toggleDisplay(el.id);
+        }
+      }
+      window.addEventListener("load", initExpandables);
+    </script>
+  </head>
+  <body>
+    <div id="header" class="header">
+      <h1>Cppcheck report - libmatemixer: </h1>
+    </div>
+    <div class="wrapper">
+      <div id="menu_index">
+       <p id="filename"><a href="index.html">Defect summary;</a> </p>
+
+       <label><input type="checkbox" onclick="toggleAll()" checked> Toggle all</label>
+       <table>
+           <tr><th>Show</th><th>#</th><th>Defect ID</th></tr>
+            <tr><td><input type="checkbox" onclick="toggleDisplay(this.id)" id="shadowVariable" name="shadowVariable" checked></td><td>5</td><td>shadowVariable</td></tr>
+            <tr><td><input type="checkbox" onclick="toggleDisplay(this.id)" id="ConfigurationNotChecked" name="ConfigurationNotChecked" checked></td><td>4</td><td>ConfigurationNotChecked</td></tr>
+            <tr><td><input type="checkbox" onclick="toggleDisplay(this.id)" id="knownConditionTrueFalse" name="knownConditionTrueFalse" checked></td><td>3</td><td>knownConditionTrueFalse</td></tr>
+            <tr><td><input type="checkbox" onclick="toggleDisplay(this.id)" id="variableScope" name="variableScope" checked></td><td>2</td><td>variableScope</td></tr>
+            <tr><td><input type="checkbox" onclick="toggleDisplay(this.id)" id="missingInclude" name="missingInclude" checked></td><td>1</td><td>missingInclude</td></tr>
+           <tr><td></td><td>15</td><td>total</td></tr>
+       </table>
+       <p><a href="stats.html">Statistics</a></p>
+    </div>
+    <div id="content_index">
+
+       <table>
+       <tr><th>Line</th><th>Id</th><th>CWE</th><th>Severity</th><th>Message</th></tr>
+       <tr><td colspan="5"><a href="6.html"></a></td></tr>
+         <tr class="missingInclude"><td></td><td>missingInclude</td><td></td><td>information</td><td>Cppcheck cannot find all the include files (use --check-config for details)</td></tr>
+       <tr><td colspan="5"><a href="0.html">backends/alsa/alsa-backend.c</a></td></tr>
+       <tr class="shadowVariable"><td><a href="0.html#line-433">433</a></td><td>shadowVariable</td><td><a href="https://cwe.mitre.org/data/definitions/398.html">398</a></td><td>style</td><td >Local variable &apos;info&apos; shadows outer variable</td></tr>
+       <tr><td colspan="5"><a href="1.html">backends/oss/oss-device.c</a></td></tr>
+       <tr class="shadowVariable"><td><a href="1.html#line-595">595</a></td><td>shadowVariable</td><td><a href="https://cwe.mitre.org/data/definitions/398.html">398</a></td><td>style</td><td >Local variable &apos;name&apos; shadows outer variable</td></tr>
+       <tr><td colspan="5"><a href="2.html">backends/pulse/pulse-backend.c</a></td></tr>
+       <tr class="shadowVariable"><td><a href="2.html#line-680">680</a></td><td>shadowVariable</td><td><a href="https://cwe.mitre.org/data/definitions/398.html">398</a></td><td>style</td><td >Local variable &apos;stream&apos; shadows outer variable</td></tr>
+       <tr class="shadowVariable"><td><a href="2.html#line-716">716</a></td><td>shadowVariable</td><td><a href="https://cwe.mitre.org/data/definitions/398.html">398</a></td><td>style</td><td >Local variable &apos;stream&apos; shadows outer variable</td></tr>
+       <tr><td colspan="5"><a href="3.html">backends/pulse/pulse-ext-stream.c</a></td></tr>
+       <tr class="knownConditionTrueFalse"><td><a href="3.html#line-291">291</a></td><td>knownConditionTrueFalse</td><td><a href="https://cwe.mitre.org/data/definitions/571.html">571</a></td><td>style</td><td >Condition &apos;app_info==NULL&apos; is always true</td></tr>
+       <tr class="knownConditionTrueFalse"><td><a href="3.html#line-303">303</a></td><td>knownConditionTrueFalse</td><td><a href="https://cwe.mitre.org/data/definitions/571.html">571</a></td><td>style</td><td >Condition &apos;app_info==NULL&apos; is always true</td></tr>
+       <tr><td colspan="5"><a href="4.html">libmatemixer/matemixer-context.c</a></td></tr>
+       <tr class="variableScope"><td><a href="4.html#line-592">592</a></td><td>variableScope</td><td><a href="https://cwe.mitre.org/data/definitions/398.html">398</a></td><td>style</td><td >The scope of the variable &apos;module&apos; can be reduced.</td></tr>
+       <tr class="variableScope"><td><a href="4.html#line-594">594</a></td><td>variableScope</td><td><a href="https://cwe.mitre.org/data/definitions/398.html">398</a></td><td>style</td><td >The scope of the variable &apos;info&apos; can be reduced.</td></tr>
+       <tr class="shadowVariable"><td><a href="4.html#line-817">817</a></td><td>shadowVariable</td><td><a href="https://cwe.mitre.org/data/definitions/398.html">398</a></td><td>style</td><td >Local variable &apos;info&apos; shadows outer variable</td></tr>
+       <tr class="knownConditionTrueFalse"><td><a href="4.html#line-838">838</a></td><td>knownConditionTrueFalse</td><td><a href="https://cwe.mitre.org/data/definitions/571.html">571</a></td><td>style</td><td >Condition &apos;info==NULL&apos; is always true</td></tr>
+       <tr><td colspan="5"><a href="5.html">libmatemixer/matemixer-stream-control.c</a></td></tr>
+       <tr class="ConfigurationNotChecked"><td><a href="5.html#line-523">523</a></td><td>ConfigurationNotChecked</td><td></td><td>information</td><td >Skipping configuration &apos;INFINITY&apos; since the value of &apos;INFINITY&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.</td></tr>
+       <tr class="ConfigurationNotChecked"><td><a href="5.html#line-533">533</a></td><td>ConfigurationNotChecked</td><td></td><td>information</td><td >Skipping configuration &apos;INFINITY&apos; since the value of &apos;INFINITY&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.</td></tr>
+       <tr class="ConfigurationNotChecked"><td><a href="5.html#line-650">650</a></td><td>ConfigurationNotChecked</td><td></td><td>information</td><td >Skipping configuration &apos;INFINITY&apos; since the value of &apos;INFINITY&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.</td></tr>
+       <tr class="ConfigurationNotChecked"><td><a href="5.html#line-660">660</a></td><td>ConfigurationNotChecked</td><td></td><td>information</td><td >Skipping configuration &apos;INFINITY&apos; since the value of &apos;INFINITY&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.</td></tr>
+       </table>
+      </div> <!-- /.wrapper -->
+    </div>
+    <div id="footer" class="footer">
+      <p>
+        Cppcheck 2.5 - a tool for static C/C++ code analysis<br>
+        <br>
+        Internet: <a href="http://cppcheck.net">http://cppcheck.net</a><br>
+        IRC: <a href="irc://irc.freenode.net/cppcheck">irc://irc.freenode.net/cppcheck</a><br>
+      </p>
+    </div>
+  </body>
+</html>

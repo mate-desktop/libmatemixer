@@ -1,0 +1,311 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Cppcheck - HTML report - libmatemixer</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+
+    </style>
+    <script>
+      function getStyle(el, styleProp) {
+        var y;
+
+        if (el.currentStyle) {
+          y = el.currentStyle[styleProp];
+        } else if (window.getComputedStyle) {
+          y = document.defaultView.getComputedStyle(el, null).getPropertyValue(styleProp);
+        }
+
+        return y;
+      }
+
+      function toggle() {
+        var el = this.expandable_content;
+        var mark = this.expandable_marker;
+
+        if (el.style.display === "block") {
+          el.style.display = "none";
+          mark.textContent = "[+]";
+        } else {
+          el.style.display = "block";
+          mark.textContent = "[-]";
+        }
+      }
+
+      function initExpandables() {
+        var elements = document.querySelectorAll(".expandable");
+
+        for (var i = 0, len = elements.length; i < len; i++) {
+          var el = elements[i];
+          var clickable = el.querySelector("span");
+          var marker = clickable.querySelector(".marker");
+          var content = el.querySelector(".content");
+          var width = clickable.clientWidth - parseInt(getStyle(content, "padding-left")) - parseInt(getStyle(content, "padding-right"));
+          content.style.width = width + "px";
+          clickable.expandable_content = content;
+          clickable.expandable_marker = marker;
+          clickable.addEventListener("click", toggle);
+        }
+      }
+
+      function toggleDisplay(cb) {
+        var elements = document.querySelectorAll("." + cb.id);
+
+        for (var i = 0, len = elements.length; i < len; i++) {
+          elements[i].classList.toggle("id-filtered", !cb.checked);
+        }
+
+        updateFileRows();
+      }
+
+      function toggleSeverity(cb) {
+        cb.parentElement.classList.toggle("unchecked", !cb.checked);
+        var elements = document.querySelectorAll(".sev_" + cb.id);
+
+        for (var i = 0, len = elements.length; i < len; i++) {
+          elements[i].classList.toggle("severity-filtered", !cb.checked);
+        }
+
+        updateFileRows();
+      }
+
+      function toggleTool(cb) {
+        cb.parentElement.classList.toggle("unchecked", !cb.checked);
+
+        var elements;
+        if (cb.id == "clang-tidy")
+            elements = document.querySelectorAll("[class^=clang-tidy-]");
+        else
+            elements = document.querySelectorAll(".issue:not([class^=clang-tidy-])");
+
+        for (var i = 0, len = elements.length; i < len; i++) {
+          elements[i].classList.toggle("tool-filtered", !cb.checked);
+        }
+
+        updateFileRows();
+      }
+
+      function toggleAll() {
+        var elements = document.querySelectorAll(".idToggle");
+
+        // starting from 1 since 0 is the "toggle all" input
+        for (var i = 1, len = elements.length; i < len; i++) {
+          var changed = elements[i].checked != elements[0].checked;
+          if (changed) {
+            elements[i].checked = elements[0].checked;
+            toggleDisplay(elements[i]);
+          }
+        }
+      }
+
+      function filterFile(filter) {
+        var elements = document.querySelectorAll(".fileEntry");
+
+        for (var i = 0, len = elements.length; i < len; i++) {
+          var visible = elements[i].querySelector("tr").querySelector("td").textContent.toLowerCase().includes(filter.toLowerCase());
+          elements[i].classList.toggle("text-filtered", !visible);
+        }
+      }
+
+      function filterText(text) {
+        filter = text.toLowerCase();
+        var elements = document.querySelectorAll(".issue");
+
+        for (var i = 0, len = elements.length; i < len; i++) {
+          var visible = false;
+          var fields = elements[i].querySelectorAll("td");
+          for (var n = 0, num = fields.length; n < num; n++) {
+            if (fields[n].textContent.toLowerCase().includes(filter)) {
+              visible = true;
+              break;
+            }
+          }
+          elements[i].classList.toggle("text-filtered", !visible);
+        }
+
+        updateFileRows();
+      }
+
+      function updateFileRows(element) {
+        var elements = document.querySelectorAll(".fileEntry");
+
+        for (var i = 0, len = elements.length; i < len; i++) {
+          var visible = elements[i].querySelector(".issue:not(.id-filtered):not(.severity-filtered):not(.tool-filtered):not(.text-filtered)");
+          elements[i].classList.toggle("file-filtered", !visible);
+        }
+      }
+
+      window.addEventListener("load", initExpandables);
+    </script>
+  </head>
+  <body>
+    <div id="wrapper">
+    <div id="header" class="header">
+      <h1>Cppcheck report - libmatemixer</h1>
+      <div id="filters">
+
+        <label class="checkBtn"><input type="checkbox" onclick="toggleSeverity(this)" id="error"checked/>error</label>
+        <label class="checkBtn disabled"><input type="checkbox" onclick="toggleSeverity(this)" id="warning"disabled/>warning</label>
+        <label class="checkBtn disabled"><input type="checkbox" onclick="toggleSeverity(this)" id="portability"disabled/>portability</label>
+        <label class="checkBtn disabled"><input type="checkbox" onclick="toggleSeverity(this)" id="performance"disabled/>performance</label>
+        <label class="checkBtn"><input type="checkbox" onclick="toggleSeverity(this)" id="style"checked/>style</label>
+        <label class="checkBtn"><input type="checkbox" onclick="toggleSeverity(this)" id="information"checked/>information</label>
+        | 
+        <label class="checkBtn"><input type="checkbox" onclick="toggleTool(this)" id="cppcheck"checked/>cppcheck</label>
+        <label class="checkBtn disabled"><input type="checkbox" onclick="toggleTool(this)" id="clang-tidy"disabled/>clang-tidy</label>
+        | 
+        <label class="severityHeader">File: <input type="text" oninput="filterFile(this.value)"/></label>
+        <label class="severityHeader">Filter: <input type="text" oninput="filterText(this.value)"/></label>
+      </div>
+
+    </div>
+
+    <div id="menu_index">
+     <p><a href="index.html">Defect summary</a> </p>
+
+       <label><input type="checkbox" class="idToggle" onclick="toggleAll()" checked> Toggle all</label>
+       <table>
+           <tr><th>Show</th><th>#</th><th>Defect ID</th></tr>
+            <tr><td><input type="checkbox" class="idToggle" onclick="toggleDisplay(this)" id="unknownMacro" name="unknownMacro" checked></td><td>33</td><td>unknownMacro</td></tr>
+            <tr><td><input type="checkbox" class="idToggle" onclick="toggleDisplay(this)" id="ConfigurationNotChecked" name="ConfigurationNotChecked" checked></td><td>4</td><td>ConfigurationNotChecked</td></tr>
+            <tr><td><input type="checkbox" class="idToggle" onclick="toggleDisplay(this)" id="variableScope" name="variableScope" checked></td><td>2</td><td>variableScope</td></tr>
+            <tr><td><input type="checkbox" class="idToggle" onclick="toggleDisplay(this)" id="constParameter" name="constParameter" checked></td><td>1</td><td>constParameter</td></tr>
+            <tr><td><input type="checkbox" class="idToggle" onclick="toggleDisplay(this)" id="knownConditionTrueFalse" name="knownConditionTrueFalse" checked></td><td>1</td><td>knownConditionTrueFalse</td></tr>
+            <tr><td><input type="checkbox" class="idToggle" onclick="toggleDisplay(this)" id="missingInclude" name="missingInclude" checked></td><td>1</td><td>missingInclude</td></tr>
+            <tr><td><input type="checkbox" class="idToggle" onclick="toggleDisplay(this)" id="shadowVariable" name="shadowVariable" checked></td><td>1</td><td>shadowVariable</td></tr>
+           <tr><td></td><td>43</td><td>total</td></tr>
+       </table>
+       <p><a href="stats.html">Statistics</a></p>
+    </div>
+    <div id="content_index">
+
+       <table class="summaryTable">
+       <tr><th>Line</th><th>Id</th><th>CWE</th><th>Severity</th><th>Message</th></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="35.html"></a></td></tr>
+         <tr class="missingInclude sev_information issue"><td></td><td>missingInclude</td><td></td><td>information</td><td>Cppcheck cannot find all the include files (use --check-config for details)</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="0.html">backends/alsa/alsa-backend.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="0.html#line-68">68</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_DYNAMIC_TYPE_EXTENDED is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="1.html">backends/alsa/alsa-device.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="1.html#line-75">75</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="2.html">backends/alsa/alsa-stream-control.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="2.html#line-38">38</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_ABSTRACT_TYPE_WITH_CODE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="3.html">backends/alsa/alsa-stream.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="3.html#line-38">38</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="4.html">backends/alsa/alsa-switch-option.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="4.html#line-30">30</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="5.html">backends/alsa/alsa-switch.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="5.html#line-41">41</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_TYPE_WITH_CODE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="6.html">backends/alsa/alsa-toggle.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="6.html#line-39">39</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_TYPE_WITH_CODE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="7.html">backends/null/null-backend.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="7.html#line-29">29</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_DYNAMIC_TYPE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="8.html">backends/oss/oss-backend.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="8.html#line-64">64</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_DYNAMIC_TYPE_EXTENDED is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="9.html">backends/oss/oss-device.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="9.html#line-187">187</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="10.html">backends/oss/oss-stream-control.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="10.html#line-54">54</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="11.html">backends/oss/oss-stream.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="11.html#line-42">42</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="12.html">backends/oss/oss-switch-option.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="12.html#line-32">32</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="13.html">backends/oss/oss-switch.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="13.html#line-40">40</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="14.html">backends/pulse/pulse-backend.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="14.html#line-120">120</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_DYNAMIC_TYPE_EXTENDED is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="15.html">backends/pulse/pulse-device-profile.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="15.html#line-36">36</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="16.html">backends/pulse/pulse-device-switch.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="16.html#line-37">37</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="17.html">backends/pulse/pulse-device.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="17.html#line-67">67</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="18.html">backends/pulse/pulse-ext-stream.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="18.html#line-64">64</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="19.html">backends/pulse/pulse-port-switch.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="19.html#line-37">37</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="20.html">backends/pulse/pulse-port.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="20.html#line-35">35</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="21.html">backends/pulse/pulse-stream-control.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="21.html#line-64">64</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="22.html">backends/pulse/pulse-stream.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="22.html#line-58">58</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="23.html">libmatemixer/matemixer-backend.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="23.html#line-73">73</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="24.html">libmatemixer/matemixer-context.c</a></td></tr>
+         <tr class="variableScope sev_style issue"><td><a href="24.html#line-592">592</a></td><td>variableScope</td><td><a href="https://cwe.mitre.org/data/definitions/398.html">398</a></td><td>style</td><td>The scope of the variable &apos;module&apos; can be reduced.</td></tr>
+         <tr class="variableScope sev_style issue"><td><a href="24.html#line-594">594</a></td><td>variableScope</td><td><a href="https://cwe.mitre.org/data/definitions/398.html">398</a></td><td>style</td><td>The scope of the variable &apos;info&apos; can be reduced.</td></tr>
+         <tr class="shadowVariable sev_style issue"><td><a href="24.html#line-817">817</a></td><td>shadowVariable</td><td><a href="https://cwe.mitre.org/data/definitions/398.html">398</a></td><td>style</td><td>Local variable &apos;info&apos; shadows outer variable</td></tr>
+         <tr class="knownConditionTrueFalse sev_style issue"><td><a href="24.html#line-838">838</a></td><td>knownConditionTrueFalse</td><td><a href="https://cwe.mitre.org/data/definitions/571.html">571</a></td><td>style</td><td>Condition &apos;info==NULL&apos; is always true</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="25.html">libmatemixer/matemixer-device-switch.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="25.html#line-58">58</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="26.html">libmatemixer/matemixer-device.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="26.html#line-75">75</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="27.html">libmatemixer/matemixer-stored-control.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="27.html#line-48">48</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="28.html">libmatemixer/matemixer-stream-control.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="28.html#line-81">81</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+         <tr class="ConfigurationNotChecked sev_information issue"><td><a href="28.html#line-538">538</a></td><td>ConfigurationNotChecked</td><td></td><td>information</td><td>Skipping configuration &apos;INFINITY&apos; since the value of &apos;INFINITY&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.</td></tr>
+         <tr class="ConfigurationNotChecked sev_information issue"><td><a href="28.html#line-548">548</a></td><td>ConfigurationNotChecked</td><td></td><td>information</td><td>Skipping configuration &apos;INFINITY&apos; since the value of &apos;INFINITY&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.</td></tr>
+         <tr class="ConfigurationNotChecked sev_information issue"><td><a href="28.html#line-665">665</a></td><td>ConfigurationNotChecked</td><td></td><td>information</td><td>Skipping configuration &apos;INFINITY&apos; since the value of &apos;INFINITY&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.</td></tr>
+         <tr class="ConfigurationNotChecked sev_information issue"><td><a href="28.html#line-675">675</a></td><td>ConfigurationNotChecked</td><td></td><td>information</td><td>Skipping configuration &apos;INFINITY&apos; since the value of &apos;INFINITY&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="29.html">libmatemixer/matemixer-stream-switch.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="29.html#line-60">60</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="30.html">libmatemixer/matemixer-stream-toggle.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="30.html#line-59">59</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="31.html">libmatemixer/matemixer-stream.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="31.html#line-79">79</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="32.html">libmatemixer/matemixer-switch-option.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="32.html#line-57">57</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="33.html">libmatemixer/matemixer-switch.c</a></td></tr>
+         <tr class="unknownMacro sev_error issue"><td><a href="33.html#line-62">62</a></td><td>unknownMacro</td><td></td><td>error</td><td class="error">There is an unknown macro here somewhere. Configuration is required. If G_DEFINE_ABSTRACT_TYPE_WITH_PRIVATE is a macro then please configure it.</td></tr>
+      <tbody class="fileEntry">
+       <tr><td colspan="5"><a href="34.html">libmatemixer/matemixer.c</a></td></tr>
+         <tr class="constParameter sev_style issue"><td><a href="34.html#line-131">131</a></td><td>constParameter</td><td><a href="https://cwe.mitre.org/data/definitions/398.html">398</a></td><td>style</td><td>Parameter &apos;positions&apos; can be declared as pointer to const</td></tr>
+      </tbody>
+       </table>
+    </div>
+    <div id="footer" class="footer">
+      <p>
+        Created by Cppcheck 2.9 (<a href="https://cppcheck.sourceforge.io">Sourceforge</a>, <a href="irc://irc.freenode.net/cppcheck">IRC</a>)
+      </p>
+    </div>
+    </div>
+  </body>
+</html>
