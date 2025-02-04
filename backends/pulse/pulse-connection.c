@@ -1467,6 +1467,11 @@ pulse_server_info_cb (pa_context           *c,
 {
     PulseConnection *connection;
 
+    if (! info) {
+        g_warning ("Failed to get PulseAudio server information: %s", pa_strerror (pa_context_errno (c)));
+        return;
+    }
+
     connection = PULSE_CONNECTION (userdata);
 
     g_signal_emit (G_OBJECT (connection),
