@@ -16,12 +16,17 @@ requires=(
 
 # https://gitlab.archlinux.org/archlinux/packaging/packages/libmatemixer
 requires+=(
+	alsa-lib
 	gcc
 	git
+	glib2
+	glibc
 	gtk-doc
+	libpulse
 	make
-	which
 	mate-common
+	systemd-libs
+	which
 )
 
 infobegin "Update system"
