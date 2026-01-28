@@ -13,6 +13,7 @@ requires=(
 	ccache # Use ccache to speed up build
 )
 
+# https://git.launchpad.net/ubuntu/+source/libmatemixer/tree/debian/control
 requires+=(
 	autoconf-archive
 	autopoint

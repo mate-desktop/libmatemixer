@@ -11,17 +11,17 @@ infoend() {
 # Required packages on Archlinux
 requires=(
 	ccache # Use ccache to speed up build
+	clang  # Build with clang on Archlinux
 )
 
+# https://gitlab.archlinux.org/archlinux/packaging/packages/libmatemixer
 requires+=(
-	autoconf-archive
 	gcc
 	git
-	glib2
-	libpulse
+	gtk-doc
 	make
-	mate-common
 	which
+	mate-common
 )
 
 infobegin "Update system"

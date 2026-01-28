@@ -13,6 +13,7 @@ requires=(
 	ccache # Use ccache to speed up build
 )
 
+# https://src.fedoraproject.org/cgit/rpms/libmatemixer.git
 requires+=(
 	alsa-lib-devel
 	autoconf-archive
