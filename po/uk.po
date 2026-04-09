@@ -6,7 +6,7 @@
 # Translators:
 # Микола Ткач <chistomov@gmail.com>, 2018
 # Shahor <shahorr@gmail.com>, 2018
-# Шаповалов Анатолій Романович <elrond.716.smith@gmail.com>, 2018
+# Анатолій Романович Шаповалов <elrond.716.smith@gmail.com>, 2018
 # dsafsadf <heneral@gmail.com>, 2019
 # 
 msgid ""

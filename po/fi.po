@@ -6,6 +6,8 @@
 # Translators:
 # Stefano Karapetsas <stefano@karapetsas.com>, 2018
 # nomen omen, 2018
+# Tommi Nieminen <translator@legisign.org>, 2026
+# Transifex Bot <>, 2026
 # 
 msgid ""
 msgstr ""
@@ -13,7 +15,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: https://mate-desktop.org\n"
 "POT-Creation-Date: 2022-10-29 15:24+0200\n"
 "PO-Revision-Date: 2018-03-11 15:58+0000\n"
-"Last-Translator: nomen omen, 2018\n"
+"Last-Translator: Transifex Bot <>, 2026\n"
 "Language-Team: Finnish (https://app.transifex.com/mate/teams/13566/fi/)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -115,7 +117,7 @@ msgstr "AC97"
 
 #: backends/alsa/alsa-constants.c:71 backends/alsa/alsa-constants.c:72
 msgid "LFE Speaker"
-msgstr ""
+msgstr "LFE-kaiutin"
 
 #: backends/alsa/alsa-constants.c:73
 msgid "Bass Speaker"
@@ -157,7 +159,7 @@ msgstr "Mikrofoni"
 
 #: backends/alsa/alsa-constants.c:84 backends/alsa/alsa-constants.c:195
 msgid "Microphone/Line In"
-msgstr ""
+msgstr "Mikrofoni/linjasisäänmeno"
 
 #: backends/alsa/alsa-constants.c:85 backends/alsa/alsa-constants.c:86
 #: backends/alsa/alsa-constants.c:169 backends/alsa/alsa-constants.c:170
@@ -169,24 +171,24 @@ msgstr "Sisäinen Mikrofoni"
 #: backends/alsa/alsa-constants.c:87 backends/alsa/alsa-constants.c:164
 #: backends/alsa/alsa-constants.c:165
 msgid "Front Microphone"
-msgstr ""
+msgstr "Etumikrofoni"
 
 #: backends/alsa/alsa-constants.c:88 backends/alsa/alsa-constants.c:184
 #: backends/alsa/alsa-constants.c:185
 msgid "Rear Microphone"
-msgstr ""
+msgstr "Takamikrofoni"
 
 #: backends/alsa/alsa-constants.c:89 backends/alsa/alsa-constants.c:168
 msgid "Dock Microphone"
-msgstr ""
+msgstr "Telakkamikrofoni"
 
 #: backends/alsa/alsa-constants.c:90 backends/alsa/alsa-constants.c:166
 msgid "Headphone Microphone"
-msgstr ""
+msgstr "Kuulokepuhelimen mikrofoni"
 
 #: backends/alsa/alsa-constants.c:91 backends/alsa/alsa-constants.c:167
 msgid "Headset Microphone"
-msgstr ""
+msgstr "Kuulokemikrofoni"
 
 #: backends/alsa/alsa-constants.c:92
 msgid "Inverted Internal Microphone"
@@ -198,7 +200,7 @@ msgstr ""
 #: backends/alsa/alsa-constants.c:197 backends/alsa/alsa-constants.c:198
 #: backends/oss/oss-device.c:96
 msgid "Line In"
-msgstr ""
+msgstr "Linjasisäänmeno"
 
 #: backends/alsa/alsa-constants.c:96 backends/alsa/alsa-constants.c:204
 #: backends/alsa/alsa-constants.c:207
@@ -220,51 +222,51 @@ msgstr "FM"
 
 #: backends/alsa/alsa-constants.c:101
 msgid "Microphone Boost"
-msgstr ""
+msgstr "Mikrofonin vahvistus"
 
 #: backends/alsa/alsa-constants.c:102
 msgid "Microphone Boost (+20dB)"
-msgstr ""
+msgstr "Mikrofonin vahvistus (+20 dB)"
 
 #: backends/alsa/alsa-constants.c:103 backends/alsa/alsa-constants.c:104
 msgid "Internal Microphone Boost"
-msgstr ""
+msgstr "Sisäisen mikrofonin vahvistus"
 
 #: backends/alsa/alsa-constants.c:105
 msgid "Front Microphone Boost"
-msgstr ""
+msgstr "Etumikrofonin vahvistus"
 
 #: backends/alsa/alsa-constants.c:106
 msgid "Rear Microphone Boost"
-msgstr ""
+msgstr "Takamikrofonin vahvistus"
 
 #: backends/alsa/alsa-constants.c:107
 msgid "Dock Microphone Boost"
-msgstr ""
+msgstr "Telakkamikrofonin vahvistus"
 
 #: backends/alsa/alsa-constants.c:108
 msgid "Headphone Microphone Boost"
-msgstr ""
+msgstr "Kuulokepuhelimen mikrofonin vahvistus"
 
 #: backends/alsa/alsa-constants.c:109
 msgid "Headset Microphone Boost"
-msgstr ""
+msgstr "Kuulokemikrofonin vahvistus"
 
 #: backends/alsa/alsa-constants.c:110
 msgid "Line In Boost"
-msgstr ""
+msgstr "Linjasisäänmenon vahvistus"
 
 #: backends/alsa/alsa-constants.c:117
 msgid "Analog Output"
-msgstr ""
+msgstr "Analoginen ulostulo"
 
 #: backends/alsa/alsa-constants.c:118
 msgid "Analog Source"
-msgstr ""
+msgstr "Analoginen lähde"
 
 #: backends/alsa/alsa-constants.c:119
 msgid "Capture Source"
-msgstr ""
+msgstr "Kaappauslähde"
 
 #: backends/alsa/alsa-constants.c:120 backends/alsa/alsa-constants.c:121
 msgid "Input Source"
@@ -276,11 +278,11 @@ msgstr "Digitaalinen Sisääntulo Lähde"
 
 #: backends/alsa/alsa-constants.c:123
 msgid "PCM Capture Source"
-msgstr ""
+msgstr "PCM-kaappauslähde"
 
 #: backends/alsa/alsa-constants.c:124
 msgid "Digital Playback Source"
-msgstr ""
+msgstr "Digitaalinen toistolähde"
 
 #: backends/alsa/alsa-constants.c:125
 msgid "Mono Output"
@@ -288,7 +290,7 @@ msgstr "Mono ulostulo"
 
 #: backends/alsa/alsa-constants.c:126
 msgid "Shared Microphone/Line In"
-msgstr ""
+msgstr "Jaettu mikrofoni/linjasisäänmeno"
 
 #: backends/alsa/alsa-constants.c:128
 msgid "Microphone Jack Mode"
@@ -300,27 +302,27 @@ msgstr ""
 
 #: backends/alsa/alsa-constants.c:130
 msgid "Auto-Mute Mode"
-msgstr ""
+msgstr "Automaattinen vaimennus"
 
 #: backends/alsa/alsa-constants.c:133
 msgid "External Amplifier"
-msgstr ""
+msgstr "Ulkoinen vahvistin"
 
 #: backends/alsa/alsa-constants.c:134
 msgid "Bass Boost"
-msgstr ""
+msgstr "Bassovahvistus"
 
 #: backends/alsa/alsa-constants.c:135
 msgid "Capture Boost"
-msgstr ""
+msgstr "Kaappausvahvistus"
 
 #: backends/alsa/alsa-constants.c:137 backends/alsa/alsa-constants.c:201
 msgid "Digital In"
-msgstr ""
+msgstr "Digitaalinen sisään"
 
 #: backends/alsa/alsa-constants.c:138
 msgid "Digital Default PCM"
-msgstr ""
+msgstr "Digitaalinen oletus-PCM"
 
 #: backends/alsa/alsa-constants.c:139
 msgid "Optical"
@@ -328,7 +330,7 @@ msgstr "Optinen"
 
 #: backends/alsa/alsa-constants.c:140
 msgid "Auto Gain Control"
-msgstr ""
+msgstr "Automaattinen vahvistuksensäätö"
 
 #: backends/alsa/alsa-constants.c:141
 msgid "Mix"
@@ -340,19 +342,19 @@ msgstr ""
 
 #: backends/alsa/alsa-constants.c:143
 msgid "Microphone Capture"
-msgstr ""
+msgstr "Mikrofonin kaappaus"
 
 #: backends/alsa/alsa-constants.c:144 backends/alsa/alsa-constants.c:199
 msgid "Input 1"
-msgstr ""
+msgstr "Sisäänmeno 1"
 
 #: backends/alsa/alsa-constants.c:145 backends/alsa/alsa-constants.c:200
 msgid "Input 2"
-msgstr ""
+msgstr "Sisäänmeno 2"
 
 #: backends/alsa/alsa-constants.c:152
 msgid "Speakers"
-msgstr ""
+msgstr "Kaiuttimet"
 
 #: backends/alsa/alsa-constants.c:153
 msgid "Headphones"
@@ -360,7 +362,7 @@ msgstr "Kuulokkeet"
 
 #: backends/alsa/alsa-constants.c:154
 msgid "Front Panel Headphones"
-msgstr ""
+msgstr "Etupaneelin kuulokkeet"
 
 #: backends/alsa/alsa-constants.c:159
 msgid "Microphone 1"
@@ -373,7 +375,7 @@ msgstr "Mikrofoni 2"
 #: backends/alsa/alsa-constants.c:161 backends/alsa/alsa-constants.c:162
 #: backends/alsa/alsa-constants.c:163
 msgid "Microphone In"
-msgstr ""
+msgstr "Mikrofoni sisään"
 
 #: backends/alsa/alsa-constants.c:171
 msgid "Internal Microphone 1"
@@ -381,11 +383,11 @@ msgstr "Sisäinen mikrofoni 1"
 
 #: backends/alsa/alsa-constants.c:175
 msgid "Internal Digital Microphone"
-msgstr ""
+msgstr "Sisäinen digitaalimikrofoni"
 
 #: backends/alsa/alsa-constants.c:176 backends/alsa/alsa-constants.c:179
 msgid "Digital Microphone"
-msgstr ""
+msgstr "Digitaalimikrofoni"
 
 #: backends/alsa/alsa-constants.c:177
 msgid "Digital Microphone 1"
@@ -402,23 +404,23 @@ msgstr "Ulkoinen mikrofoni"
 
 #: backends/alsa/alsa-constants.c:186
 msgid "Camera Microphone"
-msgstr ""
+msgstr "Kameran mikrofoni"
 
 #: backends/alsa/alsa-constants.c:189
 msgid "Analog"
-msgstr ""
+msgstr "Analoginen"
 
 #: backends/alsa/alsa-constants.c:190
 msgid "Analog In"
-msgstr ""
+msgstr "Analoginen sisään"
 
 #: backends/alsa/alsa-constants.c:191
 msgid "Analog Inputs"
-msgstr ""
+msgstr "Analogiset syötteet"
 
 #: backends/alsa/alsa-constants.c:196
 msgid "Line In/Microphone"
-msgstr ""
+msgstr "Linjasisääntulo/mikrofoni"
 
 #: backends/alsa/alsa-constants.c:205 backends/alsa/alsa-constants.c:206
 msgid "Auxiliary In"
@@ -446,15 +448,15 @@ msgstr "Telakointiasema"
 
 #: backends/alsa/alsa-constants.c:213 backends/oss/oss-device.c:100
 msgid "Mixer"
-msgstr ""
+msgstr "Mikseri"
 
 #: backends/alsa/alsa-constants.c:217
 msgid "Unknown 1"
-msgstr ""
+msgstr "Tuntematon 1"
 
 #: backends/alsa/alsa-constants.c:218
 msgid "Unknown 2"
-msgstr ""
+msgstr "Tuntematon 2"
 
 #: backends/alsa/alsa-constants.c:219
 msgid "Enabled"
@@ -475,7 +477,7 @@ msgstr "Pois päältä"
 #: backends/oss/oss-backend.c:403
 #, c-format
 msgid "OSS Mixer %d"
-msgstr ""
+msgstr "OSS-mikseri %d"
 
 #: backends/oss/oss-device.c:88
 msgid "Volume"
@@ -483,60 +485,60 @@ msgstr "Määrä"
 
 #: backends/oss/oss-device.c:101
 msgid "PCM 2"
-msgstr ""
+msgstr "PCM 2"
 
 #: backends/oss/oss-device.c:103
 msgid "Record"
-msgstr ""
+msgstr "Äänitys"
 
 #: backends/oss/oss-device.c:104
 msgid "Input Gain"
-msgstr ""
+msgstr "Sisäänmenon vahvistus"
 
 #: backends/oss/oss-device.c:105
 msgid "Output Gain"
-msgstr ""
+msgstr "Ulostulos vahvistus"
 
 #: backends/oss/oss-device.c:106
 msgid "Line In 1"
-msgstr ""
+msgstr "Linjasisääntulo 1"
 
 #: backends/oss/oss-device.c:107
 msgid "Line In 2"
-msgstr ""
+msgstr "Linjasisääntulo 2"
 
 #: backends/oss/oss-device.c:108
 msgid "Line In 3"
-msgstr ""
+msgstr "Linjasisääntulo 3"
 
 #: backends/oss/oss-device.c:110
 msgid "Digital 1"
-msgstr ""
+msgstr "Digitaalinen 1"
 
 #: backends/oss/oss-device.c:111
 msgid "Digital 2"
-msgstr ""
+msgstr "Digitaalinen 2"
 
 #: backends/oss/oss-device.c:112
 msgid "Digital 3"
-msgstr ""
+msgstr "Digitaalinen 3"
 
 #: backends/oss/oss-device.c:113
 msgid "Phone In"
-msgstr ""
+msgstr "Puhelin sisään"
 
 #: backends/oss/oss-device.c:114
 msgid "Phone Out"
-msgstr ""
+msgstr "Puhelin ulos"
 
 #: backends/oss/oss-device.c:116
 msgid "Radio"
-msgstr ""
+msgstr "Radio"
 
 #: backends/oss/oss-stream.c:210 backends/pulse/pulse-sink.c:144
 #: backends/pulse/pulse-source.c:141
 msgid "Connector"
-msgstr ""
+msgstr "Liitin"
 
 #: backends/pulse/pulse-device.c:385
 msgid "Profile"
