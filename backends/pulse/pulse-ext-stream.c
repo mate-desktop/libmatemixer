@@ -373,8 +373,10 @@ pulse_ext_stream_update (PulseExtStream                   *ext,
         if (pa_cvolume_equal (&ext->priv->cvolume, &info->volume) == 0)
             volume_changed = TRUE;
     } else {
-        flags &= ~(MATE_MIXER_STREAM_CONTROL_VOLUME_READABLE |
-                   MATE_MIXER_STREAM_CONTROL_VOLUME_WRITABLE);
+        /* An empty cvolume has no readable volume, but a stored control
+         * should still accept the first write coming from the user */
+        flags &= ~MATE_MIXER_STREAM_CONTROL_VOLUME_READABLE;
+        flags |= MATE_MIXER_STREAM_CONTROL_VOLUME_WRITABLE;
 
         if (ext->priv->volume != (guint) PA_VOLUME_MUTED)
             volume_changed = TRUE;
@@ -461,15 +463,27 @@ pulse_ext_stream_set_volume (MateMixerStreamControl *mmsc, guint volume)
 {
     PulseExtStream *ext;
     pa_cvolume      cvolume;
+    pa_channel_map  channel_map;
 
     g_return_val_if_fail (PULSE_IS_EXT_STREAM (mmsc), FALSE);
 
     ext = PULSE_EXT_STREAM (mmsc);
-    cvolume = ext->priv->cvolume;
 
-    /* Modify a temporary cvolume structure as the change may be irreversible */
-    if (pa_cvolume_scale (&cvolume, (pa_volume_t) volume) == NULL)
-        return FALSE;
+    if (pa_cvolume_valid (&ext->priv->cvolume) != 0) {
+        /* Modify a temporary cvolume structure as the change may be irreversible */
+        cvolume = ext->priv->cvolume;
+        if (pa_cvolume_scale (&cvolume, (pa_volume_t) volume) == NULL)
+            return FALSE;
+    } else {
+        /* The empty entry carries no channel layout either, so build a
+         * minimal valid MONO cvolume from the requested volume, just like
+         * pavucontrol stores media role volumes */
+        pa_channel_map_init_mono (&channel_map);
+        pa_cvolume_init (&cvolume);
+        if (pa_cvolume_set (&cvolume, channel_map.channels, (pa_volume_t) volume) == NULL)
+            return FALSE;
+        ext->priv->channel_map = channel_map;
+    }
 
     return write_cvolume (ext, &cvolume);
 }
