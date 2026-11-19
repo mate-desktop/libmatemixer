@@ -1,57 +1,59 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR MATE Desktop Environment team
 # This file is distributed under the same license as the libmatemixer package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-# 
-# Translators:
 # Stefano Karapetsas <stefano@karapetsas.com>, 2018
-# 
+# Rihards Prieditis <rprieditis@gmail.com>, 2026.
+#
+# Translators:
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: libmatemixer 1.26.0\n"
 "Report-Msgid-Bugs-To: https://mate-desktop.org\n"
 "POT-Creation-Date: 2022-10-29 15:24+0200\n"
-"PO-Revision-Date: 2018-03-11 15:58+0000\n"
-"Last-Translator: Stefano Karapetsas <stefano@karapetsas.com>, 2018\n"
-"Language-Team: Latvian (https://app.transifex.com/mate/teams/13566/lv/)\n"
+"PO-Revision-Date: 2026-11-19 21:20+0000\n"
+"Last-Translator: Rihards Prieditis <rprieditis@gmail.com>\n"
+"Language-Team: Latvian <https://translate.fedoraproject.org/projects/mate-"
+"desktop/applications/libmatemixer/lv/>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: lv\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2);\n"
+"Plural-Forms: nplurals=3; plural=n%10==1 && n%100!=11 ? 0 : n != 0 ? 1 : 2;\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 #: backends/alsa/alsa-constants.c:41
 msgid "Master"
-msgstr ""
+msgstr "Galvenais"
 
 #: backends/alsa/alsa-constants.c:42
 msgid "Hardware Master"
-msgstr ""
+msgstr "Aparatūras galvenais"
 
 #: backends/alsa/alsa-constants.c:43 backends/oss/oss-device.c:92
 msgid "PCM"
-msgstr ""
+msgstr "PCM"
 
 #: backends/alsa/alsa-constants.c:44 backends/oss/oss-device.c:95
 msgid "Speaker"
-msgstr ""
+msgstr "Skaļrunis"
 
 #: backends/alsa/alsa-constants.c:45
 msgid "Desktop Speaker"
-msgstr ""
+msgstr "Galda skaļrunis"
 
 #: backends/alsa/alsa-constants.c:46 backends/alsa/alsa-constants.c:47
 #: backends/alsa/alsa-constants.c:48
 msgid "Front Speaker"
-msgstr ""
+msgstr "Priekšējais skaļrunis"
 
 #: backends/alsa/alsa-constants.c:49
 msgid "Headphone"
-msgstr ""
+msgstr "Austiņas"
 
 #: backends/alsa/alsa-constants.c:50
 msgid "Headphone 2"
-msgstr ""
+msgstr "Austiņas 2"
 
 #: backends/alsa/alsa-constants.c:51
 msgid "Headset"
@@ -60,49 +62,49 @@ msgstr "Austiņas ar mikrofonu"
 #: backends/alsa/alsa-constants.c:52 backends/alsa/alsa-constants.c:53
 #: backends/alsa/alsa-constants.c:54 backends/alsa/alsa-constants.c:55
 msgid "Surround Speaker"
-msgstr ""
+msgstr "Telpiskās skaņas skaļrunis"
 
 #: backends/alsa/alsa-constants.c:56 backends/alsa/alsa-constants.c:57
 msgid "Center Speaker"
-msgstr ""
+msgstr "Centrālais skaļrunis"
 
 #: backends/alsa/alsa-constants.c:58 backends/alsa/alsa-constants.c:59
 msgid "CLFE Speaker"
-msgstr ""
+msgstr "CLFE skaļrunis"
 
 #: backends/alsa/alsa-constants.c:60 backends/alsa/alsa-constants.c:136
 msgid "Digital"
-msgstr ""
+msgstr "Digitālais"
 
 #: backends/alsa/alsa-constants.c:61
 msgid "Master Mono"
-msgstr ""
+msgstr "Galvenais mono"
 
 #: backends/alsa/alsa-constants.c:62
 msgid "Master Digital"
-msgstr ""
+msgstr "Galvenais digitālais"
 
 #: backends/alsa/alsa-constants.c:63 backends/alsa/alsa-constants.c:64
 msgid "Side Speaker"
-msgstr ""
+msgstr "Sānu skaļrunis"
 
 #: backends/alsa/alsa-constants.c:65
 msgid "Rear Speaker"
-msgstr ""
+msgstr "Aizmugurējais skaļrunis"
 
 #: backends/alsa/alsa-constants.c:66
 msgid "Wave"
-msgstr ""
+msgstr "Wave"
 
 #: backends/alsa/alsa-constants.c:67 backends/alsa/alsa-constants.c:100
 #: backends/alsa/alsa-constants.c:216
 msgid "Phone"
-msgstr "Telefons"
+msgstr "Tālrunis"
 
 #: backends/alsa/alsa-constants.c:68 backends/alsa/alsa-constants.c:214
 #: backends/oss/oss-device.c:98
 msgid "CD"
-msgstr ""
+msgstr "CD"
 
 #: backends/alsa/alsa-constants.c:69
 msgid "Music"
@@ -110,86 +112,86 @@ msgstr "Mūzika"
 
 #: backends/alsa/alsa-constants.c:70
 msgid "AC97"
-msgstr ""
+msgstr "AC97"
 
 #: backends/alsa/alsa-constants.c:71 backends/alsa/alsa-constants.c:72
 msgid "LFE Speaker"
-msgstr ""
+msgstr "LFE skaļrunis"
 
 #: backends/alsa/alsa-constants.c:73
 msgid "Bass Speaker"
-msgstr ""
+msgstr "Basu skaļrunis"
 
 #: backends/alsa/alsa-constants.c:74
 msgid "PC Speaker"
-msgstr ""
+msgstr "Datora skaļrunis"
 
 #: backends/alsa/alsa-constants.c:75 backends/oss/oss-device.c:91
 msgid "Synth"
-msgstr ""
+msgstr "Sintezators"
 
 #: backends/alsa/alsa-constants.c:76
 msgid "MIDI"
-msgstr ""
+msgstr "MIDI"
 
 #: backends/alsa/alsa-constants.c:77
 msgid "Synth/MIDI"
-msgstr ""
+msgstr "Sintezators/MIDI"
 
 #: backends/alsa/alsa-constants.c:78 backends/oss/oss-device.c:89
 msgid "Bass"
-msgstr ""
+msgstr "Basi"
 
 #: backends/alsa/alsa-constants.c:79 backends/oss/oss-device.c:90
 msgid "Treble"
-msgstr ""
+msgstr "Augstās frekvences"
 
 #: backends/alsa/alsa-constants.c:82
 msgid "Capture"
-msgstr ""
+msgstr "Ierakstīšana"
 
 #: backends/alsa/alsa-constants.c:83 backends/alsa/alsa-constants.c:127
 #: backends/alsa/alsa-constants.c:157 backends/alsa/alsa-constants.c:158
 #: backends/oss/oss-device.c:97
 msgid "Microphone"
-msgstr ""
+msgstr "Mikrofons"
 
 #: backends/alsa/alsa-constants.c:84 backends/alsa/alsa-constants.c:195
 msgid "Microphone/Line In"
-msgstr ""
+msgstr "Mikrofons/līnijas ieeja"
 
 #: backends/alsa/alsa-constants.c:85 backends/alsa/alsa-constants.c:86
 #: backends/alsa/alsa-constants.c:169 backends/alsa/alsa-constants.c:170
 #: backends/alsa/alsa-constants.c:172 backends/alsa/alsa-constants.c:173
 #: backends/alsa/alsa-constants.c:174
 msgid "Internal Microphone"
-msgstr ""
+msgstr "Iebūvētais mikrofons"
 
 #: backends/alsa/alsa-constants.c:87 backends/alsa/alsa-constants.c:164
 #: backends/alsa/alsa-constants.c:165
 msgid "Front Microphone"
-msgstr ""
+msgstr "Priekšējais mikrofons"
 
 #: backends/alsa/alsa-constants.c:88 backends/alsa/alsa-constants.c:184
 #: backends/alsa/alsa-constants.c:185
 msgid "Rear Microphone"
-msgstr ""
+msgstr "Aizmugurējais mikrofons"
 
 #: backends/alsa/alsa-constants.c:89 backends/alsa/alsa-constants.c:168
 msgid "Dock Microphone"
-msgstr ""
+msgstr "Dokstacijas mikrofons"
 
 #: backends/alsa/alsa-constants.c:90 backends/alsa/alsa-constants.c:166
 msgid "Headphone Microphone"
-msgstr ""
+msgstr "Austiņu mikrofons"
 
 #: backends/alsa/alsa-constants.c:91 backends/alsa/alsa-constants.c:167
 msgid "Headset Microphone"
-msgstr ""
+msgstr "Austiņu ar mikrofonu mikrofons"
 
 #: backends/alsa/alsa-constants.c:92
 msgid "Inverted Internal Microphone"
-msgstr ""
+msgstr "Invertēts iebūvētais mikrofons"
 
 #: backends/alsa/alsa-constants.c:93 backends/alsa/alsa-constants.c:94
 #: backends/alsa/alsa-constants.c:95 backends/alsa/alsa-constants.c:192
@@ -197,12 +199,12 @@ msgstr ""
 #: backends/alsa/alsa-constants.c:197 backends/alsa/alsa-constants.c:198
 #: backends/oss/oss-device.c:96
 msgid "Line In"
-msgstr ""
+msgstr "Līnijas ieeja"
 
 #: backends/alsa/alsa-constants.c:96 backends/alsa/alsa-constants.c:204
 #: backends/alsa/alsa-constants.c:207
 msgid "Auxiliary"
-msgstr ""
+msgstr "Papildu"
 
 #: backends/alsa/alsa-constants.c:97 backends/alsa/alsa-constants.c:215
 #: backends/oss/oss-device.c:115
@@ -211,147 +213,147 @@ msgstr "Video"
 
 #: backends/alsa/alsa-constants.c:98 backends/alsa/alsa-constants.c:202
 msgid "TV Tuner"
-msgstr ""
+msgstr "TV uztvērējs"
 
 #: backends/alsa/alsa-constants.c:99 backends/alsa/alsa-constants.c:203
 msgid "FM"
-msgstr ""
+msgstr "FM"
 
 #: backends/alsa/alsa-constants.c:101
 msgid "Microphone Boost"
-msgstr ""
+msgstr "Mikrofona pastiprinājums"
 
 #: backends/alsa/alsa-constants.c:102
 msgid "Microphone Boost (+20dB)"
-msgstr ""
+msgstr "Mikrofona pastiprinājums (+20dB)"
 
 #: backends/alsa/alsa-constants.c:103 backends/alsa/alsa-constants.c:104
 msgid "Internal Microphone Boost"
-msgstr ""
+msgstr "Iebūvētā mikrofona pastiprinājums"
 
 #: backends/alsa/alsa-constants.c:105
 msgid "Front Microphone Boost"
-msgstr ""
+msgstr "Priekšējā mikrofona pastiprinājums"
 
 #: backends/alsa/alsa-constants.c:106
 msgid "Rear Microphone Boost"
-msgstr ""
+msgstr "Aizmugurējā mikrofona pastiprinājums"
 
 #: backends/alsa/alsa-constants.c:107
 msgid "Dock Microphone Boost"
-msgstr ""
+msgstr "Dokstacijas mikrofona pastiprinājums"
 
 #: backends/alsa/alsa-constants.c:108
 msgid "Headphone Microphone Boost"
-msgstr ""
+msgstr "Austiņu mikrofona pastiprinājums"
 
 #: backends/alsa/alsa-constants.c:109
 msgid "Headset Microphone Boost"
-msgstr ""
+msgstr "Austiņu ar mikrofonu pastiprinājums"
 
 #: backends/alsa/alsa-constants.c:110
 msgid "Line In Boost"
-msgstr ""
+msgstr "Līnijas ieejas pastiprinājums"
 
 #: backends/alsa/alsa-constants.c:117
 msgid "Analog Output"
-msgstr ""
+msgstr "Analogā izvade"
 
 #: backends/alsa/alsa-constants.c:118
 msgid "Analog Source"
-msgstr ""
+msgstr "Analogais avots"
 
 #: backends/alsa/alsa-constants.c:119
 msgid "Capture Source"
-msgstr ""
+msgstr "Ierakstīšanas avots"
 
 #: backends/alsa/alsa-constants.c:120 backends/alsa/alsa-constants.c:121
 msgid "Input Source"
-msgstr ""
+msgstr "Ievades avots"
 
 #: backends/alsa/alsa-constants.c:122
 msgid "Digital Input Source"
-msgstr ""
+msgstr "Digitālās ievades avots"
 
 #: backends/alsa/alsa-constants.c:123
 msgid "PCM Capture Source"
-msgstr ""
+msgstr "PCM ierakstīšanas avots"
 
 #: backends/alsa/alsa-constants.c:124
 msgid "Digital Playback Source"
-msgstr ""
+msgstr "Digitālās atskaņošanas avots"
 
 #: backends/alsa/alsa-constants.c:125
 msgid "Mono Output"
-msgstr ""
+msgstr "Mono izvade"
 
 #: backends/alsa/alsa-constants.c:126
 msgid "Shared Microphone/Line In"
-msgstr ""
+msgstr "Koplietota mikrofona/līnijas ieeja"
 
 #: backends/alsa/alsa-constants.c:128
 msgid "Microphone Jack Mode"
-msgstr ""
+msgstr "Mikrofona ligzdas režīms"
 
 #: backends/alsa/alsa-constants.c:129
 msgid "Surround Jack Mode"
-msgstr ""
+msgstr "Telpiskās skaņas ligzdas režīms"
 
 #: backends/alsa/alsa-constants.c:130
 msgid "Auto-Mute Mode"
-msgstr ""
+msgstr "Automātiskās klusināšanas režīms"
 
 #: backends/alsa/alsa-constants.c:133
 msgid "External Amplifier"
-msgstr ""
+msgstr "Ārējais pastiprinātājs"
 
 #: backends/alsa/alsa-constants.c:134
 msgid "Bass Boost"
-msgstr ""
+msgstr "Basu pastiprinājums"
 
 #: backends/alsa/alsa-constants.c:135
 msgid "Capture Boost"
-msgstr ""
+msgstr "Ierakstīšanas pastiprinājums"
 
 #: backends/alsa/alsa-constants.c:137 backends/alsa/alsa-constants.c:201
 msgid "Digital In"
-msgstr ""
+msgstr "Digitālā ieeja"
 
 #: backends/alsa/alsa-constants.c:138
 msgid "Digital Default PCM"
-msgstr ""
+msgstr "Digitālais noklusējuma PCM"
 
 #: backends/alsa/alsa-constants.c:139
 msgid "Optical"
-msgstr ""
+msgstr "Optiskais"
 
 #: backends/alsa/alsa-constants.c:140
 msgid "Auto Gain Control"
-msgstr ""
+msgstr "Automātiskā pastiprinājuma regulēšana"
 
 #: backends/alsa/alsa-constants.c:141
 msgid "Mix"
-msgstr ""
+msgstr "Miksējums"
 
 #: backends/alsa/alsa-constants.c:142
 msgid "Mix Mono"
-msgstr ""
+msgstr "Mono miksējums"
 
 #: backends/alsa/alsa-constants.c:143
 msgid "Microphone Capture"
-msgstr ""
+msgstr "Mikrofona ierakstīšana"
 
 #: backends/alsa/alsa-constants.c:144 backends/alsa/alsa-constants.c:199
 msgid "Input 1"
-msgstr ""
+msgstr "Ievade 1"
 
 #: backends/alsa/alsa-constants.c:145 backends/alsa/alsa-constants.c:200
 msgid "Input 2"
-msgstr ""
+msgstr "Ievade 2"
 
 #: backends/alsa/alsa-constants.c:152
 msgid "Speakers"
-msgstr ""
+msgstr "Skaļruņi"
 
 #: backends/alsa/alsa-constants.c:153
 msgid "Headphones"
@@ -359,109 +361,109 @@ msgstr "Austiņas"
 
 #: backends/alsa/alsa-constants.c:154
 msgid "Front Panel Headphones"
-msgstr ""
+msgstr "Priekšējā paneļa austiņas"
 
 #: backends/alsa/alsa-constants.c:159
 msgid "Microphone 1"
-msgstr ""
+msgstr "Mikrofons 1"
 
 #: backends/alsa/alsa-constants.c:160
 msgid "Microphone 2"
-msgstr ""
+msgstr "Mikrofons 2"
 
 #: backends/alsa/alsa-constants.c:161 backends/alsa/alsa-constants.c:162
 #: backends/alsa/alsa-constants.c:163
 msgid "Microphone In"
-msgstr ""
+msgstr "Mikrofona ieeja"
 
 #: backends/alsa/alsa-constants.c:171
 msgid "Internal Microphone 1"
-msgstr ""
+msgstr "Iebūvētais mikrofons 1"
 
 #: backends/alsa/alsa-constants.c:175
 msgid "Internal Digital Microphone"
-msgstr ""
+msgstr "Iebūvētais digitālais mikrofons"
 
 #: backends/alsa/alsa-constants.c:176 backends/alsa/alsa-constants.c:179
 msgid "Digital Microphone"
-msgstr ""
+msgstr "Digitālais mikrofons"
 
 #: backends/alsa/alsa-constants.c:177
 msgid "Digital Microphone 1"
-msgstr ""
+msgstr "Digitālais mikrofons 1"
 
 #: backends/alsa/alsa-constants.c:178
 msgid "Digital Microphone 2"
-msgstr ""
+msgstr "Digitālais mikrofons 2"
 
 #: backends/alsa/alsa-constants.c:180 backends/alsa/alsa-constants.c:181
 #: backends/alsa/alsa-constants.c:182 backends/alsa/alsa-constants.c:183
 msgid "External Microphone"
-msgstr ""
+msgstr "Ārējais mikrofons"
 
 #: backends/alsa/alsa-constants.c:186
 msgid "Camera Microphone"
-msgstr ""
+msgstr "Kameras mikrofons"
 
 #: backends/alsa/alsa-constants.c:189
 msgid "Analog"
-msgstr ""
+msgstr "Analogais"
 
 #: backends/alsa/alsa-constants.c:190
 msgid "Analog In"
-msgstr ""
+msgstr "Analogā ieeja"
 
 #: backends/alsa/alsa-constants.c:191
 msgid "Analog Inputs"
-msgstr ""
+msgstr "Analogās ieejas"
 
 #: backends/alsa/alsa-constants.c:196
 msgid "Line In/Microphone"
-msgstr ""
+msgstr "Līnijas ieeja/mikrofons"
 
 #: backends/alsa/alsa-constants.c:205 backends/alsa/alsa-constants.c:206
 msgid "Auxiliary In"
-msgstr ""
+msgstr "Papildu ieeja"
 
 #: backends/alsa/alsa-constants.c:208
 msgid "Auxiliary 0"
-msgstr ""
+msgstr "Papildu 0"
 
 #: backends/alsa/alsa-constants.c:209
 msgid "Auxiliary 1"
-msgstr ""
+msgstr "Papildu 1"
 
 #: backends/alsa/alsa-constants.c:210
 msgid "Auxiliary 2"
-msgstr ""
+msgstr "Papildu 2"
 
 #: backends/alsa/alsa-constants.c:211
 msgid "Auxiliary 3"
-msgstr ""
+msgstr "Papildu 3"
 
 #: backends/alsa/alsa-constants.c:212
 msgid "Docking Station"
-msgstr ""
+msgstr "Dokstacija"
 
 #: backends/alsa/alsa-constants.c:213 backends/oss/oss-device.c:100
 msgid "Mixer"
-msgstr ""
+msgstr "Mikseris"
 
 #: backends/alsa/alsa-constants.c:217
 msgid "Unknown 1"
-msgstr ""
+msgstr "Nezināms 1"
 
 #: backends/alsa/alsa-constants.c:218
 msgid "Unknown 2"
-msgstr ""
+msgstr "Nezināms 2"
 
 #: backends/alsa/alsa-constants.c:219
 msgid "Enabled"
-msgstr "Aktivizēts"
+msgstr "Iespējots"
 
 #: backends/alsa/alsa-constants.c:220
 msgid "Disabled"
-msgstr "Deaktivizēts"
+msgstr "Atspējots"
 
 #: backends/alsa/alsa-device.c:630
 msgid "On"
@@ -474,73 +476,73 @@ msgstr "Izslēgts"
 #: backends/oss/oss-backend.c:403
 #, c-format
 msgid "OSS Mixer %d"
-msgstr ""
+msgstr "OSS mikseris %d"
 
 #: backends/oss/oss-device.c:88
 msgid "Volume"
-msgstr "Tilpums"
+msgstr "Sējums"
 
 #: backends/oss/oss-device.c:101
 msgid "PCM 2"
-msgstr ""
+msgstr "PCM 2"
 
 #: backends/oss/oss-device.c:103
 msgid "Record"
-msgstr ""
+msgstr "Ierakstīt"
 
 #: backends/oss/oss-device.c:104
 msgid "Input Gain"
-msgstr ""
+msgstr "Ievades pastiprinājums"
 
 #: backends/oss/oss-device.c:105
 msgid "Output Gain"
-msgstr ""
+msgstr "Izvades pastiprinājums"
 
 #: backends/oss/oss-device.c:106
 msgid "Line In 1"
-msgstr ""
+msgstr "Līnijas ieeja 1"
 
 #: backends/oss/oss-device.c:107
 msgid "Line In 2"
-msgstr ""
+msgstr "Līnijas ieeja 2"
 
 #: backends/oss/oss-device.c:108
 msgid "Line In 3"
-msgstr ""
+msgstr "Līnijas ieeja 3"
 
 #: backends/oss/oss-device.c:110
 msgid "Digital 1"
-msgstr ""
+msgstr "Digitālais 1"
 
 #: backends/oss/oss-device.c:111
 msgid "Digital 2"
-msgstr ""
+msgstr "Digitālais 2"
 
 #: backends/oss/oss-device.c:112
 msgid "Digital 3"
-msgstr ""
+msgstr "Digitālais 3"
 
 #: backends/oss/oss-device.c:113
 msgid "Phone In"
-msgstr ""
+msgstr "Tālruņa ieeja"
 
 #: backends/oss/oss-device.c:114
 msgid "Phone Out"
-msgstr ""
+msgstr "Tālruņa izeja"
 
 #: backends/oss/oss-device.c:116
 msgid "Radio"
-msgstr ""
+msgstr "Radio"
 
 #: backends/oss/oss-stream.c:210 backends/pulse/pulse-sink.c:144
 #: backends/pulse/pulse-source.c:141
 msgid "Connector"
-msgstr ""
+msgstr "Savienotājs"
 
 #: backends/pulse/pulse-device.c:385
 msgid "Profile"
-msgstr ""
+msgstr "Profils"
 
 #: backends/pulse/pulse-monitor.c:275
 msgid "Peak detect"
-msgstr "Pīķu noteikšana"
+msgstr "Maksimuma noteikšana"
