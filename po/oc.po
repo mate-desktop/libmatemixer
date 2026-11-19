@@ -1,25 +1,27 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR MATE Desktop Environment team
 # This file is distributed under the same license as the libmatemixer package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-# 
-# Translators:
 # Cédric Valmary <cvalmary@yahoo.fr>, 2018
 # Quentin PAGÈS, 2021
-# 
+# Quentin PAGÈS <quentinantonin@free.fr>, 2026.
+#
+# Translators:
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: libmatemixer 1.26.0\n"
 "Report-Msgid-Bugs-To: https://mate-desktop.org\n"
 "POT-Creation-Date: 2022-10-29 15:24+0200\n"
-"PO-Revision-Date: 2018-03-11 15:58+0000\n"
-"Last-Translator: Quentin PAGÈS, 2021\n"
-"Language-Team: Occitan (post 1500) (https://app.transifex.com/mate/teams/13566/oc/)\n"
+"PO-Revision-Date: 2026-06-16 10:10+0000\n"
+"Last-Translator: Quentin PAGÈS <quentinantonin@free.fr>\n"
+"Language-Team: Occitan <https://translate.fedoraproject.org/projects/mate-"
+"desktop/libmatemixer/oc/>\n"
+"Language: oc\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: oc\n"
-"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #: backends/alsa/alsa-constants.c:41
 msgid "Master"
@@ -73,7 +75,7 @@ msgstr "Nautparlaire d'ambiança CLFE"
 
 #: backends/alsa/alsa-constants.c:60 backends/alsa/alsa-constants.c:136
 msgid "Digital"
-msgstr "Digital"
+msgstr "Numeric"
 
 #: backends/alsa/alsa-constants.c:61
 msgid "Master Mono"
@@ -446,7 +448,7 @@ msgstr "Estacion d’acuèlh"
 
 #: backends/alsa/alsa-constants.c:213 backends/oss/oss-device.c:100
 msgid "Mixer"
-msgstr "Mixer"
+msgstr "Mesclador"
 
 #: backends/alsa/alsa-constants.c:217
 msgid "Unknown 1"
