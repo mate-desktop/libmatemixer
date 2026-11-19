@@ -1,24 +1,25 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR MATE Desktop Environment team
 # This file is distributed under the same license as the libmatemixer package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-# 
+# Baurzhan Muftakhidinov <baurthefirst@gmail.com>, 2018, 2026.
+#
 # Translators:
-# Baurzhan Muftakhidinov <baurthefirst@gmail.com>, 2018
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: libmatemixer 1.26.0\n"
 "Report-Msgid-Bugs-To: https://mate-desktop.org\n"
 "POT-Creation-Date: 2022-10-29 15:24+0200\n"
-"PO-Revision-Date: 2018-03-11 15:58+0000\n"
-"Last-Translator: Baurzhan Muftakhidinov <baurthefirst@gmail.com>, 2018\n"
-"Language-Team: Kazakh (https://app.transifex.com/mate/teams/13566/kk/)\n"
+"PO-Revision-Date: 2026-08-27 17:18+0000\n"
+"Last-Translator: Baurzhan Muftakhidinov <baurthefirst@gmail.com>\n"
+"Language-Team: Kazakh <https://translate.fedoraproject.org/projects/mate-"
+"desktop/applications/libmatemixer/kk/>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: kk\n"
-"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.8.1\n"
 
 #: backends/alsa/alsa-constants.c:41
 msgid "Master"
@@ -26,7 +27,7 @@ msgstr "Басты"
 
 #: backends/alsa/alsa-constants.c:42
 msgid "Hardware Master"
-msgstr ""
+msgstr "Аппараттық басты"
 
 #: backends/alsa/alsa-constants.c:43 backends/oss/oss-device.c:92
 msgid "PCM"
@@ -38,20 +39,20 @@ msgstr "Динамик"
 
 #: backends/alsa/alsa-constants.c:45
 msgid "Desktop Speaker"
-msgstr ""
+msgstr "Жұмыс үстелі динамигі"
 
 #: backends/alsa/alsa-constants.c:46 backends/alsa/alsa-constants.c:47
 #: backends/alsa/alsa-constants.c:48
 msgid "Front Speaker"
-msgstr ""
+msgstr "Алдыңғы динамик"
 
 #: backends/alsa/alsa-constants.c:49
 msgid "Headphone"
-msgstr ""
+msgstr "Құлаққап"
 
 #: backends/alsa/alsa-constants.c:50
 msgid "Headphone 2"
-msgstr ""
+msgstr "Құлаққап 2"
 
 #: backends/alsa/alsa-constants.c:51
 msgid "Headset"
@@ -60,15 +61,15 @@ msgstr "Микрофонды құлаққап"
 #: backends/alsa/alsa-constants.c:52 backends/alsa/alsa-constants.c:53
 #: backends/alsa/alsa-constants.c:54 backends/alsa/alsa-constants.c:55
 msgid "Surround Speaker"
-msgstr ""
+msgstr "Көлемді дыбыс динамигі"
 
 #: backends/alsa/alsa-constants.c:56 backends/alsa/alsa-constants.c:57
 msgid "Center Speaker"
-msgstr ""
+msgstr "Орталық динамик"
 
 #: backends/alsa/alsa-constants.c:58 backends/alsa/alsa-constants.c:59
 msgid "CLFE Speaker"
-msgstr ""
+msgstr "CLFE динамигі"
 
 #: backends/alsa/alsa-constants.c:60 backends/alsa/alsa-constants.c:136
 msgid "Digital"
@@ -76,23 +77,23 @@ msgstr "Цифрлық"
 
 #: backends/alsa/alsa-constants.c:61
 msgid "Master Mono"
-msgstr ""
+msgstr "Басты моно"
 
 #: backends/alsa/alsa-constants.c:62
 msgid "Master Digital"
-msgstr ""
+msgstr "Басты цифрлық"
 
 #: backends/alsa/alsa-constants.c:63 backends/alsa/alsa-constants.c:64
 msgid "Side Speaker"
-msgstr ""
+msgstr "Бүйірлік динамик"
 
 #: backends/alsa/alsa-constants.c:65
 msgid "Rear Speaker"
-msgstr ""
+msgstr "Артқы динамик"
 
 #: backends/alsa/alsa-constants.c:66
 msgid "Wave"
-msgstr ""
+msgstr "Wave"
 
 #: backends/alsa/alsa-constants.c:67 backends/alsa/alsa-constants.c:100
 #: backends/alsa/alsa-constants.c:216
@@ -114,19 +115,19 @@ msgstr "AC97"
 
 #: backends/alsa/alsa-constants.c:71 backends/alsa/alsa-constants.c:72
 msgid "LFE Speaker"
-msgstr ""
+msgstr "LFE динамигі"
 
 #: backends/alsa/alsa-constants.c:73
 msgid "Bass Speaker"
-msgstr ""
+msgstr "Бас динамигі"
 
 #: backends/alsa/alsa-constants.c:74
 msgid "PC Speaker"
-msgstr ""
+msgstr "ДК динамигі"
 
 #: backends/alsa/alsa-constants.c:75 backends/oss/oss-device.c:91
 msgid "Synth"
-msgstr ""
+msgstr "Синтезатор"
 
 #: backends/alsa/alsa-constants.c:76
 msgid "MIDI"
@@ -134,15 +135,15 @@ msgstr "MIDI"
 
 #: backends/alsa/alsa-constants.c:77
 msgid "Synth/MIDI"
-msgstr ""
+msgstr "Синтезатор/MIDI"
 
 #: backends/alsa/alsa-constants.c:78 backends/oss/oss-device.c:89
 msgid "Bass"
-msgstr ""
+msgstr "Бас"
 
 #: backends/alsa/alsa-constants.c:79 backends/oss/oss-device.c:90
 msgid "Treble"
-msgstr ""
+msgstr "Жоғарғы жиіліктер"
 
 #: backends/alsa/alsa-constants.c:82
 msgid "Capture"
@@ -156,40 +157,40 @@ msgstr "Микрофон"
 
 #: backends/alsa/alsa-constants.c:84 backends/alsa/alsa-constants.c:195
 msgid "Microphone/Line In"
-msgstr ""
+msgstr "Микрофон/Сызықтық кіріс"
 
 #: backends/alsa/alsa-constants.c:85 backends/alsa/alsa-constants.c:86
 #: backends/alsa/alsa-constants.c:169 backends/alsa/alsa-constants.c:170
 #: backends/alsa/alsa-constants.c:172 backends/alsa/alsa-constants.c:173
 #: backends/alsa/alsa-constants.c:174
 msgid "Internal Microphone"
-msgstr ""
+msgstr "Ішкі микрофон"
 
 #: backends/alsa/alsa-constants.c:87 backends/alsa/alsa-constants.c:164
 #: backends/alsa/alsa-constants.c:165
 msgid "Front Microphone"
-msgstr ""
+msgstr "Алдыңғы микрофон"
 
 #: backends/alsa/alsa-constants.c:88 backends/alsa/alsa-constants.c:184
 #: backends/alsa/alsa-constants.c:185
 msgid "Rear Microphone"
-msgstr ""
+msgstr "Артқы микрофон"
 
 #: backends/alsa/alsa-constants.c:89 backends/alsa/alsa-constants.c:168
 msgid "Dock Microphone"
-msgstr ""
+msgstr "Док микрофоны"
 
 #: backends/alsa/alsa-constants.c:90 backends/alsa/alsa-constants.c:166
 msgid "Headphone Microphone"
-msgstr ""
+msgstr "Құлаққап микрофоны"
 
 #: backends/alsa/alsa-constants.c:91 backends/alsa/alsa-constants.c:167
 msgid "Headset Microphone"
-msgstr ""
+msgstr "Гарнитура микрофоны"
 
 #: backends/alsa/alsa-constants.c:92
 msgid "Inverted Internal Microphone"
-msgstr ""
+msgstr "Инверсияланған ішкі микрофон"
 
 #: backends/alsa/alsa-constants.c:93 backends/alsa/alsa-constants.c:94
 #: backends/alsa/alsa-constants.c:95 backends/alsa/alsa-constants.c:192
@@ -202,7 +203,7 @@ msgstr "Сызықтық кіріс"
 #: backends/alsa/alsa-constants.c:96 backends/alsa/alsa-constants.c:204
 #: backends/alsa/alsa-constants.c:207
 msgid "Auxiliary"
-msgstr ""
+msgstr "Қосымша"
 
 #: backends/alsa/alsa-constants.c:97 backends/alsa/alsa-constants.c:215
 #: backends/oss/oss-device.c:115
@@ -219,39 +220,39 @@ msgstr "FM"
 
 #: backends/alsa/alsa-constants.c:101
 msgid "Microphone Boost"
-msgstr ""
+msgstr "Микрофонды күшейту"
 
 #: backends/alsa/alsa-constants.c:102
 msgid "Microphone Boost (+20dB)"
-msgstr ""
+msgstr "Микрофонды күшейту (+20 дБ)"
 
 #: backends/alsa/alsa-constants.c:103 backends/alsa/alsa-constants.c:104
 msgid "Internal Microphone Boost"
-msgstr ""
+msgstr "Ішкі микрофонды күшейту"
 
 #: backends/alsa/alsa-constants.c:105
 msgid "Front Microphone Boost"
-msgstr ""
+msgstr "Алдыңғы микрофонды күшейту"
 
 #: backends/alsa/alsa-constants.c:106
 msgid "Rear Microphone Boost"
-msgstr ""
+msgstr "Артқы микрофонды күшейту"
 
 #: backends/alsa/alsa-constants.c:107
 msgid "Dock Microphone Boost"
-msgstr ""
+msgstr "Док микрофонын күшейту"
 
 #: backends/alsa/alsa-constants.c:108
 msgid "Headphone Microphone Boost"
-msgstr ""
+msgstr "Құлаққап микрофонын күшейту"
 
 #: backends/alsa/alsa-constants.c:109
 msgid "Headset Microphone Boost"
-msgstr ""
+msgstr "Гарнитура микрофонын күшейту"
 
 #: backends/alsa/alsa-constants.c:110
 msgid "Line In Boost"
-msgstr ""
+msgstr "Сызықтық кірісті күшейту"
 
 #: backends/alsa/alsa-constants.c:117
 msgid "Analog Output"
@@ -259,59 +260,59 @@ msgstr "Аналогты шығыс"
 
 #: backends/alsa/alsa-constants.c:118
 msgid "Analog Source"
-msgstr ""
+msgstr "Аналогтық дереккөз"
 
 #: backends/alsa/alsa-constants.c:119
 msgid "Capture Source"
-msgstr ""
+msgstr "Түсіру дереккөзі"
 
 #: backends/alsa/alsa-constants.c:120 backends/alsa/alsa-constants.c:121
 msgid "Input Source"
-msgstr ""
+msgstr "Кіріс дереккөзі"
 
 #: backends/alsa/alsa-constants.c:122
 msgid "Digital Input Source"
-msgstr ""
+msgstr "Цифрлық кіріс дереккөзі"
 
 #: backends/alsa/alsa-constants.c:123
 msgid "PCM Capture Source"
-msgstr ""
+msgstr "PCM түсіру дереккөзі"
 
 #: backends/alsa/alsa-constants.c:124
 msgid "Digital Playback Source"
-msgstr ""
+msgstr "Цифрлық ойнату дереккөзі"
 
 #: backends/alsa/alsa-constants.c:125
 msgid "Mono Output"
-msgstr ""
+msgstr "Моно шығыс"
 
 #: backends/alsa/alsa-constants.c:126
 msgid "Shared Microphone/Line In"
-msgstr ""
+msgstr "Ортақ микрофон/Сызықтық кіріс"
 
 #: backends/alsa/alsa-constants.c:128
 msgid "Microphone Jack Mode"
-msgstr ""
+msgstr "Микрофон ұяшығы режимі"
 
 #: backends/alsa/alsa-constants.c:129
 msgid "Surround Jack Mode"
-msgstr ""
+msgstr "Көлемді дыбыс ұяшығы режимі"
 
 #: backends/alsa/alsa-constants.c:130
 msgid "Auto-Mute Mode"
-msgstr ""
+msgstr "Автоматты түрде дыбыссыз ету режимі"
 
 #: backends/alsa/alsa-constants.c:133
 msgid "External Amplifier"
-msgstr ""
+msgstr "Сыртқы күшейткіш"
 
 #: backends/alsa/alsa-constants.c:134
 msgid "Bass Boost"
-msgstr ""
+msgstr "Басты күшейту"
 
 #: backends/alsa/alsa-constants.c:135
 msgid "Capture Boost"
-msgstr ""
+msgstr "Түсіруді күшейту"
 
 #: backends/alsa/alsa-constants.c:137 backends/alsa/alsa-constants.c:201
 msgid "Digital In"
@@ -319,7 +320,7 @@ msgstr "Цифрлық кіріс"
 
 #: backends/alsa/alsa-constants.c:138
 msgid "Digital Default PCM"
-msgstr ""
+msgstr "Үнсіз келісім бойынша цифрлық PCM"
 
 #: backends/alsa/alsa-constants.c:139
 msgid "Optical"
@@ -327,19 +328,19 @@ msgstr "Оптикалық"
 
 #: backends/alsa/alsa-constants.c:140
 msgid "Auto Gain Control"
-msgstr ""
+msgstr "Автоматты күшейтуді басқару"
 
 #: backends/alsa/alsa-constants.c:141
 msgid "Mix"
-msgstr ""
+msgstr "Микс"
 
 #: backends/alsa/alsa-constants.c:142
 msgid "Mix Mono"
-msgstr ""
+msgstr "Моно микс"
 
 #: backends/alsa/alsa-constants.c:143
 msgid "Microphone Capture"
-msgstr ""
+msgstr "Микрофоннан түсіру"
 
 #: backends/alsa/alsa-constants.c:144 backends/alsa/alsa-constants.c:199
 msgid "Input 1"
@@ -359,7 +360,7 @@ msgstr "Құлаққап"
 
 #: backends/alsa/alsa-constants.c:154
 msgid "Front Panel Headphones"
-msgstr ""
+msgstr "Алдыңғы панельдегі құлаққаптар"
 
 #: backends/alsa/alsa-constants.c:159
 msgid "Microphone 1"
@@ -441,7 +442,7 @@ msgstr "Сыртқы 3"
 
 #: backends/alsa/alsa-constants.c:212
 msgid "Docking Station"
-msgstr ""
+msgstr "Док-станция"
 
 #: backends/alsa/alsa-constants.c:213 backends/oss/oss-device.c:100
 msgid "Mixer"
@@ -474,7 +475,7 @@ msgstr "Сөнд."
 #: backends/oss/oss-backend.c:403
 #, c-format
 msgid "OSS Mixer %d"
-msgstr ""
+msgstr "OSS микшері %d"
 
 #: backends/oss/oss-device.c:88
 msgid "Volume"
@@ -490,43 +491,43 @@ msgstr "Жазып алу"
 
 #: backends/oss/oss-device.c:104
 msgid "Input Gain"
-msgstr ""
+msgstr "Кірісті күшейту"
 
 #: backends/oss/oss-device.c:105
 msgid "Output Gain"
-msgstr ""
+msgstr "Шығысты күшейту"
 
 #: backends/oss/oss-device.c:106
 msgid "Line In 1"
-msgstr ""
+msgstr "Сызықтық кіріс 1"
 
 #: backends/oss/oss-device.c:107
 msgid "Line In 2"
-msgstr ""
+msgstr "Сызықтық кіріс 2"
 
 #: backends/oss/oss-device.c:108
 msgid "Line In 3"
-msgstr ""
+msgstr "Сызықтық кіріс 3"
 
 #: backends/oss/oss-device.c:110
 msgid "Digital 1"
-msgstr ""
+msgstr "Цифрлық 1"
 
 #: backends/oss/oss-device.c:111
 msgid "Digital 2"
-msgstr ""
+msgstr "Цифрлық 2"
 
 #: backends/oss/oss-device.c:112
 msgid "Digital 3"
-msgstr ""
+msgstr "Цифрлық 3"
 
 #: backends/oss/oss-device.c:113
 msgid "Phone In"
-msgstr ""
+msgstr "Телефон кірісі"
 
 #: backends/oss/oss-device.c:114
 msgid "Phone Out"
-msgstr ""
+msgstr "Телефон шығысы"
 
 #: backends/oss/oss-device.c:116
 msgid "Radio"
@@ -535,7 +536,7 @@ msgstr "Радио"
 #: backends/oss/oss-stream.c:210 backends/pulse/pulse-sink.c:144
 #: backends/pulse/pulse-source.c:141
 msgid "Connector"
-msgstr ""
+msgstr "Қосқыш"
 
 #: backends/pulse/pulse-device.c:385
 msgid "Profile"
