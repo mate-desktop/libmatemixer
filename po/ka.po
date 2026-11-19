@@ -1,28 +1,30 @@
 # SOME DESCRIPTIVE TITLE.
 # Copyright (C) YEAR MATE Desktop Environment team
 # This file is distributed under the same license as the libmatemixer package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-# 
-# Translators:
 # Stefano Karapetsas <stefano@karapetsas.com>, 2018
-# 
+# Temuri Doghonadze <temuri.doghonadze@gmail.com>, 2026.
+#
+# Translators:
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: libmatemixer 1.26.0\n"
 "Report-Msgid-Bugs-To: https://mate-desktop.org\n"
 "POT-Creation-Date: 2022-10-29 15:24+0200\n"
-"PO-Revision-Date: 2018-03-11 15:58+0000\n"
-"Last-Translator: Stefano Karapetsas <stefano@karapetsas.com>, 2018\n"
-"Language-Team: Georgian (https://app.transifex.com/mate/teams/13566/ka/)\n"
+"PO-Revision-Date: 2026-06-23 01:11+0000\n"
+"Last-Translator: Temuri Doghonadze <temuri.doghonadze@gmail.com>\n"
+"Language-Team: Georgian <https://translate.fedoraproject.org/projects/mate-"
+"desktop/applications/libmatemixer/ka/>\n"
+"Language: ka\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Language: ka\n"
-"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
+"X-Generator: Weblate 2026.6.1\n"
 
 #: backends/alsa/alsa-constants.c:41
 msgid "Master"
-msgstr ""
+msgstr "ძირითადი"
 
 #: backends/alsa/alsa-constants.c:42
 msgid "Hardware Master"
@@ -30,11 +32,11 @@ msgstr ""
 
 #: backends/alsa/alsa-constants.c:43 backends/oss/oss-device.c:92
 msgid "PCM"
-msgstr ""
+msgstr "PCM"
 
 #: backends/alsa/alsa-constants.c:44 backends/oss/oss-device.c:95
 msgid "Speaker"
-msgstr ""
+msgstr "დინამიკი"
 
 #: backends/alsa/alsa-constants.c:45
 msgid "Desktop Speaker"
@@ -47,7 +49,7 @@ msgstr ""
 
 #: backends/alsa/alsa-constants.c:49
 msgid "Headphone"
-msgstr ""
+msgstr "ყურსასმენი"
 
 #: backends/alsa/alsa-constants.c:50
 msgid "Headphone 2"
@@ -55,7 +57,7 @@ msgstr ""
 
 #: backends/alsa/alsa-constants.c:51
 msgid "Headset"
-msgstr "ყურსასმენი"
+msgstr "ყურსასმენი მიკროფონით"
 
 #: backends/alsa/alsa-constants.c:52 backends/alsa/alsa-constants.c:53
 #: backends/alsa/alsa-constants.c:54 backends/alsa/alsa-constants.c:55
@@ -72,7 +74,7 @@ msgstr ""
 
 #: backends/alsa/alsa-constants.c:60 backends/alsa/alsa-constants.c:136
 msgid "Digital"
-msgstr ""
+msgstr "ციფრული"
 
 #: backends/alsa/alsa-constants.c:61
 msgid "Master Mono"
@@ -92,7 +94,7 @@ msgstr ""
 
 #: backends/alsa/alsa-constants.c:66
 msgid "Wave"
-msgstr ""
+msgstr "ტალღა"
 
 #: backends/alsa/alsa-constants.c:67 backends/alsa/alsa-constants.c:100
 #: backends/alsa/alsa-constants.c:216
@@ -102,7 +104,7 @@ msgstr "ტელეფონი"
 #: backends/alsa/alsa-constants.c:68 backends/alsa/alsa-constants.c:214
 #: backends/oss/oss-device.c:98
 msgid "CD"
-msgstr ""
+msgstr "CD"
 
 #: backends/alsa/alsa-constants.c:69
 msgid "Music"
@@ -110,7 +112,7 @@ msgstr "მუსიკა"
 
 #: backends/alsa/alsa-constants.c:70
 msgid "AC97"
-msgstr ""
+msgstr "AC97"
 
 #: backends/alsa/alsa-constants.c:71 backends/alsa/alsa-constants.c:72
 msgid "LFE Speaker"
@@ -126,33 +128,33 @@ msgstr ""
 
 #: backends/alsa/alsa-constants.c:75 backends/oss/oss-device.c:91
 msgid "Synth"
-msgstr ""
+msgstr "სინთეზატორი"
 
 #: backends/alsa/alsa-constants.c:76
 msgid "MIDI"
-msgstr ""
+msgstr "MIDI"
 
 #: backends/alsa/alsa-constants.c:77
 msgid "Synth/MIDI"
-msgstr ""
+msgstr "Synth/MIDI"
 
 #: backends/alsa/alsa-constants.c:78 backends/oss/oss-device.c:89
 msgid "Bass"
-msgstr ""
+msgstr "ბასი"
 
 #: backends/alsa/alsa-constants.c:79 backends/oss/oss-device.c:90
 msgid "Treble"
-msgstr ""
+msgstr "მაღლები"
 
 #: backends/alsa/alsa-constants.c:82
 msgid "Capture"
-msgstr ""
+msgstr "ჩაჭერა"
 
 #: backends/alsa/alsa-constants.c:83 backends/alsa/alsa-constants.c:127
 #: backends/alsa/alsa-constants.c:157 backends/alsa/alsa-constants.c:158
 #: backends/oss/oss-device.c:97
 msgid "Microphone"
-msgstr ""
+msgstr "მიკროფონი"
 
 #: backends/alsa/alsa-constants.c:84 backends/alsa/alsa-constants.c:195
 msgid "Microphone/Line In"
@@ -202,7 +204,7 @@ msgstr ""
 #: backends/alsa/alsa-constants.c:96 backends/alsa/alsa-constants.c:204
 #: backends/alsa/alsa-constants.c:207
 msgid "Auxiliary"
-msgstr ""
+msgstr "დამატებითი"
 
 #: backends/alsa/alsa-constants.c:97 backends/alsa/alsa-constants.c:215
 #: backends/oss/oss-device.c:115
@@ -215,7 +217,7 @@ msgstr ""
 
 #: backends/alsa/alsa-constants.c:99 backends/alsa/alsa-constants.c:203
 msgid "FM"
-msgstr ""
+msgstr "FM"
 
 #: backends/alsa/alsa-constants.c:101
 msgid "Microphone Boost"
@@ -323,7 +325,7 @@ msgstr ""
 
 #: backends/alsa/alsa-constants.c:139
 msgid "Optical"
-msgstr ""
+msgstr "ოპტიკური"
 
 #: backends/alsa/alsa-constants.c:140
 msgid "Auto Gain Control"
@@ -331,7 +333,7 @@ msgstr ""
 
 #: backends/alsa/alsa-constants.c:141
 msgid "Mix"
-msgstr ""
+msgstr "მიქსერი"
 
 #: backends/alsa/alsa-constants.c:142
 msgid "Mix Mono"
@@ -351,11 +353,11 @@ msgstr ""
 
 #: backends/alsa/alsa-constants.c:152
 msgid "Speakers"
-msgstr ""
+msgstr "დინამიკები"
 
 #: backends/alsa/alsa-constants.c:153
 msgid "Headphones"
-msgstr ""
+msgstr "ყურსასმენები"
 
 #: backends/alsa/alsa-constants.c:154
 msgid "Front Panel Headphones"
@@ -405,7 +407,7 @@ msgstr ""
 
 #: backends/alsa/alsa-constants.c:189
 msgid "Analog"
-msgstr ""
+msgstr "ანალოგური"
 
 #: backends/alsa/alsa-constants.c:190
 msgid "Analog In"
@@ -445,7 +447,7 @@ msgstr ""
 
 #: backends/alsa/alsa-constants.c:213 backends/oss/oss-device.c:100
 msgid "Mixer"
-msgstr ""
+msgstr "მიქსერი"
 
 #: backends/alsa/alsa-constants.c:217
 msgid "Unknown 1"
@@ -461,15 +463,15 @@ msgstr "ჩართულია"
 
 #: backends/alsa/alsa-constants.c:220
 msgid "Disabled"
-msgstr "გამორთული"
+msgstr "გამორთულია"
 
 #: backends/alsa/alsa-device.c:630
 msgid "On"
-msgstr ""
+msgstr "ჩართ"
 
 #: backends/alsa/alsa-device.c:631
 msgid "Off"
-msgstr "გამორთულია"
+msgstr "გამორთ"
 
 #: backends/oss/oss-backend.c:403
 #, c-format
@@ -478,7 +480,7 @@ msgstr ""
 
 #: backends/oss/oss-device.c:88
 msgid "Volume"
-msgstr "ნაწილი"
+msgstr "ხმის დონე"
 
 #: backends/oss/oss-device.c:101
 msgid "PCM 2"
@@ -486,7 +488,7 @@ msgstr ""
 
 #: backends/oss/oss-device.c:103
 msgid "Record"
-msgstr ""
+msgstr "ჩაწერა"
 
 #: backends/oss/oss-device.c:104
 msgid "Input Gain"
@@ -530,16 +532,16 @@ msgstr ""
 
 #: backends/oss/oss-device.c:116
 msgid "Radio"
-msgstr ""
+msgstr "რადიო"
 
 #: backends/oss/oss-stream.c:210 backends/pulse/pulse-sink.c:144
 #: backends/pulse/pulse-source.c:141
 msgid "Connector"
-msgstr ""
+msgstr "მაერთებელი"
 
 #: backends/pulse/pulse-device.c:385
 msgid "Profile"
-msgstr ""
+msgstr "პროფილი"
 
 #: backends/pulse/pulse-monitor.c:275
 msgid "Peak detect"
